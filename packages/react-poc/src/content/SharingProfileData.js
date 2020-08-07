@@ -4,7 +4,7 @@ import Icon from '../Icon';
 
 export default function Content() {
   return (
-    <App title={Content.title} defaultTabID="profiler">
+    <App title={Content.title} defaultTabID="profiler" iframeSource="example-table.js">
       <p>
         Sometimes it can be useful to share profiling data with someone else, or
         to save it for later for comparison purposes. Let's familiarize
