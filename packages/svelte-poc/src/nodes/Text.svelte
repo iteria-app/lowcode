@@ -1,3 +1,4 @@
+<svelte:options accessors/>
 <script>
   import SearchTerm from './SearchTerm.svelte'
 

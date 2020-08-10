@@ -1,3 +1,4 @@
+<svelte:options accessors/>
 <script>
   export let style
   export let hover

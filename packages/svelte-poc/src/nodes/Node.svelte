@@ -1,3 +1,4 @@
+<svelte:options accessors/>
 <script>
   import { visibility, hoveredNodeId, selectedNode } from '../store.js'
   import Element from './Element.svelte'
@@ -113,7 +114,7 @@
         <span style={`left: ${depth * 12 + 6}px`} />
       {/if}
       <ul>
-        {#each node.children as child (child.id)}
+        {#each node.children as child}<!--(child.id)-->
           <svelte:self
             node={child}
             depth={node.type == 'iteration' ? depth : depth + 1} />
@@ -122,7 +123,7 @@
     </svelte:component>
   </li>
 {:else}
-  {#each node.children as node (node.id)}
+  {#each node.children as node}<!--(node.id)-->
     <svelte:self {node} {depth} />
   {/each}
 {/if}

@@ -1,3 +1,4 @@
+<svelte:options accessors/>
 <script>
   import Collapse from './Collapse.svelte'
   import SearchTerm from './SearchTerm.svelte'
@@ -22,7 +23,7 @@
         return value != value ? 'NaN' : value.toString()
       case 'object':
         if (value == null) return 'null'
-        if (Array.isArray(value)) return `[${value.map(stringify).join(', ')}]`
+        if (Array.isArray(value)) return `[${value?.map(stringify).join(', ')}]`
         if (value.__isFunction) return value.name + '()'
         if (value.__isSymbol) return value.name
         return `{${Object.entries(value)
@@ -35,16 +36,18 @@
   let cache = {}
   $: {
     let localCache = {}
-    _attributes = attributes.map(o => {
-      const value = stringify(o.value)
-      localCache[o.key] = value
-
-      return {
-        ...o,
-        value,
-        flash: !!_attributes && value != cache[o.key]
-      }
-    })
+    if (attributes?.map) {
+      _attributes = attributes.map(o => {
+        const value = stringify(o.value)
+        localCache[o.key] = value
+  
+        return {
+          ...o,
+          value,
+          flash: !!_attributes && value != cache[o.key]
+        }
+      })
+    }
     cache = localCache
   }
 </script>

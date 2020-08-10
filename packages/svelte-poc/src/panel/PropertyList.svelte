@@ -1,5 +1,5 @@
 <script>
-  import { devtools } from 'chrome'
+  //import { devtools } from 'chrome'
   import CollapsableValue from './CollapsableValue.svelte'
 
   export let header
@@ -9,14 +9,14 @@
 
   let errorMessages = {}
   function change(key, value) {
-    devtools.inspectedWindow.eval(
+    /*devtools.inspectedWindow.eval(
       `__svelte_devtools_inject_state(${id}, '${key}', ${value})`,
       (result, error) =>
         (errorMessages[key] =
           error && error.isException
             ? error.value.substring(0, error.value.indexOf('\n'))
             : undefined)
-    )
+    )*/
   }
 </script>
 

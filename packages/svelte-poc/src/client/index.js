@@ -4,7 +4,7 @@ import {
   startProfiler,
   stopProfiler,
   getSvelteVersion
-} from 'svelte-listener'
+} from '../svelte-listener'
 import { highlight, startPicker, stopPicker } from './highlight.js'
 
 window.__svelte_devtools_inject_state = function(id, key, value) {
@@ -169,35 +169,3 @@ function serializeNode(node) {
 
   return serialized
 }
-
-addNodeListener({
-  add(node, anchor) {
-    window.postMessage({
-      target: node.parent ? node.parent.id : null,
-      anchor: anchor ? anchor.id : null,
-      type: 'addNode',
-      node: serializeNode(node)
-    })
-  },
-
-  remove(node) {
-    window.postMessage({
-      type: 'removeNode',
-      node: serializeNode(node)
-    })
-  },
-
-  update(node) {
-    window.postMessage({
-      type: 'updateNode',
-      node: serializeNode(node)
-    })
-  },
-
-  profile(frame) {
-    window.postMessage({
-      type: 'updateProfile',
-      frame
-    })
-  }
-})

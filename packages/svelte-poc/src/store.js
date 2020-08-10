@@ -18,37 +18,37 @@ export const profileFrame = writable({})
 
 const nodeMap = new Map()
 
-const port = chrome.runtime.connect()
-port.postMessage({
+const port = null/*chrome.runtime.connect()
+port?.postMessage({
   type: 'init',
-  tabId: chrome.devtools.inspectedWindow.tabId
-})
+  tabId: chrome?.devtools?.inspectedWindow?.tabId
+})*/
 
 export function reload() {
-  port.postMessage({
+  port?.postMessage({
     type: 'reload',
-    tabId: chrome.devtools.inspectedWindow.tabId
+    tabId: chrome?.devtools?.inspectedWindow?.tabId
   })
 }
 
 export function startPicker() {
-  port.postMessage({
+  port?.postMessage({
     type: 'startPicker',
-    tabId: chrome.devtools.inspectedWindow.tabId
+    tabId: chrome?.devtools?.inspectedWindow?.tabId
   })
 }
 
 export function stopPicker() {
-  port.postMessage({
+  port?.postMessage({
     type: 'stopPicker',
-    tabId: chrome.devtools.inspectedWindow.tabId
+    tabId: chrome?.devtools?.inspectedWindow?.tabId
   })
 }
 
 selectedNode.subscribe(node => {
-  port.postMessage({
+  port?.postMessage({
     type: 'setSelected',
-    tabId: chrome.devtools.inspectedWindow.tabId,
+    tabId: chrome?.devtools?.inspectedWindow?.tabId,
     nodeId: node.id
   })
 
@@ -65,17 +65,17 @@ selectedNode.subscribe(node => {
 })
 
 hoveredNodeId.subscribe(nodeId =>
-  port.postMessage({
+  port?.postMessage({
     type: 'setHover',
-    tabId: chrome.devtools.inspectedWindow.tabId,
+    tabId: chrome?.devtools?.inspectedWindow?.tabId,
     nodeId
   })
 )
 
 profilerEnabled.subscribe(o =>
-  port.postMessage({
+  port?.postMessage({
     type: o ? 'startProfiler' : 'stopProfiler',
-    tabId: chrome.devtools.inspectedWindow.tabId
+    tabId: chrome?.devtools?.inspectedWindow?.tabId
   })
 )
 
@@ -85,19 +85,19 @@ function insertNode(node, target, anchorId) {
   node.parent = target
 
   let index = -1
-  if (anchorId) index = target.children.findIndex(o => o.id == anchorId)
+  if (anchorId) index = target?.children.findIndex(o => o.id == anchorId)
 
   if (index != -1) {
-    target.children.splice(index, 0, node)
+    target?.children.splice(index, 0, node)
   } else {
-    target.children.push(node)
+    target?.children.push(node)
   }
 
   target.invalidate()
 }
 
 function resolveFrame(frame) {
-  frame.children.forEach(resolveFrame)
+  frame?.children.forEach(resolveFrame)
 
   if (!frame.node) return
 
@@ -134,7 +134,7 @@ function resolveEventBubble(node) {
   }
 }
 
-port.onMessage.addListener(msg => {
+export const handleMessage = msg => {
   switch (msg.type) {
     case 'clear': {
       selectedNode.set({})
@@ -173,11 +173,12 @@ port.onMessage.addListener(msg => {
 
     case 'removeNode': {
       const node = nodeMap.get(msg.node.id)
-      const index = node.parent.children.findIndex(o => o.id == node.id)
-      node.parent.children.splice(index, 1)
       nodeMap.delete(node.id)
-
-      node.parent.invalidate()
+      if (node.parent) {
+        const index = node.parent.children.findIndex(o => o.id == node.id)
+        node.parent.children.splice(index, 1)
+        node.parent?.invalidate()
+      }
 
       break
     }
@@ -208,4 +209,9 @@ port.onMessage.addListener(msg => {
       break
     }
   }
-})
+}
+
+//window.onmessage = (e) => {
+//  handleMessage(e)
+//}
+//port?.onMessage?.addListener()

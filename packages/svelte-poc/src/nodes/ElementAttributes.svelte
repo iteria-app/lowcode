@@ -1,3 +1,4 @@
+<svelte:options accessors/>
 <script>
   import SearchTerm from './SearchTerm.svelte'
 
@@ -30,7 +31,7 @@
   }
 </style>
 
-{#each attributes as { key, value, isBound, flash } (key)}
+{#each attributes || [] as { key, value, isBound, flash } (key)}
   &nbsp;
   <span class:flash>
     <span class="attr-name">
@@ -44,7 +45,7 @@
   </span>
 {/each}
 
-{#each listeners as { event, handler, modifiers }}
+{#each listeners || [] as { event, handler, modifiers }}
   &nbsp;
   <span
     class="attr-name"

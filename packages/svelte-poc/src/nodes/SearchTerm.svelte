@@ -1,3 +1,4 @@
+<svelte:options accessors/>
 <script>
   import { searchValue } from '../store.js'
 

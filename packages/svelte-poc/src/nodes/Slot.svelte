@@ -1,3 +1,4 @@
+<svelte:options accessors/>
 <script>
   import Collapse from './Collapse.svelte'
   import SearchTerm from './SearchTerm.svelte'
