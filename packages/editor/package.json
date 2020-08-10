@@ -1,0 +1,31 @@
+{
+  "name": "@iteria-ui/table-editor",
+  "version": "0.1.0",
+  "description": "Visual Editor for Svelte and React",
+  "main": "dist/index",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/iteria-ui/lowcode.git"
+  },
+  "keywords": [
+    "lowcode",
+    "visual",
+    "builder"
+  ],
+  "author": "iteria.sk",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/iteria-ui/lowcode/issues"
+  },
+  "homepage": "https://github.com/iteria-ui/lowcode#readme",
+  "devDependencies": {
+    "tslint": "^6.1.3",
+    "typescript": "^3.9.7"
+  },
+  "dependencies": {
+    "tslint-config-airbnb": "^5.11.2"
+  }
+}
