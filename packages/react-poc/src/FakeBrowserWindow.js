@@ -3,6 +3,7 @@ import IconButton from './IconButton';
 import { usePrevAndNextRoutes } from './hooks';
 import { navigate } from '@reach/router';
 import DevTools from './DevTools';
+import { highlight } from './highlight';
 
 import styles from './FakeBrowserWindow.module.css';
 
@@ -28,6 +29,7 @@ function loadBabel(iframe, scriptSource) {
 }
 
 function loadScript(iframe, scriptSource, onLoadFn) {
+  const highlightFun = highlight
   const { contentDocument } = iframe;
 
   const script = contentDocument.createElement('script');
@@ -65,6 +67,8 @@ export default function FakeBrowserWindow({
       });
     }
   }, [iframeSource]);
+
+
 
   return (
     <div className={styles.Wrapper}>
