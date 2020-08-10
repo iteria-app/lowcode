@@ -1,6 +1,6 @@
 const world = '';
 
-class Rect {
+class Box {
   top: number
   bottom: number
   left: number
@@ -19,7 +19,7 @@ class Rect {
   }
 }
 
-export function elementBoundingRect(element: HTMLElement): Rect {
+export function elementBoundingBox(element: HTMLElement): Box {
   const styles = getComputedStyle(element)
   const margin = {
     top: Math.max(parseInt(styles.marginTop), 0),
@@ -28,7 +28,7 @@ export function elementBoundingRect(element: HTMLElement): Rect {
     left: Math.max(parseInt(styles.marginLeft), 0)
   }
 
-  const rect = new Rect(
+  const box = new Box(
     element.offsetTop - margin.top,
     element.offsetLeft - margin.left,
     element.offsetWidth + margin.right + margin.left,
@@ -40,8 +40,8 @@ export function elementBoundingRect(element: HTMLElement): Rect {
     (parent =
       parent.offsetParent as HTMLElement || parent.ownerDocument?.defaultView?.frameElement as HTMLElement)
   ) {
-    rect.top += parent.offsetTop
-    rect.left += parent.offsetLeft
+    box.top += parent.offsetTop
+    box.left += parent.offsetLeft
   }
 
   parent = element
@@ -49,13 +49,9 @@ export function elementBoundingRect(element: HTMLElement): Rect {
     (parent =
       parent.parentElement as HTMLElement || parent?.ownerDocument?.defaultView?.frameElement as HTMLElement)
   ) {
-    rect.top -= parent.scrollTop
-    rect.left -= parent.scrollLeft
+    box.top -= parent.scrollTop
+    box.left -= parent.scrollLeft
   }
 
-  return rect
-}
-
-export function hello(word: string = world): string {
-  return `Hello ${world}! `;
+  return box
 }
