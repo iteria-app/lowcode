@@ -56,6 +56,7 @@ function Table() {
     }
 
 
+<<<<<<< HEAD
 
 
     let target = null
@@ -95,11 +96,35 @@ function Table() {
             const columnIndex = columns.findIndex(column => column == e.target);
             console.log(rowIndex, columnIndex)
 
+=======
+    let target = null
+    function handleMousemove(e) {
+        target = e.target
+        highlightFun({ type: 'element', detail: target })
+        console.log("Target", target)
+        console.log("Detail", e.detail)
+        setAdd(true)
+    }
+
+    function handleAddCol(e) {
+        target = e.target;
+        const table = document.querySelector('table');
+        const rows = document.querySelectorAll('tr');
+        const rowsArray = Array.from(rows);
+        const rowIndex = rowsArray.findIndex(row => row.contains(e.target));
+        const columns = Array.from(rowsArray[rowIndex].querySelectorAll('th'));
+        const columnIndex = columns.findIndex(column => column == e.target);
+        console.log(rowIndex, columnIndex)
+        e.target.addEventListener('click', () => {
+>>>>>>> WIP Add Column to a specific position
             const head = document.querySelector('.table').tHead;
             const newEl = document.createElement('th');
             newEl.innerHTML = "NewHead"
             console.log('New El', newEl)
+<<<<<<< HEAD
             newEl.addEventListener('click', () => { })
+=======
+>>>>>>> WIP Add Column to a specific position
             target.after(newEl)
             const tableBody = document.querySelector('.table').tBodies[0];
             for (let i = 0; i < tableBody.rows.length; i++) {
@@ -109,6 +134,7 @@ function Table() {
                 console.log('After this', afterThis)
                 afterThis.after(newCell)
             }
+<<<<<<< HEAD
         }
 
 
@@ -141,8 +167,28 @@ function Table() {
                 afterThis.after(newCell)
             }
         })
+=======
+        })
+
+    }
+
+    function addSelectedColumn() {
+        const head = document.querySelector('.table').tHead;
+        console.log("head", head)
+        for (let h = 0; h < head.rows.length; h++) {
+            let newTH = document.createElement('th');
+            head.rows[h].appendChild(newTH);
+            newTH.innerHTML = "New"
+        }
+        const tableBody = document.querySelector('.table').tBodies[0];
+        for (let i = 0; i < tableBody.rows.length; i++) {
+            let newCell = tableBody.rows[i].insertCell(-1);
+            newCell.innerHTML = "New Cell"
+        }
+>>>>>>> WIP Add Column to a specific position
     }
     //{add ? <button className="btn btn-primary btn-sm" style={buttonAdd} onClick={addColumn}><i class="fas fa-plus"></i></button> : null}
+
 
 
     const addColumn = () => {
@@ -162,6 +208,7 @@ function Table() {
     }
     return (
         <div>
+<<<<<<< HEAD
             <div className="container" onMouseOver={(e) => { onMouseOverHandler(e) }} onMouseOut={e => { destroyElement(e) }} onClick={(e) => { handleAddCol(e) }} >
                 <h2 className="text-center">UzitocnePage</h2>
                 <div>
@@ -177,23 +224,56 @@ function Table() {
                                 <th >Last</th>
                                 <th  >Handle</th>
 
+=======
+            <div className="container" >
+                <h2 className="text-center">UzitocnePage</h2>
+                <div>
+                    <table class="table" >
+                        <thead onClick={(e) => { handleAddCol(e) }} onMouseEnter={(e) => { handleMousemove(e); checkIndex(e) }} onMouseLeave={() => { setAdd(false) }}>
+                            <tr>
+                                <th scope="col">#</th>
+
+
+                                <th scope="col" onMouseEnter={() => { setIsShown(true) }} onMouseLeave={() => { setIsShown(false) }}> {edit ? null : columnData}
+                                    {show ? <button className="btn btn-primary btn-sm" style={buttonAdd} onClick={() => { setEdit(true); setIsShown(false) }}><i class="fas fa-edit"></i></button> : null}{edit ?
+                                        <div><input type="text" name="columnData" value={columnData}
+                                            onChange={(e) => { setColumnData(e.target.value) }}
+                                        /> <button className="btn btn-primary btn-sm" onClick={() => { console.log("hey"); setEdit(false); setIsShown(false) }}>Save</button> </div> : null}
+                                </th>
+                                <th scope="col">Last</th>
+                                <th scope="col" >Handle</th>
+
+                                {add ? <button className="btn btn-primary btn-sm" style={buttonAdd} onClick={addColumn}><i class="fas fa-plus"></i></button> : null}
+>>>>>>> WIP Add Column to a specific position
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
+<<<<<<< HEAD
                                 <td ><i class="fas fa-plus"></i></td>
+=======
+                                <td scope="row">1</td>
+>>>>>>> WIP Add Column to a specific position
                                 <td>Mark</td>
                                 <td>Otto</td>
                                 <td >@mdo</td>
                             </tr>
                             <tr>
+<<<<<<< HEAD
                                 <td ><i class="fas fa-plus"></i></td>
+=======
+                                <td scope="row">2</td>
+>>>>>>> WIP Add Column to a specific position
                                 <td>Jacob</td>
                                 <td>Thornton</td>
                                 <td >@fat</td>
                             </tr>
                             <tr>
+<<<<<<< HEAD
                                 <td ><i class="fas fa-plus"></i></td>
+=======
+                                <td scope="row">3</td>
+>>>>>>> WIP Add Column to a specific position
                                 <td>Larry</td>
                                 <td>the Bird</td>
                                 <td >@twitter</td>
