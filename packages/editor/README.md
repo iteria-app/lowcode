@@ -15,5 +15,7 @@ Roadmap:
 - [ ] Apollo Graphql Client
 
 
-Inspiration:
+Credits:
 * https://editorjs.io/
+* https://github.com/RedHatter/svelte-listener
+* https://github.com/RedHatter/svelte-devtools
