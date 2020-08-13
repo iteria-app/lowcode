@@ -51,7 +51,7 @@ function Table() {
                 divWithButton.style.borderRadius = "50px"
                 divWithButton.style.display = "inline"
                 divWithButton.style.marginLeft = "2rem"
-                divWithButton.addEventListener('click', (e) => handleAddCol(e))
+                divWithButton.addEventListener('mouseover', (e) => showSelect(e))
                 console.log("Created Button")
                 target.appendChild(divWithButton)
             }
@@ -64,8 +64,65 @@ function Table() {
         if (target.nodeName !== "TH" && target.nodeName !== "BUTTON") {
             console.log("Other EL")
             const butt = document.querySelector('.btn-to-delete')
+            const tab = document.querySelector('.group')
+            if (tab) { tab.parentNode.removeChild(tab) }
             if (butt) { butt.parentNode.removeChild(butt); }
         }
+    }
+
+    function showSelect(e) {
+        target = e.target.parentNode;
+        const targetClone = e.target.parentNode;
+        console.log("Target after show", target)
+        const table = document.querySelector('table');
+        const rows = document.querySelectorAll('tr');
+        const rowsArray = Array.from(rows);
+        const rowIndex = rowsArray.findIndex(row => row.contains(target));
+        const columns = Array.from(rowsArray[rowIndex].querySelectorAll('th'));
+        const columnIndex = columns.findIndex(column => column == target);
+        console.log(rowIndex, columnIndex)
+
+        const group = document.createElement('div')
+        group.classList.add('group')
+        group.style.position = "absolute"
+        const addButt = document.createElement('button')
+        addButt.innerHTML = 'Clone'
+        addButt.classList.add('btn')
+        addButt.classList.add('btn-primary')
+        addButt.classList.add('btn-sm')
+        addButt.addEventListener('click', () => {
+            const clonedTh = targetClone.cloneNode(true)
+            targetClone.after(clonedTh)
+            const tableBody = document.querySelector('.table').tBodies[0];
+            for (let i = 0; i < tableBody.rows.length; i++) {
+                const toClone = tableBody.rows[i].cells[columnIndex]
+                const clonedTd = toClone.cloneNode(true)
+                console.log('After this', clonedTd)
+                toClone.after(clonedTd)
+            }
+        })
+        const removeButt = document.createElement('button')
+        removeButt.innerHTML = 'Remove'
+        removeButt.classList.add('btn')
+        removeButt.classList.add('btn-primary')
+        removeButt.classList.add('btn-sm')
+        removeButt.addEventListener('click', () => {
+            targetClone.parentNode.removeChild(targetClone)
+            const tableBody = document.querySelector('.table').tBodies[0];
+            for (let i = 0; i < tableBody.rows.length; i++) {
+                const toClone = tableBody.rows[i].cells[columnIndex]
+                toClone.parentNode.removeChild(toClone)
+            }
+        })
+        group.appendChild(addButt)
+        group.appendChild(removeButt)
+        e.target.parentNode.appendChild(group)
+
+
+
+        const tab = document.querySelector('.group')
+
+
     }
 
 
@@ -89,11 +146,11 @@ function Table() {
         target.after(newEl)
         const tableBody = document.querySelector('.table').tBodies[0];
         for (let i = 0; i < tableBody.rows.length; i++) {
-            let newCell = document.createElement('td')
-            newCell.innerHTML = 'NewTD'
-            const afterThis = tableBody.rows[i].cells[columnIndex]
-            console.log('After this', afterThis)
-            afterThis.after(newCell)
+
+            const toClone = tableBody.rows[i].cells[columnIndex]
+            const clonedTd = toClone.cloneNode(true)
+            console.log('After this', clonedTd)
+            toClone.after(clonedTd)
 
         }
         const butt = document.querySelector('.btn-to-delete')
@@ -102,20 +159,13 @@ function Table() {
     }
     function onMouseOverHandler(e) {
         target = e.target
-        if (target.nodeName == "BUTTON") {
-            return
-        } else if (target.nodeName == "I") {
-            return
-        } else {
-            // highlight({ type: 'element', detail: target })
-        }
+
         console.log("Target", target)
         //if (target.nodeName == "TH") {
         //  handleMousemove(e)
         //}
         handleMousemove(e)
     }
-
 
     return (
         <div>
