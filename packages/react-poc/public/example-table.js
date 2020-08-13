@@ -30,6 +30,7 @@ function Table() {
         setShowInput(false)
     }
 
+<<<<<<< HEAD
     const addColumnStyle = {
         margin: '40px',
         border: '5px solid pink'
@@ -59,32 +60,47 @@ function Table() {
 <<<<<<< HEAD
 
 
+=======
+>>>>>>> Table
     let target = null
     function handleMousemove(e) {
-        const divWithButton = document.createElement('button')
-        divWithButton.innerHTML = '<i class="fas fa-plus"></i>'
-        divWithButton.style.position = "absolute"
-        divWithButton.style.opacity = 0.5;
-        divWithButton.classList.add('btn')
-        divWithButton.classList.add('btn-primary')
-        divWithButton.classList.add('btn-sm')
-        divWithButton.classList.add('addButton')
-        divWithButton.style.borderRadius = "50px"
-        divWithButton.style.display = "inline"
-        divWithButton.style.marginLeft = "2rem"
-        divWithButton.addEventListener('click', () => handleAddCol(e))
-
-        target.appendChild(divWithButton)
-    }
-
-    function destroyElement(e) {
+        target = e.target;
         if (target.nodeName == "TH") {
-            const butt = document.querySelector('button')
-            e.target.removeChild(butt);
-        }
+            const checkButton = document.querySelector('.btn-to-delete')
+            if (!checkButton) {
+                const divWithButton = document.createElement('button')
 
+                divWithButton.innerHTML = '<i class="fas fa-plus"></i>'
+                divWithButton.style.position = "absolute"
+                divWithButton.style.opacity = 0.5;
+                divWithButton.style.top = 0;
+                divWithButton.style.right = 0;
+                divWithButton.classList.add('btn')
+                divWithButton.classList.add('btn-primary')
+                divWithButton.classList.add('btn-sm')
+                divWithButton.classList.add('addButton')
+                divWithButton.classList.add('btn-to-delete')
+                divWithButton.style.borderRadius = "50px"
+                divWithButton.style.display = "inline"
+                divWithButton.style.marginLeft = "2rem"
+                divWithButton.addEventListener('click', (e) => handleAddCol(e))
+                console.log("Created Button")
+                target.appendChild(divWithButton)
+            }
+        }
+        //if (target.nodeName !== "TH" || target.nodeName !== "BUTTON") {
+        // console.log("Other element")
+        //const butt = document.querySelector('.btn-to-delete')
+        //if (butt) { butt.parentNode.removeChild(butt); }
+        //}
+        if (target.nodeName !== "TH" && target.nodeName !== "BUTTON") {
+            console.log("Other EL")
+            const butt = document.querySelector('.btn-to-delete')
+            if (butt) { butt.parentNode.removeChild(butt); }
+        }
     }
 
+<<<<<<< HEAD
     function handleAddCol(e) {
         if (target.nodeName == "TH") {
             target = e.target;
@@ -136,21 +152,57 @@ function Table() {
             }
 <<<<<<< HEAD
         }
+=======
+>>>>>>> Table
 
+    function handleAddCol(e) {
 
+        target = e.target.parentNode;
+        const table = document.querySelector('table');
+        const rows = document.querySelectorAll('tr');
+        const rowsArray = Array.from(rows);
+        const rowIndex = rowsArray.findIndex(row => row.contains(target));
+        const columns = Array.from(rowsArray[rowIndex].querySelectorAll('th'));
+        const columnIndex = columns.findIndex(column => column == target);
+        console.log(rowIndex, columnIndex)
 
+        const head = document.querySelector('.table').tHead;
+        const newEl = document.createElement('th');
+        newEl.style.position = "relative"
+        newEl.innerHTML = "NewHead"
+        console.log('New El', newEl)
+        newEl.addEventListener('click', () => { })
+        target.after(newEl)
+        const tableBody = document.querySelector('.table').tBodies[0];
+        for (let i = 0; i < tableBody.rows.length; i++) {
+            let newCell = document.createElement('td')
+            newCell.innerHTML = 'NewTD'
+            const afterThis = tableBody.rows[i].cells[columnIndex]
+            console.log('After this', afterThis)
+            afterThis.after(newCell)
 
+        }
+        const butt = document.querySelector('.btn-to-delete')
+        if (butt) { butt.parentNode.removeChild(butt); }
 
     }
     function onMouseOverHandler(e) {
         target = e.target
-        highlight({ type: 'element', detail: target })
-        console.log("Target", target)
-        if (target.nodeName == "TH") {
-            handleMousemove(e)
+        if (target.nodeName == "BUTTON") {
+            return
+        } else if (target.nodeName == "I") {
+            return
+        } else {
+            // highlight({ type: 'element', detail: target })
         }
+        console.log("Target", target)
+        //if (target.nodeName == "TH") {
+        //  handleMousemove(e)
+        //}
+        handleMousemove(e)
     }
 
+<<<<<<< HEAD
     function handleAdding(e, columnIndex) {
         e.target.addEventListener('click', () => {
             const head = document.querySelector('.table').tHead;
@@ -204,25 +256,30 @@ function Table() {
             let newCell = tableBody.rows[i].insertCell(-1);
             newCell.innerHTML = "New Cell"
         }
+=======
+>>>>>>> Table
 
-    }
     return (
         <div>
 <<<<<<< HEAD
+<<<<<<< HEAD
             <div className="container" onMouseOver={(e) => { onMouseOverHandler(e) }} onMouseOut={e => { destroyElement(e) }} onClick={(e) => { handleAddCol(e) }} >
+=======
+            <div className="container" onMouseOver={(e) => { onMouseOverHandler(e) }}   >
+>>>>>>> Table
                 <h2 className="text-center">UzitocnePage</h2>
                 <div>
                     <table class="table" >
                         <thead >
                             <tr>
-                                <th >Icon</th>
+                                <th style={{ position: "relative" }}>Icon</th>
 
 
-                                <th >
+                                <th style={{ position: "relative" }}>
                                     First
                 </th>
-                                <th >Last</th>
-                                <th  >Handle</th>
+                                <th style={{ position: "relative" }}>Last</th>
+                                <th style={{ position: "relative" }} >Handle</th>
 
 =======
             <div className="container" >

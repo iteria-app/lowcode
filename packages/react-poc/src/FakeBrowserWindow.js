@@ -34,6 +34,16 @@ function loadScript(iframe, scriptSource, onLoadFn) {
 
   const script = contentDocument.createElement('script');
   script.addEventListener('load', onLoadFn);
+  contentDocument.addEventListener('mousemove', (e) => {
+    const target = e.target
+    if (target.nodeName == "BUTTON") {
+      return
+    } else if (target.nodeName == "I") {
+      return
+    } else {
+      highlight({ type: 'element', detail: target })
+    }
+  })
   script.src = scriptSource;
 
   contentDocument.head.appendChild(script);
