@@ -5,19 +5,11 @@ import * as vscode from "vscode";
 import * as parse5 from "parse5";
 import * as fs from 'fs';
 import * as parser from 'prettier-plugin-svelte';
-//import prettier from 'prettier';
-//import * as prettier from 'prettier';
 
-import * as astToDoc from 'prettier/src/main/ast-to-doc'
 import * as prettierCore from 'prettier/src/main/core'
 import * as prettierCss from 'prettier/src/language-css'
 import * as prettierJs from 'prettier/src/language-js'
 import * as prettierHtml from 'prettier/src/language-html'
-
-//import { SupportLanguage, Parser, Printer } from 'prettier';
-
-
-//import { configurationSettings } from './globals/enums';
 
 export class JsonEditorPanel {
   public static currentPanel: JsonEditorPanel | undefined;
@@ -150,10 +142,6 @@ export class JsonEditorPanel {
   }
 
   private doFormat(input){
-    const folderPath = vscode.workspace.rootPath+'/src/pages/About/table.svelte';
-    let ast = parser.parsers.svelte.parse(input);
-    const locStart = parser.parsers.svelte.locStart;
-    const locEnd = parser.parsers.svelte.locEnd;
     let options = {
       parser: 'svelte',
       "svelteSortOrder": "scripts-styles-markup",
@@ -162,28 +150,16 @@ export class JsonEditorPanel {
       "svelteBracketNewLine": true,
       "svelteAllowShorthand": false,
       "originalText": input,
-      //plugins: ['C:\\tmp\\prettier-plugin-svelte-master\\src\\index.ts'],
-      //pluginSearchDirs: ['.'],
-      //'C:\\tmp\\patrik\\lowcode\\packages\\vscode\\iteriaui\\node_modules'
-      locStart,
-      locEnd,
-      printer: {
-        print: x => console.log('xxx1', x)
-      },
-      print: x => console.log('xxx2', x)
     }
 
     try {
-      //let doc = astToDoc(ast, options)
-      //console.log('ast to doc', doc);
-      console.log('beeegin', prettierCore)
-      let formated = prettierCore.formatAST(ast, options)
-      console.log('end formated', formated)
+      let parsed = prettierCore.parse(input, options, true)
+      parsed.ast.tokens = []//pretier-svelte isASTNode() needs this
+      let formated = prettierCore.formatAST(parsed.ast, options)
+      console.log('formated AST', formated)
     } catch (e) {
       console.error('format failed', e)
     }
-    //let result = prettier.__debug.formatAST(ast, options)
-    //let result = formatAST(ast, options);
   }
 
   private createFiles(path: any, fileName: string, data: any) {

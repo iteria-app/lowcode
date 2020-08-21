@@ -1,6 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.JsonEditorPanel = void 0;
 const path = require("path");
 const vscode = require("vscode");
 const parse5 = require("parse5");
@@ -9,8 +8,7 @@ const parser = require("prettier-plugin-svelte");
 const prettierCore = require("prettier/src/main/core");
 const prettierCss = require("prettier/src/language-css");
 const prettierJs = require("prettier/src/language-js");
-//import { SupportLanguage, Parser, Printer } from 'prettier';
-//import { configurationSettings } from './globals/enums';
+const prettierHtml = require("prettier/src/language-html");
 class JsonEditorPanel {
     constructor(extensionPath, column, theme) {
         this.scriptTextSave = [];
@@ -94,45 +92,24 @@ class JsonEditorPanel {
         return documentFragment;
     }
     doFormat(input) {
-        const folderPath = vscode.workspace.rootPath + '/src/pages/About/table.svelte';
-
-        
-        const locStart = parser.parsers.svelte.locStart;
-        const locEnd = parser.parsers.svelte.locEnd;
         let options = {
             parser: 'svelte',
             "svelteSortOrder": "scripts-styles-markup",
-            plugins: [parser, prettierCss, prettierJs],
+            plugins: [parser, prettierCss, prettierJs, prettierHtml],
             "svelteStrictMode": true,
             "svelteBracketNewLine": true,
             "svelteAllowShorthand": false,
             "originalText": input,
-            //plugins: ['C:\\tmp\\prettier-plugin-svelte-master\\src\\index.ts'],
-            //pluginSearchDirs: ['.'],
-            //'C:\\tmp\\patrik\\lowcode\\packages\\vscode\\iteriaui\\node_modules'
-            locStart,
-            locEnd,
-            printer: {
-                print: x => console.log('xxx1', x)
-            },
-            print: x => console.log('xxx2', x)
         };
-
-        let parsed = prettierCore.parse(input, options, true)
         try {
-            //let doc = astToDoc(ast, options)
-            //console.log('ast to doc', doc);
-            console.log('beeegin', prettierCore);
-
-            parsed.ast.tokens = []//pretier-svelte isASTNode() needs this
+            let parsed = prettierCore.parse(input, options, true);
+            parsed.ast.tokens = []; //pretier-svelte isASTNode() needs this
             let formated = prettierCore.formatAST(parsed.ast, options);
-            console.log('end formated', formated);
+            console.log('formated AST', formated);
         }
         catch (e) {
             console.error('format failed', e);
         }
-        //let result = prettier.__debug.formatAST(ast, options)
-        //let result = formatAST(ast, options);
     }
     createFiles(path, fileName, data) {
         fs.writeFile(path + '/' + fileName, data, err => {
@@ -209,6 +186,6 @@ class JsonEditorPanel {
         `;
     }
 }
-exports.JsonEditorPanel = JsonEditorPanel;
 JsonEditorPanel.viewType = "jsonEditor";
+exports.JsonEditorPanel = JsonEditorPanel;
 //# sourceMappingURL=JsonEditorPanel.js.map

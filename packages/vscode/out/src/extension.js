@@ -1,6 +1,5 @@
 'use strict';
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.activate = void 0;
 const vscode = require("vscode");
 const JsonEditorPanel_1 = require("./JsonEditorPanel");
 // this method is called when your extension is activated
