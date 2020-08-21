@@ -1,0 +1,104 @@
+{
+    "name": "vscode-json-editor",
+    "displayName": "JSON Tree Editor",
+    "description": "Generate a tree view editor of the active JSON document",
+    "version": "1.0.200602",
+    "publisher": "GregChamblin",
+    "engines": {
+        "vscode": "^1.32.0"
+    },
+    "icon": "resources/icon.png",
+    "categories": [
+        "Other"
+    ],
+    "homepage": "https://github.com/gregchamblin/vscode-json-editor",
+    "keywords": [
+        "json",
+        "editor",
+        "tree",
+        "preview"
+    ],
+    "activationEvents": [
+        "onLanguage:json",
+        "onCommand:vscode-json-editor.start"
+    ],
+    "main": "./out/src/extension",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/gregchamblin/vscode-json-editor.git"
+    },
+    "contributes": {
+        "commands": [
+            {
+                "command": "vscode-json-editor.start5",
+                "title": "Start JSON Tree Editor session",
+                "category": "JSON Tree Editor",
+                "icon": {
+                    "light": "./resources/json-light.svg",
+                    "dark": "./resources/json-dark.svg"
+                }
+            },
+            {
+                "command": "vscode-json-editor.start",
+                "title": "Edit Page"
+            }
+        ],
+        "menus": {
+            "explorer/context": [
+                {
+                    "when": "resourceExtname == .json",
+                    "command": "vscode-json-editor.start",
+                    "group": "navigation"
+                }
+            ],
+            "editor/title": [
+                {
+                    "when": "editorLangId == json",
+                    "command": "vscode-json-editor.start",
+                    "group": "navigation"
+                },
+                {
+                    "when": "editorLangId == svelte",
+                    "command": "vscode-json-editor.start",
+                    "group": "navigation"
+                }
+            ]
+        },
+        "configuration": {
+            "title": "JSON Tree Editor",
+            "properties": {
+                "vscode-json-editor.theme": {
+                    "type": "string",
+                    "default": "dark",
+                    "description": "Set the theme for the editor ('light', 'dark'). Note: you must close/reopen any existing editors for the change to take effect.",
+                    "enum": [
+                        "light",
+                        "dark"
+                    ]
+                }
+            }
+        }
+    },
+    "scripts": {
+        "vscode:prepublish": "npm run compile",
+        "compile": "tsc -p ./",
+        "watch": "tsc -watch -p ./",
+        "deploy": "vsce publish --yarn"
+    },
+    "devDependencies": {
+        "@types/mocha": "^2.2.42",
+        "@types/node": "^7.0.43",
+        "@types/vscode": "^1.32.0",
+        "aqua": "^1.0.1",
+        "lerna": "^3.22.1",
+        "prettier-plugin-svelte": "^1.1.0",
+        "tslint": "^5.8.0",
+        "tslint-microsoft-contrib": "^5.0.3",
+        "typescript": "^2.6.1",
+        "vsce": "^1.75.0"
+    },
+    "dependencies": {
+        "prettier": "git+https://github.com/prettier/prettier.git",
+        "svelte": "^3.24.1"
+    }
+}
