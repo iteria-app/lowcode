@@ -4,11 +4,17 @@ const path = require("path");
 const vscode = require("vscode");
 const parse5 = require("parse5");
 const fs = require("fs");
+const prettierSvelte = require("prettier-plugin-svelte");
 const parser = require("prettier-plugin-svelte");
+const printAstToDoc = require("prettier/src/main/ast-to-doc");
 const prettierCore = require("prettier/src/main/core");
+const prettierOpts = require("prettier/src/main/options");
+const prettierMulti = require("prettier/src/main/multiparser");
+const FastPath = require("prettier/src/common/fast-path");
 const prettierCss = require("prettier/src/language-css");
 const prettierJs = require("prettier/src/language-js");
 const prettierHtml = require("prettier/src/language-html");
+const prettierDoc = require("prettier/src/document/doc-printer");
 class JsonEditorPanel {
     constructor(extensionPath, column, theme) {
         this.scriptTextSave = [];
@@ -92,20 +98,48 @@ class JsonEditorPanel {
         return documentFragment;
     }
     doFormat(input) {
-        let options = {
+        let ast = parser.parsers.svelte.parse(input);
+        ast.tokens = [];
+        const locStart = parser.parsers.svelte.locStart;
+        const locEnd = parser.parsers.svelte.locEnd;
+        let options = prettierOpts.normalize({
+            tabWidth: 2,
             parser: 'svelte',
             "svelteSortOrder": "scripts-styles-markup",
-            plugins: [parser, prettierCss, prettierJs, prettierHtml],
-            "svelteStrictMode": true,
-            "svelteBracketNewLine": true,
-            "svelteAllowShorthand": false,
+            plugins: [prettierCss, prettierJs, prettierHtml, prettierSvelte],
+            "svelteStrictMode": false,
+            "svelteBracketNewLine": false,
+            "svelteAllowShorthand": true,
             "originalText": input,
-        };
+            locStart,
+            locEnd
+        });
+        const sveltePrint = parser.printers['svelte-ast'].print;
+        //const svelteEmbed = parser.printers['svelte-ast'].embed
+        function printFn(fastPath) {
+            const current = fastPath.getValue();
+            if (current.isJS) {
+                return prettierMulti.printSubtree(fastPath, sveltePrint, options, printAstToDoc);
+            }
+            switch (current.type) {
+                case 'Script':
+                case 'Style':
+                    return prettierMulti.printSubtree(fastPath, sveltePrint, options, printAstToDoc);
+            }
+            return sveltePrint(fastPath, options, printFn);
+        }
         try {
             let parsed = prettierCore.parse(input, options, true);
             parsed.ast.tokens = []; //pretier-svelte isASTNode() needs this
-            let formated = prettierCore.formatAST(parsed.ast, options);
-            console.log('formated AST', formated);
+            options.originalText = parsed.text;
+            let doc = sveltePrint(new FastPath(parsed.ast), options, printFn);
+            let formatted = prettierDoc.printDocToString(doc, options);
+            console.log('formated AST 1', formatted);
+            /*
+            formatted = prettierCore.formatAST(ast, options)
+            //let formatted = prettierCore.printToDoc(input, options)
+            //let formatted = prettier.format(input, options)
+            console.log('formated AST 2', formatted)*/
         }
         catch (e) {
             console.error('format failed', e);
