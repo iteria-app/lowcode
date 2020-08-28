@@ -1,13 +1,25 @@
 {
   "compilerOptions": {
-    "target": "es2015",
+    "target": "es6",
     "module": "commonjs",
-    "strict": true,
-    
-    // Tells TypeScript to read JS files, as
-    // normally they are ignored as source files
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
     "allowJs": true,
-    "outDir": "dist",
-    "sourceMap": true
-  }
+    "importHelpers": true,
+    "jsx": "react",
+    "alwaysStrict": true,
+    "sourceMap": true,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitAny": false,
+    "noImplicitThis": false,
+    "strictNullChecks": false
+  },
+  "include": [
+    "src/**/*",
+    "__tests__/**/*"
+  ]
 }
