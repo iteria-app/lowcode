@@ -1,10 +1,5 @@
 import type { KnownExtension, FileInfo, ImportPath, Transpiler } from './transpilation'
 
-navigator.serviceWorker.register('./_dist_/service-worker.js', {
-  scope: './controlled'
-});
-
-
 type SyncReader = ((path: string) => string)
 
 type LookupTranspiler = (extension: KnownExtension) => Transpiler

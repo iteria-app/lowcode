@@ -1,28 +1,35 @@
-var CACHE = 'previewA';
+const CACHE = 'previewB'
+const CONTROLLED = '/controlled/'
 
-// On install, cache some resource.
-self.addEventListener('install', function(evt) {
-  console.log('The service worker is being installed.');
+console.log('service wokeeeer')
+
+self.addEventListener('install', function(event) {
+  console.log('The service worker is being installed...', event);
+  event.waitUntil(self.skipWaiting()); // Activate worker immediately
   // Open a cache and use `addAll()` with an array of assets to add all of them
   // to the cache. Ask the service worker to keep installing until the
   // returning promise resolves.
-  evt.waitUntil(caches.open(CACHE).then(function (cache) {
-    cache.addAll([
-      //'./index.js',
-      //'./index.jsx',
+  //event.waitUntil(caches.open(CACHE).then(function (cache) {
+  //  cache.addAll([
       //'./index.tsx',
       //'./index.svelte',
-    ]);
-  }));
+  //  ]);
+  //}));
 });
+
+
+self.addEventListener('activate', function(event) {
+  console.log('The service worker is being activated...', event);
+  event.waitUntil(self.clients.claim()); // Become available to all pages
+})
 
 // On fetch, use cache but update the entry with the latest contents
 // from the server.
 self.addEventListener('fetch', function(evt) {
-  console.log('sw fetch', evt.request, evt);
   const url = new URL(evt.request.url)
-  if (url.pathname.startsWith('/controlled/')) {
-    console.log('sw fetch - startsWith controlled')
+  console.log('sw fetch', url.pathname, evt);
+  if (url.pathname.startsWith(CONTROLLED)) {
+    console.log('sw fetch - startsWith ', CONTROLLED)
 
     // You can use `respondWith()` to answer ASAP...
     const ch = fromCache(evt.request)
@@ -39,13 +46,17 @@ self.addEventListener('fetch', function(evt) {
   }
 });
 
+self.addEventListener('message', function (evt) {
+  console.log('postMessage received', evt.data);
+})
+
 // Open the cache where the assets were stored and search for the requested
 // resource. Notice that in case of no matching, the promise still resolves
 // but it does with `undefined` as value.
 function fromCache(request) {
   return caches.open(CACHE).then(function (cache) {
     //return cache.match(request);
-    return new Response("<h1>Hello!</h1>", {
+    return new Response("<h1>Cauky!</h1>", {
       headers: {'Content-Type': 'text/html'}
     })
   })
@@ -63,29 +74,6 @@ function update(request) {
     });
   });
 }
-
-/*
-body: (...)
-bodyUsed: false
-headers: Headers {}
-ok: false
-redirected: false
-status: 404
-statusText: "Not Found"
-type: "basic"
-url: "http://localhost:8080/controlled/controlled.html"
-
-
-body: ReadableStream
-bodyUsed: false
-headers: Headers {}
-ok: true
-redirected: false
-status: 200
-statusText: "OK"
-type: "basic"
-url: "http://localhost:8080/controlled/controlled.html"
-*/
 
 // Sends a message to the clients.
 function refresh(response) {
