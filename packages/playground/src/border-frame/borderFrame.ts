@@ -1,10 +1,11 @@
 import { getOffset } from '../util/highlight';
 
 const iFrame = document.querySelector('iframe');
+console.log('hello world');
 
 const innerDoc = iFrame!.contentDocument || iFrame!.contentWindow!.document;
 
-innerDoc.addEventListener('click', (e: MouseEvent) => {
+innerDoc.addEventListener('mouseover', (e: MouseEvent) => {
   const styles = getOffset(e.target!);
   const mainDiv = innerDoc.getElementById('buttonContainer')!;
   mainDiv.setAttribute(
