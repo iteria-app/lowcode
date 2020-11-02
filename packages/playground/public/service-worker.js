@@ -103,7 +103,7 @@ self.addEventListener('fetch', function(event) {
   const requestURL = new URL(event.request.url)
   console.log('sw fetch requestURL', requestURL.pathname)
   const c = content(event.request)
-  /**/if (c) {
+  /*if (c) {
     event.respondWith(caches.open('playground').then(async cache => {
       let jsMatch = await cache.match(svelteExtenstionToJs(requestURL.pathname))
       if (jsMatch) {
@@ -119,7 +119,7 @@ self.addEventListener('fetch', function(event) {
       cache.put(svelteExtenstionToJs(requestURL.pathname), jsMatch = newJavaScriptResponse(svContent))
       return jsMatch
     }))
-  } else if (event.request.mode === 'navigate') {
+  } else */if (event.request.mode === 'navigate') {
     console.log('sw navigate ', event)
     //const txt = event.request.url.substr(event.request.url.lastIndexOf('/'))
     const value = 'aaa'//routes.some(r => r == txt) 
@@ -161,16 +161,16 @@ self.addEventListener('fetch', function(event) {
   } else {
     console.log('sw fetch A', requestURL.pathname, event.request)
     
-    /*if (requestURL.pathname.startsWith(CONTROLLED)) {
+    /**/if (requestURL.pathname.startsWith(CONTROLLED)) {
       const stripControlled =  requestURL.pathname.substring(CONTROLLED.length)
       const filename =  svelteExtenstion(stripControlled)//'App.svelte'
-      const filenameUrlEnc = encodeURI(filename)
+      const filenameUrlEnc = encodeURI(filename).replaceAll('/', '%2F')
       const branch = 'gitlabAPI-lowcode'
       const gitlabUrl = `https://gitlab.com/api/v4/projects/18967974/repository/files/src%2F${filenameUrlEnc}?ref=${branch}`
   
       console.log('sw fetch B', gitlabUrl, event.request)
   
-      const response = fetchFile(gitlabUrl, '').then(svelteSource => {
+      const response = fetchFile(gitlabUrl, '<use your token>').then(svelteSource => {
         //@urql/svelte
 
         //svelteSource = svelteSource.replaceAll('@material/mwc-', 'https://unpkg.com/@material/mwc-')
@@ -192,7 +192,7 @@ self.addEventListener('fetch', function(event) {
       })
       
       event.respondWith(response)
-    } else*/ {
+    } else/**/ {
       const response = fetch(event.request).then(response => {
        console.log('sw fetch response', response)
        return response//TODO cache response
@@ -215,8 +215,11 @@ async function fetchFile(url, privateToken) {
       .then(res => {
           console.log("res", res)
           const result = res.json().then(data => {
-              let resData = window.atob(data.content); console.log(resData);
-              return resData
+              if (data.content) {
+                let resData = window.atob(data.content); console.log(resData);
+                return resData
+              }
+              return `<!-- 404 ${url} -->`
           })
 
           console.log("RESPONSE", gitlabFile)
