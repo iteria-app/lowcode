@@ -1,5 +1,5 @@
 import { CONTROLLED } from './controlled'
-import { loadHDTS } from './utils/loadGitlab'
+import { loadFile } from './utils/loadGitlab'
 
 const previewIframe = document.getElementById('previewIframe') as HTMLIFrameElement
 console.log('initializing', previewIframe)
@@ -77,8 +77,14 @@ if (refreshButton) {
 
             console.log('XXXXXXXXXXXXXXXXXX', previewIframe.contentWindow?.navigator?.serviceWorker)
         }
-        const code = loadHDTS()
-        console.log("CODE", code)
+        const url = window.prompt('Write down url of the file')
+        if (url) {
+            const token = window.prompt("Private Token")
+            if (token) {
+                const code = loadFile(url, token)
+                console.log("CODE", code)
+            }
 
+        }
     }
 }

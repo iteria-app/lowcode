@@ -1,23 +1,23 @@
-export async function loadHDTS() {
+export async function loadFile(url: string, privateToken: string) {
     let gitlabFile: string = '';
-    //const fileName = "App.svelte"
-    //const endpoint = `https://gitlab.com/api/v4/projects/18967974/repository/files/src%2F${fileName}?ref=gitlabAPI-lowcode`
-    const url = 'https://gitlab.com/api/v4/projects/18967974/repository/files/src%2FApp.svelte?ref=gitlabAPI-lowcode'
-
-    await fetch(url, {
+    return await fetch(url, {
         method: 'GET',
         headers: {
             'Accept': 'application/json',
             cache: 'no-store',
-            'PRIVATE-TOKEN': 'Lpdpwxi9BsHkd6jPpVsV'
+            'PRIVATE-TOKEN': privateToken
             //Authorization: "Bearer token" 
             //...(headers || window.endpointHeaders)
         }
     })
         .then(res => {
             console.log("res", res)
-            res.json().then(data => { console.log("GITHUBREPOSNE", data); let resData = atob(data.content); console.log(resData); gitlabFile = resData })
+            const result = res.json().then(data => {
+                let resData = atob(data.content); console.log(resData);
+                return resData
+            })
+
             console.log("RESPONSE", gitlabFile)
+            return result
         })
-    return gitlabFile
 }
