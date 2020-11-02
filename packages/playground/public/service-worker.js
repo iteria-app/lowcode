@@ -1,5 +1,5 @@
 //const CACHE = 'previewB'
-//const CONTROLLED = '/controlled/'
+const CONTROLLED = '/controlled/'
 const appSvelte = `<script>
 import Nested from './Nested.svelte';
 </script>
@@ -103,7 +103,7 @@ self.addEventListener('fetch', function(event) {
   const requestURL = new URL(event.request.url)
   console.log('sw fetch requestURL', requestURL.pathname)
   const c = content(event.request)
-  if (c) {
+  /**/if (c) {
     event.respondWith(caches.open('playground').then(async cache => {
       let jsMatch = await cache.match(svelteExtenstionToJs(requestURL.pathname))
       if (jsMatch) {
@@ -159,10 +159,67 @@ self.addEventListener('fetch', function(event) {
   //} else if (assets.some(str => str == getValue(event.request.url))) {
     //event.respondWith(caches.match(getValue(event.request.url)))
   } else {
-    console.log('sw fetch ', event.request)
-    event.respondWith(fetch(event.request).then(response => {
-      console.log('sw fetch response', response)
-      return response//TODO cache response
-    }))
+    console.log('sw fetch A', requestURL.pathname, event.request)
+    
+    /*if (requestURL.pathname.startsWith(CONTROLLED)) {
+      const stripControlled =  requestURL.pathname.substring(CONTROLLED.length)
+      const filename =  svelteExtenstion(stripControlled)//'App.svelte'
+      const filenameUrlEnc = encodeURI(filename)
+      const branch = 'gitlabAPI-lowcode'
+      const gitlabUrl = `https://gitlab.com/api/v4/projects/18967974/repository/files/src%2F${filenameUrlEnc}?ref=${branch}`
+  
+      console.log('sw fetch B', gitlabUrl, event.request)
+  
+      const response = fetchFile(gitlabUrl, '').then(svelteSource => {
+        //@urql/svelte
+
+        //svelteSource = svelteSource.replaceAll('@material/mwc-', 'https://unpkg.com/@material/mwc-')
+        const aliases = {
+          '@urql/svelte': 'https://unpkg.com/@urql/svelte@1.1.2/dist/urql-svelte.js',
+          '@material/mwc-': 'https://unpkg.com/@material/mwc-',
+          'svelte-i18n': 'https://unpkg.com/browse/svelte-i18n@3.1.0/dist/runtime.esm.js',
+          'graphql-request': 'https://unpkg.com/graphql-request@3.3.0/dist/index.js',
+        }
+        for (const pkg in aliases) {
+          svelteSource = svelteSource.replaceAll(pkg, aliases[pkg])
+        }
+
+        //svelteSource = svelteSource.replaceAll('import "@', 'import "https://unpkg.com/@')
+        //svelteSource = svelteSource.replaceAll("import '@", "import 'https://unpkg.com/@")
+        //svelteSource = svelteSource.replaceAll("from '@", "from 'https://unpkg.com/@")
+        const jsSource = sv({source: svelteSource, filename})
+        return newJavaScriptResponse(jsSource)
+      })
+      
+      event.respondWith(response)
+    } else*/ {
+      const response = fetch(event.request).then(response => {
+       console.log('sw fetch response', response)
+       return response//TODO cache response
+      })
+      event.respondWith(response)
+    }
   }
 });
+
+async function fetchFile(url, privateToken) {
+  let gitlabFile = '';
+  return await fetch(url, {
+      method: 'GET',
+      headers: {
+          'Accept': 'application/json',
+          cache: 'no-store',
+          'PRIVATE-TOKEN': privateToken
+      }
+  })
+      .then(res => {
+          console.log("res", res)
+          const result = res.json().then(data => {
+              let resData = window.atob(data.content); console.log(resData);
+              return resData
+          })
+
+          console.log("RESPONSE", gitlabFile)
+          return result
+      })
+}
