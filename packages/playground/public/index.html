@@ -9,11 +9,30 @@
       content="Web site created using create-snowpack-app"
     />
     <link rel="stylesheet" type="text/css" href="/index.css" />
+    <link rel="stylesheet" type="text/css" href="/BorderFrame.css" />
     <title>Snowpack App</title>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
-    <iframe id="previewIframe" src="sample.html" height="300"></iframe>
+    <div
+      id="buttonContainer"
+      class="ic-select-box ic-select-box-can-delete buttonContainer"
+      style="top: 0; left: 0"
+    >
+      <div>
+        <div class="control-container">
+          <a class="select-duplicate" id="cloneIcon" href="#"></a>
+          <a class="select-remove" href="#"></a>
+          <a class="select-duplicate" href="#"></a>
+        </div>
+      </div>
+    </div>
+    <iframe
+      id="previewIframe"
+      src="empty.html"
+      width="1000"
+      height="600"
+    ></iframe>
     <!--
       This HTML file is a template.
       If you open it directly in the browser, you will see an empty page.
@@ -25,6 +44,7 @@
         To create a production bundle, use `npm run build` or `yarn build`.
       -->
     <script type="module" src="/_dist_/border-frame/borderFrame.js"></script>
+    <script type="module" src="/_dist_/index.js"></script>
 
     <button id="refreshButton">REFRESH</button>
   </body>
