@@ -1,0 +1,21 @@
+{
+    "compilerOptions": {
+        "module": "commonjs",
+        "target": "es2016",
+        "outDir": "out",
+        "lib": [
+            "es2016"
+        ],
+        "sourceMap": true,
+        "rootDir": ".",
+        "noUnusedLocals": true,
+        "noImplicitThis": true,
+        "noImplicitReturns": true,
+        "strictNullChecks": false,
+        "noUnusedParameters": true
+    },
+    "exclude": [
+        "node_modules",
+        ".vscode-test"
+    ]
+}
