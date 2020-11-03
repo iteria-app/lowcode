@@ -5,7 +5,7 @@ export const addSnippetToCode = (
 ) => {
   if (!snippet) return console.warn('No code snippet was provided');
 
-  if (!end) return console.warn('Element was not found in the code');
+  if (end === null) return console.warn('Element was not found in the code');
 
   const lineArray = code.split('\n');
   lineArray.splice(end + 1, 0, snippet);
@@ -18,7 +18,8 @@ export const cloneElementInCode = (
   start: number | null,
   end: number | null,
 ) => {
-  if (!start || !end) return console.warn('Element was not found in the code');
+  if (start === null || end === null)
+    return console.warn('Element was not found in the code');
 
   const lineArray = code.split('\n');
   const cloneLines: Array<string> = [];
@@ -36,7 +37,8 @@ export const deleteElementInCode = (
   start: number | null,
   end: number | null,
 ) => {
-  if (!start || !end) return console.warn('Element was not found in the code');
+  if (start === null || end === null)
+    return console.warn('Element was not found in the code');
 
   const lineArray = code.split('\n');
   return [...lineArray.slice(0, start), ...lineArray.slice(end + 1)].join('\n');
