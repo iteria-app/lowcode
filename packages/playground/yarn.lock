@@ -1489,6 +1489,11 @@ es-module-lexer@^0.3.24:
   resolved "https://registry.yarnpkg.com/es-module-lexer/-/es-module-lexer-0.3.25.tgz#24a1abcb9c5dc96923a8e42be033b801f788de06"
   integrity sha512-H9VoFD5H9zEfiOX2LeTWDwMvAbLqcAyA2PIb40TOAvGpScOjit02oTGWgIh+M0rx2eJOKyJVM9wtpKFVgnyC3A==
 
+esbuild-wasm@^0.8.3:
+  version "0.8.3"
+  resolved "https://registry.yarnpkg.com/esbuild-wasm/-/esbuild-wasm-0.8.3.tgz#6d49ac2e2bbd9b0aa45433bc8db93993d6769608"
+  integrity sha512-F+EublrWWcoBYLadIwU3Sbi1e9jvxL4ACLUxZCFz2dERefUEYp3XgF1K6qQOzSwvbiXVxAIHMsjZp69DfjWETA==
+
 esbuild@^0.7.0:
   version "0.7.21"
   resolved "https://registry.yarnpkg.com/esbuild/-/esbuild-0.7.21.tgz#e93f9d7e673cd5fcab2aab7774d489a0f680d657"
