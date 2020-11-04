@@ -1,3 +1,5 @@
+import svelte from 'svelte/compiler';
+
 export const addSnippetToCode = (
   code: string,
   snippet: string,
@@ -13,33 +15,55 @@ export const addSnippetToCode = (
   return lineArray.join('\n');
 };
 
+export const findElementInAST = (body: string, char: number) => {
+  const AST = svelte.parse(body).html;
+
+  let clickedNode: any;
+  //@ts-ignore
+  svelte.walk(AST, {
+    enter(node: any) {
+      if (node.start === char) {
+        clickedNode = node;
+      }
+    },
+  });
+
+  return clickedNode;
+};
+
 export const cloneElementInCode = (
-  code: string,
-  start: number | null,
-  end: number | null,
+  body: string,
+  startChar: number,
+  charCount: number,
 ) => {
-  if (start === null || end === null)
-    return console.warn('Element was not found in the code');
+  const charArray = body.split('');
+  const endChar =
+    charArray[startChar + charCount] === '\n'
+      ? startChar + charCount + 1
+      : startChar + charCount;
 
-  const lineArray = code.split('\n');
-  const cloneLines: Array<string> = [];
+  const cloneChars: Array<string> = [];
+  if (endChar === charArray.length) cloneChars.push('\n');
 
-  for (let i = start; i <= end; i++) {
-    cloneLines.push(lineArray[i]);
+  for (let i = startChar; i < startChar + charCount; i++) {
+    cloneChars.push(charArray[i]);
   }
 
-  lineArray.splice(end + 1, 0, ...cloneLines);
-  return lineArray.join('\n');
+  if (charArray[startChar + charCount] === '\n') cloneChars.push('\n');
+
+  charArray.splice(endChar, 0, ...cloneChars);
+  return charArray.join('');
 };
 
 export const deleteElementInCode = (
-  code: string,
-  start: number | null,
-  end: number | null,
+  body: string,
+  startChar: number,
+  charCount: number,
 ) => {
-  if (start === null || end === null)
-    return console.warn('Element was not found in the code');
+  const charArray = body.split('');
+  const endChar = startChar + charCount;
 
-  const lineArray = code.split('\n');
-  return [...lineArray.slice(0, start), ...lineArray.slice(end + 1)].join('\n');
+  return [...charArray.slice(0, startChar), ...charArray.slice(endChar)].join(
+    '',
+  );
 };
