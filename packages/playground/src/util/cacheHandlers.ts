@@ -6,28 +6,29 @@ import {
 
 const getDataFromCache = async (
   file: string,
-  char: number,
-): Promise<{ body?: string; cache?: Cache; charCount?: number }> => {
-  try {
-    const cache = await caches.open('playground');
-    const cacheContent = await cache.match(`/controlled/${file}`);
-    const body = await cacheContent?.text();
-
-    console.log(char);
-    const clickedNode = findElementInAST(body || '', char);
-    if (!clickedNode) throw new Error('Element was not found in code');
-
-    const charCount = clickedNode.end - clickedNode.start;
-    return { body, cache, charCount };
-  } catch (err) {
+): Promise<{ body?: string; cache?: Cache }> => {
+  const cache = await caches.open('playground').catch((err) => {
     console.log(err);
-    return {};
-  }
+    throw new Error('Unable to open a cache');
+  });
+  const cacheContent = await cache.match(`/controlled/${file}`).catch((err) => {
+    console.log(err);
+    throw new Error('Requested code was not found in cache');
+  });
+  const body = await cacheContent?.text().catch((err) => {
+    console.log(err);
+    throw new Error('Unable to transform CacheContent to text');
+  });
+  return { body, cache };
 };
 
 export const cloneElement = async ({ loc }: any) => {
-  const { body, cache, charCount } = await getDataFromCache(loc.file, loc.char);
-  if (!body || !cache || !charCount) return;
+  const { body, cache } = await getDataFromCache(loc.file);
+  if (!body || !cache) return;
+
+  const clickedNode = findElementInAST(body, loc.char);
+  if (!clickedNode) throw new Error('Element was not found in code');
+  const charCount = clickedNode.end - clickedNode.start;
 
   const newCode = cloneElementInCode(body, loc.char, charCount);
   console.log(newCode);
@@ -37,8 +38,12 @@ export const cloneElement = async ({ loc }: any) => {
 };
 
 export const removeElement = async ({ loc }: any) => {
-  const { body, cache, charCount } = await getDataFromCache(loc.file, loc.char);
-  if (!body || !cache || !charCount) return;
+  const { body, cache } = await getDataFromCache(loc.file);
+  if (!body || !cache) return;
+
+  const clickedNode = findElementInAST(body, loc.char);
+  if (!clickedNode) throw new Error('Element was not found in code');
+  const charCount = clickedNode.end - clickedNode.start;
 
   const newCode = deleteElementInCode(body, loc.char, charCount);
   console.log(newCode);
