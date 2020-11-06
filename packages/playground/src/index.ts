@@ -1,6 +1,9 @@
 import { addBorderFrame } from './border-frame/borderFrame';
 import { CONTROLLED } from './controlled';
+import { files, gitlabFetchFile } from './gitlab'
+import { transpile } from './transpile'
 
+const refreshButton = document.getElementById('refreshButton') as HTMLButtonElement;
 const previewIframe = document.getElementById(
   'previewIframe',
 ) as HTMLIFrameElement;
@@ -26,18 +29,13 @@ if (navigator.serviceWorker) {
         console.log('on sw listener message A', event);
       });
 
-      function newResponse(content: string, contentType: string): Response {
-        const headers = new Headers();
-        headers.append('Content-Type', contentType);
-        const init = { status: 200, statusText: 'OK', headers };
-        return new Response(content, init);
-      }
-
       navigator.serviceWorker
         .register('./service-worker.js', {
           scope: CONTROLLED,
         })
         .then(() => {
+          console.log('serviceWorker then')
+          refreshButton.disabled = false
           return navigator.serviceWorker.ready;
         })
         .then(() => {
@@ -56,9 +54,30 @@ if (navigator.serviceWorker) {
   alert('NULL navigator.serviceWorker or navigator.serviceWorker.controller');
 }
 
-const refreshButton = document.getElementById('refreshButton');
 if (refreshButton) {
   refreshButton.onclick = (event) => {
+    console.log('onclick', event)
+
+    caches.open('playground').then((cache) => {
+      for (const file of files) {
+        if (file.name.endsWith('.ts')) {
+          gitlabFetchFile(file.path).then(async (tsSource) => {
+            if (typeof(tsSource) == 'string') {
+              const transpiled = await transpile(tsSource)//TODO source map in response
+              if (transpiled?.warnings?.length > 0) {
+                console.warn('transpilation', transpiled.warnings)
+              }
+              console.log('transpiled', transpiled)
+              if (transpiled?.code?.length > 0) {
+                const jsPath = CONTROLLED + file.path.substring(0, file.path.length - '.ts'.length)+ '.js'
+                cache.put(jsPath, newJavaScriptResponse(transpiled.code));
+              }
+            }
+          })
+        }
+      }   
+    });
+
     navigator.serviceWorker.getRegistrations().then(
       (v) => {
         console.log('sw registrations ', v);
@@ -92,4 +111,11 @@ if (refreshButton) {
       );
     }
   };
+}
+
+function newJavaScriptResponse(content: string) : Response {
+  const headers = new Headers();
+  headers.append('Content-Type', 'application/javascript');
+  const init = { status: 200, statusText: 'OK', headers };
+  return new Response(content, init);
 }

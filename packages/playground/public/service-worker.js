@@ -30,8 +30,14 @@ self.addEventListener('message', function (e) {
   console.log('sw message', e);
 });
 
-importScripts('https://unpkg.com/svelte@3.29.4/compiler.js', 'https://unpkg.com/esbuild-wasm@0.8.3/lib/browser.js')
+importScripts('https://unpkg.com/svelte@3.29.4/compiler.js', 
+  //'https://unpkg.com/esbuild-wasm@0.8.3/lib/browser.js'
+  )
 
+//const esbuildPromise = esbuild.startService({
+//  wasmURL: 'https://unpkg.com/esbuild-wasm@0.8.3/esbuild.wasm',
+//  worker: false
+//})
 
 /*self.addEventListener('activate', function(e) {
   console.log('sw activating', self.registration)
@@ -200,6 +206,8 @@ self.addEventListener('fetch', function (event) {
       console.log('sw fetch B', gitlabUrl, event.request)
   
       const response = fetchFile(gitlabUrl, '<use your token>').then(svelteSource => {
+        //TODO if *.ts esbuildPromise.then(transpiler.transform('enum Foo { A, B }', { loader: 'ts' })
+
         const aliases = {
           '@urql/svelte': 'https://unpkg.com/@urql/svelte@1.1.2/dist/urql-svelte.js',
           '@material/mwc-': 'https://unpkg.com/@material/mwc-',
