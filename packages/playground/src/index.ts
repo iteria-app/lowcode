@@ -34,17 +34,6 @@ if (navigator.serviceWorker) {
       }
 
       navigator.serviceWorker
-        .register('./svelte-service-worker.js', {
-          scope: 'svelte/',
-        })
-        .then(() => {
-          return navigator.serviceWorker.ready;
-        })
-        .then(() => {
-          console.log('serviceWorker ready 1');
-        });
-
-      navigator.serviceWorker
         .register('./service-worker.js', {
           scope: CONTROLLED,
         })
@@ -62,11 +51,6 @@ if (navigator.serviceWorker) {
         .catch((e) => {
           console.error('service worker error', e);
         });
-      if (navigator.serviceWorker.controller) {
-        console.log('sending ...');
-        navigator.serviceWorker.controller.postMessage({ hello: 'world' });
-      }
-      console.log('sw AHOJ ', navigator.serviceWorker);
     });
 } else {
   alert('NULL navigator.serviceWorker or navigator.serviceWorker.controller');
@@ -94,6 +78,7 @@ if (refreshButton) {
       previewIframe.src = CONTROLLED + 'index.html';
 
       previewIframe.onload = () => {
+        console.log('previewIframe onload', event, previewIframe)
         const innerDoc =
           previewIframe!.contentDocument ||
           previewIframe!.contentWindow!.document;

@@ -1,11 +1,11 @@
-import svelte from 'svelte/compiler';
+import { parse as svelteParse, walk as svelteWalk} from 'https://unpkg.com/svelte@3.29.3/compiler.mjs';
 
 export const findElementInAST = (body: string, char: number) => {
-  const AST = svelte.parse(body).html;
+  const AST = svelteParse(body).html;
 
   let clickedNode: any;
   //@ts-ignore
-  svelte.walk(AST, {
+  svelteWalk(AST, {
     enter(node: any) {
       if (node.start === char) {
         clickedNode = node;

@@ -11,7 +11,7 @@ const getDataFromCache = async (
     console.log(err);
     throw new Error('Unable to open a cache');
   });
-  const cacheContent = await cache.match(`/controlled/${file}`).catch((err) => {
+  const cacheContent = await cache.match(file).catch((err) => {
     console.log(err);
     throw new Error('Requested code was not found in cache');
   });
@@ -23,6 +23,7 @@ const getDataFromCache = async (
 };
 
 export const cloneElement = async ({ loc }: any) => {
+  console.log('cloneElement', loc)
   const { body, cache } = await getDataFromCache(loc.file);
   if (!body || !cache) return;
 
@@ -33,7 +34,7 @@ export const cloneElement = async ({ loc }: any) => {
   const newCode = cloneElementInCode(body, loc.char, charCount);
   console.log(newCode);
   if (newCode) {
-    await cache.put(`/controlled/${loc.file}`, new Response(newCode));
+    await cache.put(loc.file, new Response(newCode));
   }
 };
 
@@ -48,6 +49,6 @@ export const removeElement = async ({ loc }: any) => {
   const newCode = deleteElementInCode(body, loc.char, charCount);
   console.log(newCode);
   if (newCode) {
-    await cache.put(`/controlled/${loc.file}`, new Response(newCode));
+    await cache.put(loc.file, new Response(newCode));
   }
 };

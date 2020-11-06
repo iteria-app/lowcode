@@ -1,5 +1,3 @@
-import svelte from 'svelte/compiler';
-
 import { cloneElement, removeElement } from '../util/cacheHandlers';
 import { getOffset } from '../util/highlight';
 interface HTMLBodyElementWithMeta extends HTMLBodyElement {
