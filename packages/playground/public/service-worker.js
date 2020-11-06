@@ -219,7 +219,7 @@ self.addEventListener('fetch', function (event) {
 
       console.log('sw fetch B', gitlabObject.gitlabUrl, event.request)
 
-      const response = fetchFile(gitlabObject.gitlabUrl, 'Lpdpwxi9BsHkd6jPpVsV').then(svelteSource => {
+      const response = fetchFile(gitlabObject.gitlabUrl, '<YOUR_PERSONAL_TOKEN>').then(svelteSource => {
         //@urql/svelte
         console.log("GITLABURL", gitlabObject.gitlabUrl)
         //svelteSource = svelteSource.replaceAll('@material/mwc-', 'https://unpkg.com/@material/mwc-')
