@@ -26,7 +26,12 @@ self.addEventListener('install', function (e) {
   self.skipWaiting();
 });
 
-importScripts('https://unpkg.com/svelte@3.29.4/compiler.js');
+self.addEventListener('message', function (e) {
+  console.log('sw message', e);
+});
+
+importScripts('https://unpkg.com/svelte@3.29.4/compiler.js', 'https://unpkg.com/esbuild-wasm@0.8.3/lib/browser.js')
+
 
 /*self.addEventListener('activate', function(e) {
   console.log('sw activating', self.registration)
@@ -73,7 +78,7 @@ function sv({ source, filename }) {
   };
   //const parsed = svelte.parse(source, options);
   const compiled = svelte.compile(source, options);
-  console.log('svelte compiled', compiled.js.code);
+  //console.log('svelte compiled', compiled.js.code);
 
   return compiled.js.code.replaceAll(
     'https://unpkg.com/svelte@3.29.4/internal',
@@ -105,34 +110,41 @@ function newJavaScriptResponse(content) {
 
 self.addEventListener('fetch', function (event) {
   const requestURL = new URL(event.request.url);
-  console.log('sw fetch requestURL', requestURL.pathname);
+  console.log('sw fetch requestURL', requestURL.pathname, typeof esbuild);
   const c = content(event.request);
   if (c) {
     event.respondWith(
       caches.open('playground').then(async (cache) => {
-        let jsMatch = await cache.match(
+        let source = null
+        /*let jsMatch = await cache.match(
           svelteExtenstionToJs(requestURL.pathname),
-        );
+        )
         if (jsMatch) {
           return jsMatch;
-        }
+        }*/
+
         let svelteMatch = await cache.match(
           svelteExtenstion(requestURL.pathname),
-        );
+        )
         if (!svelteMatch) {
           cache.put(
             svelteExtenstion(requestURL.pathname),
-            (svelteMatch = newJavaScriptResponse(c.source)),
+            newJavaScriptResponse(c.source),
           );
+          svelteMatch = newJavaScriptResponse(c.source)
         }
-        console.log('sw match', svelteMatch);
-        //TODO const text = await svelteMatch.text()//TODO filename => sv({source: text, filename})
-        const svContent = sv(c);
-        cache.put(
-          svelteExtenstionToJs(requestURL.pathname),
-          (jsMatch = newJavaScriptResponse(svContent)),
-        );
-        return jsMatch;
+        source = await svelteMatch.text()
+        
+        if (source) {
+          const filename = requestURL.pathname.substring(CONTROLLED)
+          const svContent =  sv({source, filename})
+          //const svContent = sv(source);
+          cache.put(
+            svelteExtenstionToJs(requestURL.pathname),
+            (/*jsMatch = */newJavaScriptResponse(svContent)),
+          );
+          return newJavaScriptResponse(svContent);
+        }
       }),
     );
   } else if (event.request.mode === 'navigate') {
@@ -188,9 +200,6 @@ self.addEventListener('fetch', function (event) {
       console.log('sw fetch B', gitlabUrl, event.request)
   
       const response = fetchFile(gitlabUrl, '<use your token>').then(svelteSource => {
-        //@urql/svelte
-
-        //svelteSource = svelteSource.replaceAll('@material/mwc-', 'https://unpkg.com/@material/mwc-')
         const aliases = {
           '@urql/svelte': 'https://unpkg.com/@urql/svelte@1.1.2/dist/urql-svelte.js',
           '@material/mwc-': 'https://unpkg.com/@material/mwc-',
@@ -211,7 +220,7 @@ self.addEventListener('fetch', function (event) {
       event.respondWith(response)
     } else/**/ {
       const response = fetch(event.request).then(response => {
-       console.log('sw fetch response', response)
+       //console.log('sw fetch response', response)
        return response//TODO cache response
       })
       event.respondWith(response)
@@ -236,7 +245,7 @@ async function fetchFile(url, privateToken) {
                 let resData = window.atob(data.content); console.log(resData);
                 return resData
               }
-              return `<!-- 404 ${url} -->`
+              return `/* 404 ${url} */`
           })
 
           console.log("RESPONSE", gitlabFile)
