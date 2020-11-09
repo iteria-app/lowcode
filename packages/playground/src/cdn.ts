@@ -7,7 +7,7 @@ import { cssPlugin } from '@velcro/plugin-css';
 export function cdnImports(source: string): string {
   return source
     .replace(/from[ ]*(["'"])([^.][^"'"]+)["'"]/gm, 'from "https://unpkg.com/$2?module"')
-    .replace(/import[ ]*(["'"])([^.][^"'"]+)["'"]/gm, 'import "https://unpkg.com/$2?module"')
+    .replace(/import[ ]*(["'"])([^.][^"'"]+)["'"]/gm, 'import "https://unpkg.com/$2"')
     .replace('https://unpkg.com/svelte@3.29.4?module', 'https://unpkg.com/svelte@3.29.4/index.js?module')
     //TODO package versions
 }
