@@ -6,23 +6,28 @@ import { cssPlugin } from '@velcro/plugin-css';
 import dependencyFetcher from './util/dependencyFetcher';
 
 export async function cdnImports(source: string): Promise<string> {
-  const regex1 = source.match(/from[ ]*(["'"])([^.][^"'"]+)["'"]/gm);
-  if (regex1?.length) {
-    const string = regex1[0].match(/(["'])(?:(?=(\\?))\2.)*?\1/gm);
-    if (string) {
-      const dependency = string[0].replaceAll('"', '').replaceAll("'", '');
-      const replaceString = await dependencyFetcher(dependency);
-      if (!replaceString)
-        console.log(
-          'Toto je ten zly source',
-          source,
-          'toto je dependency',
-          string,
-        );
-      return source.replace(
-        /from[ ]*(["'"])([^.][^"'"]+)["'"]/gm,
-        `from "${replaceString}"`,
-      );
+  const regexFrom = source.match(/from[ ]*(["'"])([^.][^"'"]+)["'"]/gm);
+  const regexImport = source.match(/import[ ]*(["'"])([^.][^"'"]+)["'"]/gm);
+  if (regexFrom?.length) {
+    for (let i = 0; i < regexFrom.length; i++) {
+      console.log(regexFrom[i]);
+      const string = regexFrom[i].match(/(["'])(?:(?=(\\?))\2.)*?\1/gm);
+      if (string) {
+        const dependency = string[0].replaceAll('"', '').replaceAll("'", '');
+        const replaceString = await dependencyFetcher(dependency);
+        return source.replace(regexFrom[i], `from "${replaceString}"`);
+      }
+    }
+  }
+
+  if (regexImport?.length) {
+    for (let i = 0; i < regexImport.length; i++) {
+      const string = regexImport[0].match(/(["'])(?:(?=(\\?))\2.)*?\1/gm);
+      if (string) {
+        const dependency = string[0].replaceAll('"', '').replaceAll("'", '');
+        const replaceString = await dependencyFetcher(dependency);
+        return source.replace(regexImport[i], `import  "${replaceString}"`);
+      }
     }
   }
   return source;
