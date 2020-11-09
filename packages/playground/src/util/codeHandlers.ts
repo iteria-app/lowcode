@@ -1,4 +1,8 @@
-import { parse as svelteParse, walk as svelteWalk} from 'https://unpkg.com/svelte@3.29.3/compiler.mjs';
+import {
+  parse as svelteParse,
+  walk as svelteWalk,
+  //@ts-ignore
+} from 'https://unpkg.com/svelte@3.29.3/compiler.mjs';
 
 export const findElementInAST = (body: string, char: number) => {
   const AST = svelteParse(body).html;

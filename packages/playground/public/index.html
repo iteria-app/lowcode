@@ -27,12 +27,14 @@
         </div>
       </div>
     </div>
+    <button>Tryout button</button>
     <iframe
       id="previewIframe"
       src="empty.html"
       width="1000"
       height="500"
     ></iframe>
+
     <!--
       This HTML file is a template.
       If you open it directly in the browser, you will see an empty page.
@@ -43,10 +45,19 @@
         To begin the development, run `npm start` or `yarn start`.
         To create a production bundle, use `npm run build` or `yarn build`.
       -->
+    <button id="refreshButton" disabled>REFRESH</button>
     <script src="https://unpkg.com/esbuild-wasm@0.8.3/lib/browser.js"></script>
+    <script
+      type="module"
+      src="node_modules/@vanillawc/wc-monaco-editor/index.js"
+    ></script>
     <script type="module" src="/_dist_/border-frame/borderFrame.js"></script>
     <script type="module" src="/_dist_/index.js"></script>
 
-    <button id="refreshButton" disabled>REFRESH</button>
+    <textarea style="display: block; height: 800px; width: 800px">
+      function x() {
+        console.log('Hello world!');
+      }
+    </textarea>
   </body>
 </html>

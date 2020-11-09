@@ -7,6 +7,7 @@
     "lint": "prettier --check \"src/**/*.{ts,js}\""
   },
   "dependencies": {
+    "@vanillawc/wc-monaco-editor": "^1.10.12",
     "canvas-confetti": "^1.2.0",
     "svelte": "^3.29.4"
   },
