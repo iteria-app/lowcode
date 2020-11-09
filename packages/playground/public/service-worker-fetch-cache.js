@@ -79,6 +79,11 @@ self.addEventListener('fetch', function (event) {
     }))
   } else {
     async function fixJsResponse(response) {
+      if (!response.ok) {
+        console.log('sw fetch nok', response.url)
+        return response
+      }
+
       const text = await response.text()
       return newJavaScriptResponse(text
         .replace('process.env.NODE_ENV', "'development'")

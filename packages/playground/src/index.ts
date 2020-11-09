@@ -4,7 +4,6 @@ import { files, gitlabFetchFile } from './gitlab';
 import { transpileEsbuild, transpileSvelte } from './transpile';
 
 import { cdnImports } from './cdn';
-import dependencyFetcher from './util/dependencyFetcher';
 
 const refreshButton = document.getElementById(
   'refreshButton',
