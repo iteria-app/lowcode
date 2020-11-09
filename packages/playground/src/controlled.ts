@@ -1,1 +1,1 @@
-export const CONTROLLED = '/controlled/'
+export const CONTROLLED = '/src/'
