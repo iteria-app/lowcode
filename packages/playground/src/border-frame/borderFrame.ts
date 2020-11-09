@@ -12,6 +12,7 @@ interface HTMLBodyElementWithMeta extends HTMLBodyElement {
 }
 
 const iFrame = document.querySelector('iframe');
+const iFramePosition = iFrame?.getBoundingClientRect();
 const innerDoc = iFrame!.contentDocument || iFrame!.contentWindow!.document;
 
 export const addBorderFrame = (innerDoc: Document) => {
@@ -44,12 +45,21 @@ export const addBorderFrame = (innerDoc: Document) => {
         iFrame?.contentWindow?.location.reload();
       } else console.warn('Something went wrong');
     };
-
     mainDiv.setAttribute(
       'style',
-      `height:${styles.height}px; width:${styles.width}px; transform:translate3d(${styles.left}px, ${styles.top}px, 0px)`,
+      `height:${styles.height}px; width:${
+        styles.width
+      }px; transform:translate3d(${
+        styles.left + iFramePosition?.left - iFramePosition!.top
+      }px, ${styles.top}px, 0px)`,
     );
   });
+};
+
+export const removeBorderFrame = () => {
+  const mainDiv = document.getElementById('buttonContainer');
+
+  mainDiv?.setAttribute('style', `top:0; left:0;`);
 };
 
 addBorderFrame(innerDoc);

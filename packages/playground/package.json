@@ -7,6 +7,7 @@
     "lint": "prettier --check \"src/**/*.{ts,js}\""
   },
   "dependencies": {
+    "@vanillawc/wc-monaco-editor": "^1.10.12",
     "@velcro/bundler": "^0.56.2",
     "@velcro/plugin-css": "^0.56.2",
     "@velcro/plugin-sucrase": "^0.56.2",

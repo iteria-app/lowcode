@@ -1404,6 +1404,10 @@
   dependencies:
     "@types/yargs-parser" "*"
 
+"@vanillawc/wc-monaco-editor@^1.10.12":
+  version "1.10.12"
+  resolved "https://registry.yarnpkg.com/@vanillawc/wc-monaco-editor/-/wc-monaco-editor-1.10.12.tgz#73ae976b27fecfbef034df0cd2ea3608f4457180"
+  integrity sha512-UOFs6eCf30qWQE8J4+e6axlcoZAKfa/rOgcqMB70s7UvAzQYnE0zpbWmTyRPCG6ARmuHXDkaxjkG8DXywZfJDA==
 "@typescript-eslint/parser@^4.6.1":
   version "4.6.1"
   resolved "https://registry.yarnpkg.com/@typescript-eslint/parser/-/parser-4.6.1.tgz#b801bff67b536ecc4a840ac9289ba2be57e02428"

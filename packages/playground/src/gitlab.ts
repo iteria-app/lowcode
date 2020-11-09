@@ -4,7 +4,7 @@ export async function gitlabFetchFile(filename: string) {
     const branch = 'gitlabAPI-lowcode'
     const projectId = 18967974
     const gitlabUrl = `https://gitlab.com/api/v4/projects/${projectId}/repository/files/${filenameUrlEnc}?ref=${branch}`
-    const privateToken = ''
+    const privateToken = '3BsLFHXqRsQx9E1ajK2g'
     return await fetch(gitlabUrl, {
         method: 'GET',
         headers: {

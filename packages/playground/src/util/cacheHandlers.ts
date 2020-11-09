@@ -4,6 +4,8 @@ import {
   findElementInAST,
 } from './codeHandlers';
 
+import { removeBorderFrame } from '../border-frame/borderFrame';
+
 const getDataFromCache = async (
   file: string,
 ): Promise<{ body?: string; cache?: Cache }> => {
@@ -23,7 +25,7 @@ const getDataFromCache = async (
 };
 
 export const cloneElement = async ({ loc }: any) => {
-  console.log('cloneElement', loc)
+  console.log('cloneElement', loc);
   const { body, cache } = await getDataFromCache(loc.file);
   if (!body || !cache) return;
 
@@ -32,9 +34,10 @@ export const cloneElement = async ({ loc }: any) => {
   const charCount = clickedNode.end - clickedNode.start;
 
   const newCode = cloneElementInCode(body, loc.char, charCount);
-  console.log(newCode);
+  console.log(newCode, loc.file);
   if (newCode) {
     await cache.put(loc.file, new Response(newCode));
+    removeBorderFrame();
   }
 };
 
@@ -50,5 +53,6 @@ export const removeElement = async ({ loc }: any) => {
   console.log(newCode);
   if (newCode) {
     await cache.put(loc.file, new Response(newCode));
+    removeBorderFrame();
   }
 };

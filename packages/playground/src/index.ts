@@ -1,12 +1,17 @@
 import { addBorderFrame } from './border-frame/borderFrame';
 import { CONTROLLED } from './controlled';
-import { files, gitlabFetchFile } from './gitlab'
-import { transpileEsbuild, transpileSvelte } from './transpile'
+import { files, gitlabFetchFile } from './gitlab';
+import { transpileEsbuild, transpileSvelte } from './transpile';
 
-import { dependency, cdnImports } from './cdn';
+import { cdnImports } from './cdn';
+import dependencyFetcher from './util/dependencyFetcher';
 
-const refreshButton = document.getElementById('refreshButton') as HTMLButtonElement;
-const compileButton = document.getElementById('compileButton') as HTMLButtonElement;
+const refreshButton = document.getElementById(
+  'refreshButton',
+) as HTMLButtonElement;
+const compileButton = document.getElementById(
+  'compileButton',
+) as HTMLButtonElement;
 const previewIframe = document.getElementById(
   'previewIframe',
 ) as HTMLIFrameElement;
@@ -18,7 +23,11 @@ if (navigator.serviceWorker) {
     .then(
       (registrations) => {
         const promises = registrations.map((registration) => {
-          console.log('sw prev registration', registration.active, registration);
+          console.log(
+            'sw prev registration',
+            registration.active,
+            registration,
+          );
           return registration.unregister();
         });
         return Promise.all(promises);
@@ -37,14 +46,14 @@ if (navigator.serviceWorker) {
           scope: CONTROLLED,
         })
         .then((registration) => {
-          console.log('serviceWorker then', registration.active, registration)
+          console.log('serviceWorker then', registration.active, registration);
           if (refreshButton) {
-            refreshButton.innerText = "REFRESH"
-            refreshButton.disabled = false
+            refreshButton.innerText = 'REFRESH';
+            refreshButton.disabled = false;
           }
           if (compileButton) {
-            compileButton.innerText = "COMPILE"
-            compileButton.disabled = false
+            compileButton.innerText = 'COMPILE';
+            compileButton.disabled = false;
           }
         });
     });
@@ -53,11 +62,11 @@ if (navigator.serviceWorker) {
 }
 
 function prefix(prefix: string, str: string) {
-  console.log('prefix', prefix, str)
+  console.log('prefix', prefix, str);
   if (!str.startsWith(prefix)) {
-    return prefix + str
+    return prefix + str;
   }
-  return str
+  return str;
 }
 
 const html = `<!DOCTYPE html>
@@ -101,63 +110,78 @@ if (compileButton) {
         cache.put('/src/' + pkg, newJavaScriptResponse(dep.code))
       })/**/
 
-    /**/for (const file of files) {
+      /**/ for (const file of files) {
         if (file.name.endsWith('.js')) {
           gitlabFetchFile(file.path).then(async (source) => {
-            if (typeof(source) == 'string') {
-              const jsPath = prefix(CONTROLLED, prefix('/', file.path.substring(0, file.path.length - '.js'.length)))
-              const sourceCdn = cdnImports(source)
+            if (typeof source == 'string') {
+              const jsPath = prefix(
+                CONTROLLED,
+                prefix(
+                  '/',
+                  file.path.substring(0, file.path.length - '.js'.length),
+                ),
+              );
+              const sourceCdn = await cdnImports(source);
               cache.put(jsPath, newJavaScriptResponse(sourceCdn));
             }
-          })
+          });
         } else if (file.name.endsWith('.svelte')) {
           gitlabFetchFile(file.path).then(async (source) => {
-            if (typeof(source) == 'string') {
+            if (typeof source == 'string') {
               try {
-                const transpiled = await transpileSvelte(source, file.path)
-                const sourceCdn = cdnImports(transpiled.code)
-                cache.put(prefix(CONTROLLED, prefix('/', transpiled.path)), newJavaScriptResponse(sourceCdn));
-              } catch(err) {
-                console.error('error transpiling svelte', file, err)
+                const transpiled = await transpileSvelte(source, file.path);
+                const sourceCdn = await cdnImports(transpiled.code);
+                cache.put(
+                  prefix(CONTROLLED, prefix('/', transpiled.path)),
+                  newJavaScriptResponse(sourceCdn),
+                );
+              } catch (err) {
+                console.error('error transpiling svelte', file, err);
               }
             }
-          })
-        } else if (file.name.endsWith('.ts') || file.name.endsWith('.jsx') || file.name.endsWith('.tsx')) {
+          });
+        } else if (
+          file.name.endsWith('.ts') ||
+          file.name.endsWith('.jsx') ||
+          file.name.endsWith('.tsx')
+        ) {
           gitlabFetchFile(file.path).then(async (tsSource) => {
-            if (typeof(tsSource) == 'string') {
-              const transpiled = await transpileEsbuild(tsSource, file.path)//TODO source map in response
+            if (typeof tsSource == 'string') {
+              const transpiled = await transpileEsbuild(tsSource, file.path); //TODO source map in response
               if (transpiled?.warnings?.length > 0) {
-                console.warn('transpilation', transpiled.warnings)
+                console.warn('transpilation', transpiled.warnings);
               }
               if (file.name.indexOf('graphql') >= 0) {
-                console.log('gitlab graphql', file.name)
+                console.log('gitlab graphql', file.name);
               }
-              console.log('transpiled', transpiled)
+              console.log('transpiled', transpiled);
               if (transpiled?.code?.length > 0) {
-                const sourceCdn = cdnImports(transpiled.code)
-                cache.put(prefix(CONTROLLED, prefix('/', transpiled.path)), newJavaScriptResponse(sourceCdn));
+                const sourceCdn = await cdnImports(transpiled.code);
+                cache.put(
+                  prefix(CONTROLLED, prefix('/', transpiled.path)),
+                  newJavaScriptResponse(sourceCdn),
+                );
               }
             }
-          })
+          });
         }
-      }/**/  
+      } /**/
     });
-  }
+  };
 }
 
 if (refreshButton) {
   refreshButton.onclick = async (event) => {
-    console.log('onclick', event)
+    console.log('onclick', event);
 
-        //const resultReact = await resolver.getUrlForBareModule('htm', '3.0.4', '/react');
+    //const resultReact = await resolver.getUrlForBareModule('htm', '3.0.4', '/react');
     //console.log('getUrlForBareModule react', resultReact)
     //const resultX = await resolver.getUrlForBareModule('intl-messageformat', '7.2.4', '/');
     //console.log('getUrlForBareModule intl-messageformat', resultX)
     //resolver.readFileContent //resolve(new Uri('intl-messageformat'))
 
-
     if (previewIframe) {
-      /**/previewIframe.contentWindow?.navigator?.serviceWorker?.addEventListener(
+      /**/ previewIframe.contentWindow?.navigator?.serviceWorker?.addEventListener(
         'message',
         function (event) {
           console.log('on sw listener message B', event);
@@ -172,7 +196,12 @@ if (refreshButton) {
       // previewDoc?.close();
 
       previewIframe.onload = () => {
-        console.log('previewIframe onload', previewIframe.src, event, previewIframe)
+        console.log(
+          'previewIframe onload',
+          previewIframe.src,
+          event,
+          previewIframe,
+        );
         const innerDoc =
           previewIframe!.contentDocument ||
           previewIframe!.contentWindow!.document;
@@ -188,23 +217,26 @@ if (refreshButton) {
         'XXXXXXXXXXXXXXXXXX',
         previewIframe,
         previewIframe.contentWindow?.navigator?.serviceWorker,
-        );
-        previewIframe.contentWindow?.navigator?.serviceWorker.getRegistrations()
-        .then((regs)=>regs.forEach((reg)=>{
-          console.log('XXXXX reg.active',reg.active)
-          reg.active?.postMessage('abcd')
-        }))/**/
+      );
+      previewIframe.contentWindow?.navigator?.serviceWorker
+        .getRegistrations()
+        .then((regs) =>
+          regs.forEach((reg) => {
+            console.log('XXXXX reg.active', reg.active);
+            reg.active?.postMessage('abcd');
+          }),
+        ); /**/
     }
   };
 }
 
-function newJavaScriptResponse(content: string) : Response {
+function newJavaScriptResponse(content: string): Response {
   const headers = new Headers();
   headers.append('Content-Type', 'application/javascript');
   const init = { status: 200, statusText: 'OK', headers };
   return new Response(content, init);
 }
-function newHtmlResponse(content: string) : Response {
+function newHtmlResponse(content: string): Response {
   const headers = new Headers();
   headers.append('Content-Type', 'text/html');
   const init = { status: 200, statusText: 'OK', headers };
