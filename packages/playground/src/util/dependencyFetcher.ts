@@ -1,6 +1,13 @@
 import examplePackage from './examplePackage';
 
 export default async (packageName: string) => {
+  const cache = await caches.open('playground')
+  const cacheKey = `/unpkg.com/${packageName}`
+  const match = await cache.match(cacheKey)
+  if (match) {
+    return cacheKey
+  }
+
   //   const parsedPackage = JSON.parse(examplePackage);
 
   //   for (const dependencyName in parsedPackage.dependencies) {
@@ -24,10 +31,6 @@ export default async (packageName: string) => {
   //       console.log(responseSkypack);
   //     }
   //   }
-
-  // TODO use https://www.npmjs.com/package/cjs-es to FIX CDN ES Module issues
-  // especially for 'graphql', 'graphql-tag', cache 
-  // import { transform } from 'https://cdn.skypack.dev/-/cjs-es@v0.8.2-ceQTG87fHFEzTzEBy8F3/dist=es2020/cjs-es.js'
 
   if (['svelte-i18n', 'intl-messageformat'].indexOf(packageName) < 0) {
     try {

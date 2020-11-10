@@ -5,6 +5,9 @@ import { sucrasePlugin } from '@velcro/plugin-sucrase';
 import { cssPlugin } from '@velcro/plugin-css';
 import dependencyFetcher 
 from './util/dependencyFetcher';
+import { parse } from 'acorn'
+//import { transform } from 'cjs-es'
+import cjsEs from 'https://cdn.skypack.dev/-/cjs-es@v0.8.2-ceQTG87fHFEzTzEBy8F3/dist=es2020/cjs-es.js'
 
 export async function cdnImports(source: string): Promise<string> {
   const importMatches = source.match(/import[^a-zA-Z0-9][^"']*["'][^\.][^"']*["']/gm);
@@ -66,7 +69,10 @@ export async function dependency(pkgName: string) {
         `Velcro.runtime.require(${JSON.stringify(entrypoint.toString())});`,
     )
     .join('\n')}\n`;
-  const runtimeCode = `${codeWithStart}\n//# sourceMappingURL=${output.sourceMapDataUri}`;
+
+  const runtimeCode = cjsEs.transform( { code: codeWithStart, parse })
+  // TODO especially for 'graphql', 'graphql-tag', cache 
+  //const runtimeCode = `${codeWithStart}\n//# sourceMappingURL=${output.sourceMapDataUri}`;
   //console.log('build runtimeCode', runtimeCode)
 
   return { code: runtimeCode, path: cdnUri };

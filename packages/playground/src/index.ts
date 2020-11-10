@@ -3,10 +3,14 @@ import { CONTROLLED } from './controlled';
 import { files, gitlabFetchFile } from './gitlab';
 import { transpileEsbuild, transpileSvelte } from './transpile';
 
-import { cdnImports } from './cdn';
+import { cdnImports, dependency } from './cdn';
+import examplePackage from './util/examplePackage';
 
 const refreshButton = document.getElementById(
   'refreshButton',
+) as HTMLButtonElement;
+const bundleDepsButton = document.getElementById(
+  'bundleDepsButton',
 ) as HTMLButtonElement;
 const compileButton = document.getElementById(
   'compileButton',
@@ -49,6 +53,10 @@ if (navigator.serviceWorker) {
           if (refreshButton) {
             refreshButton.innerText = 'REFRESH';
             refreshButton.disabled = false;
+          }
+          if (bundleDepsButton) {
+            bundleDepsButton.innerText = 'BUNDLE DEPS';
+            bundleDepsButton.disabled = false;
           }
           if (compileButton) {
             compileButton.innerText = 'COMPILE';
@@ -96,19 +104,6 @@ const html = `<!DOCTYPE html>
 if (compileButton) {
   compileButton.onclick = async (event) => {
     caches.open('playground').then(async (cache) => {
-      //cache.put(CONTROLLED + 'index.html', newHtmlResponse(html))
-
-      /**const dependencies = {
-        "@fullcalendar/core": "^4.4.2",
-        //     "@material/mwc-textfield": "^0.15.0",
-        "svelte/store": "^3.29.4"
-      }
-      Object.entries(dependencies).forEach(async ([pkg, ver]) => {
-        const dep = await dependency(pkg)// + '@' + ver
-        console.log('dep', pkg, ver, dep)
-        cache.put('/src/' + pkg, newJavaScriptResponse(dep.code))
-      })/**/
-
       /**/ for (const file of files) {
         if (file.name.endsWith('.js')) {
           gitlabFetchFile(file.path).then(async (source) => {
@@ -167,6 +162,21 @@ if (compileButton) {
       } /**/
     });
   };
+}
+
+if (bundleDepsButton) {
+  bundleDepsButton.onclick = async (event) => {
+    console.log('bundling dependencies', event);
+
+    Object.entries(examplePackage.dependencies).forEach(async ([pkg, ver]) => {
+      const dep = await dependency(pkg)// + '@' + ver
+      console.log('dep', pkg, ver, dep)
+      caches.open('playground').then(async (cache) => {
+        const depCode = await dep.code
+        cache.put('/unpkg.com/' + pkg, newJavaScriptResponse(depCode.code))
+      })
+    })
+  }
 }
 
 if (refreshButton) {

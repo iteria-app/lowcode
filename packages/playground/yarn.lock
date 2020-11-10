@@ -1404,10 +1404,6 @@
   dependencies:
     "@types/yargs-parser" "*"
 
-"@vanillawc/wc-monaco-editor@^1.10.12":
-  version "1.10.12"
-  resolved "https://registry.yarnpkg.com/@vanillawc/wc-monaco-editor/-/wc-monaco-editor-1.10.12.tgz#73ae976b27fecfbef034df0cd2ea3608f4457180"
-  integrity sha512-UOFs6eCf30qWQE8J4+e6axlcoZAKfa/rOgcqMB70s7UvAzQYnE0zpbWmTyRPCG6ARmuHXDkaxjkG8DXywZfJDA==
 "@typescript-eslint/parser@^4.6.1":
   version "4.6.1"
   resolved "https://registry.yarnpkg.com/@typescript-eslint/parser/-/parser-4.6.1.tgz#b801bff67b536ecc4a840ac9289ba2be57e02428"
@@ -1452,6 +1448,11 @@
   dependencies:
     "@typescript-eslint/types" "4.6.1"
     eslint-visitor-keys "^2.0.0"
+
+"@vanillawc/wc-monaco-editor@^1.10.12":
+  version "1.10.12"
+  resolved "https://registry.yarnpkg.com/@vanillawc/wc-monaco-editor/-/wc-monaco-editor-1.10.12.tgz#73ae976b27fecfbef034df0cd2ea3608f4457180"
+  integrity sha512-UOFs6eCf30qWQE8J4+e6axlcoZAKfa/rOgcqMB70s7UvAzQYnE0zpbWmTyRPCG6ARmuHXDkaxjkG8DXywZfJDA==
 
 "@velcro/bundler@^0.56.2":
   version "0.56.2"
@@ -1602,6 +1603,11 @@ acorn@^7.1.1, acorn@^7.2.0:
   version "7.4.1"
   resolved "https://registry.yarnpkg.com/acorn/-/acorn-7.4.1.tgz#feaed255973d2e77555b83dbc08851a6c63520fa"
   integrity sha512-nQyp0o1/mNdbTO1PO6kHkwSrmgZ0MT/jCCpNiwbUjGoRN4dlBhqJtoQuCnEOKzgTVwg0ZWiCoQy6SxMebQVh8A==
+
+acorn@^8.0.4:
+  version "8.0.4"
+  resolved "https://registry.yarnpkg.com/acorn/-/acorn-8.0.4.tgz#7a3ae4191466a6984eee0fe3407a4f3aa9db8354"
+  integrity sha512-XNP0PqF1XD19ZlLKvB7cMmnZswW4C/03pRHgirB30uSJTaS3A3V1/P4sS3HPvFmjoriPCJQs+JDSbm4bL1TxGQ==
 
 address@^1.0.1:
   version "1.1.2"
@@ -2227,6 +2233,16 @@ cipher-base@^1.0.0, cipher-base@^1.0.1, cipher-base@^1.0.3:
   dependencies:
     inherits "^2.0.1"
     safe-buffer "^5.0.1"
+
+cjs-es@^0.8.2:
+  version "0.8.2"
+  resolved "https://registry.yarnpkg.com/cjs-es/-/cjs-es-0.8.2.tgz#3a4358f8cbc6caffcabf3282e5b56052cb1e7962"
+  integrity sha512-Z3AHuD0KH36hntFdT5M4c921ygkALhuRRaX8QyYhuOgoHBLeZItE5G3CMg/+m5NQ6b1revYp7Th2h6F8J56i2g==
+  dependencies:
+    estree-walker "^0.6.1"
+    is-reference "^1.1.2"
+    magic-string "^0.25.2"
+    rollup-pluginutils "^2.8.1"
 
 cjs-module-lexer@^0.4.0, cjs-module-lexer@^0.4.2:
   version "0.4.3"
@@ -3683,7 +3699,7 @@ is-potential-custom-element-name@^1.0.0:
   resolved "https://registry.yarnpkg.com/is-potential-custom-element-name/-/is-potential-custom-element-name-1.0.0.tgz#0c52e54bcca391bb2c494b21e8626d7336c6e397"
   integrity sha1-DFLlS8yjkbssSUsh6GJtczbG45c=
 
-is-reference@^1.2.1:
+is-reference@^1.1.2, is-reference@^1.2.1:
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/is-reference/-/is-reference-1.2.1.tgz#8b2dac0b371f4bc994fdeaba9eb542d03002d0b7"
   integrity sha512-U82MsXXiFIrjCK4otLT+o2NA2Cd2g5MLoOVXUZjIOhLurrRxpEXzI8O0KZHr3IjLvlAH1kTPYSuqer5T9ZVBKQ==
@@ -4396,7 +4412,7 @@ lru-cache@^6.0.0:
   dependencies:
     yallist "^4.0.0"
 
-magic-string@^0.25.3, magic-string@^0.25.5, magic-string@^0.25.7:
+magic-string@^0.25.2, magic-string@^0.25.3, magic-string@^0.25.5, magic-string@^0.25.7:
   version "0.25.7"
   resolved "https://registry.yarnpkg.com/magic-string/-/magic-string-0.25.7.tgz#3f497d6fd34c669c6798dcb821f2ef31f5445051"
   integrity sha512-4CrMT5DOHTDk4HYDlzmwu4FVCcIYI8gauveasrdCu2IKIFOJ3f0v/8MDGJCDL9oD2ppz/Av1b0Nj345H9M+XIA==
