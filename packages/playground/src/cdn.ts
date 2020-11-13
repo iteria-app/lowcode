@@ -4,34 +4,44 @@ import { GraphBuilder } from '@velcro/bundler';
 import { sucrasePlugin } from '@velcro/plugin-sucrase';
 import { cssPlugin } from '@velcro/plugin-css';
 import dependencyFetcher from './util/dependencyFetcher';
+import { parse } from 'acorn';
+//import { transform } from 'cjs-es'
+//@ts-ignore
+import cjsEs from 'https://cdn.skypack.dev/-/cjs-es@v0.8.2-ceQTG87fHFEzTzEBy8F3/dist=es2020/cjs-es.js';
 
 export async function cdnImports(source: string): Promise<string> {
-  const regexFrom = source.match(/from[ ]*(["'"])([^.][^"'"]+)["'"]/gm);
-  const regexImport = source.match(/import[ ]*(["'"])([^.][^"'"]+)["'"]/gm);
-  if (regexFrom?.length) {
-    for (let i = 0; i < regexFrom.length; i++) {
-      console.log(regexFrom[i]);
-      const string = regexFrom[i].match(/(["'])(?:(?=(\\?))\2.)*?\1/gm);
-      if (string) {
-        const dependency = string[0].replaceAll('"', '').replaceAll("'", '');
-        const replaceString = await dependencyFetcher(dependency);
-        return source.replace(regexFrom[i], `from "${replaceString}"`);
+  const importMatches = source.match(
+    /import[^a-zA-Z0-9][^"']*["'][^\.][^"']*["']/gm,
+  );
+  for (let match of importMatches || []) {
+    const dependencyFirstQuote = match.lastIndexOf(
+      match[match.length - 1],
+      match.length - 2,
+    );
+    const dependency = match.substring(
+      dependencyFirstQuote + 1,
+      match.length - 1,
+    );
+    if (dependency?.length > 0 && !dependency.startsWith('https://')) {
+      if (dependency.startsWith('@material/mwc-')) {
+        source = source.replaceAll(match, '');
+        continue;
+      }
+      let dependencyCdn = await dependencyFetcher(dependency);
+      if (dependencyCdn && dependencyCdn?.length > 0) {
+        const cdnImport =
+          match.substring(0, dependencyFirstQuote) + `"${dependencyCdn}"`;
+        console.log(match, ' => ', cdnImport);
+        source = source.replaceAll(match, cdnImport);
+        continue;
       }
     }
+    console.log(match, 'NO REPLACEMENT');
   }
 
-  if (regexImport?.length) {
-    for (let i = 0; i < regexImport.length; i++) {
-      const string = regexImport[0].match(/(["'])(?:(?=(\\?))\2.)*?\1/gm);
-      if (string) {
-        const dependency = string[0].replaceAll('"', '').replaceAll("'", '');
-        const replaceString = await dependencyFetcher(dependency);
-        return source.replace(regexImport[i], `import  "${replaceString}"`);
-      }
-    }
-  }
   return source;
 }
+
 export async function dependency(pkgName: string) {
   const readUrl = (href: string) =>
     fetch(href).then((res) => res.arrayBuffer());
@@ -68,7 +78,10 @@ export async function dependency(pkgName: string) {
         `Velcro.runtime.require(${JSON.stringify(entrypoint.toString())});`,
     )
     .join('\n')}\n`;
-  const runtimeCode = `${codeWithStart}\n//# sourceMappingURL=${output.sourceMapDataUri}`;
+
+  const runtimeCode = cjsEs.transform({ code: codeWithStart, parse });
+  // TODO especially for 'graphql', 'graphql-tag', cache
+  //const runtimeCode = `${codeWithStart}\n//# sourceMappingURL=${output.sourceMapDataUri}`;
   //console.log('build runtimeCode', runtimeCode)
 
   return { code: runtimeCode, path: cdnUri };

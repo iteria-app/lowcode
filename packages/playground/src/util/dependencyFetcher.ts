@@ -24,7 +24,10 @@ export default async (packageName: string) => {
   //       console.log(responseSkypack);
   //     }
   //   }
+  if (packageName === 'react' || packageName === 'react-dom')
+    return `https://cdn.skypack.dev/${packageName}`;
   const response = await fetch(`https://esm.run/${packageName}`);
+  console.log(packageName);
   if (!response.ok) {
     const responseUnpkg = await fetch(
       `https://unpkg.com/${packageName}?module`,
@@ -37,6 +40,5 @@ export default async (packageName: string) => {
     if (responseSkypack.ok) {
       return `https://cdn.skypack.dev/${packageName}`;
     } else return console.log('NENASIEL SOM NIC', packageName);
-  }
-  return `https://esm.run/${packageName}`;
+  } else return `https://esm.run/${packageName}`;
 };

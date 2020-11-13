@@ -1404,10 +1404,6 @@
   dependencies:
     "@types/yargs-parser" "*"
 
-"@vanillawc/wc-monaco-editor@^1.10.12":
-  version "1.10.12"
-  resolved "https://registry.yarnpkg.com/@vanillawc/wc-monaco-editor/-/wc-monaco-editor-1.10.12.tgz#73ae976b27fecfbef034df0cd2ea3608f4457180"
-  integrity sha512-UOFs6eCf30qWQE8J4+e6axlcoZAKfa/rOgcqMB70s7UvAzQYnE0zpbWmTyRPCG6ARmuHXDkaxjkG8DXywZfJDA==
 "@typescript-eslint/parser@^4.6.1":
   version "4.6.1"
   resolved "https://registry.yarnpkg.com/@typescript-eslint/parser/-/parser-4.6.1.tgz#b801bff67b536ecc4a840ac9289ba2be57e02428"
@@ -1452,6 +1448,11 @@
   dependencies:
     "@typescript-eslint/types" "4.6.1"
     eslint-visitor-keys "^2.0.0"
+
+"@vanillawc/wc-monaco-editor@^1.10.12":
+  version "1.10.12"
+  resolved "https://registry.yarnpkg.com/@vanillawc/wc-monaco-editor/-/wc-monaco-editor-1.10.12.tgz#73ae976b27fecfbef034df0cd2ea3608f4457180"
+  integrity sha512-UOFs6eCf30qWQE8J4+e6axlcoZAKfa/rOgcqMB70s7UvAzQYnE0zpbWmTyRPCG6ARmuHXDkaxjkG8DXywZfJDA==
 
 "@velcro/bundler@^0.56.2":
   version "0.56.2"
@@ -2644,6 +2645,11 @@ domexception@^2.0.1:
   integrity sha512-yxJ2mFy/sibVQlu5qHjOkf9J3K6zgmCxgJ94u2EdvDOV09H+32LtRswEcUsmUWN72pVLOEnTSRaIVVzVQgS0dg==
   dependencies:
     webidl-conversions "^5.0.0"
+
+dotenv@^8.2.0:
+  version "8.2.0"
+  resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-8.2.0.tgz#97e619259ada750eea3e4ea3e26bceea5424b16a"
+  integrity sha512-8sJ78ElpbDJBHNeBzUbUVLsqKdccaa/BXF1uPTw3GrvQTBgrQrtObr2mUrE38vzYd8cEv+m/JBfDLioYcfXoaw==
 
 ecc-jsbn@~0.1.1:
   version "0.1.2"
