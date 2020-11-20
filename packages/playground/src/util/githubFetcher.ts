@@ -6,8 +6,9 @@ import { stripExtension } from './codeHandlers';
 
 export const fetchProjectFromGitHub = async () => {
   const accessToken = prompt('Enter your GitHub access token');
+  const repoUrl = `https://api.github.com/repos/devias-io/react-material-dashboard/git/trees/23844d3d7a8f48ca47406e6e44211a60cc6ef2a5?recursive=1?access_token=${accessToken}`;
   // const repoUrl = `https://api.github.com/repos/nas5w/react-typescript-todo-app/git/trees/b9323b8ddaa2f29c73ab3a7f054dcbeb28ca6ce7?recursive=1?access_token=${accessToken}`;
-  const repoUrl = `https://api.github.com/repos/ionic-team/ionic-react-conference-app/git/trees/93cd376cc3f4a2867dfd2c748f56acaaf8155943?recursive=1?access_token=${accessToken}`;
+  // const repoUrl = `https://api.github.com/repos/ionic-team/ionic-react-conference-app/git/trees/93cd376cc3f4a2867dfd2c748f56acaaf8155943?recursive=1?access_token=${accessToken}`;
 
   if (!accessToken) return;
   try {
@@ -20,14 +21,16 @@ export const fetchProjectFromGitHub = async () => {
       const { content } = await data.json();
       if (content) {
         const fileContent = atob(content);
-        if (path.endsWith('js')) {
-          const jsPath = prefix(
-            CONTROLLED,
-            prefix('/', path.substring(0, path.length - '.js'.length)),
-          );
-          const sourceCdn = await cdnImports(fileContent);
-          cache.put(jsPath, newJavaScriptResponse(sourceCdn));
-        } else if (
+        // if (path.endsWith('js')) {
+        //   const jsPath = prefix(
+        //     CONTROLLED,
+        //     prefix('/', path.substring(0, path.length - '.js'.length)),
+        //   );
+        //   const sourceCdn = await cdnImports(fileContent);
+        //   cache.put(jsPath, newJavaScriptResponse(sourceCdn));
+        // } else
+        if (
+          path.endsWith('.js') ||
           path.endsWith('.ts') ||
           path.endsWith('.jsx') ||
           path.endsWith('.tsx')
@@ -39,6 +42,7 @@ export const fetchProjectFromGitHub = async () => {
 
           if (transpiled?.code?.length > 0) {
             const sourceCdn = await cdnImports(transpiled.code);
+
             cache.put(
               prefix(CONTROLLED, prefix('/', transpiled.path)),
               newJavaScriptResponse(sourceCdn),
@@ -46,15 +50,57 @@ export const fetchProjectFromGitHub = async () => {
           }
         } else {
           if (fileContent) {
-            cache.put(path, new Response(fileContent));
+            cache.put(path, newJavaScriptResponse(fileContent));
           }
         }
       }
     }
+    fixRelativePaths();
   } catch (error) {
     console.log(error);
     throw new Error(error);
   }
+};
+
+export const fixRelativePaths = async () => {
+  const cache = await caches.open('playground');
+  const keys = await cache.keys();
+
+  for (const key of keys) {
+    const res = await cache.match(key);
+    const source = await res?.text();
+    if (source) {
+      const fixedSource = await relativePaths(source);
+      cache.put(key, newJavaScriptResponse(fixedSource));
+    }
+  }
+};
+
+export const relativePaths = async (source: string) => {
+  const cache = await caches.open('playground');
+  const importMatches = source.match(
+    /import[^a-zA-Z0-9][^"']*["'][^"']*["']/gm,
+  );
+  const secondRegex = /import[^a-zA-Z0-9][^"']*["'][^\.][^"']*["']/gm;
+  for (let match of importMatches || []) {
+    const dependencyFirstQuote = match.lastIndexOf(
+      match[match.length - 1],
+      match.length - 2,
+    );
+    const dependency = match.substring(
+      dependencyFirstQuote + 1,
+      match.length - 1,
+    );
+    // Check if found dependency is stored in dependencies cache
+
+    const path = dependency.replaceAll('https://cdn.skypack.dev', '');
+    const res = await cache.match(path + '/index');
+    if (res) {
+      source = source.replaceAll(path, path + '/index');
+    }
+  }
+
+  return source;
 };
 
 export const fetchDependenciesFromGitHub = async () => {
@@ -78,10 +124,10 @@ export const fetchDependenciesFromGitHub = async () => {
             path.substring(0, path.length - '.js'.length),
           );
           const code = fixDependencyImports(fileContent);
-          cache.put(jsPath, newJavaScriptResponse(code));
+          await cache.put(jsPath, newJavaScriptResponse(code));
         } else {
           if (fileContent) {
-            cache.put(path, new Response(fileContent));
+            await cache.put(path, new Response(fileContent));
           }
         }
       }

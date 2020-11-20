@@ -68,13 +68,17 @@ export function transpileEsbuild(
 ): Promise<Transpiled> {
   const dot = filename.lastIndexOf('.');
   const hasExtension = dot > 0 && dot < filename.length;
-  const extenstion = hasExtension ? filename.substring(dot + 1) : 'ts';
+  let extension = hasExtension ? filename.substring(dot + 1) : 'ts';
   const path = hasExtension
-    ? filename.substring(0, filename.length - extenstion.length - 1)
+    ? filename.substring(0, filename.length - extension.length - 1)
     : filename;
+  if (extension === 'js') {
+    extension = 'jsx';
+  }
+
   return esbuildPromise.then((transpiler: any) => {
     return transpiler
-      .transform(source, { loader: extenstion })
+      .transform(source, { loader: extension })
       .then((transpiled: any) => {
         return { code: transpiled.code, path };
       });

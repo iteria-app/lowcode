@@ -63,7 +63,7 @@ function newJavaScriptResponse(content) {
   return new Response(content, init);
 }
 
-self.addEventListener('fetch', function (event) {
+self.addEventListener('fetch', async function (event) {
   const requestURL = new URL(event.request.url);
   console.log('sw fetch A', requestURL.pathname, event.request);
 
@@ -105,8 +105,23 @@ self.addEventListener('fetch', function (event) {
             console.log('Now this is css', requestURL.pathname);
             return newJavaScriptResponse('');
           }
+          console.log('Tu matchujem', requestURL.pathname);
 
-          return cache.match(requestURL.pathname);
+          const res = await cache.match(requestURL.pathname);
+          if (res) {
+            console.log('Som v IF', requestURL.pathname);
+            return cache.match(requestURL.pathname);
+          } else {
+            console.log('som v else', requestURL.pathname);
+            if (requestURL.pathname === '/src/layouts/DashboardLayout/NavBar') {
+              return cache.match(requestURL.pathname + '/index');
+            }
+            if (
+              requestURL.pathname === '/src/layouts/DashboardLayout/NavItem'
+            ) {
+              return cache.match('/src/layouts/DashboardLayout/NavBar/NavItem');
+            }
+          }
         }
       }),
     );
@@ -128,13 +143,6 @@ self.addEventListener('fetch', function (event) {
             throw new Error(err);
           }),
       );
-    } else if (
-      event.request.url ===
-        'https://cdn.skypack.dev/-/@ionic/core@v5.5.0-Wx4zoBHs9RmnWBxFTfI6/dist/esm/polyfills/index.js' ||
-      event.request.url ===
-        'https://cdn.skypack.dev/-/@ionic/core@v5.5.0-Wx4zoBHs9RmnWBxFTfI6/dist/esm-es5/loader.js'
-    ) {
-      console.log('tu je ten problem', event.request.url);
     } else {
       event.respondWith(
         fetch(event.request.url, { redirect: 'follow' })
