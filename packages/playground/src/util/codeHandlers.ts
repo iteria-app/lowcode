@@ -72,3 +72,13 @@ export const deleteElementInCode = (
     '',
   );
 };
+
+export const stripExtension = (filename: string) => {
+  const dot = filename.lastIndexOf('.');
+  const hasExtension = dot > 0 && dot < filename.length;
+  if (hasExtension) {
+    return filename.substring(0, dot);
+  }
+
+  return filename;
+};

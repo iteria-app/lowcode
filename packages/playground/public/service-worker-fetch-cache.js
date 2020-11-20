@@ -37,6 +37,25 @@ function stripExtension(filename) {
   return filename;
 }
 
+async function fixJsResponse(response) {
+  if (!response) {
+    return;
+  }
+  const text = await response.text();
+  return newJavaScriptResponse(
+    text
+      .replace('process.env.NODE_ENV', "'development'")
+      .replace(
+        'https://unpkg.com/intl-messageformat@^9.3.15?module',
+        'https://unpkg.com/intl-messageformat@9.3.15/lib/index.js?module',
+      )
+      .replace(
+        'https://unpkg.com/intl-messageformat-parser@6.0.13?module',
+        'https://unpkg.com/intl-messageformat-parser@6.0.13/lib/index.js?module',
+      ),
+  );
+}
+
 function newJavaScriptResponse(content) {
   const headers = new Headers();
   headers.append('Content-Type', 'application/javascript');
@@ -79,43 +98,57 @@ self.addEventListener('fetch', function (event) {
 
           return newJavaScriptResponse(text);
         } else {
-          if (requestURL.pathname.endsWith('.css')) {
+          if (
+            requestURL.pathname.endsWith('.css') ||
+            requestURL.pathname.endsWith('.scss')
+          ) {
             console.log('Now this is css', requestURL.pathname);
             return newJavaScriptResponse('');
           }
-          console.log('TU MATCHUJEM TOTO:', requestURL.pathname);
+
           return cache.match(requestURL.pathname);
         }
       }),
     );
   } else {
-    async function fixJsResponse(response) {
-      const text = await response.text();
-      return newJavaScriptResponse(
-        text
-          .replace('process.env.NODE_ENV', "'development'")
-          .replace(
-            'https://unpkg.com/intl-messageformat@^9.3.15?module',
-            'https://unpkg.com/intl-messageformat@9.3.15/lib/index.js?module',
-          )
-          .replace(
-            'https://unpkg.com/intl-messageformat-parser@6.0.13?module',
-            'https://unpkg.com/intl-messageformat-parser@6.0.13/lib/index.js?module',
-          ),
+    if (requestURL.pathname.startsWith('/dependencies/')) {
+      const pathName = requestURL.pathname.endsWith('.js')
+        ? stripExtension(requestURL.pathname)
+        : requestURL.pathname;
+
+      console.log(pathName, 'fetchujem z cache');
+
+      return event.respondWith(
+        caches
+          .open('dependencies')
+          .then((cache) => cache.match(pathName))
+          .then(fixJsResponse)
+          .catch((err) => {
+            console.error(err);
+            throw new Error(err);
+          }),
+      );
+    } else if (
+      event.request.url ===
+        'https://cdn.skypack.dev/-/@ionic/core@v5.5.0-Wx4zoBHs9RmnWBxFTfI6/dist/esm/polyfills/index.js' ||
+      event.request.url ===
+        'https://cdn.skypack.dev/-/@ionic/core@v5.5.0-Wx4zoBHs9RmnWBxFTfI6/dist/esm-es5/loader.js'
+    ) {
+      console.log('tu je ten problem', event.request.url);
+    } else {
+      event.respondWith(
+        fetch(event.request.url, { redirect: 'follow' })
+          .then(fixJsResponse)
+          .catch(() => {
+            const newUrl2 = 'https://cdn.jsdelivr.net/' + requestURL.pathname;
+            return fetch(newUrl2, { redirect: 'follow' })
+              .then(fixJsResponse)
+              .catch((err2) => {
+                console.error('err fetch jsdelivr', err2);
+                console.log('som v catch');
+              });
+          }),
       );
     }
-    event.respondWith(
-      fetch(event.request.url, { redirect: 'follow' })
-        .then(fixJsResponse)
-        .catch((err) => {
-          //fallback
-          const newUrl2 = 'https://cdn.skypack.dev' + requestURL.pathname;
-          return fetch(newUrl2, { redirect: 'follow' })
-            .then(fixJsResponse)
-            .catch((err2) => {
-              console.error('err fetch unpkg', err2);
-            });
-        }),
-    );
   }
 });

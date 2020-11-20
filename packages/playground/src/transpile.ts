@@ -2,7 +2,7 @@
 // import * as esbuild from 'https://unpkg.com/esbuild-wasm@0.8.3/lib/browser';
 //@ts-ignore
 import { compile as svelteCompile } from 'https://unpkg.com/svelte@3.29.3/compiler.mjs';
-import { CONTROLLED } from './controlled';
+import { CONTROLLED } from './constants';
 //import type { compile as svelteCompile } from 'https://unpkg.com/svelte@3.29.3/compiler.d.ts';
 
 //@ts-ignore

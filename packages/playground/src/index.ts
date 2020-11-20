@@ -1,10 +1,13 @@
 import { addBorderFrame } from './border-frame/borderFrame';
-import { CONTROLLED } from './controlled';
+import { CONTROLLED } from './constants';
 import { files, gitlabFetchFile } from './gitlab';
 import { transpileEsbuild, transpileSvelte } from './transpile';
 
 import { cdnImports } from './cdn';
-import githubFetcher from './util/githubFetcher';
+import {
+  fetchDependenciesFromGitHub,
+  fetchProjectFromGitHub,
+} from './util/githubFetcher';
 
 const refreshButton = document.getElementById(
   'refreshButton',
@@ -16,10 +19,18 @@ const previewIframe = document.getElementById(
   'previewIframe',
 ) as HTMLIFrameElement;
 console.log('initializing', previewIframe);
-const githubButton = document.getElementById('githubButton');
+const githubProjectButton = document.getElementById('githubProjectButton');
+const githubDependenciesButton = document.getElementById(
+  'githubDependenciesButton',
+);
 
-if (githubButton) {
-  githubButton.onclick = async () => await githubFetcher();
+if (githubProjectButton) {
+  githubProjectButton.onclick = async () => await fetchProjectFromGitHub();
+}
+
+if (githubDependenciesButton) {
+  githubDependenciesButton.onclick = async () =>
+    await fetchDependenciesFromGitHub();
 }
 
 if (navigator.serviceWorker) {

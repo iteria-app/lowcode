@@ -3,13 +3,14 @@ import { CdnStrategy } from '@velcro/strategy-cdn';
 import { GraphBuilder } from '@velcro/bundler';
 import { sucrasePlugin } from '@velcro/plugin-sucrase';
 import { cssPlugin } from '@velcro/plugin-css';
-import dependencyFetcher from './util/dependencyFetcher';
 import { parse } from 'acorn';
+import { DEPENDENCIES } from './constants';
 //import { transform } from 'cjs-es'
 //@ts-ignore
 import cjsEs from 'https://cdn.skypack.dev/-/cjs-es@v0.8.2-ceQTG87fHFEzTzEBy8F3/dist=es2020/cjs-es.js';
 
 export async function cdnImports(source: string): Promise<string> {
+  const cache = await caches.open('dependencies');
   const importMatches = source.match(
     /import[^a-zA-Z0-9][^"']*["'][^\.][^"']*["']/gm,
   );
@@ -22,16 +23,27 @@ export async function cdnImports(source: string): Promise<string> {
       dependencyFirstQuote + 1,
       match.length - 1,
     );
+    // Check if found dependency is stored in dependencies cache
+    const dependencyPath = DEPENDENCIES + dependency;
+    const response = await cache.match(dependencyPath);
+
+    if (response?.ok) {
+      const cacheImport =
+        match.substring(0, dependencyFirstQuote) + `"${dependencyPath}"`;
+      source = source.replaceAll(match, cacheImport);
+      continue;
+    }
+
     if (dependency?.length > 0 && !dependency.startsWith('https://')) {
       if (dependency.startsWith('@material/mwc-')) {
         source = source.replaceAll(match, '');
         continue;
       }
-      let dependencyCdn = await dependencyFetcher(dependency);
+      let dependencyCdn = `https://cdn.skypack.dev/${dependency}`;
       if (dependencyCdn && dependencyCdn?.length > 0) {
         const cdnImport =
           match.substring(0, dependencyFirstQuote) + `"${dependencyCdn}"`;
-        console.log(match, ' => ', cdnImport);
+        // console.log(match, ' => ', cdnImport);
         source = source.replaceAll(match, cdnImport);
         continue;
       }
