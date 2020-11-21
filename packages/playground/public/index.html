@@ -45,12 +45,12 @@
         To begin the development, run `npm start` or `yarn start`.
         To create a production bundle, use `npm run build` or `yarn build`.
       -->
-    <button id="refreshButton" disabled>REFRESH</button>
     <script src="https://unpkg.com/esbuild-wasm@0.8.3/lib/browser.js"></script>
     <script type="module" src="/_dist_/border-frame/borderFrame.js"></script>
     <script type="module" src="/_dist_/index.js"></script>
 
     <button id="refreshButton" disabled>Loading...</button>
+    <button id="bundleDepsButton" disabled>Loading...</button>
     <button id="compileButton" disabled>Loading...</button>
     <button id="githubProjectButton">GitHub fetch project</button>
     <button id="githubDependenciesButton">GitHub fetch dependencies</button>

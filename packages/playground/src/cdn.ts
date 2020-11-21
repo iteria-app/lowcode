@@ -46,6 +46,30 @@ export async function cdnImports(source: string): Promise<string> {
         // console.log(match, ' => ', cdnImport);
         source = source.replaceAll(match, cdnImport);
         continue;
+/*
+import dependencyFetcher 
+from './util/dependencyFetcher';
+import { parse } from 'acorn'
+//import { transform } from 'cjs-es'
+import cjsEs from 'https://cdn.skypack.dev/-/cjs-es@v0.8.2-ceQTG87fHFEzTzEBy8F3/dist=es2020/cjs-es.js'
+
+export async function cdnImports(source: string): Promise<string> {
+  const importMatches = source.match(/import[^a-zA-Z0-9][^"']*["'][^\.][^"']*["']/gm);
+  for(let match of importMatches || []) {
+    const dependencyFirstQuote = match.lastIndexOf(match[match.length - 1], match.length - 2)
+    const dependency = match.substring(dependencyFirstQuote + 1, match.length - 1)
+    if (dependency?.length > 0 && !dependency.startsWith('https://')) {
+      if (dependency.startsWith('@material/mwc-')) {
+        source = source.replaceAll(match, '');
+        continue
+      }
+      let dependencyCdn = await dependencyFetcher(dependency)
+      if (dependencyCdn && dependencyCdn?.length > 0) {
+        const cdnImport = match.substring(0, dependencyFirstQuote) + `"${dependencyCdn}"`
+        console.log(match, ' => ', cdnImport);
+        source = source.replaceAll(match, cdnImport);
+        continue
+*/
       }
     }
     console.log(match, 'NO REPLACEMENT');
@@ -93,6 +117,7 @@ export async function dependency(pkgName: string) {
 
   const runtimeCode = cjsEs.transform({ code: codeWithStart, parse });
   // TODO especially for 'graphql', 'graphql-tag', cache
+
   //const runtimeCode = `${codeWithStart}\n//# sourceMappingURL=${output.sourceMapDataUri}`;
   //console.log('build runtimeCode', runtimeCode)
 

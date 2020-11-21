@@ -1,5 +1,4 @@
-export default `
-{
+export default {
     "scripts": {
       "start": "graphql-codegen && snowpack dev",
       "dev": "snowpack dev",
@@ -56,11 +55,9 @@ export default `
       "@material/mwc-top-app-bar": "^0.15.0",
       "@mdi/js": "^5.3.45",
       "@urql/svelte": "^0.2.3",
-      "cypress": "^4.9.0",
       "graphql": "^15.0.0",
       "moment": "^2.27.0",
       "svelte-i18n": "^3.0.4",
       "sveltejs-tippy": "^3.0.0"
     }
   }
-`;
