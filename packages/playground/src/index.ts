@@ -1,9 +1,14 @@
 import { addBorderFrame } from './border-frame/borderFrame';
-import { CONTROLLED } from './controlled';
+import { CONTROLLED } from './constants';
 import { files, gitlabFetchFile } from './gitlab';
 import { transpileEsbuild, transpileSvelte } from './transpile';
 
 import { cdnImports, dependency } from './cdn';
+import {
+  fetchDependenciesFromGitHub,
+  fetchProjectFromGitHub,
+} from './util/githubFetcher';
+
 import examplePackage from './util/examplePackage';
 
 const refreshButton = document.getElementById(
@@ -19,6 +24,19 @@ const previewIframe = document.getElementById(
   'previewIframe',
 ) as HTMLIFrameElement;
 console.log('initializing', previewIframe);
+const githubProjectButton = document.getElementById('githubProjectButton');
+const githubDependenciesButton = document.getElementById(
+  'githubDependenciesButton',
+);
+
+if (githubProjectButton) {
+  githubProjectButton.onclick = async () => await fetchProjectFromGitHub();
+}
+
+if (githubDependenciesButton) {
+  githubDependenciesButton.onclick = async () =>
+    await fetchDependenciesFromGitHub();
+}
 
 if (navigator.serviceWorker) {
   navigator.serviceWorker
@@ -68,7 +86,7 @@ if (navigator.serviceWorker) {
   alert('NULL navigator.serviceWorker or navigator.serviceWorker.controller');
 }
 
-function prefix(prefix: string, str: string) {
+export function prefix(prefix: string, str: string) {
   console.log('prefix', prefix, str);
   if (!str.startsWith(prefix)) {
     return prefix + str;
@@ -87,6 +105,7 @@ const html = `<!DOCTYPE html>
       <link rel='icon' type='image/png' href='/favicon.png'>
       </head>
       <body>
+      <p>KUKik4 App.js</p>
       <script type="module">
       //import App from '/src/App.js'
       import App from '/src/ActivityTypes.js'
@@ -96,7 +115,7 @@ const html = `<!DOCTYPE html>
       } catch(err) {
         console.log('App loading error', err)
       }
-      </script>KUKik4 App.js
+      </script>
     </body>
     </html>
     `;
@@ -198,7 +217,8 @@ if (refreshButton) {
       );
       //previewIframe.src = CONTROLLED + 'index.html';
       //previewIframe.src = 'svelte.html';
-      previewIframe.src = CONTROLLED + 'loading.html';
+      previewIframe.src = CONTROLLED + 'tryout.html';
+      console.log('Som v previewIframe', previewIframe.src);
       // const previewDoc = previewIframe.contentDocument;
       // previewDoc?.open();
       // previewDoc?.write(html);
@@ -211,15 +231,17 @@ if (refreshButton) {
           event,
           previewIframe,
         );
+
         const innerDoc =
           previewIframe!.contentDocument ||
           previewIframe!.contentWindow!.document;
         addBorderFrame(innerDoc);
 
         const previewDoc = previewIframe.contentDocument;
-        previewDoc?.open();
-        previewDoc?.write(html);
-        previewDoc?.close();
+        // previewDoc?.open();
+        // previewDoc?.write(html);
+        // console.log('tu som');
+        // previewDoc?.close();
       };
 
       console.log(
@@ -239,7 +261,7 @@ if (refreshButton) {
   };
 }
 
-function newJavaScriptResponse(content: string): Response {
+export function newJavaScriptResponse(content: string): Response {
   const headers = new Headers();
   headers.append('Content-Type', 'application/javascript');
   const init = { status: 200, statusText: 'OK', headers };

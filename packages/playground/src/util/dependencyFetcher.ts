@@ -1,12 +1,14 @@
-import examplePackage from './examplePackage';
-
 export default async (packageName: string) => {
+
   const cache = await caches.open('playground')
   const cacheKey = `/unpkg.com/${packageName}`
   const match = await cache.match(cacheKey)
   if (match) {
     return cacheKey
   }
+
+  if (packageName === 'react' || packageName === 'react-dom')
+    return `https://cdn.skypack.dev/${packageName}`;
 
   //   const parsedPackage = JSON.parse(examplePackage);
 
@@ -66,3 +68,4 @@ export default async (packageName: string) => {
 
   return null
 }
+

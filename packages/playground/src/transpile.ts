@@ -2,7 +2,7 @@
 // import * as esbuild from 'https://unpkg.com/esbuild-wasm@0.8.3/lib/browser';
 //@ts-ignore
 import { compile as svelteCompile } from 'https://unpkg.com/svelte@3.29.3/compiler.mjs';
-import { CONTROLLED } from './controlled';
+import { CONTROLLED } from './constants';
 //import type { compile as svelteCompile } from 'https://unpkg.com/svelte@3.29.3/compiler.d.ts';
 
 //@ts-ignore
@@ -68,13 +68,17 @@ export function transpileEsbuild(
 ): Promise<Transpiled> {
   const dot = filename.lastIndexOf('.');
   const hasExtension = dot > 0 && dot < filename.length;
-  const extenstion = hasExtension ? filename.substring(dot + 1) : 'ts';
+  let extension = hasExtension ? filename.substring(dot + 1) : 'ts';
   const path = hasExtension
-    ? filename.substring(0, filename.length - extenstion.length - 1)
+    ? filename.substring(0, filename.length - extension.length - 1)
     : filename;
+  if (extension === 'js') {
+    extension = 'jsx';
+  }
+
   return esbuildPromise.then((transpiler: any) => {
     return transpiler
-      .transform(source, { loader: extenstion })
+      .transform(source, { loader: extension })
       .then((transpiled: any) => {
         return { code: transpiled.code, path };
       });
