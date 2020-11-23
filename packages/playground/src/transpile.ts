@@ -7,7 +7,7 @@ import { CONTROLLED } from './constants';
 
 //@ts-ignore
 const esbuildPromise = esbuild.startService({
-  wasmURL: 'https://unpkg.com/esbuild-wasm@0.8.3/esbuild.wasm',
+  wasmURL: 'https://unpkg.com/esbuild-wasm@0.8.12/esbuild.wasm',
   //worker: false
 });
 
@@ -43,9 +43,9 @@ export async function transpileSvelte(
 
   const svelteOptions = {
     dev: true,
-    css: false,
+    css: true,
     filename, //DOM element.__svelte_meta: {loc: char: 45, column: 13, file: "Nested.svelte", line: 1}
-    sveltePath: 'svelte@3.29.4', //CONTROLLED + 'svelte', //parse package json version...
+    //sveltePath: 'svelte@3.29.4', //CONTROLLED + 'svelte', //parse package json version...
   };
   const compiled = svelteCompile(source, svelteOptions);
   let compiledCode = compiled.js.code;
@@ -62,10 +62,13 @@ export async function transpileSvelte(
   };
 }
 
+
 export function transpileEsbuild(
   source: string,
   filename: string,
 ): Promise<Transpiled> {
+  console.trace('transpileEsbuild', filename)
+
   const dot = filename.lastIndexOf('.');
   const hasExtension = dot > 0 && dot < filename.length;
   let extension = hasExtension ? filename.substring(dot + 1) : 'ts';

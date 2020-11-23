@@ -16,8 +16,6 @@ self.addEventListener('message', function (event) {
   event.source.postMessage('answer');
 });
 
-importScripts('https://unpkg.com/svelte@3.29.4/compiler.js');
-
 function respondWith(event, response) {
   event.respondWith(
     Promise((resolve, reject) => {
@@ -69,6 +67,8 @@ self.addEventListener('fetch', async function (event) {
 
   if (requestURL.pathname.startsWith(CONTROLLED + 'tryout.html')) {
     event.respondWith(fetch('/tryout.html'));
+  } else if (requestURL.pathname.startsWith(CONTROLLED + 'svelte.html')) {
+    event.respondWith(fetch('/svelte.html'));
   } else if (requestURL.pathname.startsWith(CONTROLLED)) {
     event.respondWith(
       caches.open('playground').then(async (cache) => {
@@ -121,11 +121,16 @@ self.addEventListener('fetch', async function (event) {
             ) {
               return cache.match('/src/layouts/DashboardLayout/NavBar/NavItem');
             }
+
+            return newJavaScriptResponse(`/*404*/export default {}`);
           }
         }
       }),
     );
   } else {
+    if (requestURL.pathname.startsWith('/web_modules/')) {
+      console.log('web_modules', requestURL.pathname)
+    }
     if (requestURL.pathname.startsWith('/dependencies/')) {
       const pathName = requestURL.pathname.endsWith('.js')
         ? stripExtension(requestURL.pathname)
@@ -145,8 +150,8 @@ self.addEventListener('fetch', async function (event) {
       );
     } else {
       event.respondWith(
-        fetch(event.request.url, { redirect: 'follow' })
-          .then(fixJsResponse)
+        fetch(event.request, { redirect: 'follow' })
+          /*.then(fixJsResponse)
           .catch(() => {
             const newUrl2 = 'https://cdn.jsdelivr.net/' + requestURL.pathname;
             return fetch(newUrl2, { redirect: 'follow' })
@@ -155,7 +160,7 @@ self.addEventListener('fetch', async function (event) {
                 console.error('err fetch jsdelivr', err2);
                 console.log('som v catch');
               });
-          }),
+          }),*/
       );
     }
   }

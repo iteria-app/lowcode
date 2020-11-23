@@ -41,11 +41,11 @@ export const fetchProjectFromGitHub = async () => {
           }
 
           if (transpiled?.code?.length > 0) {
-            const sourceCdn = await cdnImports(transpiled.code);
+            const sourceCdn = await cdnImports(transpiled.code, path);
 
             cache.put(
               prefix(CONTROLLED, prefix('/', transpiled.path)),
-              newJavaScriptResponse(sourceCdn),
+              newJavaScriptResponse(sourceCdn.source),
             );
           }
         } else {

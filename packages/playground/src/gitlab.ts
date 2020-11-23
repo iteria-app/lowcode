@@ -1,23 +1,31 @@
-
+function decodeUnicode(base64: string) {
+    // Going backwards: from bytestream, to percent-encoding, to original string.
+    return decodeURIComponent(atob(base64).split('').map(function (c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+}
 export async function gitlabFetchFile(filename: string) {
     const filenameUrlEnc = encodeURI(filename).replaceAll('/', '%2F')
-    const branch = 'gitlabAPI-lowcode'
+    const ref = '014b455997a446f371ea0b502f93ffac3c9c4baa'//'master'//'gitlabAPI-lowcode'
     const projectId = 18967974
-    const gitlabUrl = `https://gitlab.com/api/v4/projects/${projectId}/repository/files/${filenameUrlEnc}?ref=${branch}`
-    const privateToken = '3BsLFHXqRsQx9E1ajK2g'
+    const gitlabUrl = `https://gitlab.com/api/v4/projects/${projectId}/repository/files/${filenameUrlEnc}?ref=${ref}`
+    const privateToken = window.prompt('personal token')
     return await fetch(gitlabUrl, {
         method: 'GET',
         headers: {
             'Accept': 'application/json',
             cache: 'no-store',
-            'PRIVATE-TOKEN': privateToken
+            'PRIVATE-TOKEN': privateToken || ''
         }
     })
     .then(res => {
         //console.log('gitlabFetch', filename, gitlabUrl, res)
         const result = res.json().then(data => {
             if (data.content) {
-                let resData = window.atob(data.content);
+                if (filename.indexOf('/sk.js') > 0) {
+                    console.log('gitlabFetch', filename, gitlabUrl, data)
+                }
+                let resData = decodeUnicode(data.content);
                 return resData
             }
             return `/* 404 ${gitlabUrl} */`

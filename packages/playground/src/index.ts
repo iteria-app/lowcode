@@ -123,9 +123,31 @@ const html = `<!DOCTYPE html>
 if (compileButton) {
   compileButton.onclick = async (event) => {
     caches.open('playground').then(async (cache) => {
+      let promises : Array<Promise<void>> = []
       /**/ for (const file of files) {
+        if (file.name.endsWith('.js') || file.name.endsWith('.ts')) {
+          const jsPath = prefix(
+            CONTROLLED,
+            prefix(
+              '/',
+              file.path.substring(0, file.path.length - '.js'.length),
+            ),
+          );
+          if (jsPath.indexOf('fullcalendar') >= 0) {
+            const promise = cache.put(jsPath, newJavaScriptResponse(''));
+            promises = [...promises, promise]
+          }
+        }
+      }
+      Promise.all(promises)
+
+      let cssImports : Array<String> = []
+      for (const file of files) {
         if (file.name.endsWith('.js')) {
-          gitlabFetchFile(file.path).then(async (source) => {
+          const promise = gitlabFetchFile(file.path).then(async (source) => {
+            if (file.path.endsWith('/sk.js')) {
+              console.log('sk locale', file)
+            }
             if (typeof source == 'string') {
               const jsPath = prefix(
                 CONTROLLED,
@@ -134,31 +156,39 @@ if (compileButton) {
                   file.path.substring(0, file.path.length - '.js'.length),
                 ),
               );
-              const sourceCdn = await cdnImports(source);
-              cache.put(jsPath, newJavaScriptResponse(sourceCdn));
+              const sourceCdn = await cdnImports(source, file.path);
+              cssImports = [...cssImports, ...sourceCdn.imports]
+              cache.put(jsPath, newJavaScriptResponse(sourceCdn.source));
             }
           });
+          promises = [...promises, promise]
         } else if (file.name.endsWith('.svelte')) {
-          gitlabFetchFile(file.path).then(async (source) => {
+          const promise = gitlabFetchFile(file.path).then(async (source) => {
             if (typeof source == 'string') {
               try {
                 const transpiled = await transpileSvelte(source, file.path);
-                const sourceCdn = await cdnImports(transpiled.code);
+                const sourceCdn = await cdnImports(transpiled.code, file.path);
+                cssImports = [...cssImports, ...sourceCdn.imports]
                 cache.put(
                   prefix(CONTROLLED, prefix('/', transpiled.path)),
-                  newJavaScriptResponse(sourceCdn),
+                  newJavaScriptResponse(sourceCdn.source),
                 );
               } catch (err) {
                 console.error('error transpiling svelte', file, err);
               }
             }
           });
+          promises = [...promises, promise]
         } else if (
           file.name.endsWith('.ts') ||
           file.name.endsWith('.jsx') ||
           file.name.endsWith('.tsx')
         ) {
-          gitlabFetchFile(file.path).then(async (tsSource) => {
+          const promise = gitlabFetchFile(file.path).then(async (tsSource) => {
+            if (file.path.indexOf('OperationsCopy') >= 0) {
+              console.log('OperationsCopy', tsSource)
+            }
+    
             if (typeof tsSource == 'string') {
               const transpiled = await transpileEsbuild(tsSource, file.path); //TODO source map in response
               if (transpiled?.warnings?.length > 0) {
@@ -169,16 +199,20 @@ if (compileButton) {
               }
               console.log('transpiled', transpiled);
               if (transpiled?.code?.length > 0) {
-                const sourceCdn = await cdnImports(transpiled.code);
+                const sourceCdn = await cdnImports(transpiled.code, file.path);
+                cssImports = [...cssImports, ...sourceCdn.imports]
                 cache.put(
                   prefix(CONTROLLED, prefix('/', transpiled.path)),
-                  newJavaScriptResponse(sourceCdn),
+                  newJavaScriptResponse(sourceCdn.source),
                 );
               }
             }
           });
+          promises = [...promises, promise]
         }
       } /**/
+
+      //TODO cache.put('/dist/imports.css', newJavaScriptResponse(sourceCdn.source));
     });
   };
 }
@@ -216,8 +250,8 @@ if (refreshButton) {
         },
       );
       //previewIframe.src = CONTROLLED + 'index.html';
-      //previewIframe.src = 'svelte.html';
-      previewIframe.src = CONTROLLED + 'tryout.html';
+      previewIframe.src = CONTROLLED + 'svelte.html';
+      //previewIframe.src = CONTROLLED + 'tryout.html';
       console.log('Som v previewIframe', previewIframe.src);
       // const previewDoc = previewIframe.contentDocument;
       // previewDoc?.open();
@@ -263,7 +297,7 @@ if (refreshButton) {
 
 export function newJavaScriptResponse(content: string): Response {
   const headers = new Headers();
-  headers.append('Content-Type', 'application/javascript');
+  headers.append('Content-Type', 'application/javascript; charset=utf-8');
   const init = { status: 200, statusText: 'OK', headers };
   return new Response(content, init);
 }
