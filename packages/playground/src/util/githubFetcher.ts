@@ -105,13 +105,13 @@ export const relativePaths = async (source: string) => {
 
 export const fetchDependenciesFromGitHub = async () => {
   const accessToken = prompt('Enter your GitHub access token');
-  const dependenciesUrl = `https://api.github.com/repos/mecirmartin/web_modules/git/trees/1d833fb5e6f74642836d2549b65963aa99051bd0?recursive=1?access_token=${accessToken}`;
+  const dependenciesUrl = `https://api.github.com/repos/mecirmartin/web_modules/git/trees/7ffe03620edcd50246fe9053fda6435b0702f5fb?recursive=1?access_token=${accessToken}`;
   if (!accessToken) return;
 
   try {
     const data = await fetch(dependenciesUrl);
     const { tree } = await data.json();
-    const cache = await caches.open('dependencies');
+    const cache = await caches.open('web_modules');
     for (const { url, path } of tree) {
       const data = await fetch(`${url}?access_token=${accessToken}`);
 
@@ -120,14 +120,14 @@ export const fetchDependenciesFromGitHub = async () => {
         const fileContent = atob(content);
         if (path.endsWith('js')) {
           const jsPath = prefix(
-            DEPENDENCIES,
+            '/web_modules/',
             path.substring(0, path.length - '.js'.length),
           );
           const code = fixDependencyImports(fileContent);
-          await cache.put(jsPath, newJavaScriptResponse(code));
+          cache.put(jsPath, newJavaScriptResponse(code));
         } else {
           if (fileContent) {
-            await cache.put(path, new Response(fileContent));
+            cache.put(path, new Response(fileContent));
           }
         }
       }

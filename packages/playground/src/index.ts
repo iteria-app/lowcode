@@ -123,7 +123,7 @@ const html = `<!DOCTYPE html>
 if (compileButton) {
   compileButton.onclick = async (event) => {
     caches.open('playground').then(async (cache) => {
-      let promises : Array<Promise<void>> = []
+      let promises: Array<Promise<void>> = [];
       /**/ for (const file of files) {
         if (file.name.endsWith('.js') || file.name.endsWith('.ts')) {
           const jsPath = prefix(
@@ -135,88 +135,101 @@ if (compileButton) {
           );
           if (jsPath.indexOf('fullcalendar') >= 0) {
             const promise = cache.put(jsPath, newJavaScriptResponse(''));
-            promises = [...promises, promise]
+            promises = [...promises, promise];
           }
         }
       }
-      Promise.all(promises)
-      const privateToken = window.prompt('personal token')
+      Promise.all(promises);
+      const privateToken = window.prompt('personal token');
       if (!privateToken) {
-        return
+        return;
       }
 
-      let cssImports : Array<String> = []
+      let cssImports: Array<String> = [];
       for (const file of files) {
         if (file.name.endsWith('.js')) {
-          const promise = gitlabFetchFile(file.path, privateToken).then(async (source) => {
-            if (file.path.endsWith('/sk.js')) {
-              console.log('sk locale', file)
-            }
-            if (typeof source == 'string') {
-              const jsPath = prefix(
-                CONTROLLED,
-                prefix(
-                  '/',
-                  file.path.substring(0, file.path.length - '.js'.length),
-                ),
-              );
-              const sourceCdn = await cdnImports(source, file.path);
-              cssImports = [...cssImports, ...sourceCdn.imports]
-              cache.put(jsPath, newJavaScriptResponse(sourceCdn.source));
-            }
-          });
-          promises = [...promises, promise]
-        } else if (file.name.endsWith('.svelte')) {
-          const promise = gitlabFetchFile(file.path, privateToken).then(async (source) => {
-            if (typeof source == 'string') {
-              try {
-                const transpiled = await transpileSvelte(source, file.path);
-                const sourceCdn = await cdnImports(transpiled.code, file.path);
-                cssImports = [...cssImports, ...sourceCdn.imports]
-                cache.put(
-                  prefix(CONTROLLED, prefix('/', transpiled.path)),
-                  newJavaScriptResponse(sourceCdn.source),
-                );
-              } catch (err) {
-                console.error('error transpiling svelte', file, err);
+          const promise = gitlabFetchFile(file.path, privateToken).then(
+            async (source) => {
+              if (file.path.endsWith('/sk.js')) {
+                console.log('sk locale', file);
               }
-            }
-          });
-          promises = [...promises, promise]
+              if (typeof source == 'string') {
+                const jsPath = prefix(
+                  CONTROLLED,
+                  prefix(
+                    '/',
+                    file.path.substring(0, file.path.length - '.js'.length),
+                  ),
+                );
+                const sourceCdn = await cdnImports(source, file.path);
+                cssImports = [...cssImports, ...sourceCdn.imports];
+                cache.put(jsPath, newJavaScriptResponse(sourceCdn.source));
+              }
+            },
+          );
+          promises = [...promises, promise];
+        } else if (file.name.endsWith('.svelte')) {
+          const promise = gitlabFetchFile(file.path, privateToken).then(
+            async (source) => {
+              if (typeof source == 'string') {
+                try {
+                  const transpiled = await transpileSvelte(source, file.path);
+                  const sourceCdn = await cdnImports(
+                    transpiled.code,
+                    file.path,
+                  );
+                  cssImports = [...cssImports, ...sourceCdn.imports];
+                  cache.put(
+                    prefix(CONTROLLED, prefix('/', transpiled.path)),
+                    newJavaScriptResponse(sourceCdn.source),
+                  );
+                } catch (err) {
+                  console.error('error transpiling svelte', file, err);
+                }
+              }
+            },
+          );
+          promises = [...promises, promise];
         } else if (
           file.name.endsWith('.ts') ||
           file.name.endsWith('.jsx') ||
           file.name.endsWith('.tsx')
         ) {
-          const promise = gitlabFetchFile(file.path, privateToken).then(async (tsSource) => {
-            if (file.path.indexOf('OperationsCopy') >= 0) {
-              console.log('OperationsCopy', tsSource)
-            }
-    
-            if (typeof tsSource == 'string') {
-              const transpiled = await transpileEsbuild(tsSource, file.path); //TODO source map in response
-              if (transpiled?.warnings?.length > 0) {
-                console.warn('transpilation', transpiled.warnings);
+          const promise = gitlabFetchFile(file.path, privateToken).then(
+            async (tsSource) => {
+              if (file.path.indexOf('OperationsCopy') >= 0) {
+                console.log('OperationsCopy', tsSource);
               }
-              if (file.name.indexOf('graphql') >= 0) {
-                console.log('gitlab graphql', file.name);
+
+              if (typeof tsSource == 'string') {
+                const transpiled = await transpileEsbuild(tsSource, file.path); //TODO source map in response
+                if (transpiled?.warnings?.length > 0) {
+                  console.warn('transpilation', transpiled.warnings);
+                }
+                if (file.name.indexOf('graphql') >= 0) {
+                  console.log('gitlab graphql', file.name);
+                }
+                console.log('transpiled', transpiled);
+                if (transpiled?.code?.length > 0) {
+                  const sourceCdn = await cdnImports(
+                    transpiled.code,
+                    file.path,
+                  );
+                  cssImports = [...cssImports, ...sourceCdn.imports];
+                  cache.put(
+                    prefix(CONTROLLED, prefix('/', transpiled.path)),
+                    newJavaScriptResponse(sourceCdn.source),
+                  );
+                }
               }
-              console.log('transpiled', transpiled);
-              if (transpiled?.code?.length > 0) {
-                const sourceCdn = await cdnImports(transpiled.code, file.path);
-                cssImports = [...cssImports, ...sourceCdn.imports]
-                cache.put(
-                  prefix(CONTROLLED, prefix('/', transpiled.path)),
-                  newJavaScriptResponse(sourceCdn.source),
-                );
-              }
-            }
-          });
-          promises = [...promises, promise]
+            },
+          );
+          promises = [...promises, promise];
         }
       } /**/
 
-      //TODO cache.put('/dist/imports.css', newJavaScriptResponse(sourceCdn.source));
+      //  cache.put('/dist/imports.css', newJavaScriptResponse());
+      console.log('TOTO SU .css', cssImports);
     });
   };
 }
@@ -226,14 +239,14 @@ if (bundleDepsButton) {
     console.log('bundling dependencies', event);
 
     Object.entries(examplePackage.dependencies).forEach(async ([pkg, ver]) => {
-      const dep = await dependency(pkg)// + '@' + ver
-      console.log('dep', pkg, ver, dep)
+      const dep = await dependency(pkg); // + '@' + ver
+      console.log('dep', pkg, ver, dep);
       caches.open('playground').then(async (cache) => {
-        const depCode = await dep.code
-        cache.put('/unpkg.com/' + pkg, newJavaScriptResponse(depCode.code))
-      })
-    })
-  }
+        const depCode = await dep.code;
+        cache.put('/unpkg.com/' + pkg, newJavaScriptResponse(depCode.code));
+      });
+    });
+  };
 }
 
 if (refreshButton) {

@@ -129,9 +129,9 @@ self.addEventListener('fetch', async function (event) {
     );
   } else {
     if (requestURL.pathname.startsWith('/web_modules/')) {
-      console.log('web_modules', requestURL.pathname)
+      console.log('web_modules', requestURL.pathname);
     }
-    if (requestURL.pathname.startsWith('/dependencies/')) {
+    if (requestURL.pathname.startsWith('/web_modules/')) {
       const pathName = requestURL.pathname.endsWith('.js')
         ? stripExtension(requestURL.pathname)
         : requestURL.pathname;
@@ -140,7 +140,7 @@ self.addEventListener('fetch', async function (event) {
 
       return event.respondWith(
         caches
-          .open('dependencies')
+          .open('web_modules')
           .then((cache) => cache.match(pathName))
           .then(fixJsResponse)
           .catch((err) => {
@@ -150,8 +150,8 @@ self.addEventListener('fetch', async function (event) {
       );
     } else {
       event.respondWith(
-        fetch(event.request, { redirect: 'follow' })
-          /*.then(fixJsResponse)
+        fetch(event.request, { redirect: 'follow' }),
+        /*.then(fixJsResponse)
           .catch(() => {
             const newUrl2 = 'https://cdn.jsdelivr.net/' + requestURL.pathname;
             return fetch(newUrl2, { redirect: 'follow' })
