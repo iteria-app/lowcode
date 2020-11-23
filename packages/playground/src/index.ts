@@ -149,7 +149,7 @@ if (compileButton) {
       for (const file of files) {
         if (file.name.endsWith('.js')) {
           const promise = gitlabFetchFile(file.path, privateToken).then(async (source) => {
-            if (file.path.endsWith('/sk.js')) {
+            if (file.path.endsWith('src/graphql.ts')) {
               console.log('sk locale', file)
             }
             if (typeof source == 'string') {
@@ -188,9 +188,10 @@ if (compileButton) {
           file.name.endsWith('.jsx') ||
           file.name.endsWith('.tsx')
         ) {
+
           const promise = gitlabFetchFile(file.path, privateToken).then(async (tsSource) => {
-            if (file.path.indexOf('OperationsCopy') >= 0) {
-              console.log('OperationsCopy', tsSource)
+            if (file.path.endsWith('src/graphql.ts') || file.path.indexOf('OperationsCopy') >= 0) {
+              console.log('fetched', file, tsSource)
             }
     
             if (typeof tsSource == 'string') {

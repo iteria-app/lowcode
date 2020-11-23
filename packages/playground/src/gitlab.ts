@@ -6,7 +6,7 @@ function decodeUnicode(base64: string) {
 }
 export async function gitlabFetchFile(filename: string, privateToken: string) {
     const filenameUrlEnc = encodeURI(filename).replaceAll('/', '%2F')
-    const ref = '014b455997a446f371ea0b502f93ffac3c9c4baa'//'master'//'gitlabAPI-lowcode'
+    const ref = 'a164f5d5461f3ade0d1458f4e607e4066151e657'//'master'//'gitlabAPI-lowcode'
     const projectId = 18967974
     const gitlabUrl = `https://gitlab.com/api/v4/projects/${projectId}/repository/files/${filenameUrlEnc}?ref=${ref}`
     return await fetch(gitlabUrl, {
