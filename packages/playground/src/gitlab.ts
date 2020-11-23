@@ -4,18 +4,17 @@ function decodeUnicode(base64: string) {
         return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
     }).join(''));
 }
-export async function gitlabFetchFile(filename: string) {
+export async function gitlabFetchFile(filename: string, privateToken: string) {
     const filenameUrlEnc = encodeURI(filename).replaceAll('/', '%2F')
     const ref = '014b455997a446f371ea0b502f93ffac3c9c4baa'//'master'//'gitlabAPI-lowcode'
     const projectId = 18967974
     const gitlabUrl = `https://gitlab.com/api/v4/projects/${projectId}/repository/files/${filenameUrlEnc}?ref=${ref}`
-    const privateToken = window.prompt('personal token')
     return await fetch(gitlabUrl, {
         method: 'GET',
         headers: {
             'Accept': 'application/json',
             cache: 'no-store',
-            'PRIVATE-TOKEN': privateToken || ''
+            'PRIVATE-TOKEN': privateToken
         }
     })
     .then(res => {

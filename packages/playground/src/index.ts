@@ -140,11 +140,15 @@ if (compileButton) {
         }
       }
       Promise.all(promises)
+      const privateToken = window.prompt('personal token')
+      if (!privateToken) {
+        return
+      }
 
       let cssImports : Array<String> = []
       for (const file of files) {
         if (file.name.endsWith('.js')) {
-          const promise = gitlabFetchFile(file.path).then(async (source) => {
+          const promise = gitlabFetchFile(file.path, privateToken).then(async (source) => {
             if (file.path.endsWith('/sk.js')) {
               console.log('sk locale', file)
             }
@@ -163,7 +167,7 @@ if (compileButton) {
           });
           promises = [...promises, promise]
         } else if (file.name.endsWith('.svelte')) {
-          const promise = gitlabFetchFile(file.path).then(async (source) => {
+          const promise = gitlabFetchFile(file.path, privateToken).then(async (source) => {
             if (typeof source == 'string') {
               try {
                 const transpiled = await transpileSvelte(source, file.path);
@@ -184,7 +188,7 @@ if (compileButton) {
           file.name.endsWith('.jsx') ||
           file.name.endsWith('.tsx')
         ) {
-          const promise = gitlabFetchFile(file.path).then(async (tsSource) => {
+          const promise = gitlabFetchFile(file.path, privateToken).then(async (tsSource) => {
             if (file.path.indexOf('OperationsCopy') >= 0) {
               console.log('OperationsCopy', tsSource)
             }
