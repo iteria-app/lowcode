@@ -1,6 +1,6 @@
 import { addBorderFrame } from './border-frame/borderFrame';
 import { CONTROLLED } from './constants';
-import { files, gitlabFetchFile } from './gitlab';
+import { gitlabFetchFile, gitlabFetchFiles } from './gitlab';
 import { transpileEsbuild, transpileSvelte } from './transpile';
 
 import { cdnImports, dependency } from './cdn';
@@ -123,8 +123,15 @@ const html = `<!DOCTYPE html>
 if (compileButton) {
   compileButton.onclick = async (event) => {
     caches.open('playground').then(async (cache) => {
+      const privateToken = window.prompt('personal token');
+      if (!privateToken) {
+        return;
+      }
+
       let promises: Array<Promise<void>> = [];
-      /**/ for (const file of files) {
+      const files = await gitlabFetchFiles(privateToken);
+      console.log('toto su files', files);
+      for (const file of files) {
         if (file.name.endsWith('.js') || file.name.endsWith('.ts')) {
           const jsPath = prefix(
             CONTROLLED,
@@ -140,12 +147,9 @@ if (compileButton) {
         }
       }
       Promise.all(promises);
-      const privateToken = window.prompt('personal token');
-      if (!privateToken) {
-        return;
-      }
 
       let cssImports: Array<String> = [];
+
       for (const file of files) {
         if (file.name.endsWith('.js')) {
           const promise = gitlabFetchFile(file.path, privateToken).then(
@@ -156,10 +160,7 @@ if (compileButton) {
               if (typeof source == 'string') {
                 const jsPath = prefix(
                   CONTROLLED,
-                  prefix(
-                    '/',
-                    file.path.substring(0, file.path.length - '.js'.length),
-                  ),
+                  file.path.substring(0, file.path.length - '.js'.length),
                 );
                 const sourceCdn = await cdnImports(source, file.path);
                 cssImports = [...cssImports, ...sourceCdn.imports];
@@ -229,9 +230,12 @@ if (compileButton) {
           );
           promises = [...promises, promise];
         }
-      } /**/
-
-      //TODO cache.put('/dist/imports.css', newJavaScriptResponse(sourceCdn.source));
+      }
+      await Promise.all(promises);
+      cache.put(
+        '/dist/imports.css',
+        newJavaScriptResponse(cssImports.join('\n')),
+      );
     });
   };
 }

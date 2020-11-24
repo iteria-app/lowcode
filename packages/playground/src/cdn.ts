@@ -4,7 +4,7 @@ import { GraphBuilder } from '@velcro/bundler';
 import { sucrasePlugin } from '@velcro/plugin-sucrase';
 import { cssPlugin } from '@velcro/plugin-css';
 import { parse } from 'acorn';
-import { DEPENDENCIES } from './constants';
+import { WEB_MODULES } from './constants';
 //import { transform } from 'cjs-es'
 //@ts-ignore
 import cjsEs from 'https://cdn.skypack.dev/-/cjs-es@v0.8.2-ceQTG87fHFEzTzEBy8F3/dist=es2020/cjs-es.js';
@@ -106,10 +106,10 @@ importMap.set('sveltejs-tippy', ['/web_modules/sveltejs-tippy.js']);
 importMap.set('tippy.js', ['/web_modules/tippy.js']);
 
 export async function cdnImports(source: string, path: string) {
-  const cacheDeps = await caches.open('dependencies');
+  const cacheDeps = await caches.open('web_modules');
 
   const importMatches = source.match(
-    /import[^a-zA-Z0-9][^"']*["'][^"']*["']/gm,
+    /(?<!\/\/[\s]*)import[^a-zA-Z0-9][^"']*["'][^"']*["']/gm,
   );
 
   let imports: Array<String> = [];
@@ -123,10 +123,10 @@ export async function cdnImports(source: string, path: string) {
       dependencyFirstQuote + 1,
       match.length - 1,
     );
-
     if (dependency.endsWith('.css')) {
       source = source.replaceAll(match, `//${match}`); //TODO import css
-      imports = [...imports, CONTROLLED + 'import.css'];
+      imports.push('/' + dependency);
+      console.log('THIS ', path, dependency);
       continue;
     }
     if (dependency.startsWith('./') && !dependency.endsWith('.svelte')) {
@@ -153,13 +153,13 @@ export async function cdnImports(source: string, path: string) {
       source = source.replaceAll(match, cacheImport);
       continue;
     }
-    // Check if found dependency is stored in dependencies cache
-    const dependencyPath = DEPENDENCIES + dependency;
+    // Check if found dependency is stored in web_modules cache
+    const dependencyPath = WEB_MODULES + dependency;
     const response = await cacheDeps.match(dependencyPath);
     if (response?.ok) {
       const cacheImport =
         match.substring(0, dependencyFirstQuote) + `"${dependencyPath}"`;
-      //source = source.replaceAll(match, cacheImport);
+      source = source.replaceAll(match, cacheImport);
       continue;
     }
 
@@ -172,8 +172,8 @@ export async function cdnImports(source: string, path: string) {
       if (dependencyCdn && dependencyCdn?.length > 0) {
         const cdnImport =
           match.substring(0, dependencyFirstQuote) + `"${dependencyCdn}"`;
-        // console.log(match, ' => ', cdnImport);
-        //source = source.replaceAll(match, cdnImport);
+        console.log(match, ' => ', cdnImport);
+        source = source.replaceAll(match, cdnImport);
         continue;
         /*
 import dependencyFetcher 

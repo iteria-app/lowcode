@@ -127,7 +127,7 @@ export const fetchDependenciesFromGitHub = async () => {
           cache.put(jsPath, newJavaScriptResponse(code));
         } else {
           if (fileContent) {
-            cache.put(path, new Response(fileContent));
+            cache.put(path, newJavaScriptResponse(fileContent));
           }
         }
       }

@@ -45,7 +45,7 @@ export const addBorderFrame = (innerDoc: Document) => {
         iFrame?.contentWindow?.location.reload();
       } else console.warn('Something went wrong');
     };
-    console.log(iFramePosition?.top, iFramePosition?.left);
+
     mainDiv.setAttribute(
       'style',
       `height:${styles.height}px; width:${

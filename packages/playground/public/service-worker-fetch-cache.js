@@ -105,25 +105,24 @@ self.addEventListener('fetch', async function (event) {
             console.log('Now this is css', requestURL.pathname);
             return newJavaScriptResponse('');
           }
-          console.log('Tu matchujem', requestURL.pathname);
 
-          const res = await cache.match(requestURL.pathname);
-          if (res) {
-            console.log('Som v IF', requestURL.pathname);
-            return cache.match(requestURL.pathname);
-          } else {
-            console.log('som v else', requestURL.pathname);
-            if (requestURL.pathname === '/src/layouts/DashboardLayout/NavBar') {
-              return cache.match(requestURL.pathname + '/index');
-            }
-            if (
-              requestURL.pathname === '/src/layouts/DashboardLayout/NavItem'
-            ) {
-              return cache.match('/src/layouts/DashboardLayout/NavBar/NavItem');
-            }
+          // const res = await cache.match(requestURL.pathname);
+          // if (res) {
+          //   console.log('Som v IF', requestURL.pathname);
+          //   return cache.match(requestURL.pathname);
+          // } else {
+          //   console.log('som v else', requestURL.pathname);
+          //   if (requestURL.pathname === '/src/layouts/DashboardLayout/NavBar') {
+          //     return cache.match(requestURL.pathname + '/index');
+          //   }
+          //   if (
+          //     requestURL.pathname === '/src/layouts/DashboardLayout/NavItem'
+          //   ) {
+          //     return cache.match('/src/layouts/DashboardLayout/NavBar/NavItem');
+          //   }
 
-            return newJavaScriptResponse(`/*404*/export default {}`);
-          }
+          //   return newJavaScriptResponse(`/*404*/export default {}`);
+          // }
         }
       }),
     );
@@ -152,15 +151,15 @@ self.addEventListener('fetch', async function (event) {
       event.respondWith(
         fetch(event.request, { redirect: 'follow' }),
         /*.then(fixJsResponse)
-          .catch(() => {
-            const newUrl2 = 'https://cdn.jsdelivr.net/' + requestURL.pathname;
-            return fetch(newUrl2, { redirect: 'follow' })
-              .then(fixJsResponse)
-              .catch((err2) => {
-                console.error('err fetch jsdelivr', err2);
-                console.log('som v catch');
-              });
-          }),*/
+                .catch(() => {
+                  const newUrl2 = 'https://cdn.jsdelivr.net/' + requestURL.pathname;
+                  return fetch(newUrl2, { redirect: 'follow' })
+                    .then(fixJsResponse)
+                    .catch((err2) => {
+                      console.error('err fetch jsdelivr', err2);
+                      console.log('som v catch');
+                    });
+                }),*/
       );
     }
   }
