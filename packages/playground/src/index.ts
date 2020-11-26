@@ -1,13 +1,13 @@
 import { addBorderFrame } from './border-frame/borderFrame';
-import { CONTROLLED } from './constants';
+import { CONTENT_TYPE_JS, CONTROLLED } from './constants';
 import { gitlabFetchFile, gitlabFetchFiles } from './gitlab';
 import { transpileEsbuild, transpileSvelte } from './transpile';
-
 import { cdnImports, dependency } from './cdn';
 import {
   fetchDependenciesFromGitHub,
   fetchProjectFromGitHub,
 } from './util/githubFetcher';
+import { newCustomResponse } from './util/cacheHandlers';
 
 import examplePackage from './util/examplePackage';
 
@@ -140,7 +140,10 @@ if (compileButton) {
             ),
           );
           if (jsPath.indexOf('fullcalendar') >= 0) {
-            const promise = cache.put(jsPath, newJavaScriptResponse(''));
+            const promise = cache.put(
+              jsPath,
+              newCustomResponse('', CONTENT_TYPE_JS),
+            );
             promises = [...promises, promise];
           }
         }
@@ -164,7 +167,15 @@ if (compileButton) {
 
                 const sourceCdn = await cdnImports(source, file.path);
                 cssImports = [...cssImports, ...sourceCdn.imports];
-                cache.put(jsPath, newJavaScriptResponse(sourceCdn.source));
+                const copyCache = await caches.open('copy_cache');
+                copyCache.put(
+                  jsPath,
+                  newCustomResponse(source, CONTENT_TYPE_JS),
+                );
+                cache.put(
+                  jsPath,
+                  newCustomResponse(sourceCdn.source, CONTENT_TYPE_JS),
+                );
               }
             },
           );
@@ -174,15 +185,22 @@ if (compileButton) {
             async (source) => {
               if (typeof source == 'string') {
                 try {
+                  console.log('toto je file.path', file.path);
                   const transpiled = await transpileSvelte(source, file.path);
+                  console.log('svelte file', file);
                   const sourceCdn = await cdnImports(
                     transpiled.code,
                     file.path,
                   );
                   cssImports = [...cssImports, ...sourceCdn.imports];
+                  const copyCache = await caches.open('copy_cache');
+                  copyCache.put(
+                    prefix(CONTROLLED, prefix('/', transpiled.path)),
+                    newCustomResponse(source, CONTENT_TYPE_JS),
+                  );
                   cache.put(
                     prefix(CONTROLLED, prefix('/', transpiled.path)),
-                    newJavaScriptResponse(sourceCdn.source),
+                    newCustomResponse(sourceCdn.source, CONTENT_TYPE_JS),
                   );
                 } catch (err) {
                   console.error('error transpiling svelte', file, err);
@@ -220,9 +238,10 @@ if (compileButton) {
                     file.path,
                   );
                   cssImports = [...cssImports, ...sourceCdn.imports];
+
                   cache.put(
                     prefix(CONTROLLED, prefix('/', transpiled.path)),
-                    newJavaScriptResponse(sourceCdn.source),
+                    newCustomResponse(sourceCdn.source, CONTENT_TYPE_JS),
                   );
                 }
               }
@@ -251,7 +270,10 @@ if (bundleDepsButton) {
       console.log('dep', pkg, ver, dep);
       caches.open('playground').then(async (cache) => {
         const depCode = await dep.code;
-        cache.put('/unpkg.com/' + pkg, newJavaScriptResponse(depCode.code));
+        cache.put(
+          '/unpkg.com/' + pkg,
+          newCustomResponse(depCode.code, CONTENT_TYPE_JS),
+        );
       });
     });
   };
@@ -320,15 +342,15 @@ if (refreshButton) {
   };
 }
 
-export function newJavaScriptResponse(content: string): Response {
-  const headers = new Headers();
-  headers.append('Content-Type', 'application/javascript; charset=utf-8');
-  const init = { status: 200, statusText: 'OK', headers };
-  return new Response(content, init);
-}
-function newHtmlResponse(content: string): Response {
-  const headers = new Headers();
-  headers.append('Content-Type', 'text/html');
-  const init = { status: 200, statusText: 'OK', headers };
-  return new Response(content, init);
-}
+// export function newCustomResponse(content: string): Response {
+//   const headers = new Headers();
+//   headers.append('Content-Type', 'application/javascript; charset=utf-8');
+//   const init = { status: 200, statusText: 'OK', headers };
+//   return new Response(content, init);
+// }
+// function newHtmlResponse(content: string): Response {
+//   const headers = new Headers();
+//   headers.append('Content-Type', 'text/html');
+//   const init = { status: 200, statusText: 'OK', headers };
+//   return new Response(content, init);
+// }

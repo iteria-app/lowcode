@@ -2,18 +2,26 @@ import {
   cloneElementInCode,
   deleteElementInCode,
   findElementInAST,
+  stripExtension,
 } from './codeHandlers';
-
 import { removeBorderFrame } from '../border-frame/borderFrame';
+import { CONTENT_TYPE_JS } from '../constants';
+
+export const newCustomResponse = (content: string, type: string) => {
+  const headers = new Headers();
+  headers.append('Content-Type', type);
+  const init = { status: 200, statusText: 'OK', headers };
+  return new Response(content, init);
+};
 
 const getDataFromCache = async (
-  file: string,
+  path: string,
 ): Promise<{ body?: string; cache?: Cache }> => {
-  const cache = await caches.open('playground').catch((err) => {
+  const cache = await caches.open('copy_cache').catch((err) => {
     console.log(err);
     throw new Error('Unable to open a cache');
   });
-  const cacheContent = await cache.match(file).catch((err) => {
+  const cacheContent = await cache.match(path).catch((err) => {
     console.log(err);
     throw new Error('Requested code was not found in cache');
   });
@@ -25,24 +33,29 @@ const getDataFromCache = async (
 };
 
 export const cloneElement = async ({ loc }: any) => {
-  console.log('cloneElement', loc);
-  const { body, cache } = await getDataFromCache(loc.file);
+  const pathWithoutExtension = stripExtension(loc.file);
+  const { body, cache } = await getDataFromCache(pathWithoutExtension);
   if (!body || !cache) return;
 
   const clickedNode = findElementInAST(body, loc.char);
+  console.log('toto je clickedNode', clickedNode);
   if (!clickedNode) throw new Error('Element was not found in code');
   const charCount = clickedNode.end - clickedNode.start;
 
   const newCode = cloneElementInCode(body, loc.char, charCount);
-  console.log(newCode, loc.file);
   if (newCode) {
-    await cache.put(loc.file, new Response(newCode));
+    await cache.put(
+      pathWithoutExtension,
+      newCustomResponse(newCode, CONTENT_TYPE_JS),
+    );
     removeBorderFrame();
+    return newCode;
   }
 };
 
 export const removeElement = async ({ loc }: any) => {
-  const { body, cache } = await getDataFromCache(loc.file);
+  const pathWithoutExtension = stripExtension(loc.file);
+  const { body, cache } = await getDataFromCache(pathWithoutExtension);
   if (!body || !cache) return;
 
   const clickedNode = findElementInAST(body, loc.char);
@@ -50,9 +63,12 @@ export const removeElement = async ({ loc }: any) => {
   const charCount = clickedNode.end - clickedNode.start;
 
   const newCode = deleteElementInCode(body, loc.char, charCount);
-  console.log(newCode);
   if (newCode) {
-    await cache.put(loc.file, new Response(newCode));
+    await cache.put(
+      pathWithoutExtension,
+      newCustomResponse(newCode, CONTENT_TYPE_JS),
+    );
     removeBorderFrame();
+    return newCode;
   }
 };

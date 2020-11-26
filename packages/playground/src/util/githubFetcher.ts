@@ -1,8 +1,8 @@
 import { cdnImports } from '../cdn';
 import { transpileEsbuild } from '../transpile';
-import { CONTROLLED, DEPENDENCIES } from '../constants';
-import { prefix, newJavaScriptResponse } from '../index';
-import { stripExtension } from './codeHandlers';
+import { CONTENT_TYPE_JS, CONTROLLED, DEPENDENCIES } from '../constants';
+import { prefix } from '../index';
+import { newCustomResponse } from './cacheHandlers';
 
 export const fetchProjectFromGitHub = async () => {
   const accessToken = prompt('Enter your GitHub access token');
@@ -21,14 +21,6 @@ export const fetchProjectFromGitHub = async () => {
       const { content } = await data.json();
       if (content) {
         const fileContent = atob(content);
-        // if (path.endsWith('js')) {
-        //   const jsPath = prefix(
-        //     CONTROLLED,
-        //     prefix('/', path.substring(0, path.length - '.js'.length)),
-        //   );
-        //   const sourceCdn = await cdnImports(fileContent);
-        //   cache.put(jsPath, newJavaScriptResponse(sourceCdn));
-        // } else
         if (
           path.endsWith('.js') ||
           path.endsWith('.ts') ||
@@ -45,12 +37,12 @@ export const fetchProjectFromGitHub = async () => {
 
             cache.put(
               prefix(CONTROLLED, prefix('/', transpiled.path)),
-              newJavaScriptResponse(sourceCdn.source),
+              newCustomResponse(sourceCdn.source, CONTENT_TYPE_JS),
             );
           }
         } else {
           if (fileContent) {
-            cache.put(path, newJavaScriptResponse(fileContent));
+            cache.put(path, newCustomResponse(fileContent, CONTENT_TYPE_JS));
           }
         }
       }
@@ -71,7 +63,7 @@ export const fixRelativePaths = async () => {
     const source = await res?.text();
     if (source) {
       const fixedSource = await relativePaths(source);
-      cache.put(key, newJavaScriptResponse(fixedSource));
+      cache.put(key, newCustomResponse(fixedSource, CONTENT_TYPE_JS));
     }
   }
 };
@@ -124,10 +116,10 @@ export const fetchDependenciesFromGitHub = async () => {
             path.substring(0, path.length - '.js'.length),
           );
 
-          cache.put(jsPath, newJavaScriptResponse(fileContent));
+          cache.put(jsPath, newCustomResponse(fileContent, CONTENT_TYPE_JS));
         } else {
           if (fileContent) {
-            cache.put(path, newJavaScriptResponse(fileContent));
+            cache.put(path, newCustomResponse(fileContent, CONTENT_TYPE_JS));
           }
         }
       }

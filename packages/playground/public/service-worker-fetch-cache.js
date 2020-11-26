@@ -40,7 +40,7 @@ async function fixJsResponse(response) {
     return;
   }
   const text = await response.text();
-  return newJavaScriptResponse(
+  return newCustomResponse(
     text
       .replace('process.env.NODE_ENV', "'development'")
       .replace(
@@ -51,26 +51,20 @@ async function fixJsResponse(response) {
         'https://unpkg.com/intl-messageformat-parser@6.0.13?module',
         'https://unpkg.com/intl-messageformat-parser@6.0.13/lib/index.js?module',
       ),
+    'application/javascript',
   );
 }
 
-function newJavaScriptResponse(content) {
+function newCustomResponse(content, type) {
   const headers = new Headers();
-  headers.append('Content-Type', 'application/javascript');
+  headers.append('Content-Type', type);
   const init = { status: 200, statusText: 'OK', headers };
   return new Response(content, init);
 }
 
-const newCSSResponse = (content) => {
-  const headers = new Headers();
-  headers.append('Content-Type', 'text/css');
-  const init = { status: 200, statusText: 'OK', headers };
-  return new Response(content, init);
-};
-
 self.addEventListener('fetch', async function (event) {
   const requestURL = new URL(event.request.url);
-  console.log('sw fetch A', requestURL.pathname, event.request);
+  // console.log('sw fetch A', requestURL.pathname, event.request);
 
   if (requestURL.pathname.startsWith(CONTROLLED + 'tryout.html')) {
     event.respondWith(fetch('/tryout.html'));
@@ -90,35 +84,37 @@ self.addEventListener('fetch', async function (event) {
           requestURL.pathname.endsWith('.tsx')
         ) {
           const newPath = stripExtension(requestURL.pathname);
-          console.log('sw fetch B', newPath, event.request);
+          // console.log('sw fetch B', newPath, event.request);
 
           const response = await cache.match(newPath);
           if (!response || response.type.indexOf('html') >= 0) {
-            return newJavaScriptResponse(`/*404*/export default {}`);
-          }
-
-          if (requestURL.pathname.indexOf('App.js') >= 0) {
-            console.log('App.js', response);
+            return newCustomResponse(
+              `/*404*/export default {}`,
+              'application/javascript',
+            );
           }
 
           const text = await response.text();
           if (!text || !text.trim().length) {
-            return newJavaScriptResponse(`/*404*/export default {}`);
+            return newCustomResponse(
+              `/*404*/export default {}`,
+              'application/javascript',
+            );
           }
 
-          return newJavaScriptResponse(text);
+          return newCustomResponse(text, 'application/javascript');
         } else {
           if (requestURL.pathname.startsWith('/dist/')) {
             if (requestURL.pathname === '/dist/imports.css') {
               const res = await cache.match(requestURL.pathname);
               const content = await res.text();
-              return newCSSResponse(content);
+              return newCustomResponse(content, 'text/css');
             } else {
               const modulesCache = await caches.open('web_modules');
               const newPath = requestURL.pathname.replace('/dist/', '');
               const res = await modulesCache.match(newPath);
               const content = await res.text();
-              return newCSSResponse(content);
+              return newCustomResponse(content, 'text/css');
             }
           } else return cache.match(requestURL.pathname);
         }
@@ -130,7 +126,7 @@ self.addEventListener('fetch', async function (event) {
         ? stripExtension(requestURL.pathname)
         : requestURL.pathname;
 
-      console.log(pathName, 'fetchujem z cache');
+      // console.log(pathName, 'fetchujem z cache');
 
       return event.respondWith(
         caches

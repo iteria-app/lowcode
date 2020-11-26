@@ -1,5 +1,7 @@
 import { cloneElement, removeElement } from '../util/cacheHandlers';
 import { getOffset } from '../util/highlight';
+import { svelteTranspileAndSaveToCache } from '../util/codeHandlers';
+
 interface HTMLBodyElementWithMeta extends HTMLBodyElement {
   __svelte_meta: {
     loc: {
@@ -34,14 +36,34 @@ export const addBorderFrame = (innerDoc: Document) => {
 
     cloneIcon!.onclick = async () => {
       if (target.__svelte_meta) {
-        await cloneElement(target.__svelte_meta);
+        try {
+          const {
+            loc: { file },
+          } = target.__svelte_meta;
+          const newCode = await cloneElement(target.__svelte_meta);
+          if (newCode) {
+            svelteTranspileAndSaveToCache(newCode, file);
+          }
+        } catch (err) {
+          console.error('error transpiling svelte', err);
+        }
         iFrame?.contentWindow?.location.reload();
       } else console.warn('Something went wrong');
     };
 
     removeIcon!.onclick = async () => {
       if (target.__svelte_meta) {
-        await removeElement(target.__svelte_meta);
+        try {
+          const {
+            loc: { file },
+          } = target.__svelte_meta;
+          const newCode = await removeElement(target.__svelte_meta);
+          if (newCode) {
+            svelteTranspileAndSaveToCache(newCode, file);
+          }
+        } catch (err) {
+          console.error('error transpiling svelte', err);
+        }
         iFrame?.contentWindow?.location.reload();
       } else console.warn('Something went wrong');
     };

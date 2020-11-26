@@ -1,3 +1,7 @@
+import { cdnImports } from '../cdn';
+import { CONTENT_TYPE_JS } from '../constants';
+import { transpileSvelte } from '../transpile';
+import { newCustomResponse } from './cacheHandlers';
 import {
   parse as svelteParse,
   walk as svelteWalk,
@@ -6,7 +10,6 @@ import {
 
 export const findElementInAST = (body: string, char: number) => {
   const AST = svelteParse(body).html;
-
   let clickedNode: any;
   //@ts-ignore
   svelteWalk(AST, {
@@ -81,4 +84,24 @@ export const stripExtension = (filename: string) => {
   }
 
   return filename;
+};
+
+export const svelteTranspileAndSaveToCache = async (
+  code: string,
+  file: string,
+) => {
+  try {
+    const pathWithoutExtension = stripExtension(file);
+    const playgroundCache = await caches.open('playground');
+
+    const transpiled = await transpileSvelte(code, file);
+    const sourceCdn = await cdnImports(transpiled.code, file);
+    playgroundCache.put(
+      pathWithoutExtension,
+      newCustomResponse(sourceCdn.source, CONTENT_TYPE_JS),
+    );
+  } catch (err) {
+    console.error('error transpiling svelte', err);
+    throw new Error(err);
+  }
 };
