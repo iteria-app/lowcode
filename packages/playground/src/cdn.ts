@@ -114,7 +114,7 @@ export async function cdnImports(source: string, path: string) {
 
   let imports: Array<String> = [];
   for (let match of importMatches || []) {
-    console.trace('import match', match);
+    // console.trace('import match', match);
     const dependencyFirstQuote = match.lastIndexOf(
       match[match.length - 1],
       match.length - 2,
@@ -123,10 +123,10 @@ export async function cdnImports(source: string, path: string) {
       dependencyFirstQuote + 1,
       match.length - 1,
     );
+
     if (dependency.endsWith('.css')) {
       source = source.replaceAll(match, `//${match}`); //TODO import css
-      imports.push('/' + dependency);
-      console.log('THIS ', path, dependency);
+      imports.push(`@import "${dependency}";`);
       continue;
     }
     if (dependency.startsWith('./') && !dependency.endsWith('.svelte')) {
@@ -153,13 +153,13 @@ export async function cdnImports(source: string, path: string) {
       source = source.replaceAll(match, cacheImport);
       continue;
     }
-    // Check if found dependency is stored in web_modules cache
+    // Check if found dependency is stored in dependencies cache
     const dependencyPath = WEB_MODULES + dependency;
     const response = await cacheDeps.match(dependencyPath);
     if (response?.ok) {
       const cacheImport =
         match.substring(0, dependencyFirstQuote) + `"${dependencyPath}"`;
-      source = source.replaceAll(match, cacheImport);
+      //source = source.replaceAll(match, cacheImport);
       continue;
     }
 
@@ -172,8 +172,8 @@ export async function cdnImports(source: string, path: string) {
       if (dependencyCdn && dependencyCdn?.length > 0) {
         const cdnImport =
           match.substring(0, dependencyFirstQuote) + `"${dependencyCdn}"`;
-        console.log(match, ' => ', cdnImport);
-        source = source.replaceAll(match, cdnImport);
+        // console.log(match, ' => ', cdnImport);
+        //source = source.replaceAll(match, cdnImport);
         continue;
         /*
 import dependencyFetcher 
@@ -181,7 +181,6 @@ from './util/dependencyFetcher';
 import { parse } from 'acorn'
 //import { transform } from 'cjs-es'
 import cjsEs from 'https://cdn.skypack.dev/-/cjs-es@v0.8.2-ceQTG87fHFEzTzEBy8F3/dist=es2020/cjs-es.js'
-
 export async function cdnImports(source: string): Promise<string> {
   const importMatches = source.match(/import[^a-zA-Z0-9][^"']*["'][^\.][^"']*["']/gm);
   for(let match of importMatches || []) {

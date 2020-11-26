@@ -130,7 +130,6 @@ if (compileButton) {
 
       let promises: Array<Promise<void>> = [];
       const files = await gitlabFetchFiles(privateToken);
-      console.log('toto su files', files);
       for (const file of files) {
         if (file.name.endsWith('.js') || file.name.endsWith('.ts')) {
           const jsPath = prefix(
@@ -158,10 +157,11 @@ if (compileButton) {
                 console.log('sk locale', file);
               }
               if (typeof source == 'string') {
-                const jsPath = prefix(
-                  CONTROLLED,
-                  file.path.substring(0, file.path.length - '.js'.length),
+                const jsPath = file.path.substring(
+                  0,
+                  file.path.length - '.js'.length,
                 );
+
                 const sourceCdn = await cdnImports(source, file.path);
                 cssImports = [...cssImports, ...sourceCdn.imports];
                 cache.put(jsPath, newJavaScriptResponse(sourceCdn.source));
@@ -232,10 +232,12 @@ if (compileButton) {
         }
       }
       await Promise.all(promises);
-      cache.put(
-        '/dist/imports.css',
-        newJavaScriptResponse(cssImports.join('\n')),
-      );
+
+      const headers = new Headers();
+      headers.append('Content-Type', 'text/css');
+      const init = { status: 200, statusText: 'OK', headers };
+
+      cache.put('/dist/imports.css', new Response(cssImports.join('\n'), init));
     });
   };
 }

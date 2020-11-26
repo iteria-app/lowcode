@@ -61,6 +61,13 @@ function newJavaScriptResponse(content) {
   return new Response(content, init);
 }
 
+const newCSSResponse = (content) => {
+  const headers = new Headers();
+  headers.append('Content-Type', 'text/css');
+  const init = { status: 200, statusText: 'OK', headers };
+  return new Response(content, init);
+};
+
 self.addEventListener('fetch', async function (event) {
   const requestURL = new URL(event.request.url);
   console.log('sw fetch A', requestURL.pathname, event.request);
@@ -69,7 +76,10 @@ self.addEventListener('fetch', async function (event) {
     event.respondWith(fetch('/tryout.html'));
   } else if (requestURL.pathname.startsWith(CONTROLLED + 'svelte.html')) {
     event.respondWith(fetch('/svelte.html'));
-  } else if (requestURL.pathname.startsWith(CONTROLLED)) {
+  } else if (
+    requestURL.pathname.startsWith(CONTROLLED) ||
+    requestURL.pathname.startsWith('/dist/')
+  ) {
     event.respondWith(
       caches.open('playground').then(async (cache) => {
         if (
@@ -98,38 +108,23 @@ self.addEventListener('fetch', async function (event) {
 
           return newJavaScriptResponse(text);
         } else {
-          if (
-            requestURL.pathname.endsWith('.css') ||
-            requestURL.pathname.endsWith('.scss')
-          ) {
-            console.log('Now this is css', requestURL.pathname);
-            return newJavaScriptResponse('');
-          }
-
-          // const res = await cache.match(requestURL.pathname);
-          // if (res) {
-          //   console.log('Som v IF', requestURL.pathname);
-          //   return cache.match(requestURL.pathname);
-          // } else {
-          //   console.log('som v else', requestURL.pathname);
-          //   if (requestURL.pathname === '/src/layouts/DashboardLayout/NavBar') {
-          //     return cache.match(requestURL.pathname + '/index');
-          //   }
-          //   if (
-          //     requestURL.pathname === '/src/layouts/DashboardLayout/NavItem'
-          //   ) {
-          //     return cache.match('/src/layouts/DashboardLayout/NavBar/NavItem');
-          //   }
-
-          //   return newJavaScriptResponse(`/*404*/export default {}`);
-          // }
+          if (requestURL.pathname.startsWith('/dist/')) {
+            if (requestURL.pathname === '/dist/imports.css') {
+              const res = await cache.match(requestURL.pathname);
+              const content = await res.text();
+              return newCSSResponse(content);
+            } else {
+              const modulesCache = await caches.open('web_modules');
+              const newPath = requestURL.pathname.replace('/dist/', '');
+              const res = await modulesCache.match(newPath);
+              const content = await res.text();
+              return newCSSResponse(content);
+            }
+          } else return cache.match(requestURL.pathname);
         }
       }),
     );
   } else {
-    if (requestURL.pathname.startsWith('/web_modules/')) {
-      console.log('web_modules', requestURL.pathname);
-    }
     if (requestURL.pathname.startsWith('/web_modules/')) {
       const pathName = requestURL.pathname.endsWith('.js')
         ? stripExtension(requestURL.pathname)

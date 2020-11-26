@@ -105,7 +105,7 @@ export const relativePaths = async (source: string) => {
 
 export const fetchDependenciesFromGitHub = async () => {
   const accessToken = prompt('Enter your GitHub access token');
-  const dependenciesUrl = `https://api.github.com/repos/mecirmartin/web_modules/git/trees/7ffe03620edcd50246fe9053fda6435b0702f5fb?recursive=1?access_token=${accessToken}`;
+  const dependenciesUrl = `https://api.github.com/repos/mecirmartin/web_modules/git/trees/09837517aa12a0852ad54bcd7371651ce956a845?recursive=1?access_token=${accessToken}`;
   if (!accessToken) return;
 
   try {
@@ -123,8 +123,8 @@ export const fetchDependenciesFromGitHub = async () => {
             '/web_modules/',
             path.substring(0, path.length - '.js'.length),
           );
-          const code = fixDependencyImports(fileContent);
-          cache.put(jsPath, newJavaScriptResponse(code));
+
+          cache.put(jsPath, newJavaScriptResponse(fileContent));
         } else {
           if (fileContent) {
             cache.put(path, newJavaScriptResponse(fileContent));
@@ -136,26 +136,4 @@ export const fetchDependenciesFromGitHub = async () => {
     console.log(error);
     throw new Error(error);
   }
-};
-
-const fixDependencyImports = (source: string) => {
-  const importMatches = source.match(
-    /import[^a-zA-Z0-9][^"']*["'][^\.][^"']*["']/gm,
-  );
-
-  for (let match of importMatches || []) {
-    const dependencyFirstQuote = match.lastIndexOf(
-      match[match.length - 1],
-      match.length - 2,
-    );
-    const dependencyPath = match.substring(
-      dependencyFirstQuote + 1,
-      match.length - 1,
-    );
-    const newDependencyPath = stripExtension(
-      dependencyPath.replace('/src/', DEPENDENCIES),
-    );
-    source = source.replaceAll(dependencyPath, newDependencyPath);
-  }
-  return source;
 };
