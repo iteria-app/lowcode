@@ -1,5 +1,5 @@
 import { addBorderFrame } from './border-frame/borderFrame';
-import { CONTENT_TYPE_JS, CONTROLLED } from './constants';
+import { CONTENT_TYPE_CSS, CONTENT_TYPE_JS, CONTROLLED } from './constants';
 import { gitlabFetchFile, gitlabFetchFiles } from './gitlab';
 import { transpileEsbuild, transpileSvelte } from './transpile';
 import { cdnImports, dependency } from './cdn';
@@ -192,7 +192,6 @@ if (compileButton) {
                     transpiled.code,
                     file.path,
                   );
-                  cssImports = [...cssImports, ...sourceCdn.imports];
                   const copyCache = await caches.open('copy_cache');
                   copyCache.put(
                     prefix(CONTROLLED, prefix('/', transpiled.path)),
@@ -202,6 +201,19 @@ if (compileButton) {
                     prefix(CONTROLLED, prefix('/', transpiled.path)),
                     newCustomResponse(sourceCdn.source, CONTENT_TYPE_JS),
                   );
+                  if (transpiled.css.code) {
+                    cssImports.push(
+                      `@import "${prefix(
+                        CONTROLLED,
+                        prefix('/', `${transpiled.path}.css`),
+                      )}";`,
+                    );
+                    cache.put(
+                      prefix(CONTROLLED, prefix('/', `${transpiled.path}.css`)),
+                      newCustomResponse(transpiled.css.code, CONTENT_TYPE_CSS),
+                    );
+                  }
+                  cssImports = [...sourceCdn.imports, ...cssImports];
                 } catch (err) {
                   console.error('error transpiling svelte', file, err);
                 }
@@ -248,6 +260,28 @@ if (compileButton) {
             },
           );
           promises = [...promises, promise];
+        } else if (file.name.endsWith('.css')) {
+          const source = await gitlabFetchFile(file.path, privateToken);
+          if (typeof source == 'string') {
+            // const matches = source.match(/@import[\s]*url\([^\)]*\);/gm);
+            // if (matches?.length) {
+            //   cssImports = [...matches, ...cssImports];
+            // }
+            cssImports.push(
+              `@import "${prefix(CONTROLLED, prefix('/', file.path))}";`,
+            );
+            console.log(
+              'Toto je css import',
+              `@import "${prefix(
+                CONTROLLED,
+                prefix('/', `${file.path}.css`),
+              )}";`,
+            );
+            cache.put(
+              prefix(CONTROLLED, prefix('/', file.path)),
+              newCustomResponse(source, CONTENT_TYPE_CSS),
+            );
+          }
         }
       }
       await Promise.all(promises);
@@ -255,6 +289,7 @@ if (compileButton) {
       const headers = new Headers();
       headers.append('Content-Type', 'text/css');
       const init = { status: 200, statusText: 'OK', headers };
+      console.log('toto su css imports', cssImports);
 
       cache.put('/dist/imports.css', new Response(cssImports.join('\n'), init));
     });

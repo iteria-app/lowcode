@@ -36,6 +36,7 @@ export const cloneElement = async ({ loc }: any) => {
   const pathWithoutExtension = stripExtension(loc.file);
   const { body, cache } = await getDataFromCache(pathWithoutExtension);
   if (!body || !cache) return;
+  console.log(loc);
 
   const clickedNode = findElementInAST(body, loc.char);
   console.log('toto je clickedNode', clickedNode);

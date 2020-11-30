@@ -15,6 +15,7 @@ interface Transpiled {
   readonly code: string;
   readonly path: string;
   readonly warnings: [];
+  readonly css: any;
 }
 
 const scriptTs = new RegExp('(<script[^>]+typescript[^>]+>)'); //|(</script[^>]*>)
@@ -59,15 +60,15 @@ export async function transpileSvelte(
     warnings: [
       /* TODO */
     ],
+    css: compiled.css,
   };
 }
-
 
 export function transpileEsbuild(
   source: string,
   filename: string,
 ): Promise<Transpiled> {
-  console.trace('transpileEsbuild', filename)
+  console.trace('transpileEsbuild', filename);
 
   const dot = filename.lastIndexOf('.');
   const hasExtension = dot > 0 && dot < filename.length;

@@ -22,7 +22,7 @@ export const addBorderFrame = (innerDoc: Document) => {
   root!.onmouseover = (e: MouseEvent) => {
     const iFramePosition = iFrame?.getBoundingClientRect();
     const target = <HTMLBodyElementWithMeta>e.target;
-    if (target === root || !target) return;
+    if (target === root || !target || !target.__svelte_meta) return;
     const styles = getOffset(target);
 
     const mainDiv = document.getElementById('buttonContainer')!;
