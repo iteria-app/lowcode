@@ -2,14 +2,12 @@ import { addBorderFrame } from './border-frame/borderFrame';
 import { CONTENT_TYPE_CSS, CONTENT_TYPE_JS, CONTROLLED } from './constants';
 import { gitlabFetchFile, gitlabFetchFiles } from './gitlab';
 import { transpileEsbuild, transpileSvelte } from './transpile';
-import { cdnImports, dependency } from './cdn';
+import { cdnImports } from './cdn';
 import {
   fetchDependenciesFromGitHub,
   fetchProjectFromGitHub,
 } from './util/githubFetcher';
 import { newCustomResponse } from './util/cacheHandlers';
-
-import examplePackage from './util/examplePackage';
 
 const refreshButton = document.getElementById(
   'refreshButton',
@@ -292,24 +290,6 @@ if (compileButton) {
       console.log('toto su css imports', cssImports);
 
       cache.put('/dist/imports.css', new Response(cssImports.join('\n'), init));
-    });
-  };
-}
-
-if (bundleDepsButton) {
-  bundleDepsButton.onclick = async (event) => {
-    console.log('bundling dependencies', event);
-
-    Object.entries(examplePackage.dependencies).forEach(async ([pkg, ver]) => {
-      const dep = await dependency(pkg); // + '@' + ver
-      console.log('dep', pkg, ver, dep);
-      caches.open('playground').then(async (cache) => {
-        const depCode = await dep.code;
-        cache.put(
-          '/unpkg.com/' + pkg,
-          newCustomResponse(depCode.code, CONTENT_TYPE_JS),
-        );
-      });
     });
   };
 }

@@ -10,8 +10,6 @@ export default async (packageName: string) => {
   if (packageName === 'react' || packageName === 'react-dom')
     return `https://cdn.skypack.dev/${packageName}`;
 
-  //   const parsedPackage = JSON.parse(examplePackage);
-
   //   for (const dependencyName in parsedPackage.dependencies) {
   //     const dependencyVersion = parsedPackage.dependencies[
   //       dependencyName
