@@ -1,0 +1,174 @@
+.ic-select-box {
+    pointer-events: none;
+    position: absolute;
+    border: 1px solid #4a87ee;
+    /* border-radius: 3px; */
+    background-color: rgba(105, 151, 242, 0.05);
+    /*
+    padding: 5px;
+    margin-left: -5px;
+    margin-top: -5px;
+    */
+    z-index: 15;
+    box-sizing: border-box;
+  }
+  
+  .ic-select-box a {
+    display: none;
+    pointer-events: auto;
+    /* //position: absolute;
+    //top: -8px;
+    //right: -8px; */
+    background-color: #fff;
+    color: #4a87ee;
+  }
+  
+  .ic-select-box .select-remove {
+    background: url('https://creator.ionic.io/img/component-options-sprite.png') no-repeat transparent;
+    width: 16px;
+    height: 16px;
+    margin-right:2px;
+    background-size: 100%;
+  }
+
+  .ic-select-box .select-navigate {
+    background: url('https://creator.ionic.io/img/component-options-sprite.png') no-repeat transparent;
+    width: 16px;
+    height: 16px;
+    background-size: 100%;
+  }
+  
+  .ic-select-box .select-duplicate {
+    background: url('https://creator.ionic.io/img/component-options-sprite.png') no-repeat transparent;
+    width: 16px;
+    height: 16px;
+    background-size: 100%;
+    margin-right:2px;
+    background-position: 0px -32px;
+  }
+  
+  .control-container {
+    position:absolute;
+    top:-8px;
+    right:4px;
+    /* //border: 1px solid #4a87ee;
+    //border-radius:8px;
+    //padding:2px; */
+    height:22px;
+    /* //background:white; */
+  }
+  
+  .ic-select-duplicate {
+    border: 1px solid #54d77e;
+  }
+  .ic-select-duplicate .select-duplicate {
+    background-position: 0px -48px;
+  }
+  .ic-select-duplicate .control-container {
+    border: 1px solid #54d77e;
+  }
+  
+  .ic-select-remove {
+    border: 1px solid #ef4e3a;
+  }
+  .ic-select-remove .select-remove {
+    background-position: 0px -16px;
+  }
+  .ic-select-remove .control-container {
+    border: 1px solid #ef4e3a;
+  }
+  
+  .ic-select-box > div {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+  
+  .ic-select-box i {
+    font-size: 24px;
+  }
+  
+  .ic-select-box .ic-drag-y {
+    position: absolute;
+    pointer-events: auto;
+    background-color: #fff;
+    bottom: -7px;
+    left: 50%;
+    margin-left: -13px;
+  
+    background: url('/img/spacer-bar.png') no-repeat transparent;
+    width: 27px;
+    height: 11px;
+    background-size: 100%;
+  
+    cursor: ns-resize;
+    /*
+    width: 40px;
+    height: 16px;
+    border: 1px solid #4a87ee;
+    border-radius: 3px;
+    */
+  }
+  .ic-select-box .ic-drag-x {
+    position: absolute;
+    pointer-events: auto;
+    background-color: #fff;
+    top: 50%;
+    right: -8px;
+    margin-top: -20px;
+    height: 40px;
+    width: 16px;
+  
+    cursor: ew-resize;
+  
+    border: 1px solid #4a87ee;
+    border-radius: 3px;
+  }
+  
+  .ic-select-box .ic-drag-xy {
+    position: absolute;
+    pointer-events: auto;
+    background-color: #fff;
+    bottom: 0px;
+    right: 0px;
+    width: 8px;
+    height: 8px;
+    border-radius: 0px 0px 3px 0px;
+  
+    cursor: nwse-resize;
+  
+    border: 1px solid #4a87ee;
+  }
+  
+  .ic-select-box-can-delete a {
+    display: inline-block;
+  }
+  
+  .ic-hover-box {
+    pointer-events: none;
+    position: absolute;
+    border: 1px solid #4a87ee;
+    border-radius: 3px;
+    /*
+    padding: 5px;
+    margin-left: -5px;
+    margin-top: -5px;
+    */
+    z-index: 15;
+    box-sizing: border-box;
+    opacity: 0;
+  }
+  .ic-hover-box.active {
+    opacity: 1;
+    -webkit-transition: opacity 100ms ease-in-out;
+    transition: opacity 100ms ease-in-out;
+  }
+  
+  .ic-dragging {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 10;
+    /*-webkit-transition: 0.05s -webkit-transform linear;*/
+  }
