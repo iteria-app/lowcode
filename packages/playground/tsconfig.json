@@ -1,5 +1,5 @@
 {
-  "include": ["src", "types", "__tests__/transpilation.spec.ts"],
+  "include": ["src", "types", "__tests__/transpilation.spec.ts", "web_modules"],
   "compilerOptions": {
     "module": "esnext",
     "target": "esnext",

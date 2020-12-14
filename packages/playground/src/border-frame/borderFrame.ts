@@ -1,5 +1,7 @@
 import { cloneElement, removeElement } from '../util/cacheHandlers';
 import { getOffset } from '../util/highlight';
+import { svelteTranspileAndSaveToCache } from '../util/codeHandlers';
+
 interface HTMLBodyElementWithMeta extends HTMLBodyElement {
   __svelte_meta: {
     loc: {
@@ -12,15 +14,15 @@ interface HTMLBodyElementWithMeta extends HTMLBodyElement {
 }
 
 const iFrame = document.querySelector('iframe');
-const iFramePosition = iFrame?.getBoundingClientRect();
 const innerDoc = iFrame!.contentDocument || iFrame!.contentWindow!.document;
 
 export const addBorderFrame = (innerDoc: Document) => {
   const root = innerDoc.querySelector('body');
 
-  root?.addEventListener('mouseover', (e: MouseEvent) => {
+  root!.onmouseover = (e: MouseEvent) => {
+    const iFramePosition = iFrame?.getBoundingClientRect();
     const target = <HTMLBodyElementWithMeta>e.target;
-    if (target === root || !target) return;
+    if (target === root || !target || !target.__svelte_meta) return;
     const styles = getOffset(target);
 
     const mainDiv = document.getElementById('buttonContainer')!;
@@ -34,26 +36,59 @@ export const addBorderFrame = (innerDoc: Document) => {
 
     cloneIcon!.onclick = async () => {
       if (target.__svelte_meta) {
-        await cloneElement(target.__svelte_meta);
+        try {
+          const {
+            loc: { file },
+          } = target.__svelte_meta;
+          const newCode = await cloneElement(target.__svelte_meta);
+          if (newCode) {
+            svelteTranspileAndSaveToCache(newCode, file);
+          }
+        } catch (err) {
+          console.error('error transpiling svelte', err);
+        }
         iFrame?.contentWindow?.location.reload();
       } else console.warn('Something went wrong');
     };
 
     removeIcon!.onclick = async () => {
       if (target.__svelte_meta) {
-        await removeElement(target.__svelte_meta);
+        try {
+          const {
+            loc: { file },
+          } = target.__svelte_meta;
+          const newCode = await removeElement(target.__svelte_meta);
+          if (newCode) {
+            svelteTranspileAndSaveToCache(newCode, file);
+          }
+        } catch (err) {
+          console.error('error transpiling svelte', err);
+        }
         iFrame?.contentWindow?.location.reload();
       } else console.warn('Something went wrong');
     };
+
     mainDiv.setAttribute(
       'style',
       `height:${styles.height}px; width:${
         styles.width
       }px; transform:translate3d(${
-        styles.left + iFramePosition?.left - iFramePosition!.top
-      }px, ${styles.top}px, 0px)`,
+        window.innerWidth < 1080
+          ? styles.left + 2
+          : styles.left + iFramePosition?.left - iFramePosition!.top + 2
+      }px, ${
+        window.innerWidth < 1080
+          ? styles.top + iFramePosition!.top - iFramePosition!.left + 2
+          : styles.top + 2
+      }px, 0px)`,
     );
-  });
+  };
+  iFrame!.onmouseout = (e) => {
+    //@ts-ignore
+    if (e.relatedTarget?.tagName !== 'A') {
+      removeBorderFrame();
+    }
+  };
 };
 
 export const removeBorderFrame = () => {

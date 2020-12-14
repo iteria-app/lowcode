@@ -1,8 +1,8 @@
 import { cdnImports } from '../cdn';
 import { transpileEsbuild } from '../transpile';
-import { CONTROLLED, DEPENDENCIES } from '../constants';
-import { prefix, newJavaScriptResponse } from '../index';
-import { stripExtension } from './codeHandlers';
+import { CONTENT_TYPE_JS, CONTROLLED, DEPENDENCIES } from '../constants';
+import { prefix } from '../index';
+import { newCustomResponse } from './cacheHandlers';
 
 export const fetchProjectFromGitHub = async () => {
   const accessToken = prompt('Enter your GitHub access token');
@@ -21,14 +21,6 @@ export const fetchProjectFromGitHub = async () => {
       const { content } = await data.json();
       if (content) {
         const fileContent = atob(content);
-        // if (path.endsWith('js')) {
-        //   const jsPath = prefix(
-        //     CONTROLLED,
-        //     prefix('/', path.substring(0, path.length - '.js'.length)),
-        //   );
-        //   const sourceCdn = await cdnImports(fileContent);
-        //   cache.put(jsPath, newJavaScriptResponse(sourceCdn));
-        // } else
         if (
           path.endsWith('.js') ||
           path.endsWith('.ts') ||
@@ -45,12 +37,12 @@ export const fetchProjectFromGitHub = async () => {
 
             cache.put(
               prefix(CONTROLLED, prefix('/', transpiled.path)),
-              newJavaScriptResponse(sourceCdn.source),
+              newCustomResponse(sourceCdn.source, CONTENT_TYPE_JS),
             );
           }
         } else {
           if (fileContent) {
-            cache.put(path, newJavaScriptResponse(fileContent));
+            cache.put(path, newCustomResponse(fileContent, CONTENT_TYPE_JS));
           }
         }
       }
@@ -71,7 +63,7 @@ export const fixRelativePaths = async () => {
     const source = await res?.text();
     if (source) {
       const fixedSource = await relativePaths(source);
-      cache.put(key, newJavaScriptResponse(fixedSource));
+      cache.put(key, newCustomResponse(fixedSource, CONTENT_TYPE_JS));
     }
   }
 };
@@ -105,13 +97,13 @@ export const relativePaths = async (source: string) => {
 
 export const fetchDependenciesFromGitHub = async () => {
   const accessToken = prompt('Enter your GitHub access token');
-  const dependenciesUrl = `https://api.github.com/repos/mecirmartin/web_modules/git/trees/1d833fb5e6f74642836d2549b65963aa99051bd0?recursive=1?access_token=${accessToken}`;
+  const dependenciesUrl = `https://api.github.com/repos/mecirmartin/web_modules/git/trees/09837517aa12a0852ad54bcd7371651ce956a845?recursive=1?access_token=${accessToken}`;
   if (!accessToken) return;
 
   try {
     const data = await fetch(dependenciesUrl);
     const { tree } = await data.json();
-    const cache = await caches.open('dependencies');
+    const cache = await caches.open('web_modules');
     for (const { url, path } of tree) {
       const data = await fetch(`${url}?access_token=${accessToken}`);
 
@@ -120,14 +112,14 @@ export const fetchDependenciesFromGitHub = async () => {
         const fileContent = atob(content);
         if (path.endsWith('js')) {
           const jsPath = prefix(
-            DEPENDENCIES,
+            '/web_modules/',
             path.substring(0, path.length - '.js'.length),
           );
-          const code = fixDependencyImports(fileContent);
-          await cache.put(jsPath, newJavaScriptResponse(code));
+
+          cache.put(jsPath, newCustomResponse(fileContent, CONTENT_TYPE_JS));
         } else {
           if (fileContent) {
-            await cache.put(path, new Response(fileContent));
+            cache.put(path, newCustomResponse(fileContent, CONTENT_TYPE_JS));
           }
         }
       }
@@ -136,26 +128,4 @@ export const fetchDependenciesFromGitHub = async () => {
     console.log(error);
     throw new Error(error);
   }
-};
-
-const fixDependencyImports = (source: string) => {
-  const importMatches = source.match(
-    /import[^a-zA-Z0-9][^"']*["'][^\.][^"']*["']/gm,
-  );
-
-  for (let match of importMatches || []) {
-    const dependencyFirstQuote = match.lastIndexOf(
-      match[match.length - 1],
-      match.length - 2,
-    );
-    const dependencyPath = match.substring(
-      dependencyFirstQuote + 1,
-      match.length - 1,
-    );
-    const newDependencyPath = stripExtension(
-      dependencyPath.replace('/src/', DEPENDENCIES),
-    );
-    source = source.replaceAll(dependencyPath, newDependencyPath);
-  }
-  return source;
 };
