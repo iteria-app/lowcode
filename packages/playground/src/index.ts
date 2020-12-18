@@ -8,6 +8,7 @@ import {
   fetchProjectFromGitHub,
 } from './util/githubFetcher';
 import { newCustomResponse } from './util/cacheHandlers';
+import { fetchSvelteExample } from './util/svelteExamples';
 
 const refreshButton = document.getElementById(
   'refreshButton',
@@ -26,9 +27,14 @@ const githubProjectButton = document.getElementById('githubProjectButton');
 const githubDependenciesButton = document.getElementById(
   'githubDependenciesButton',
 );
+const svelteExample = document.getElementById('svelteExample');
 
 if (githubProjectButton) {
   githubProjectButton.onclick = async () => await fetchProjectFromGitHub();
+}
+
+if(svelteExample) {
+  svelteExample.onclick = async () => await fetchSvelteExample()
 }
 
 if (githubDependenciesButton) {
