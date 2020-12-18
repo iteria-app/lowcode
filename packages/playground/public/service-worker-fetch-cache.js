@@ -107,13 +107,13 @@ self.addEventListener('fetch', async function (event) {
           if (requestURL.pathname.startsWith('/dist/')) {
             if (requestURL.pathname === '/dist/imports.css') {
               const res = await cache.match(requestURL.pathname);
-              const content = await res.text();
+              const content = await res?.text();
               return newCustomResponse(content, 'text/css');
             } else {
               const modulesCache = await caches.open('web_modules');
               const newPath = requestURL.pathname.replace('/dist/', '');
               const res = await modulesCache.match(newPath);
-              const content = await res.text();
+              const content = await res?.text();
               return newCustomResponse(content, 'text/css');
             }
           } else return cache.match(requestURL.pathname);
