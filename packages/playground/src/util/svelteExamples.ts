@@ -10,6 +10,11 @@ export async function fetchSvelteExample(){
         let cssImports: Array<String> = [];
     console.log("Nested", nested.files)
     for(let file of nested.files){
+      // Put original svelte files to cache
+      // cache.put(
+      //   prefix(CONTROLLED, file.name),
+      //   newCustomResponse(file.source,CONTENT_TYPE_JS)
+      // )
         const transpiled = await transpileSvelte(file.source, file.name)
         console.log("transpiled", transpiled)
         const sourceCdn = await cdnImports(
@@ -18,11 +23,11 @@ export async function fetchSvelteExample(){
           );
         const copyCache = await caches.open('copy_cache');
       copyCache.put(
-        prefix(CONTROLLED, prefix('/', transpiled.path)),
+        prefix(CONTROLLED, transpiled.path),
         newCustomResponse(file.source, CONTENT_TYPE_JS),
       );
       cache.put(
-        prefix(CONTROLLED, prefix('/', transpiled.path)),
+        prefix('', transpiled.path),
         newCustomResponse(sourceCdn.source, CONTENT_TYPE_JS),
       );
       if (transpiled.css.code) {
@@ -33,7 +38,7 @@ export async function fetchSvelteExample(){
           )}";`,
         );
         cache.put(
-          prefix(CONTROLLED, prefix('/', `${transpiled.path}.css`)),
+          prefix(CONTROLLED, `${transpiled.path}.css`),
           newCustomResponse(transpiled.css.code, CONTENT_TYPE_CSS),
         );
       }
