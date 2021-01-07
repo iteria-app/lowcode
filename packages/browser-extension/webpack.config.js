@@ -184,8 +184,6 @@ module.exports = {
     new CopyWebpackPlugin({
       patterns: [
         {from: 'source/assets', to: 'assets'},
-        {from: 'views/vs/css/editor.main.css', to: 'vs/css/editor.main.css'},
-        {from: 'views/vs/base/browser/ui/codicons/codicon/codicon.ttf ', to: 'vs/base/browser/ui/codicons/codicon/codicon.ttf'}
       ],
     }),
     // plugin to enable browser reloading in development mode
