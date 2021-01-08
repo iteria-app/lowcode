@@ -34,7 +34,8 @@
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "webext-base-css": "^1.2.0",
-    "webextension-polyfill-ts": "^0.22.0"
+    "webextension-polyfill-ts": "^0.22.0",
+    "typescript": "^4.0.5"
   },
   "devDependencies": {
     "@abhijithvijayan/eslint-config": "2.5.6",
@@ -84,7 +85,6 @@
     "resolve-url-loader": "^3.1.2",
     "sass-loader": "^10.1.0",
     "terser-webpack-plugin": "^4.2.3",
-    "typescript": "^4.0.5",
     "webpack": "^4.44.2",
     "webpack-cli": "^4.2.0",
     "webpack-extension-reloader": "^1.1.4",
