@@ -23,7 +23,7 @@ app.get("/files/:path(*)", (req: Request, res: Response) => {
   }
 })
 
-app.put("/files/:path", (req, res) => {
+app.put("/files/:path(*)", (req, res) => {
   try {
     console.log("put file", req.params)
     req.pipe(fs.createWriteStream(req.params.path))
