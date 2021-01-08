@@ -71,7 +71,7 @@
       "http://*/*",
       "https://*/*"
     ],
-    "css": ["vs/css/editor.main.css"],
+    "css": [],
     "js": [
       "js/contentScript.bundle.js"
     ]    

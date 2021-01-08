@@ -15,6 +15,9 @@ browser.devtools.panels
     var data: any[] = [];
     var port = browser.runtime.connect(/*'devtools'*/);
 
+
+   
+
     function do_something(msg: any) {
       const rootElement = panelWindow.document.getElementById("devtools-root");
       if (msg?.event == "inspectedElementSource") {
@@ -59,6 +62,8 @@ browser.devtools.panels
       extensionPanel.onShown.removeListener(tmp); // Run once only
       panelWindow = aPanelWindow;
 
+      
+
       // Release queued data
       let msg;
       while ((msg = data.shift())) {
@@ -70,6 +75,19 @@ browser.devtools.panels
       //  port.postMessage(msg);
       //};
 
+      // const editorRef = React.createRef();
+      // const editor = editorRef.current
+      // if(editor){
+      //   editor.focus()
+      // }
+      
+      const editorElement = panelWindow.document.getElementById("editor");
+      if(editorElement){
+      // editorElement.focus()
+      // editorElement.innerHTML = "console.log"
+      
+      }
+         
       const rootElement = panelWindow.document.getElementById("devtools-root");
       console.log("rootElement", rootElement);
       if (rootElement) {
