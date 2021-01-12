@@ -6,12 +6,13 @@
     <title>DevTools</title>
     <link rel="stylesheet" href="vs/css/editor.main.css" />
     <script type="module" src="https://cdn.jsdelivr.net/gh/vanillawc/wc-monaco-editor@1/index.js"></script>
+    <script type="module" src="../source/DevToolScript/wcEditor.js"></script>
   </head>
   <body>Write your code 
     <div id="devtools-root"></div>
     <div id="monaco-editor"></div> 
     <div>
-    <wc-monaco-editor language="typescript" style="height: 50vh; width: 100%;"></wc-monaco-editor>
+    <wc-monaco-editor language="typescript" style="height: 80vh; width: 100%;" ref="monacoEditorRef" editor src="console.log('Hey')"></wc-monaco-editor>
   </div>
   </body>
 </html>
