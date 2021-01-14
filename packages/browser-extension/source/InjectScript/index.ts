@@ -1,6 +1,14 @@
-import { Project } from "ts-morph"
+import {
+  JsxAttribute,
+  JsxAttributedNode,
+  JsxSelfClosingElement,
+  Project,
+} from "ts-morph"
+import ts, { JsxAttributes, JsxAttributeLike } from "typescript"
 import { DevTools } from "../devtools"
+import { astFindSource } from "../tsx/ast"
 import { addCodeSnippet, findElementInCode, tsClone } from "../tsx/clone"
+import { createAst } from "../tsx/createSourceFile"
 
 const project = new Project()
 
@@ -96,6 +104,30 @@ window.addEventListener("message", async event => {
         })
         if (!routeCode) return console.error("Element was not found in code")
 
+        const ast = createAst(code)
+
+        // const syntaxToKind = (kind: ts.Node["kind"]) => {
+        //   return ts.SyntaxKind[kind]
+        // }
+        // // visit each node in the root AST and log its kind
+        // ts.forEachChild(ast!, node => {
+        //   console.log(syntaxToKind(node.kind))
+        // })
+
+        //Tryout zone
+        const node: any = await astFindSource(code, {
+          fileName,
+          columnNumber,
+          lineNumber,
+        })
+        console.log("toto", node.attributes)
+        const attributes: JsxAttributes = node.attributes
+        attributes.forEachChild((node: any) => {
+          if (node.name === "component") {
+            console.log("rovnasa")
+          }
+        })
+
         // Prompt for new page name
         const newPageName = window.prompt("New page name")
         if (!newPageName) return
@@ -108,7 +140,7 @@ window.addEventListener("message", async event => {
           newPath
         )
         // Replace component attribute
-        newRoute = newRoute.replace(/component(\s*)=(\s*){.*}/g, newComponent)
+        newRoute = newRoute.replace(/(component(\s*)=(\s*)){.*}/g, newComponent)
         let newCode = await addCodeSnippet(
           code,
           { fileName, columnNumber, lineNumber },
