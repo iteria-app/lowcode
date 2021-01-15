@@ -8,7 +8,7 @@ const Popup: React.FC = () => {
   return (
     <section id="popup">
       {/* <Editor height="90vh" language="typescript"  value="console.log('hello')"/> */}
-      <h3>End of page</h3>
+      {/* <h3>End of page</h3> */}
     </section>
   );
 };

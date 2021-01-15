@@ -2,7 +2,6 @@ import { browser } from "webextension-polyfill-ts";
 import * as React from 'react';
 import ReactDOM from 'react-dom';
 import App from './App';
-//import { editor } from "monaco-editor";
 //@ts-ignore
 import {WCMonacoEditor} from './wcEditor'
 //import { editor } from "monaco-editor";
@@ -26,6 +25,7 @@ browser.devtools.panels
 
     function do_something(msg: any) {
       const rootElement = panelWindow.document.getElementById("devtools-root");
+      const saveButton = panelWindow.document.getElementById('saveButton');
       const columnNumber = msg?.payload?.value?.source?.columnNumber
       const lineNumber = msg?.payload?.value?.source?.lineNumber
       console.log("Column Number", columnNumber, "Line Number", lineNumber)
@@ -34,6 +34,10 @@ browser.devtools.panels
       if (msg?.event == "inspectedElementSource") {
         
       }
+      const pathFile = msg?.fileUrl
+      const path = pathFile.substring(8)
+      console.log("Path", path, "type", typeof(path))
+      
       if(editorElement){
       console.log("Editor", editor)
        editorElement.src = msg?.body
@@ -41,14 +45,17 @@ browser.devtools.panels
        console.log("MODEL", msg, "Payload",JSON.stringify(msg?.payload))
        editor.focus();
        editor.revealLineInCenter(lineNumber + 4);
-        // const startOfTheLine = editor
-        //   .getModel()
-        //   .getLineFirstNonWhitespaceColumn(lineNumber + 1);
         editor.setPosition({
           lineNumber: 60,
           column: 40,
         });
         console.log("Position", editor.getPosition(), "Model", editor.getModel())
+
+        if(saveButton){
+          saveButton.addEventListener('click', () => {
+            fetch(`http://localhost:7500/files/${path}`, {method:'PUT', body:editorElement.value})
+          })
+        }
       }
 
       if (msg?.event === "inspectedElement") {
@@ -60,14 +67,16 @@ browser.devtools.panels
              editorElement.value = msg?.body
              editor.focus();
        editor.revealLineInCenter(lineNumber + 4);
-        // const startOfTheLine = editor
-        //   .getModel()
-        //   .getLineFirstNonWhitespaceColumn(lineNumber + 1);
         editor.setPosition({
           lineNumber: 60,
           column: 40,
         });
         console.log("Position", editor.getPosition(), "Model", editor.getModel())
+        if(saveButton){
+          saveButton.addEventListener('click', () => {
+            fetch(`http://localhost:7500/files/${path}`, {method:'PUT', body:editorElement.value})
+          })
+        }
             }
         }
       }
@@ -105,11 +114,12 @@ browser.devtools.panels
       //panelWindow.respond = function (msg) {
       //  port.postMessage(msg);
       //};
+      
          
       const rootElement = panelWindow.document.getElementById("devtools-root");
       console.log("rootElement", rootElement);
       if (rootElement) {
-        rootElement.innerHTML = "ahoj " + new Date();
+        //rootElement.innerHTML = "ahoj " + new Date();
       }
 
       const monacoElement = panelWindow.document.getElementById("monaco-editor");
