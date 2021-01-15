@@ -20,10 +20,11 @@ How it works:
 
 ### Edit code directly in Chrome
 
-![](name-of-giphy.gif)
+![](https://github.com/zadubanm02/lowcode/blob/readme/packages/browser-extension/.github/Extension.gif)
 
 ### Add new page to your app without writing code
 
+![](https://github.com/zadubanm02/lowcode/blob/readme/packages/browser-extension/.github/Newpage.gif)
 ## Getting started
 
 Chrome Extension
