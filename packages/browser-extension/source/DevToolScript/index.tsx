@@ -2,6 +2,11 @@ import { browser } from "webextension-polyfill-ts";
 import * as React from 'react';
 import ReactDOM from 'react-dom';
 import App from './App';
+//@ts-ignore
+import {WCMonacoEditor} from './wcEditor'
+//import { editor } from "monaco-editor";
+
+
 
 console.log("[lowcode] devtools.js A");
 
@@ -15,34 +20,71 @@ browser.devtools.panels
     var data: any[] = [];
     var port = browser.runtime.connect(/*'devtools'*/);
 
+
+   
+
     function do_something(msg: any) {
       const rootElement = panelWindow.document.getElementById("devtools-root");
+      const saveButton = panelWindow.document.getElementById('saveButton');
+      const columnNumber = msg?.payload?.value?.source?.columnNumber
+      const lineNumber = msg?.payload?.value?.source?.lineNumber
+      console.log("Column Number", columnNumber, "Line Number", lineNumber)
+      const editorElement:WCMonacoEditor = panelWindow.document.getElementById("editor");  
+      const editor = editorElement.editor
       if (msg?.event == "inspectedElementSource") {
-        if (rootElement) {
-          rootElement.innerHTML =
-            "inspectedElementSource" + JSON.stringify(msg);
+        
+      }
+      const pathFile = msg?.fileUrl
+      const path = pathFile.substring(8)
+      console.log("Path", path, "type", typeof(path))
+      
+      if(editorElement){
+      console.log("Editor", editor)
+       editorElement.src = msg?.body
+       editorElement.value = msg?.body
+       console.log("MODEL", msg, "Payload",JSON.stringify(msg?.payload))
+       editor.focus();
+       editor.revealLineInCenter(lineNumber + 4);
+        editor.setPosition({
+          lineNumber: 60,
+          column: 40,
+        });
+        console.log("Position", editor.getPosition(), "Model", editor.getModel())
+
+        if(saveButton){
+          saveButton.addEventListener('click', () => {
+            fetch(`http://localhost:7500/files/${path}`, {method:'PUT', body:editorElement.value})
+          })
         }
       }
 
       if (msg?.event === "inspectedElement") {
-        console.log("rootElement", rootElement);
+        console.log("Editor", editor)
         if (rootElement) {
-          rootElement.innerHTML =
-            "inspected3b " +
-            new Date() +
-            JSON.stringify({
-              displayName: msg?.payload?.value?.displayName,
-              source: msg?.payload?.value?.source,
-              props: msg?.payload?.value?.props,
-              owners: msg?.payload?.value?.props,
-            });
+          if(editorElement){
+            editor.focus();
+             editorElement.src = msg?.body
+             editorElement.value = msg?.body
+             editor.focus();
+       editor.revealLineInCenter(lineNumber + 4);
+        editor.setPosition({
+          lineNumber: 60,
+          column: 40,
+        });
+        console.log("Position", editor.getPosition(), "Model", editor.getModel())
+        if(saveButton){
+          saveButton.addEventListener('click', () => {
+            fetch(`http://localhost:7500/files/${path}`, {method:'PUT', body:editorElement.value})
+          })
+        }
+            }
         }
       }
     }
 
     port.onMessage.addListener(function (msg) {
       console.log("devtools.js message", msg);
-
+      
       // Write information to the panel, if exists.
       // If we don't have a panel reference (yet), queue the data.
       if (panelWindow) {
@@ -59,6 +101,9 @@ browser.devtools.panels
       extensionPanel.onShown.removeListener(tmp); // Run once only
       panelWindow = aPanelWindow;
 
+      const editorElement:WCMonacoEditor = panelWindow.document.getElementById("editor");  
+      editorElement.editor.focus()
+
       // Release queued data
       let msg;
       while ((msg = data.shift())) {
@@ -69,11 +114,12 @@ browser.devtools.panels
       //panelWindow.respond = function (msg) {
       //  port.postMessage(msg);
       //};
-
+      
+         
       const rootElement = panelWindow.document.getElementById("devtools-root");
       console.log("rootElement", rootElement);
       if (rootElement) {
-        rootElement.innerHTML = "ahoj " + new Date();
+        //rootElement.innerHTML = "ahoj " + new Date();
       }
 
       const monacoElement = panelWindow.document.getElementById("monaco-editor");
@@ -84,3 +130,4 @@ browser.devtools.panels
 
     //newPanel.onHidden.addListener
   });
+
