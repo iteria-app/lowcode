@@ -4,9 +4,6 @@ import ReactDOM from 'react-dom';
 import App from './App';
 //@ts-ignore
 import {WCMonacoEditor} from './wcEditor'
-//import { editor } from "monaco-editor";
-
-
 
 console.log("[lowcode] devtools.js A");
 
@@ -19,9 +16,6 @@ browser.devtools.panels
 
     var data: any[] = [];
     var port = browser.runtime.connect(/*'devtools'*/);
-
-
-   
 
     function do_something(msg: any) {
       const rootElement = panelWindow.document.getElementById("devtools-root");
@@ -36,22 +30,22 @@ browser.devtools.panels
       }
       const pathFile = msg?.fileUrl
       const path = pathFile.substring(8)
-      console.log("Path", path, "type", typeof(path))
+      console.log("Path", path)
       
-      if(editorElement){
+      if (editorElement) {
       console.log("Editor", editor)
        editorElement.src = msg?.body
        editorElement.value = msg?.body
        console.log("MODEL", msg, "Payload",JSON.stringify(msg?.payload))
        editor.focus();
        editor.revealLineInCenter(lineNumber + 4);
-        editor.setPosition({
+       editor.setPosition({
           lineNumber: 60,
           column: 40,
         });
         console.log("Position", editor.getPosition(), "Model", editor.getModel())
 
-        if(saveButton){
+        if (saveButton) {
           saveButton.addEventListener('click', () => {
             fetch(`http://localhost:7500/files/${path}`, {method:'PUT', body:editorElement.value})
           })
@@ -61,23 +55,23 @@ browser.devtools.panels
       if (msg?.event === "inspectedElement") {
         console.log("Editor", editor)
         if (rootElement) {
-          if(editorElement){
-            editor.focus();
+          if (editorElement) {
+             editor.focus();
              editorElement.src = msg?.body
              editorElement.value = msg?.body
              editor.focus();
-       editor.revealLineInCenter(lineNumber + 4);
-        editor.setPosition({
-          lineNumber: 60,
-          column: 40,
-        });
-        console.log("Position", editor.getPosition(), "Model", editor.getModel())
-        if(saveButton){
-          saveButton.addEventListener('click', () => {
-            fetch(`http://localhost:7500/files/${path}`, {method:'PUT', body:editorElement.value})
-          })
-        }
+             editor.revealLineInCenter(lineNumber + 4);
+             editor.setPosition({
+              lineNumber: 60,
+              column: 40,
+             });
+            console.log("Position", editor.getPosition(), "Model", editor.getModel())
+            if(saveButton){
+              saveButton.addEventListener('click', () => {
+                fetch(`http://localhost:7500/files/${path}`, {method:'PUT', body:editorElement.value})
+             })
             }
+          }
         }
       }
     }
@@ -114,20 +108,12 @@ browser.devtools.panels
       //panelWindow.respond = function (msg) {
       //  port.postMessage(msg);
       //};
-      
-         
-      const rootElement = panelWindow.document.getElementById("devtools-root");
-      console.log("rootElement", rootElement);
-      if (rootElement) {
-        //rootElement.innerHTML = "ahoj " + new Date();
-      }
-
+  
       const monacoElement = panelWindow.document.getElementById("monaco-editor");
       if (monacoElement) {
         ReactDOM.render(<App />, monacoElement);
       }
     });
 
-    //newPanel.onHidden.addListener
   });
 
