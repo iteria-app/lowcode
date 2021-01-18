@@ -9,9 +9,6 @@ How it works:
 3. Use Visual Editor in your Chrome/Edge/Firefox.
 4. Recompile ...
 
-## Architecture
-
-![](/packages/browser-extension/.github/Architecture.png)
 
 ## Features of Lowcode
 
@@ -24,11 +21,11 @@ How it works:
 
 ### Edit the source code directly in Chrome
 
-![](https://github.com/iteria-ui/lowcode/tree/master/packages/browser-extension/.github/Extension.gif)
+![](/packages/browser-extension/.github/Extension.gif)
 
 ### Add a new page to your app without writing code
 
-![](https://github.com/iteria-ui/lowcode/tree/master/packages/browser-extension/.github/Newpage.gif)
+![](/packages/browser-extension/.github/Newpage.gif)
 
 ## Getting started
 
@@ -72,3 +69,7 @@ Chrome extensions
 #### [Chrome Extension](https://github.com/iteria-ui/lowcode/tree/master/packages/browser-extension)
 
 #### [FS over HTTP](https://github.com/iteria-ui/lowcode/tree/master/packages/fs-over-http)
+
+## Architecture
+
+![](/packages/browser-extension/.github/Architecture.png)
