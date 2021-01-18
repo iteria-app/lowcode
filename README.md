@@ -11,7 +11,7 @@ How it works:
 
 ## Architecture
 
-![](https://github.com/iteria-ui/lowcode/tree/master/packages/browser-extension/.github/Architecture.png)
+![](/packages/browser-extension/.github/Architecture.png)
 
 ## Features of Lowcode
 
