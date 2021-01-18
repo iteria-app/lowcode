@@ -12,8 +12,8 @@ How it works:
 
 ## Features of Lowcode
 
-- Navigate to the source code (a specific file)
-- Edit the source code directly in Chrome
+- Navigate to the source code (a specific JSX/TSX file) while browsing your React application in developmen mode
+- Edit the source code directly in Chrome "visualy" or by using Monaco Editor
 - Add a new page to your app without writing code
 - We support React + React-router (UI toolkits: Material-UI, Ionic, Semantic UI, Ant Design, Grommet)
 
@@ -68,10 +68,6 @@ Chrome extensions
 - Lowcode listens for message "inspectedElement" from React Deveoper Tools are sending 
 - Using Lowcode you can modify JSX/TSX source code either "visualy" (more features will come) or by integrade Monaco editor
 - Web Pack Dev serer will recompile (tested also with Hot Code Replace)
-
-#### 
-
-#### 
 
 ## Architecture
 
