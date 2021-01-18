@@ -7,6 +7,10 @@ export interface SourceLineCol {
   columnNumber: number
 }
 
+export interface Attribute {
+  [name: string]: string
+}
+
 export function codeStart(code: string, source: SourceLineCol) {
   const sourceLines = code.split("\n")
   if (source.lineNumber > 0 && source.lineNumber < sourceLines.length) {
@@ -37,7 +41,7 @@ export async function astFindStart(code: string, start: number) {
 
     return null
   }
-  const ast = await createAst(code)
+  const ast = createAst(code)
   if (ast) {
     const found = ts.forEachChild(ast, callback)
     return found
@@ -57,4 +61,28 @@ export async function astFindSource(code: string, source: SourceLineCol) {
   }
 
   return null
+}
+
+export const jsxElementGetAttributes = (node: ts.JsxOpeningLikeElement) => {
+  const attributes: Array<Attribute> = []
+
+  node.attributes.forEachChild((a: unknown) => {
+    const attribute = a as ts.JsxAttribute
+    const { initializer } = attribute
+
+    if (!initializer) return
+
+    if (initializer && ts.isStringLiteral(initializer)) {
+      attributes.push({
+        [attribute.name.text]: initializer.text,
+      })
+    } else if (initializer && ts.isJsxExpression(initializer)) {
+      attributes.push({
+        [attribute.name.text]:
+          //@ts-ignore
+          initializer.expression?.escapedText,
+      })
+    }
+  })
+  return attributes
 }

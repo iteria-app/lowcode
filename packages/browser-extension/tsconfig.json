@@ -13,7 +13,8 @@
 		/* Additional Checks */
 		"useDefineForClassFields": true,
 		"skipLibCheck": true,
-		"noUnusedLocals": false
+		"noUnusedLocals": false,
+		"noImplicitReturns":false
 	},
 	"include": [
 		"source",
