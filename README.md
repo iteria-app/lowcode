@@ -35,7 +35,7 @@ Chrome extensions
 
 - React Developer Tools Chrome extension [React devtools in marketplace](https://chrome.google.com/webstore/detail/react-developer-tools/fmkadmapgofadopljbjfkapdkoienihi?hl=en)
 
-2. Install our chrome extension
+2. Install [Lowcode Chrome Extension](https://github.com/iteria-ui/lowcode/tree/master/packages/browser-extension)
 
 - Go to /packages/browser-extension
 - `yarn install` to install dependencies.
@@ -51,24 +51,27 @@ Chrome extensions
 - Click on the `Load Unpacked Extension…` button.
 - Select your extension’s extracted directory.
 
-3. Start fs over http (used for saving modified source code)
+3. Start [FS over HTTP](https://github.com/iteria-ui/lowcode/tree/master/packages/fs-over-http) (used for saving modified source code)
 
 - `cd packages/fs-over-http`
 - `yarn install` to install dependencies.
 - `yarn start` to start the project.
 
-4. Fetch project from your Github/Gitlab (or run project locally)
+4. Start your reat applicantion in development mode and open in browser
+- Use your React Aplication or use example React Application https://github.com/ionic-team/ionic-react-conference-app
+- Start local webpack dev server 
 
 ## How it works
 
-- Service worker will transpile your React/Svelte code
-- With help from ReactDevtools "inspectedElement" we can manipulate with the selected component
-- Edit selected component with visual tools or edit code with browser-extension
-- Dev tools server will recompile (tested also with Hot Code Replace)
+- Babel plugin (used out of the box in Create React Application boilerplate) enriches the javascript with `__source` property (sorce code path, line and column)
+- We have reused React Developer Tools Chrome extension
+- Lowcode listens for message "inspectedElement" from React Deveoper Tools are sending 
+- Using Lowcode you can modify JSX/TSX source code either "visualy" (more features will come) or by integrade Monaco editor
+- Web Pack Dev serer will recompile (tested also with Hot Code Replace)
 
-#### [Chrome Extension](https://github.com/iteria-ui/lowcode/tree/master/packages/browser-extension)
+#### 
 
-#### [FS over HTTP](https://github.com/iteria-ui/lowcode/tree/master/packages/fs-over-http)
+#### 
 
 ## Architecture
 
