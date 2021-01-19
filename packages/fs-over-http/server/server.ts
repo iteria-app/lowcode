@@ -15,20 +15,19 @@ app.get("", (_, res) => {
 })
 
 app.get("/files/:path(*)", (req: Request, res: Response) => {
-  console.log("skrrr", req.params.path)
   try {
     res.sendFile(req.params.path)
   } catch (err) {
-    res.status(500).json({ err: "Something went wrong" })
+    res.status(500).json({ err: "Something went wrong" }).send()
   }
 })
 
 app.put("/files/:path(*)", (req, res) => {
   try {
-    console.log("put file", req.params)
+    console.log("put file", req.params.path)
     req.pipe(fs.createWriteStream(req.params.path))
     //fs.writeFileSync(req.params.path, req.body)
-    res.json({}).send()
+    return res.json({ message: "Success" }).send()
   } catch (err) {
     res.status(500).send()
   }
