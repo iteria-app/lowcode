@@ -1,10 +1,11 @@
+import ts from "typescript"
 import { SourceLineCol, astFindSource } from "./ast"
+import { createAst } from "./createSourceFile"
+import { isInsideMapPatternFunction } from "./mapRecognition"
+import { addElementsToAST } from "./transformer"
 
-export const findElementInCode = async (
-  code: string,
-  source: SourceLineCol
-) => {
-  const found = await astFindSource(code, source)
+export const findElementInCode = (code: string, source: SourceLineCol) => {
+  const found = astFindSource(code, source)
   if (found) {
     const before = code.substring(0, found.end)
 
@@ -15,12 +16,12 @@ export const findElementInCode = async (
   return null
 }
 
-export const addCodeSnippet = async (
+export const addCodeSnippet = (
   code: string,
   source: SourceLineCol,
   codeSnippet: string
 ) => {
-  const found = await astFindSource(code, source)
+  const found = astFindSource(code, source)
   if (found) {
     const before = code.substring(0, found.end)
     const after = code.substring(found.end)
@@ -31,12 +32,8 @@ export const addCodeSnippet = async (
   return null
 }
 
-export async function tsClone(
-  code: string,
-  source: SourceLineCol,
-  filePath: string
-) {
-  const found = await astFindSource(code, source)
+export function tsClone(code: string, source: SourceLineCol, filePath: string) {
+  const found = astFindSource(code, source)
   if (found) {
     if (found) {
       console.log(
@@ -60,4 +57,20 @@ export async function tsClone(
   }
 
   return null
+}
+
+export const cloneElementInAst = (code: string, source: SourceLineCol) => {
+  const node = astFindSource(code, source)
+  const ast = createAst(code)
+  if (!node || !ast) return null
+  // TODO this should return only when the component is root component of map function(it has a key)
+  if (isInsideMapPatternFunction(node))
+    return alert(
+      "You are trying to clone element which is inside map function, this could clone multiple elements on this page"
+    )
+  // If node is parenthesized expression, strip parentheses so cloned node won't be wrapped in them
+  const finalNode = ts.isParenthesizedExpression(node) ? node.expression : node
+
+  const alteredAst = addElementsToAST(ast, finalNode.pos, [finalNode])
+  return alteredAst
 }

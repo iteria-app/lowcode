@@ -11,7 +11,10 @@ export interface Attribute {
   [name: string]: string
 }
 
-export function codeStart(code: string, source: SourceLineCol) {
+export const startOfJsxNode = (code: string, source: SourceLineCol) =>
+  startOfJsxIdentifier(code, source)! - 1
+
+export function startOfJsxIdentifier(code: string, source: SourceLineCol) {
   const sourceLines = code.split("\n")
   if (source.lineNumber > 0 && source.lineNumber < sourceLines.length) {
     const lineIndex = source.lineNumber - 1
@@ -21,6 +24,9 @@ export function codeStart(code: string, source: SourceLineCol) {
       start += line.length + 1
     }
     start += source.columnNumber - 1
+    // Here i intentionaly add 1 to the start variable to move from start of JSXElement
+    // to start of StringLiteral, because of discovered bug in typescript AST
+    start += 1
 
     return start
   }
@@ -28,12 +34,13 @@ export function codeStart(code: string, source: SourceLineCol) {
   return null
 }
 
-export async function astFindStart(code: string, start: number) {
+export function astFindStart(code: string, start: number) {
+  const ast = createAst(code)
   const callback = (node: ts.Node) => {
     const nodeStart = node.pos
     if (nodeStart <= start && start <= node.end) {
-      if (nodeStart == start) {
-        //node.kind == ts.SyntaxKind.JsxElement
+      if (nodeStart === start) {
+        // node.kind == ts.SyntaxKind.JsxElement
         return node
       }
       return ts.forEachChild<ts.Node>(node, callback)
@@ -41,7 +48,6 @@ export async function astFindStart(code: string, start: number) {
 
     return null
   }
-  const ast = createAst(code)
   if (ast) {
     const found = ts.forEachChild(ast, callback)
     return found
@@ -50,10 +56,22 @@ export async function astFindStart(code: string, start: number) {
   return null
 }
 
-export async function astFindSource(code: string, source: SourceLineCol) {
+export const codeStart = (code: string, source: SourceLineCol) => {
+  const identifierStart = startOfJsxIdentifier(code, source)
+  if (!identifierStart) return null
+  const identifierNode = astFindStart(code, identifierStart)
+  if (!identifierNode) return null
+  // return pos of parent if element is self closing element, otherwise return position of grandparent
+  if (ts.isJsxSelfClosingElement(identifierNode.parent))
+    return identifierNode.parent.pos
+  if (ts.isJsxOpeningElement(identifierNode.parent))
+    return identifierNode.parent.parent.pos
+}
+
+export function astFindSource(code: string, source: SourceLineCol) {
   const start = codeStart(code, source)
   if (start) {
-    const found = await astFindStart(code, start)
+    const found = astFindStart(code, start)
     return found
     //sourceLines.splice(lineIndex, 0, sourceLine);
     //const newContent = sourceLines.join('\n');
