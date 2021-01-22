@@ -9,9 +9,13 @@ import {
 export const isValidJsxElement = (node: ts.Node) =>
   ts.isJsxOpeningLikeElement(node) || ts.isJsxElement(node)
 
-export const findComponentNameInAttributes = (attributes: Array<Attribute>) =>
-  attributes.find(a => a.component)?.component
-
+export const findAttributeByName = (
+  attributes: Array<Attribute>,
+  attributeName: string
+) => {
+  const attribute = attributes.find(a => a[attributeName])
+  return attribute ? attribute[attributeName] : null
+}
 export const castRouteNodeToProperType = (node: ts.Node) => {
   const castedNode = node as ts.JsxOpeningLikeElement | ts.JsxElement
   if (ts.isJsxOpeningLikeElement(castedNode)) {
