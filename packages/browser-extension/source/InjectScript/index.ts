@@ -1,5 +1,6 @@
+import { cloneRoute, cloneElement } from "../cloneElements"
 import { DevTools } from "../devtools"
-import { tsClone } from "../tsx/clone"
+import { readFile } from "../util/helperFunctions"
 
 window.addEventListener("message", async event => {
   if (
@@ -13,21 +14,31 @@ window.addEventListener("message", async event => {
       fileName,
       lineNumber,
     } = event?.data?.payload?.payload?.value?.source
-
     const devTools = new DevTools(window.__REACT_DEVTOOLS_GLOBAL_HOOK__)
     const ownerList = devTools.getOwnersList(id)
-    if (ownerList && columnNumber && fileName && lineNumber) {
-      console.log("Mam vsetky", ownerList, columnNumber, fileName, lineNumber)
 
-      const res = await fetch(`http://localhost:7500/files/${fileName}`)
-      const code = await res.text()
-      const cloned = await tsClone(
-        code,
-        { columnNumber, fileName, lineNumber },
-        fileName
-      )
-      console.log(code, cloned)
+    const code = await readFile(fileName).catch(err => {
+      throw new Error(err)
+    })
+
+    if (ownerList && columnNumber && fileName && lineNumber && code) {
+      console.log(ownerList, columnNumber, fileName, lineNumber, event)
+
+      if (ownerList[ownerList.length - 1].displayName === "Route") {
+        cloneRoute(code, { columnNumber, lineNumber, fileName })
+      } else if (
+        ownerList[ownerList.length - 1].displayName === "IonTabButton"
+      ) {
+        // TODO Somehow obtain source from Route at which IonTabButton points, then clone
+        const href = event?.data?.payload?.payload?.value?.props?.data?.href
+        console.log(href)
+        window.location.pathname = href
+        const something = event?.data?.payload?.payload?.value?.id
+        console.log(something)
+        devTools.inspectElementDevId(something)
+      } else {
+        cloneElement(code, { columnNumber, lineNumber, fileName })
+      }
     }
   }
 })
-export {}
