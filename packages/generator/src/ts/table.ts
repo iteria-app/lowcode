@@ -1,15 +1,8 @@
-//import { Node, Symbol } from './ast'
-
 import { TsxWriter, TagBuilder, Callback, TagBuilderWriter } from './writer'
 
 function component(componentName: string, packageName: string) {
     return { componentName, packageName: packageName + componentName }
 }
-
-//TableContainer 
-//TableHead 
-// 
-//TableFooter
 
 const muiCore = '@material-ui/core/'
 
@@ -22,7 +15,7 @@ export interface CellBuilder extends TagBuilder {
 }
 
 export class TableGenerator {
-    //componentTableContainer = component('TableContainer', muiCore)
+    // TODO componentTableContainer = component('TableContainer', muiCore)
     componentTable = component('Table', muiCore)
     componentTableRow = component('TableRow', muiCore)
     componentTableCell = component('TableCell', muiCore)
@@ -76,25 +69,6 @@ class RowBuilderWriter extends TagBuilderWriter {
         })
         this.codeBlockWriter.write('</')
         //this.codeBlockWriter.write('TableRow')
-        this.codeBlockWriter.write('>')
-    }
-}
-
-class CellBuilderWriter extends TagBuilderWriter {
-    gen: TsxWriter
-
-    constructor(gen: TsxWriter) {
-        super(gen.codeBlockWriter)
-        this.gen = gen
-    }
-
-    cell(build: (tag: TagBuilder) => void): void {
-        this.codeBlockWriter.write('<')
-        this.codeBlockWriter.write('TableCell')
-        build(new TagBuilderWriter(this.gen.codeBlockWriter))
-        this.codeBlockWriter.write('>')
-        this.codeBlockWriter.write('</')
-        this.codeBlockWriter.write('TabeCell')
         this.codeBlockWriter.write('>')
     }
 }

@@ -1,7 +1,73 @@
-import { Project, StructureKind } from "ts-morph"
+// TODO https://github.com/vvakame/typescript-formatter/blob/master/lib/formatter.ts
+import { Project } from "ts-morph"
+import ts, { factory } from "typescript"
+import { createJsxElement } from './components'
+import { tagformatProperty } from './typeAlias'
+import grommetTable from '../react/grommet/table'
 import { graphqlGenTs1 } from "./typeAlias.example"
 
+export function createAst(
+  code: string,
+  scriptTarget = ts.ScriptTarget.ESNext,
+  scriptKind = ts.ScriptKind.TSX,
+  filePath = `/ts-ast-viewer.tsx`
+) {
+  return ts.createSourceFile(
+    filePath,
+    code,
+    scriptTarget,
+    true,
+    scriptKind
+  )
+}
+
 test("typeAlias test 1", () => {
+  const sourceFile = createAst('')
+  const myClassFile = parseGraphqlTypes(graphqlGenTs1)
+  const typeAlias = myClassFile.getTypeAlias("Parent")
+  const props = typeAlias?.getType()?.getProperties()
+
+  const node = createJsxElement(grommetTable.table, [],
+    [createJsxElement(grommetTable.row, [],
+      props?.map(prop =>
+        createJsxElement(grommetTable.cell, [], [
+          factory.createJsxText(
+            prop.getName(),
+            false
+          ),
+          ...tagformatProperty(prop, prop.getTypeAtLocation(myClassFile))
+        ])
+        //factory.createIdentifier("date")
+        //factory.createStringLiteral("greeting")
+        /*
+        factory.createObjectLiteralExpression(
+                            [factory.createShorthandPropertyAssignment(
+                                factory.createIdentifier("name"),
+                                undefined
+                            )],
+                            false
+                        )
+        */
+      )
+    )]
+  )
+  /*ts.transform(sourceFile, [
+      (context) => (node) => {
+        return ts.visitNode(node, n => {
+          return node
+        })
+      }
+    ])*/
+  const printer = ts.createPrinter()
+  console.log(
+    'sevas',
+    //transformed.transformed[0]
+    //.printFile(transformed.transformed[0])
+    console.log(printer.printNode(ts.EmitHint.Unspecified, node, sourceFile))
+  )
+})
+
+function parseGraphqlTypes(sourceCode: string) {
   // initialize
   const project = new Project({
     // Optionally specify compiler options, tsconfig.json, in-memory file system, and more here.
@@ -12,60 +78,6 @@ test("typeAlias test 1", () => {
 
   // add source files
   //project.addSourceFilesAtPaths("src/**/*.ts");
-  const myClassFile = project.createSourceFile("src/types.ts", graphqlGenTs1)
-
-  // get information
-  const typeAlias = myClassFile.getTypeAlias("Parent")
-  if (typeAlias) {
-    typeAlias.getName() // returns: "MyClass"
-    typeAlias.hasExportKeyword() // returns: true
-    typeAlias.isDefaultExport() // returns: false
-  }
-
-  const props = typeAlias?.getType()?.getProperties()
-  props?.forEach(prop => {
-    const t = prop.getTypeAtLocation(myClassFile) //typeAlias?.getTypeNode()
-    console.log(
-      "typeAlias prop",
-      prop.getName(),
-      "str",
-
-      t.isString(),
-      t.isStringLiteral(),
-      "nullable",
-      t.isNullable(),
-      t.isUndefined(),
-      t.isUnionOrIntersection(),
-      "num",
-      t.isNumber(),
-      t.isNumberLiteral() /*, t.getText()*/,
-      "unknown",
-      t.isUnknown(),
-      "obj",
-      t.isObject(),
-      "bool",
-      t.isBoolean(),
-      t.isBooleanLiteral(),
-      "args",
-      t.getTypeArguments()
-    )
-    prop.getDeclarations().forEach(dec => {
-      //Maybe<Scalars['Boolean']>
-      //Maybe<Scalars['date']>
-      //Maybe<Scalars['timez']>
-      //Scalars['bigint']
-      //float8
-      //timestamptz
-      //Maybe<Scalars['uuid']>
-      console.log("typeAlias prop declaration", prop.getName(), dec.getText())
-    })
-  })
-
-  //project.getSourceFileOrThrow("src/ExistingFile.ts").delete();
-
-  // asynchronously save all the changes above
-  //await project.save();
-
-  // get underlying compiler node from the typescript AST from any node
-  //const compilerNode = myClassFile.compilerNode;
-})
+  const myClassFile = project.createSourceFile("src/types.ts", sourceCode)
+  return myClassFile
+}
