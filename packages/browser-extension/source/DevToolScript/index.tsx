@@ -2,8 +2,17 @@ import { browser } from "webextension-polyfill-ts";
 import * as React from 'react';
 import ReactDOM from 'react-dom';
 import App from './App';
+import { SourceFile, CompilerOptions, ScriptTarget, ScriptKind, CompilerHost } from "typescript";
+import ts from "typescript";
 //@ts-ignore
 import {WCMonacoEditor} from './wcEditor'
+import { createAst } from "../tsx/createSourceFile";
+import skSK from "../localization/skSK";
+import { createFileFromAST, createFinalFile, createTable, getValuesFromLocalizationAST, getValuesFromLocalizationASTJSON, saveTableToObjects, saveTableValuesAndParseBack, transformSourceFile } from "../util/localizations";
+//@ts-ignore
+//import skSK from '../localization/skSK'
+//import { createAst } from "../tsx/createSourceFile";
+//import { createFileFromAST, createObjectLiteralFromTable, createTable, getLocales, getValuesFromLocalizationAST, getValuesFromLocalizationASTJSON, saveTableToObjects, saveTableValuesAndParseBack} from "../util/localizations";
 
 console.log("[lowcode] devtools.js A");
 
@@ -28,14 +37,19 @@ browser.devtools.panels
       if (msg?.event == "inspectedElementSource") {
         
       }
+
+      
+
       const pathFile = msg?.fileUrl
       const path = pathFile.substring(8)
       console.log("Path", path)
       
       if (editorElement) {
-      console.log("Editor", editor)
+      //console.log("Editor", editor, "SKLOCALE", sk_SK)
        editorElement.src = msg?.body
        editorElement.value = msg?.body
+       //editorElement.with(lineNumber, columnNumber)
+       editorElement.focus()
        console.log("MODEL", msg, "Payload",JSON.stringify(msg?.payload))
        editor.focus();
        editor.revealLineInCenter(lineNumber + 4);
@@ -54,12 +68,14 @@ browser.devtools.panels
 
       if (msg?.event === "inspectedElement") {
         console.log("Editor", editor)
+      console.log("SK Locale")
         if (rootElement) {
           if (editorElement) {
              editor.focus();
              editorElement.src = msg?.body
              editorElement.value = msg?.body
-             editor.focus();
+             //editorElement.with(lineNumber, columnNumber)
+             editorElement.focus();
              editor.revealLineInCenter(lineNumber + 4);
              editor.setPosition({
               lineNumber: 60,
@@ -97,7 +113,9 @@ browser.devtools.panels
 
       const editorElement:WCMonacoEditor = panelWindow.document.getElementById("editor");  
       editorElement.editor.focus()
+      editorElement.focus()
 
+      
       // Release queued data
       let msg;
       while ((msg = data.shift())) {
@@ -108,6 +126,43 @@ browser.devtools.panels
       //panelWindow.respond = function (msg) {
       //  port.postMessage(msg);
       //};
+      
+      const printer = ts.createPrinter()
+
+      const tableBody = panelWindow.document.getElementById('locale-tableBody')
+      const astLocale = createAst(JSON.stringify(skSK),ScriptTarget.ESNext,ScriptKind.JSON )
+      console.log("AST",astLocale,"AST CHILDREN", astLocale?.getChildren(),"FOr each child", astLocale?.forEachChild((child:any)=>child),"Source File", astLocale?.getSourceFile)
+      //const locales = getValuesFromLocalizationAST(astLocale)
+      //const {english, slovak} = getLocales(locales)
+       const {english, slovak, locales, positionsTable} = getValuesFromLocalizationASTJSON(astLocale)
+       createTable(english, slovak, panelWindow)
+      // console.log("Object created with factory", saveTableValuesAndParseBack(tableBody))
+      //  const res = transformSourceFile(positionsTable)
+      //  console.log("RES", res)
+
+      const saveTableButton = panelWindow.document.getElementById('saveTable')
+      saveTableButton?.addEventListener('click', ()=>{
+       const {englishTable, slovakTable, positions} = saveTableValuesAndParseBack(tableBody, positionsTable)
+       const result = saveTableToObjects(englishTable,slovakTable)
+       console.log("result", result)
+       const res = transformSourceFile(positions)
+       console.log("RES", res, res.getFullText(), res.compilerNode,
+        res.getFilePath())
+        console.log("res", res)
+       //const newFile = createFileFromAST(res)
+       //@ts-ignore
+       //console.log("New file", res.compilerNode.print())
+       //@ts-ignore
+       createFinalFile(printer, res.compilerNode)
+       //console.log("Printer", printer.printFile(res))
+
+       createFinalFile(printer,astLocale)
+
+      //  const parsedAST = createObjectLiteralFromTable(result)
+      //  console.log("Parsed AST",parsedAST)
+      //  createFileFromAST(parsedAST)
+       return {englishTable, slovakTable}
+      })
   
       const monacoElement = panelWindow.document.getElementById("monaco-editor");
       if (monacoElement) {
