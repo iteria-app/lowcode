@@ -8,7 +8,8 @@ import ts from "typescript";
 import {WCMonacoEditor} from './wcEditor'
 import { createAst } from "../tsx/createSourceFile";
 import sk_SK from "../localization/sk_SK";
-import {  createFinalFile, createTable, getValuesFromLocalizationASTJSON, saveTableValuesAndParseBack, transformSourceFile } from "../util/localizations";
+import {  createFinalFile,  getValuesFromLocalizationASTJSON, saveTableValuesAndParseBack, transformSourceFile } from "../localization/localizations";
+import { createTable } from "../localization/localeTables";
 
 console.log("[lowcode] devtools.js A");
 
@@ -41,10 +42,8 @@ browser.devtools.panels
       console.log("Path", path)
       
       if (editorElement) {
-      //console.log("Editor", editor, "SKLOCALE", sk_SK)
        editorElement.src = msg?.body
        editorElement.value = msg?.body
-       //editorElement.with(lineNumber, columnNumber)
        editorElement.focus()
        console.log("MODEL", msg, "Payload",JSON.stringify(msg?.payload))
        editor.focus();
@@ -70,7 +69,6 @@ browser.devtools.panels
              editor.focus();
              editorElement.src = msg?.body
              editorElement.value = msg?.body
-             //editorElement.with(lineNumber, columnNumber)
              editorElement.focus();
              editor.revealLineInCenter(lineNumber + 4);
              editor.setPosition({
@@ -125,21 +123,18 @@ browser.devtools.panels
       
       const printer = ts.createPrinter()
 
-      const tableBody = panelWindow.document.getElementById('locale-tableBody')
+      const tableBody= panelWindow.document.getElementById('locale-tableBody')
       const astLocale = createAst(JSON.stringify(sk_SK),ScriptTarget.ESNext,ScriptKind.JSON )
       const {english, slovak, locales, positionsTable} = getValuesFromLocalizationASTJSON(astLocale)
       createTable(english, slovak, panelWindow)
 
       const saveTableButton = panelWindow.document.getElementById('saveTable')
       saveTableButton?.addEventListener('click', ()=>{
-       const {englishTable, slovakTable, positions} = saveTableValuesAndParseBack(tableBody, positionsTable)
+      const {englishTable, slovakTable, positions} = saveTableValuesAndParseBack(tableBody, positionsTable)
        const transformedAST = transformSourceFile(positions)
-       console.log("RES", transformedAST)
        //@ts-ignore
        const updatedFile = createFinalFile(printer, transformedAST.compilerNode)
-       console.log("Updated file", updatedFile)
-       createFinalFile(printer,astLocale)
-       fetch(`http://localhost:7500/files/${'/Users/michalzaduban/Desktop/LowcodeMyFork/january/lowcode/packages/browser-extension/source/localization/sk_SK.ts'}`, {method:'PUT', body:'export default' + updatedFile})
+       fetch(`http://localhost:7500/files/${'/Users/michalzaduban/Desktop/LowcodeMyFork/january/lowcode/packages/browser-extension/source/localization/sk_SK.ts'}`, {method:'PUT', body:'export default ' + updatedFile})
        return {englishTable, slovakTable}
       })
   

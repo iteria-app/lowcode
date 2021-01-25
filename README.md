@@ -20,15 +20,15 @@ How it works:
 
 ### Edit the source code directly in Chrome
 
-![](/packages/browser-extension/.github/Extension.gif)
+![](/packages/browser-extension/.media/Extension.gif)
 
 ### Add a new page to your app without writing code
 
-![](/packages/browser-extension/.github/Newpage.gif)
+![](/packages/browser-extension/.media/Newpage.gif)
 
 ### Edit your localization files
 
-![](/packages/browser-extension/.github/Localizations.gif)
+![](/packages/browser-extension/.media/Localizations.gif)
 
 ## Getting started
 
@@ -75,4 +75,4 @@ Chrome extensions
 
 ## Architecture
 
-![](/packages/browser-extension/.github/Architecture.png)
+![](/packages/browser-extension/.media/Architecture.png)
