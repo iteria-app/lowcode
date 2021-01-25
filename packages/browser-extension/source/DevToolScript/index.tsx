@@ -139,7 +139,7 @@ browser.devtools.panels
        const updatedFile = createFinalFile(printer, transformedAST.compilerNode)
        console.log("Updated file", updatedFile)
        createFinalFile(printer,astLocale)
-       fetch(`http://localhost:7500/files/${'/Users/michalzaduban/Desktop/LowcodeMyFork/january/lowcode/packages/browser-extension/source/localization/skSK.ts'}`, {method:'PUT', body:'export default' + updatedFile})
+       fetch(`http://localhost:7500/files/${'/Users/michalzaduban/Desktop/LowcodeMyFork/january/lowcode/packages/browser-extension/source/localization/sk_SK.ts'}`, {method:'PUT', body:'export default' + updatedFile})
        return {englishTable, slovakTable}
       })
   

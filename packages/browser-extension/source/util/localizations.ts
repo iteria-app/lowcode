@@ -47,7 +47,7 @@ export function createFinalFile(printer: any, finalAST: any) {
 
 const project = new Project();
 
-const localeSource = project.createSourceFile("skSK.ts", JSON.stringify(sk_SK))
+const localeSource = project.createSourceFile("sk_SK.ts", JSON.stringify(sk_SK))
 
 export function transformSourceFile(positions: any[]) {
   localeSource.transform((traversal: any) => {

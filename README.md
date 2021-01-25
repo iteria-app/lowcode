@@ -9,7 +9,6 @@ How it works:
 3. Use Visual Editor in your Chrome/Edge/Firefox.
 4. Recompile ...
 
-
 ## Features of Lowcode
 
 - Navigate to the source code (a specific JSX/TSX file) while browsing your React application in developmen mode
@@ -26,6 +25,10 @@ How it works:
 ### Add a new page to your app without writing code
 
 ![](/packages/browser-extension/.github/Newpage.gif)
+
+### Edit your localization files
+
+![](/packages/browser-extension/.github/Localizations.gif)
 
 ## Getting started
 
@@ -58,14 +61,15 @@ Chrome extensions
 - `yarn start` to start the project.
 
 4. Start your reat applicantion in development mode and open in browser
+
 - Use your React Aplication or use example React Application https://github.com/ionic-team/ionic-react-conference-app
-- Start local webpack dev server 
+- Start local webpack dev server
 
 ## How it works
 
 - Babel plugin (used out of the box in Create React Application boilerplate) enriches the javascript with `__source` property (sorce code path, line and column)
 - We have reused React Developer Tools Chrome extension
-- Lowcode listens for message "inspectedElement" from React Deveoper Tools are sending 
+- Lowcode listens for message "inspectedElement" from React Deveoper Tools are sending
 - Using Lowcode you can modify JSX/TSX source code either "visualy" (more features will come) or by integrade Monaco editor
 - Web Pack Dev serer will recompile (tested also with Hot Code Replace)
 
