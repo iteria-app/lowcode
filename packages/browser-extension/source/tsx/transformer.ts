@@ -1,6 +1,7 @@
 import ts from "typescript"
+import { wrapNodesWithFragment } from "../util/nodeCreators"
 
-const addTransformer = <T extends ts.Node, U extends ts.Node>(
+const addTransformer = <T extends ts.Node, U extends ts.Node | ts.JsxChild>(
   start: number,
   newNodes: Array<U>
 ): ts.TransformerFactory<T> => {
@@ -8,7 +9,10 @@ const addTransformer = <T extends ts.Node, U extends ts.Node>(
     const visit: ts.Visitor = node => {
       const nodeStart = node.pos
       if (nodeStart === start) {
-        return [node, ...newNodes]
+        if (!ts.isJsxElement(node.parent)) {
+          console.log("som pici")
+          return wrapNodesWithFragment(node, newNodes)
+        } else return [node, ...newNodes]
       }
       return ts.visitEachChild(node, child => visit(child), context)
     }
