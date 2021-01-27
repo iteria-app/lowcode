@@ -8,7 +8,7 @@ import ts from "typescript";
 import {WCMonacoEditor} from './wcEditor'
 import { createAst } from "../tsx/createSourceFile";
 import sk_SK from "../localization/sk_SK";
-import {  createFinalFile,  getValuesFromLocalizationASTJSON, saveTableValuesAndParseBack, transformSourceFile } from "../localization/localizations";
+import {  createFinalFile,  getValuesFromLocalizationASTJSON, replaceCommaLine, saveTableValuesAndParseBack, transformSourceFile } from "../localization/localizations";
 import { createTable } from "../localization/localeTables";
 
 console.log("[lowcode] devtools.js A");
@@ -38,7 +38,7 @@ browser.devtools.panels
       
 
       const pathFile = msg?.fileUrl
-      const path = pathFile.substring(8)
+      const path = pathFile?.substring(8)
       console.log("Path", path)
       
       if (editorElement) {
@@ -121,7 +121,9 @@ browser.devtools.panels
       //  port.postMessage(msg);
       //};
       
-      const printer = ts.createPrinter()
+      const printer = ts.createPrinter({
+        newLine: ts.NewLineKind.LineFeed,
+      })
 
       const tableBody= panelWindow.document.getElementById('locale-tableBody')
       const astLocale = createAst(JSON.stringify(sk_SK),ScriptTarget.ESNext,ScriptKind.JSON )
@@ -134,7 +136,10 @@ browser.devtools.panels
        const transformedAST = transformSourceFile(positions)
        //@ts-ignore
        const updatedFile = createFinalFile(printer, transformedAST.compilerNode)
-       fetch(`http://localhost:7500/files/${'/Users/michalzaduban/Desktop/LowcodeMyFork/january/lowcode/packages/browser-extension/source/localization/sk_SK.ts'}`, {method:'PUT', body:'export default ' + updatedFile})
+       if( updatedFile ) {
+        const replaced = replaceCommaLine(updatedFile)
+        fetch(`http://localhost:7500/files/${'/Users/michalzaduban/Desktop/LowcodeMyFork/january/lowcode/packages/browser-extension/source/localization/sk_SK.ts'}`, {method:'PUT', body:'export default ' + replaced})
+       }
        return {englishTable, slovakTable}
       })
   
@@ -145,4 +150,6 @@ browser.devtools.panels
     });
 
   });
+
+
 

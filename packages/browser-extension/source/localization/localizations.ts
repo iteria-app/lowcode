@@ -32,18 +32,19 @@ export function getValuesFromLocalizationASTJSON(astLocale: SourceFile | undefin
 export function createFinalFile(printer: Printer, finalAST: ts.SourceFile) {
   const file = createSourceFile(finalAST.fileName, finalAST.text, ScriptTarget.ESNext, true, ScriptKind.JSON)
   try {
-    const formated = ts.parseJsonText("skSK.ts", finalAST.text)
+    const formated = ts.parseJsonText("sk_SK.ts", finalAST.text)
     formated.text = formated.text
     const fileFormated = createSourceFile(formated.fileName, formated.text, ScriptTarget.ESNext, true, ScriptKind.JSON)
     return printer.printFile(fileFormated)
   } catch (error) {
     console.log("Error", error)
   }
-  //return printer.printFile(file)
+  return printer.printFile(file)
 }
 
 const project = new Project();
 const localeSource = project.createSourceFile("sk_SK.ts", JSON.stringify(sk_SK))
+
 
 export function transformSourceFile(positions: LocaleWithPosition[]) {
   localeSource.transform((traversal: TransformTraversalControl) => {
@@ -51,8 +52,10 @@ export function transformSourceFile(positions: LocaleWithPosition[]) {
     const found = positions.find((position: LocaleWithPosition) => position?.position == node.pos)
     if (found && found?.position == node.pos && ts.isStringLiteral(node)) {
       node.text = found.text
+
       return ts.factory.createStringLiteral(found.text)
     }
+    ts.SyntaxKind.NewLineTrivia
     return node
   })
   console.log("New Source", localeSource)
@@ -77,9 +80,21 @@ export function saveTableValuesAndParseBack(tableBody: any, positions: LocaleWit
       }
     }
   }
+  console.log('New Positions', positions)
   return { englishTable, slovakTable, positions }
 
 }
+
+
+export function replaceCommaLine(data: string) {
+  let dataToArray = data.split(',').map(item => item.trim());
+  let withNewLines = dataToArray.join(",\n");
+  console.log('WITH new Lines', withNewLines)
+  withNewLines = withNewLines.slice(0, 1) + "\n" + withNewLines.slice(2)
+  withNewLines += "\n"
+  return withNewLines
+}
+
 
 
 
