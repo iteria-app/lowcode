@@ -2,98 +2,92 @@ import { SourceFile, factory, ScriptKind, ScriptTarget, createSourceFile, Printe
 import { TransformTraversalControl, ts } from "ts-morph";
 import { Project } from "ts-morph"
 import sk_SK from "./sk_SK";
-import { LocaleWithPosition } from "./localizationInterfaces";
+import { LocaleWithPosition, Position } from "./localizationInterfaces";
+import { findElementInCode } from "../tsx/clone";
+import { astFindSource, SourceLineCol } from "../tsx/ast";
+
 
 
 export function getValuesFromLocalizationASTJSON(astLocale: SourceFile | undefined) {
   let english: string[] = []
   let slovak: string[] = []
   let locales: string[] = []
-  let positionsTable: LocaleWithPosition[] = []
+  let positionsTable: Position[] = []
+  let englishPositionsTable: LocaleWithPosition[] = []
   astLocale?.forEachChild((child: any) => {
     child?.expression?.properties?.forEach((property: any) => {
       console.log("Property", property)
       locales = [...locales, property.name.text]
       locales = [...locales, property.initializer.text]
-      positionsTable = [...positionsTable, { text: property.initializer.text, position: property.initializer.pos }]
+      positionsTable = [...positionsTable, { text: property.name.text, start: property.name.pos, end: property.name.end },
+      { text: property.initializer.text, start: property.initializer.pos, end: property.initializer.end }]
+      englishPositionsTable = [...englishPositionsTable, { text: property.name.text, position: property.name.pos }]
       english = [...english, property.name.text]
       slovak = [...slovak, property.initializer.text]
     })
   })
-  console.log(positionsTable)
+  console.log("POsitions", positionsTable, "English positions", englishPositionsTable)
   return {
     english,
     slovak,
     locales,
-    positionsTable
+    positionsTable,
+    englishPositionsTable
   }
 }
 
-export function createFinalFile(printer: Printer, finalAST: ts.SourceFile) {
-  const file = createSourceFile(finalAST.fileName, finalAST.text, ScriptTarget.ESNext, true, ScriptKind.JSON)
-  try {
-    const formated = ts.parseJsonText("sk_SK.ts", finalAST.text)
-    formated.text = formated.text
-    const fileFormated = createSourceFile(formated.fileName, formated.text, ScriptTarget.ESNext, true, ScriptKind.JSON)
-    return printer.printFile(fileFormated)
-  } catch (error) {
-    console.log("Error", error)
-  }
-  return printer.printFile(file)
-}
 
-const project = new Project();
-const localeSource = project.createSourceFile("sk_SK.ts", JSON.stringify(sk_SK))
-
-
-export function transformSourceFile(positions: LocaleWithPosition[]) {
-  localeSource.transform((traversal: TransformTraversalControl) => {
-    const node = traversal.visitChildren();
-    const found = positions.find((position: LocaleWithPosition) => position?.position == node.pos)
-    if (found && found?.position == node.pos && ts.isStringLiteral(node)) {
-      node.text = found.text
-
-      return ts.factory.createStringLiteral(found.text)
-    }
-    ts.SyntaxKind.NewLineTrivia
-    return node
-  })
-  console.log("New Source", localeSource)
-  localeSource.transform((traversal: TransformTraversalControl) => {
-    const node = traversal.visitChildren();
-    return node
-  })
-  return localeSource
-}
-
-export function saveTableValuesAndParseBack(tableBody: any, positions: LocaleWithPosition[]) {
+export function saveTableValuesAndParseBack(tableBody: any, positions: LocaleWithPosition[], allPositions: Position[]) {
   let englishTable: string[] = []
   let slovakTable: string[] = []
+  let counter = 0
   for (var r = 0, n = tableBody.rows.length; r < n; r++) {
     for (var c = 0, m = tableBody.rows[r].cells.length; c < m; c++) {
 
+      console.log("ALL positions", allPositions, "With index", allPositions[counter], "counter", counter)
       if (tableBody.rows[r].cells[c].childNodes[0].nodeType == Node.TEXT_NODE) {
         englishTable = [...englishTable, tableBody.rows[r].cells[c].innerHTML]
+        allPositions[counter].text = tableBody.rows[r].cells[c].innerHTML
+        counter = counter + 1
       } else {
         slovakTable = [...slovakTable, tableBody.rows[r].cells[c].getElementsByTagName('input')[0]?.value]
         positions[r].text = tableBody.rows[r].cells[c].getElementsByTagName('input')[0]?.value
+        allPositions[counter].text = tableBody.rows[r].cells[c].getElementsByTagName('input')[0]?.value
+        counter = counter + 1
       }
     }
   }
-  console.log('New Positions', positions)
-  return { englishTable, slovakTable, positions }
+  console.log('New Positions', positions, "New All Positions", allPositions)
+  return { englishTable, slovakTable, positions, allPositions }
 
 }
 
-
-export function replaceCommaLine(data: string) {
-  let dataToArray = data.split(',').map(item => item.trim());
-  let withNewLines = dataToArray.join(",\n");
-  console.log('WITH new Lines', withNewLines)
-  withNewLines = withNewLines.slice(0, 1) + "\n" + withNewLines.slice(2)
-  withNewLines += "\n"
-  return withNewLines
+export const extractWord = (code: string, start: number, end: number) => {
+  return code.substring(start, end)
 }
+
+export const changeLocaleFile = (localeFile: string, allPositions: Position[], originalWords: string[]) => {
+  originalWords.forEach((word: string, index) => {
+    localeFile = localeFile.replace(word, '"' + allPositions[index].text + '"')
+  })
+  console.log("WORDS", originalWords, "Locale file After", localeFile, "All positions", allPositions, "After replace", localeFile)
+  return localeFile
+}
+
+export const extractAllStrings = (positions: Position[]) => {
+  let words: string[] = []
+  positions.forEach((position: any) => {
+    const word = extractWord(JSON.stringify(sk_SK), position.start, position.end)
+    words = [...words, word]
+    console.log("EACH WORD", word)
+  })
+  return words
+}
+
+
+
+
+
 
 
 

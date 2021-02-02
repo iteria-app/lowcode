@@ -6,10 +6,11 @@ import { SourceFile, CompilerOptions, ScriptTarget, ScriptKind, CompilerHost } f
 import ts from "typescript";
 //@ts-ignore
 import {WCMonacoEditor} from './wcEditor'
+import * as monaco from 'monaco-editor'
 import { createAst } from "../tsx/createSourceFile";
 import sk_SK from "../localization/sk_SK";
-import {  createFinalFile,  getValuesFromLocalizationASTJSON, replaceCommaLine, saveTableValuesAndParseBack, transformSourceFile } from "../localization/localizations";
-import { createTable } from "../localization/localeTables";
+import {  changeLocaleFile,  extractAllStrings, getValuesFromLocalizationASTJSON, saveTableValuesAndParseBack } from "../localization/localizations";
+import { addNewRow, addToPositions, createTable } from "../localization/localeTables";
 
 console.log("[lowcode] devtools.js A");
 
@@ -106,6 +107,7 @@ browser.devtools.panels
       panelWindow = aPanelWindow;
 
       const editorElement:WCMonacoEditor = panelWindow.document.getElementById("editor");  
+      const editorInstance = editorElement.editor
       editorElement.editor.focus()
       editorElement.focus()
 
@@ -120,27 +122,23 @@ browser.devtools.panels
       //panelWindow.respond = function (msg) {
       //  port.postMessage(msg);
       //};
-      
-      const printer = ts.createPrinter({
-        newLine: ts.NewLineKind.LineFeed,
-      })
+
+      console.log("sk_SK stringify",JSON.stringify(sk_SK))
 
       const tableBody= panelWindow.document.getElementById('locale-tableBody')
       const astLocale = createAst(JSON.stringify(sk_SK),ScriptTarget.ESNext,ScriptKind.JSON )
-      const {english, slovak, locales, positionsTable} = getValuesFromLocalizationASTJSON(astLocale)
+      const {english, slovak, locales, positionsTable, englishPositionsTable} = getValuesFromLocalizationASTJSON(astLocale)
       createTable(english, slovak, panelWindow)
+      console.log("ast", astLocale,"For each child","English Positions Table", englishPositionsTable,"Positions Table", positionsTable)
+      const originalWords = extractAllStrings(positionsTable)
+      console.log("OrignalWords", originalWords)
 
       const saveTableButton = panelWindow.document.getElementById('saveTable')
       saveTableButton?.addEventListener('click', ()=>{
-      const {englishTable, slovakTable, positions} = saveTableValuesAndParseBack(tableBody, positionsTable)
-       const transformedAST = transformSourceFile(positions)
-       //@ts-ignore
-       const updatedFile = createFinalFile(printer, transformedAST.compilerNode)
-       if( updatedFile ) {
-        const replaced = replaceCommaLine(updatedFile)
-        fetch(`http://localhost:7500/files/${'/Users/michalzaduban/Desktop/LowcodeMyFork/january/lowcode/packages/browser-extension/source/localization/sk_SK.ts'}`, {method:'PUT', body:'export default ' + replaced})
-       }
-       return {englishTable, slovakTable}
+      const {englishTable, slovakTable, positions, allPositions} = saveTableValuesAndParseBack(tableBody, englishPositionsTable, positionsTable)
+      const resultOfChanging = changeLocaleFile(JSON.stringify(sk_SK),allPositions, originalWords)
+       console.log("RESULT OF CHANGING", resultOfChanging)
+       fetch(`http://localhost:7500/files/${'/Users/michalzaduban/Desktop/LowcodeMyFork/january/lowcode/packages/browser-extension/source/localization/sk_SK.ts'}`, {method:'PUT', body:resultOfChanging})
       })
   
       const monacoElement = panelWindow.document.getElementById("monaco-editor");
