@@ -2,13 +2,6 @@
 
 import ts, { factory } from "typescript"
 import { defineComponent, createJsxSelfClosingElement, Component } from '../../ts/components'
-import { defineHook, Hook } from '../../ts/hooks'
-
-function defineObjectCall(methodName: string, hook: Hook) {
-
-}
-
-const intlHook = defineHook('intl', 'useIntl', 'react-intl')
 
 const formattedDate = defineComponent('FormattedDate', 'react-intl')
 const formattedTime = defineComponent('FormattedTime', 'react-intl')
@@ -39,9 +32,15 @@ export class TagFormatter {
     time(value: ts.Expression) {
         return [formattedValue(formattedTime, value)]
     }
-
     dateTime(value: ts.Expression) {
-        return [formattedValue(formattedDate, value), formattedValue(formattedTime, value)]
+        return [
+            formattedValue(formattedDate, value),
+            factory.createBlock(
+                [factory.createExpressionStatement(factory.createStringLiteral(" "))],
+                false
+            ),
+            formattedValue(formattedTime, value)
+        ]
     }
     number(value: ts.Expression) {
         return [formattedValue(formattedNumber, value)]
@@ -50,19 +49,38 @@ export class TagFormatter {
         return [formattedValue(formattedPlural, value)]
     }
     duration(value: ts.Expression, unit: ts.Expression) {
-        // TODO formattedRelativeTime
-        return []
+        return [formattedValue(formattedRelativeTime, value
+            // TODO unit: Unit, format: string, updateIntervalInSeconds: number,
+        )]
     }
     timeRange(from: ts.Expression, to: ts.Expression) {
-        // TODO formattedDateTimeRange
-        return []
+        return [
+            createJsxSelfClosingElement(formattedTimeRange,
+                [
+                    factory.createJsxAttribute(
+                        factory.createIdentifier("from"),
+                        factory.createJsxExpression(
+                            undefined,
+                            from
+                        )
+                    ),
+                    factory.createJsxAttribute(
+                        factory.createIdentifier("to"),
+                        factory.createJsxExpression(
+                            undefined,
+                            to
+                        )
+                    )
+                ]
+            )
+        ]
     }
     message(message: ts.StringLiteral | ts.JsxExpression, values: ts.Expression) {
         return [createJsxSelfClosingElement(formattedMessage,
             [
                 factory.createJsxAttribute(
-                  factory.createIdentifier("id"),
-                  message
+                    factory.createIdentifier("id"),
+                    message
                 ),
                 factory.createJsxAttribute(
                     factory.createIdentifier("values"),

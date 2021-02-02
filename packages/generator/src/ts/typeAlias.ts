@@ -18,7 +18,7 @@ export function tagformatProperty(prop: Symbol, type: Type<ts.Type>) {
   for (let declaration of prop.getDeclarations() ?? []) {
     //console.log("typeAlias prop declaration", prop.getName(), declaration.getText())
     const declarationText = declaration.getText()//TODO ?.replaceAll('"', "'")
-    if (declarationText.indexOf("Scalars['date']") >= 0 || declarationText.indexOf("Scalars['date']") >= 0) {
+    if (declarationText.indexOf("Scalars['date']") >= 0) {
       return tagFormatter.date(propertyAccess)//TODO new Date()
     } else if (declarationText.indexOf("Scalars['timestamptz']") >= 0 || declarationText.indexOf("Scalars['timestampt']") >= 0) {
       return tagFormatter.dateTime(propertyAccess)

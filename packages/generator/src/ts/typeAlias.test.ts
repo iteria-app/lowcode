@@ -58,7 +58,7 @@ test("typeAlias test 1", () => {
         })
       }
     ])*/
-  const printer = ts.createPrinter()
+  const printer = ts.createPrinter({newLine: ts.NewLineKind.LineFeed})
   console.log(
     'sevas',
     //transformed.transformed[0]
