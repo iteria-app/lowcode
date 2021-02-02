@@ -6,7 +6,7 @@ import { defineComponent, createJsxSelfClosingElement, Component } from '../../t
 const formattedDate = defineComponent('FormattedDate', 'react-intl')
 const formattedTime = defineComponent('FormattedTime', 'react-intl')
 const formattedNumber = defineComponent('FormattedNumber', 'react-intl')
-const formattedTimeRange = defineComponent('FormattedTimeRange', 'react-intl')
+const formattedDateTimeRange = defineComponent('FormattedDateTimeRange', 'react-intl')
 const formattedRelativeTime = defineComponent('FormattedRelativeTime', 'react-intl')
 const formattedPlural = defineComponent('FormattedPlural', 'react-intl')
 const formattedMessage = defineComponent('FormattedMessage', 'react-intl')
@@ -55,7 +55,7 @@ export class TagFormatter {
     }
     timeRange(from: ts.Expression, to: ts.Expression) {
         return [
-            createJsxSelfClosingElement(formattedTimeRange,
+            createJsxSelfClosingElement(formattedDateTimeRange,
                 [
                     factory.createJsxAttribute(
                         factory.createIdentifier("from"),

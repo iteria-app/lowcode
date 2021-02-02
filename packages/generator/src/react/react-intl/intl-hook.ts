@@ -1,6 +1,5 @@
 //import { IntlProvider, FormatMessage } from "react-intl";
 import ts, { factory } from "typescript"
-import { defineComponent, createJsxSelfClosingElement } from '../../ts/components'
 import { defineHook, Hook } from '../../ts/hooks'
 
 export interface ObjectCall {
@@ -65,11 +64,10 @@ export class HookFormatter {
         return formatValue([value, unit], formatRelativeTime, intl)
     }
     timeRange(from: ts.Expression, to: ts.Expression, intl: ts.Expression = defaultIntlInstance) {
-        //formatDateTimeRange
-        return formatValue([from, to], formatPlural, intl)
+        return formatValue([from, to], formatDateTimeRange, intl)
     }
     message(message: ts.StringLiteral | ts.JsxExpression, values: ts.Expression, intl: ts.Expression = defaultIntlInstance) {
-        return formatValue([message, values], formatPlural, intl)
+        return formatValue([message, values], formatMessage, intl)
     }
 }
 
