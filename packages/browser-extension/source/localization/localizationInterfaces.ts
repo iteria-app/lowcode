@@ -1,10 +1,7 @@
-export interface LocaleWithPosition {
-    text: string;
-    position: number;
-}
 
-export interface Position {
-    text: string;
+
+export interface Message {
+    id: string;
     start: number;
     end: number;
 }
