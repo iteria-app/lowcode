@@ -1,25 +1,28 @@
 import { SourceFile, factory, ScriptKind, ScriptTarget, createSourceFile, Printer } from "typescript"
 import sk_SK from "./sk_SK";
-import { Message } from "./localizationInterfaces";
+import { LocaleMessage, Message } from "./localizationInterfaces";
 
 
 
 export function getValuesFromLocalizationASTJSON(astLocale: SourceFile | undefined) {
-  let english: string[] = []
-  let slovak: string[] = []
   let positionsTable: Message[] = []
+  let localeMessages: LocaleMessage[] = []
   astLocale?.forEachChild((child: any) => {
     child?.expression?.properties?.forEach((property: any) => {
+      let locale = {
+        id: property.name.text,
+        value: property.initializer.text,
+        locale: "sk_SK",
+        position: { start: property.initializer.pos, end: property.initializer.end }
+      }
       positionsTable = [...positionsTable, { id: property.name.text, start: property.name.pos, end: property.name.end },
       { id: property.initializer.text, start: property.initializer.pos, end: property.initializer.end }]
-      english = [...english, property.name.text]
-      slovak = [...slovak, property.initializer.text]
+      localeMessages = [...localeMessages, locale]
     })
   })
   return {
-    english,
-    slovak,
     positionsTable,
+    localeMessages
   }
 }
 
@@ -43,12 +46,12 @@ export function saveTableValuesAndParseBack(tableBody: HTMLTableElement, allPosi
 }
 
 export const findWordFromLocale = (code: string, start: number, end: number) => {
-  return code.substring(start, end)
+  return code.substring(start + 1, end - 1)
 }
 
 export const changeLocaleFile = (localeFile: string, allPositions: Message[], originalWords: string[]) => {
   originalWords.forEach((word: string, index) => {
-    localeFile = localeFile.replace(word, '"' + allPositions[index].id + '"')
+    localeFile = localeFile.replace(word, allPositions[index].id)
   })
   return localeFile
 }
@@ -57,6 +60,16 @@ export const getAllWordsFromLocale = (positions: Message[]) => {
   let words: string[] = []
   positions.forEach((position: any) => {
     const word = findWordFromLocale(JSON.stringify(sk_SK), position.start, position.end)
+    words = [...words, word]
+  })
+  return words
+}
+
+export const getWordsFromLocale = (code: string, messages: LocaleMessage[]) => {
+  let words: string[] = []
+  messages.forEach((message: LocaleMessage) => {
+    // without " " only the value
+    const word = code.substring(message.position.start + 1, message.position.end - 1)
     words = [...words, word]
   })
   return words

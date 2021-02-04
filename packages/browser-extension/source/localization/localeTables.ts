@@ -1,5 +1,5 @@
 import ts from 'typescript'
-import { Message } from './localizationInterfaces'
+import { LocaleMessage, Message } from './localizationInterfaces'
 
 export function createTable(english: string[], slovak: string[], panelWindow: Window) {
     const tableBody = panelWindow.document.getElementById('locale-tableBody')
@@ -20,6 +20,22 @@ export function createTable(english: string[], slovak: string[], panelWindow: Wi
         tr.append(td);
     })
 
+}
+
+export function createTableWithMessages(messages: LocaleMessage[], panelWindow: Window) {
+    const tableBody = panelWindow.document.getElementById('locale-tableBody')
+    messages.forEach((message: LocaleMessage) => {
+        const tr = panelWindow.document.createElement('tr')
+        tableBody?.appendChild(tr)
+        const input = panelWindow.document.createElement('input')
+        const messageId = panelWindow.document.createElement('td')
+        const locale = panelWindow.document.createElement('td')
+        messageId.innerText = message.id
+        input.value = message.value
+        locale.appendChild(input)
+        tr.append(messageId)
+        tr.append(locale)
+    })
 }
 
 export function addNewRow(tableBody: HTMLTableElement, indexOfLastRow: number, panelWindow: Window, source: ts.SourceFile) {

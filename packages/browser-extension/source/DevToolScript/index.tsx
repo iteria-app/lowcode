@@ -9,8 +9,8 @@ import {WCMonacoEditor} from './wcEditor'
 import * as monaco from 'monaco-editor'
 import { createAst } from "../tsx/createSourceFile";
 import sk_SK from "../localization/sk_SK";
-import {  changeLocaleFile, getAllWordsFromLocale, getValuesFromLocalizationASTJSON, saveTableValuesAndParseBack } from "../localization/localizations";
-import { addNewRow, addToPositions, createTable } from "../localization/localeTables";
+import {  changeLocaleFile, getAllWordsFromLocale, getValuesFromLocalizationASTJSON, getWordsFromLocale, saveTableValuesAndParseBack } from "../localization/localizations";
+import { createTableWithMessages } from "../localization/localeTables";
 
 console.log("[lowcode] devtools.js A");
 
@@ -128,9 +128,11 @@ browser.devtools.panels
       //@ts-ignore
       const tableBody:HTMLTableElement= panelWindow.document.getElementById('locale-tableBody')
       const astLocale = createAst(JSON.stringify(sk_SK),ScriptTarget.ESNext,ScriptKind.JSON )
-      const {english, slovak, positionsTable} = getValuesFromLocalizationASTJSON(astLocale)
-      createTable(english, slovak, panelWindow)
+      const { positionsTable, localeMessages} = getValuesFromLocalizationASTJSON(astLocale)
+      console.log("Locale messages", localeMessages)
+      createTableWithMessages(localeMessages, panelWindow)
       const originalWords = getAllWordsFromLocale(positionsTable)
+      //const originalWords = getWordsFromLocale(JSON.stringify(sk_SK), localeMessages)
       const saveTableButton = panelWindow.document.getElementById('saveTable')
       saveTableButton?.addEventListener('click', ()=>{
       const allPositions = saveTableValuesAndParseBack(tableBody,positionsTable)
