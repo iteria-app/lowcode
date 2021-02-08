@@ -128,17 +128,21 @@ browser.devtools.panels
       //@ts-ignore
       const tableBody:HTMLTableElement= panelWindow.document.getElementById('locale-tableBody')
       const astLocale = createAst(JSON.stringify(sk_SK),ScriptTarget.ESNext,ScriptKind.JSON )
-      const { positionsTable, localeMessages} = getValuesFromLocalizationASTJSON(astLocale)
+      const localeMessages = getValuesFromLocalizationASTJSON(astLocale)
       console.log("Locale messages", localeMessages)
       createTableWithMessages(localeMessages, panelWindow)
-      const originalWords = getAllWordsFromLocale(positionsTable)
-      //const originalWords = getWordsFromLocale(JSON.stringify(sk_SK), localeMessages)
+      const originalWords = getAllWordsFromLocale(localeMessages)
+      console.log("Words", originalWords)
       const saveTableButton = panelWindow.document.getElementById('saveTable')
       saveTableButton?.addEventListener('click', ()=>{
-      const allPositions = saveTableValuesAndParseBack(tableBody,positionsTable)
-      const resultOfChanging = changeLocaleFile(JSON.stringify(sk_SK),allPositions, originalWords)
-       console.log("RESULT OF CHANGING", resultOfChanging)
-       fetch(`http://localhost:7500/files/${'/Users/michalzaduban/Desktop/LowcodeMyFork/january/lowcode/packages/browser-extension/source/localization/sk_SK.ts'}`, {method:'PUT', body:resultOfChanging})
+      const messages = saveTableValuesAndParseBack(tableBody, localeMessages)
+      console.log("Messages", messages)
+      if(messages){
+        const resultOfChanging = changeLocaleFile(JSON.stringify(sk_SK),messages, originalWords)
+        console.log("RESULT OF CHANGING", resultOfChanging)
+        fetch(`http://localhost:7500/files/${'/Users/michalzaduban/Desktop/LowcodeMyFork/january/lowcode/packages/browser-extension/source/localization/sk_SK.ts'}`, {method:'PUT', body:"export default " + resultOfChanging})
+      }
+     
       })
   
       const monacoElement = panelWindow.document.getElementById("monaco-editor");

@@ -1,4 +1,4 @@
-export interface LocaleMessage {
+export interface Message {
     id: string;
     value: string;
     locale: string;
@@ -6,12 +6,6 @@ export interface LocaleMessage {
 }
 
 export interface Position {
-    start: number;
-    end: number;
-}
-
-export interface Message {
-    id: string;
     start: number;
     end: number;
 }

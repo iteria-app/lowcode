@@ -1,12 +1,11 @@
 import { SourceFile, factory, ScriptKind, ScriptTarget, createSourceFile, Printer } from "typescript"
 import sk_SK from "./sk_SK";
-import { LocaleMessage, Message } from "./localizationInterfaces";
+import { Message } from "./localizationInterfaces";
 
 
 
 export function getValuesFromLocalizationASTJSON(astLocale: SourceFile | undefined) {
-  let positionsTable: Message[] = []
-  let localeMessages: LocaleMessage[] = []
+  let localeMessages: Message[] = []
   astLocale?.forEachChild((child: any) => {
     child?.expression?.properties?.forEach((property: any) => {
       let locale = {
@@ -15,33 +14,26 @@ export function getValuesFromLocalizationASTJSON(astLocale: SourceFile | undefin
         locale: "sk_SK",
         position: { start: property.initializer.pos, end: property.initializer.end }
       }
-      positionsTable = [...positionsTable, { id: property.name.text, start: property.name.pos, end: property.name.end },
-      { id: property.initializer.text, start: property.initializer.pos, end: property.initializer.end }]
       localeMessages = [...localeMessages, locale]
     })
   })
-  return {
-    positionsTable,
-    localeMessages
-  }
+  return localeMessages
 }
 
 
-export function saveTableValuesAndParseBack(tableBody: HTMLTableElement, allPositions: Message[]) {
-  let counter = 0
+export function saveTableValuesAndParseBack(tableBody: HTMLTableElement, messages: Message[]) {
+  let localeCounter = 0
   for (var r = 0, n = tableBody.rows.length; r < n; r++) {
     for (var c = 0, m = tableBody.rows[r].cells.length; c < m; c++) {
       if (tableBody.rows[r].cells[c].childNodes[0].nodeType == Node.TEXT_NODE) {
-        allPositions[counter].id = tableBody.rows[r].cells[c].innerHTML
-        counter = counter + 1
+        console.log("")
       } else {
-        allPositions[counter].id = tableBody.rows[r].cells[c].getElementsByTagName('input')[0]?.value
-        counter = counter + 1
+        messages[localeCounter].value = tableBody.rows[r].cells[c].getElementsByTagName('input')[0]?.value
+        localeCounter = localeCounter + 1
       }
     }
   }
-  console.log("New All Positions", allPositions)
-  return allPositions
+  return messages
 
 }
 
@@ -49,25 +41,25 @@ export const findWordFromLocale = (code: string, start: number, end: number) => 
   return code.substring(start + 1, end - 1)
 }
 
-export const changeLocaleFile = (localeFile: string, allPositions: Message[], originalWords: string[]) => {
+export const changeLocaleFile = (localeFile: string, messages: Message[], originalWords: string[]) => {
   originalWords.forEach((word: string, index) => {
-    localeFile = localeFile.replace(word, allPositions[index].id)
+    localeFile = localeFile.replace(word, messages[index].value)
   })
   return localeFile
 }
 
-export const getAllWordsFromLocale = (positions: Message[]) => {
+export const getAllWordsFromLocale = (messages: Message[]) => {
   let words: string[] = []
-  positions.forEach((position: any) => {
-    const word = findWordFromLocale(JSON.stringify(sk_SK), position.start, position.end)
+  messages.forEach((message: any) => {
+    const word = findWordFromLocale(JSON.stringify(sk_SK), message.position.start, message.position.end)
     words = [...words, word]
   })
   return words
 }
 
-export const getWordsFromLocale = (code: string, messages: LocaleMessage[]) => {
+export const getWordsFromLocale = (code: string, messages: Message[]) => {
   let words: string[] = []
-  messages.forEach((message: LocaleMessage) => {
+  messages.forEach((message: Message) => {
     // without " " only the value
     const word = code.substring(message.position.start + 1, message.position.end - 1)
     words = [...words, word]
