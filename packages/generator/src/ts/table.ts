@@ -1,4 +1,6 @@
 import { TsxWriter, TagBuilder, Callback, TagBuilderWriter } from './writer'
+import ts, { factory } from "typescript"
+import tagFormatter from '../react/react-intl/formatted-tag'
 
 function component(componentName: string, packageName: string) {
     return { componentName, packageName: packageName + componentName }
@@ -35,7 +37,9 @@ export class TableGenerator {
         })
     }
 
-    genTableRow() {
+
+
+    row() {
         //date, time
         //decimal
     }
@@ -46,7 +50,7 @@ export class TableGenerator {
     genTableCell() {
         //TODO genValue()
     }
-}    
+}
 
 class RowBuilderWriter extends TagBuilderWriter {
     gen: TsxWriter
@@ -71,4 +75,32 @@ class RowBuilderWriter extends TagBuilderWriter {
         //this.codeBlockWriter.write('TableRow')
         this.codeBlockWriter.write('>')
     }
+}
+
+function mapArrayToTableRows(body: ts.ConciseBody, rows: ts.Expression = factory.createIdentifier("rows"), row: ts.Identifier = factory.createIdentifier("row")) {
+    return [
+        factory.createExpressionStatement(factory.createCallExpression(
+            factory.createPropertyAccessExpression(
+                rows,
+                factory.createIdentifier("map")
+            ),
+            undefined,
+            [factory.createArrowFunction(
+                undefined,
+                undefined,
+                [factory.createParameterDeclaration(
+                    undefined,
+                    undefined,
+                    undefined,
+                    row,
+                    undefined,
+                    undefined,
+                    undefined
+                )],
+                undefined,
+                factory.createToken(ts.SyntaxKind.EqualsGreaterThanToken),
+                body
+            )]
+        ))
+    ];
 }

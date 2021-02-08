@@ -1,4 +1,4 @@
-import { defineComponent } from '../../ts/components'
+import { defineComponent } from '../component'
 
 const components = {
     table: defineComponent('Table', 'grommet'),

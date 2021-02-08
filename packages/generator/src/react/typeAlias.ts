@@ -1,22 +1,32 @@
 // TODO https://github.com/vvakame/typescript-formatter/blob/master/lib/formatter.ts
-import { Symbol, Type } from "ts-morph"
 import ts, { factory } from "typescript"
 
-import tagFormatter from '../react/react-intl/formatted-tag'
+import tagFormatter from './react-intl/formatted-tag'
+import { Property } from '../entity'
 
-export function tagformatProperty(prop: Symbol, type: Type<ts.Type>) {
+interface NameGetter {
+  getName(): string
+}
+
+export function tagFormattedMessage(prop: NameGetter, clazz: NameGetter) {
+  const typeName = clazz?.getName() ?? 'Unknown'
+  const propertyName = prop?.getName() ?? 'unknown'
+  return tagFormatter.message(factory.createStringLiteral(typeName + "." + propertyName))
+}
+
+export function tagFormattedProperty(prop: Property) {
   //TODO type.isNullable(), type.isUndefined(), type.isUnionOrIntersection(),
   const propertyAccess = factory.createPropertyAccessExpression(
     factory.createIdentifier('row'),//TODO pretty object name
     factory.createIdentifier(prop.getName())
   )
 
-  if (type.isNumber() || type.isNumberLiteral() /*, type.getText()*/) {
+  const propType = prop.getType()
+  if (propType.isNumber() || propType.isNumberLiteral() /*, type.getText()*/) {
     return tagFormatter.number(propertyAccess)
   }
 
-  for (let declaration of prop.getDeclarations() ?? []) {
-    //console.log("typeAlias prop declaration", prop.getName(), declaration.getText())
+  for (let declaration of propType?.getAliasSymbol()?.getDeclarations() ?? []) {
     const declarationText = declaration.getText()//TODO ?.replaceAll('"', "'")
     if (declarationText.indexOf("Scalars['date']") >= 0) {
       return tagFormatter.date(propertyAccess)//TODO new Date()

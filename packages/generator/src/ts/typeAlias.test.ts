@@ -1,9 +1,7 @@
 // TODO https://github.com/vvakame/typescript-formatter/blob/master/lib/formatter.ts
-import { Project } from "ts-morph"
-import ts, { factory } from "typescript"
-import { createJsxElement } from './components'
-import { tagformatProperty } from './typeAlias'
-import grommetTable from '../react/grommet/table'
+import { Project, SourceFile } from "ts-morph"
+import ts from "typescript"
+import { entityTable, entityTablePage } from '../react/entity-table'
 import { graphqlGenTs1 } from "./typeAlias.example"
 
 export function createAst(
@@ -20,37 +18,28 @@ export function createAst(
     scriptKind
   )
 }
-
+function sourceFileEntity(myClassFile: SourceFile) {
+  const typeName = "Parent"
+  const typeAlias = myClassFile.getTypeAlias(typeName)
+  const props = typeAlias?.getType()?.getProperties() ?? []
+  if (typeAlias) {
+    return {
+      getName: () => typeName,
+      getType: () => typeAlias,
+      properties: props.map((prop) => ({
+        getName: () => prop.getName(),
+        getType: () => prop.getTypeAtLocation(myClassFile)
+      }))
+    }
+  }
+}
 test("typeAlias test 1", () => {
   const sourceFile = createAst('')
   const myClassFile = parseGraphqlTypes(graphqlGenTs1)
-  const typeAlias = myClassFile.getTypeAlias("Parent")
-  const props = typeAlias?.getType()?.getProperties()
-
-  const node = createJsxElement(grommetTable.table, [],
-    [createJsxElement(grommetTable.row, [],
-      props?.map(prop =>
-        createJsxElement(grommetTable.cell, [], [
-          factory.createJsxText(
-            prop.getName(),
-            false
-          ),
-          ...tagformatProperty(prop, prop.getTypeAtLocation(myClassFile))
-        ])
-        //factory.createIdentifier("date")
-        //factory.createStringLiteral("greeting")
-        /*
-        factory.createObjectLiteralExpression(
-                            [factory.createShorthandPropertyAssignment(
-                                factory.createIdentifier("name"),
-                                undefined
-                            )],
-                            false
-                        )
-        */
-      )
-    )]
-  )
+  const entity = sourceFileEntity(myClassFile)
+  const table = entityTable(entity!!)
+  //const page = entityTablePage(table)
+  
   /*ts.transform(sourceFile, [
       (context) => (node) => {
         return ts.visitNode(node, n => {
@@ -58,12 +47,12 @@ test("typeAlias test 1", () => {
         })
       }
     ])*/
-  const printer = ts.createPrinter({newLine: ts.NewLineKind.LineFeed})
+  const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
   console.log(
     'sevas',
     //transformed.transformed[0]
     //.printFile(transformed.transformed[0])
-    console.log(printer.printNode(ts.EmitHint.Unspecified, node, sourceFile))
+    console.log(printer.printNode(ts.EmitHint.Unspecified, table, sourceFile))
   )
 })
 

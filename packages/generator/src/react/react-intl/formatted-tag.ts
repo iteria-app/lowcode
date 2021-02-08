@@ -1,7 +1,5 @@
-//import { IntlProvider, FormattedMessage } from "react-intl";
-
 import ts, { factory } from "typescript"
-import { defineComponent, createJsxSelfClosingElement, Component } from '../../ts/components'
+import { defineComponent, createJsxSelfClosingElement, Component } from '../component'
 
 const formattedDate = defineComponent('FormattedDate', 'react-intl')
 const formattedTime = defineComponent('FormattedTime', 'react-intl')
@@ -26,34 +24,34 @@ function formattedValue(component: Component, expression: ts.Expression) {
 
 export class TagFormatter {
     // <FormattedDate value={date} />
-    date(value: ts.Expression) {
+    date(value: ts.Expression): ts.JsxChild[] {
         return [formattedValue(formattedDate, value)]
     }
-    time(value: ts.Expression) {
+    time(value: ts.Expression): ts.JsxChild[] {
         return [formattedValue(formattedTime, value)]
     }
-    dateTime(value: ts.Expression) {
+    dateTime(value: ts.Expression): ts.JsxChild[] {
         return [
             formattedValue(formattedDate, value),
-            factory.createBlock(
-                [factory.createExpressionStatement(factory.createStringLiteral(" "))],
+            factory.createJsxText(
+                " ",
                 false
             ),
             formattedValue(formattedTime, value)
         ]
     }
-    number(value: ts.Expression) {
+    number(value: ts.Expression): ts.JsxChild[] {
         return [formattedValue(formattedNumber, value)]
     }
-    plural(value: ts.Expression) {
+    plural(value: ts.Expression): ts.JsxChild[] {
         return [formattedValue(formattedPlural, value)]
     }
-    duration(value: ts.Expression, unit: ts.Expression) {
+    duration(value: ts.Expression, unit: ts.Expression): ts.JsxChild[] {
         return [formattedValue(formattedRelativeTime, value
             // TODO unit: Unit, format: string, updateIntervalInSeconds: number,
         )]
     }
-    timeRange(from: ts.Expression, to: ts.Expression) {
+    timeRange(from: ts.Expression, to: ts.Expression): ts.JsxChild[] {
         return [
             createJsxSelfClosingElement(formattedDateTimeRange,
                 [
@@ -75,20 +73,21 @@ export class TagFormatter {
             )
         ]
     }
-    message(message: ts.StringLiteral | ts.JsxExpression, values: ts.Expression) {
+    message(message: ts.StringLiteral | ts.JsxExpression, values: ts.Expression | undefined = undefined): ts.JsxChild[] {
         return [createJsxSelfClosingElement(formattedMessage,
             [
                 factory.createJsxAttribute(
                     factory.createIdentifier("id"),
                     message
                 ),
-                factory.createJsxAttribute(
+                ...(values ? [factory.createJsxAttribute(
                     factory.createIdentifier("values"),
                     factory.createJsxExpression(
                         undefined,
                         values
                     )
-                )]
+                )]: [])
+            ]
         )]
     }
 }
