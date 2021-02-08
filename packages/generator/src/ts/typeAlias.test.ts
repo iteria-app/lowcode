@@ -1,7 +1,7 @@
 // TODO https://github.com/vvakame/typescript-formatter/blob/master/lib/formatter.ts
 import { Project, SourceFile } from "ts-morph"
-import ts from "typescript"
-import { entityTable, entityTablePage } from '../react/entity-table'
+import ts, { factory } from "typescript"
+import { entityTablePage } from '../react/entity-table'
 import { graphqlGenTs1 } from "./typeAlias.example"
 
 export function createAst(
@@ -33,12 +33,11 @@ function sourceFileEntity(myClassFile: SourceFile) {
     }
   }
 }
-test("typeAlias test 1", () => {
+test("entity table page 1", () => {
   const sourceFile = createAst('')
   const myClassFile = parseGraphqlTypes(graphqlGenTs1)
   const entity = sourceFileEntity(myClassFile)
-  const table = entityTable(entity!!)
-  //const page = entityTablePage(table)
+  const page = entityTablePage(entity!!)
   
   /*ts.transform(sourceFile, [
       (context) => (node) => {
@@ -48,12 +47,7 @@ test("typeAlias test 1", () => {
       }
     ])*/
   const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
-  console.log(
-    'sevas',
-    //transformed.transformed[0]
-    //.printFile(transformed.transformed[0])
-    console.log(printer.printNode(ts.EmitHint.Unspecified, table, sourceFile))
-  )
+  console.log('generated:', printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray(page), sourceFile))
 })
 
 function parseGraphqlTypes(sourceCode: string) {

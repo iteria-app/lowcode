@@ -14,10 +14,10 @@ export function tagFormattedMessage(prop: NameGetter, clazz: NameGetter) {
   return tagFormatter.message(factory.createStringLiteral(typeName + "." + propertyName))
 }
 
-export function tagFormattedProperty(prop: Property) {
-  //TODO type.isNullable(), type.isUndefined(), type.isUnionOrIntersection(),
+export function tagFormattedProperty(prop: Property, row = factory.createIdentifier('row')) {
+  //TODO null chaining in case of: type.isNullable(), type.isUndefined(), type.isUnionOrIntersection(),
   const propertyAccess = factory.createPropertyAccessExpression(
-    factory.createIdentifier('row'),//TODO pretty object name
+    row,
     factory.createIdentifier(prop.getName())
   )
 

@@ -76,31 +76,3 @@ class RowBuilderWriter extends TagBuilderWriter {
         this.codeBlockWriter.write('>')
     }
 }
-
-function mapArrayToTableRows(body: ts.ConciseBody, rows: ts.Expression = factory.createIdentifier("rows"), row: ts.Identifier = factory.createIdentifier("row")) {
-    return [
-        factory.createExpressionStatement(factory.createCallExpression(
-            factory.createPropertyAccessExpression(
-                rows,
-                factory.createIdentifier("map")
-            ),
-            undefined,
-            [factory.createArrowFunction(
-                undefined,
-                undefined,
-                [factory.createParameterDeclaration(
-                    undefined,
-                    undefined,
-                    undefined,
-                    row,
-                    undefined,
-                    undefined,
-                    undefined
-                )],
-                undefined,
-                factory.createToken(ts.SyntaxKind.EqualsGreaterThanToken),
-                body
-            )]
-        ))
-    ];
-}

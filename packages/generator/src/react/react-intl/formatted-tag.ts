@@ -1,13 +1,13 @@
 import ts, { factory } from "typescript"
 import { defineComponent, createJsxSelfClosingElement, Component } from '../component'
 
-const formattedDate = defineComponent('FormattedDate', 'react-intl')
-const formattedTime = defineComponent('FormattedTime', 'react-intl')
-const formattedNumber = defineComponent('FormattedNumber', 'react-intl')
-const formattedDateTimeRange = defineComponent('FormattedDateTimeRange', 'react-intl')
-const formattedRelativeTime = defineComponent('FormattedRelativeTime', 'react-intl')
-const formattedPlural = defineComponent('FormattedPlural', 'react-intl')
-const formattedMessage = defineComponent('FormattedMessage', 'react-intl')
+export const formattedDate = defineComponent('FormattedDate', 'react-intl')
+export const formattedTime = defineComponent('FormattedTime', 'react-intl')
+export const formattedNumber = defineComponent('FormattedNumber', 'react-intl')
+export const formattedDateTimeRange = defineComponent('FormattedDateTimeRange', 'react-intl')
+export const formattedRelativeTime = defineComponent('FormattedRelativeTime', 'react-intl')
+export const formattedPlural = defineComponent('FormattedPlural', 'react-intl')
+export const formattedMessage = defineComponent('FormattedMessage', 'react-intl')
 
 function formattedValue(component: Component, expression: ts.Expression) {
     return createJsxSelfClosingElement(component,
