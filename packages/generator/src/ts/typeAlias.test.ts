@@ -46,6 +46,7 @@ test("entity table page 1", () => {
         })
       }
     ])*/
+  // TODO https://github.com/vvakame/typescript-formatter/blob/master/lib/formatter.ts
   const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
   console.log('generated:', printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray(page), sourceFile))
 })

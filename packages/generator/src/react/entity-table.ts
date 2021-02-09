@@ -1,19 +1,19 @@
 import ts, { factory } from "typescript"
 
-import grommetTable from './grommet/table'
-import { formattedDate, formattedTime, formattedNumber, formattedDateTimeRange, formattedRelativeTime, formattedPlural, formattedMessage } from './react-intl/formatted-tag'
 import { tagFormattedMessage, tagFormattedProperty } from './typeAlias'
 import { functionalComponent, createJsxElement } from './component'
 import { Entity, Property } from '../entity'
+import { GenContext } from './context'
 
-function propertyHead(prop: Property, entity: Entity) {
-    return createJsxElement(grommetTable.cell, [],
+
+function propertyHead(prop: Property, entity: Entity, context = new GenContext()) {
+    return createJsxElement(context.imports.importCell(), [],
         tagFormattedMessage(prop, entity)
     )
 }
 
-function propertyCell(prop: Property, entity: Entity, row = factory.createIdentifier("row")) {
-    return createJsxElement(grommetTable.cell, [], [
+function propertyCell(prop: Property, entity: Entity, row = factory.createIdentifier("row"), context = new GenContext()) {
+    return createJsxElement(context.imports.importCell(), [], [
         factory.createJsxText(
             prop.getName(),
             false
@@ -27,19 +27,21 @@ function filterProp(prop: Property) {
     return propName !== '__typename' && propName.indexOf('children') < 0
 }
 
-export function entityTable(entity: Entity, rows: ts.Expression = factory.createIdentifier("rows"), row = factory.createIdentifier("row")) {
-    return createJsxElement(grommetTable.table, [],
+export function entityTable(entity: Entity, rows: ts.Expression = factory.createIdentifier("rows"), row = factory.createIdentifier("row"), context = new GenContext()) {
+    const tableComponent = context.imports.importTable()
+    const rowComponent = context.imports.importRow()
+    return createJsxElement(tableComponent, [],
         [
-            createJsxElement(grommetTable.row, [],
+            createJsxElement(rowComponent, [],
                 entity.properties
                     .filter(filterProp)
-                    .map((prop) => propertyHead(prop, entity))
+                    .map((prop) => propertyHead(prop, entity, context))
             ),
             mapArrayToTableRows(
-                createJsxElement(grommetTable.row, [],
+                createJsxElement(rowComponent, [],
                     entity.properties
                         .filter(filterProp)
-                        ?.map(prop => propertyCell(prop, entity, row))
+                        ?.map(prop => propertyCell(prop, entity, row, context))
                 ),
                 rows, row
             )
@@ -47,18 +49,9 @@ export function entityTable(entity: Entity, rows: ts.Expression = factory.create
     )
 }
 
-export function entityTablePage(entity: Entity) {
-    const imports = [
-        grommetTable.table.importDeclaration,
-        grommetTable.row.importDeclaration,
-        grommetTable.cell.importDeclaration,
-        formattedDate.importDeclaration, formattedTime.importDeclaration, formattedNumber.importDeclaration, 
-        formattedDateTimeRange.importDeclaration, formattedRelativeTime.importDeclaration, 
-        formattedPlural.importDeclaration, formattedMessage.importDeclaration
-    ]
-
+export function entityTablePage(entity: Entity, context = new GenContext()) {
     const entityVarName = entity.getName().toLowerCase() // TODO lower camel case
-    const rows = factory.createIdentifier(entityVarName + 's') // TODO plural
+    const rows = factory.createIdentifier(entityVarName + 's') // TODO plural (irregular)
     const row = factory.createIdentifier(entityVarName)
 
     const params = [factory.createParameterDeclaration(
@@ -76,9 +69,10 @@ export function entityTablePage(entity: Entity) {
         undefined
       )]
 
+    const table = entityTable(entity, rows, row, context)
     return [
-        ...imports,
-        functionalComponent('', params, entityTable(entity, rows, row))
+        ...context.imports.unique(),
+        functionalComponent('', params, table)
     ]
 }
 

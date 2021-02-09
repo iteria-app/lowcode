@@ -1,5 +1,4 @@
-// TODO https://github.com/vvakame/typescript-formatter/blob/master/lib/formatter.ts
-import ts, { factory } from "typescript"
+import { factory } from "typescript"
 
 import tagFormatter from './react-intl/formatted-tag'
 import { Property } from '../entity'
