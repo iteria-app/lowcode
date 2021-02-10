@@ -9,7 +9,7 @@ import {WCMonacoEditor} from './wcEditor'
 import * as monaco from 'monaco-editor'
 import { createAst } from "../tsx/createSourceFile";
 import sk_SK from "../localization/sk_SK";
-import {  changeLocaleFile, getAllWordsFromLocale, getValuesFromLocalizationASTJSON, getWordsFromLocale, saveTableValuesAndParseBack } from "../localization/localizations";
+import {  changeFileFromEnd, changeLocaleFile, getValuesFromLocalizationASTJSON, saveTableValuesAndParseBack } from "../localization/localizations";
 import { createTableWithMessages } from "../localization/localeTables";
 
 console.log("[lowcode] devtools.js A");
@@ -129,17 +129,16 @@ browser.devtools.panels
       const tableBody:HTMLTableElement= panelWindow.document.getElementById('locale-tableBody')
       const astLocale = createAst(JSON.stringify(sk_SK),ScriptTarget.ESNext,ScriptKind.JSON )
       const localeMessages = getValuesFromLocalizationASTJSON(astLocale)
-      console.log("Locale messages", localeMessages)
+      const original = JSON.parse(JSON.stringify(localeMessages));
       createTableWithMessages(localeMessages, panelWindow)
-      const originalWords = getAllWordsFromLocale(localeMessages)
-      console.log("Words", originalWords)
       const saveTableButton = panelWindow.document.getElementById('saveTable')
       saveTableButton?.addEventListener('click', ()=>{
       const messages = saveTableValuesAndParseBack(tableBody, localeMessages)
-      console.log("Messages", messages)
+      const resultFromEnd = changeFileFromEnd(JSON.stringify(sk_SK),messages, original)
+      console.log("Result from end", resultFromEnd)
       if(messages){
-        const resultOfChanging = changeLocaleFile(JSON.stringify(sk_SK),messages, originalWords)
-        console.log("RESULT OF CHANGING", resultOfChanging)
+        const resultOfChanging = changeLocaleFile(JSON.stringify(sk_SK),messages, original)
+        console.log("RESULT OF CHANGING", resultOfChanging, )
         fetch(`http://localhost:7500/files/${'/Users/michalzaduban/Desktop/LowcodeMyFork/january/lowcode/packages/browser-extension/source/localization/sk_SK.ts'}`, {method:'PUT', body:"export default " + resultOfChanging})
       }
      

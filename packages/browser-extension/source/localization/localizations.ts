@@ -1,18 +1,18 @@
 import { SourceFile, factory, ScriptKind, ScriptTarget, createSourceFile, Printer } from "typescript"
 import sk_SK from "./sk_SK";
 import { Message } from "./localizationInterfaces";
+import { createAst } from "../tsx/createSourceFile";
 
 
-
-export function getValuesFromLocalizationASTJSON(astLocale: SourceFile | undefined) {
+export function getValuesFromLocalizationASTJSON(astLocale: SourceFile | undefined, languageLocale = "sk_SK") {
   let localeMessages: Message[] = []
   astLocale?.forEachChild((child: any) => {
     child?.expression?.properties?.forEach((property: any) => {
       let locale = {
         id: property.name.text,
-        value: property.initializer.text,
-        locale: "sk_SK",
-        position: { start: property.initializer.pos, end: property.initializer.end }
+        value: property.initializer?.text,
+        locale: languageLocale,
+        position: { pos: property.initializer.pos, end: property.initializer.end }
       }
       localeMessages = [...localeMessages, locale]
     })
@@ -37,35 +37,26 @@ export function saveTableValuesAndParseBack(tableBody: HTMLTableElement, message
 
 }
 
-export const findWordFromLocale = (code: string, start: number, end: number) => {
-  return code.substring(start + 1, end - 1)
-}
-
-export const changeLocaleFile = (localeFile: string, messages: Message[], originalWords: string[]) => {
-  originalWords.forEach((word: string, index) => {
-    localeFile = localeFile.replace(word, messages[index].value)
+export const changeLocaleFile = (localeFile: string, changedMessages: Message[], originalMessages: Message[]) => {
+  let messages = JSON.parse(JSON.stringify(originalMessages));
+  changedMessages.forEach((message: Message, index) => {
+    if (message.value == originalMessages[index].value) {
+      console.log("Equal")
+    } else {
+      const before = localeFile.substring(0, messages[index].position.pos + 1)
+      const after = localeFile.substring(messages[index].position.end - 1)
+      localeFile = before + changedMessages[index].value + after
+      //@ts-ignore
+      let newAST = createAst(localeFile, ScriptTarget.ESNext, ScriptKind.JSON)
+      messages = getValuesFromLocalizationASTJSON(newAST)
+    }
   })
   return localeFile
 }
 
-export const getAllWordsFromLocale = (messages: Message[]) => {
-  let words: string[] = []
-  messages.forEach((message: any) => {
-    const word = findWordFromLocale(JSON.stringify(sk_SK), message.position.start, message.position.end)
-    words = [...words, word]
-  })
-  return words
-}
 
-export const getWordsFromLocale = (code: string, messages: Message[]) => {
-  let words: string[] = []
-  messages.forEach((message: Message) => {
-    // without " " only the value
-    const word = code.substring(message.position.start + 1, message.position.end - 1)
-    words = [...words, word]
-  })
-  return words
-}
+
+
 
 
 

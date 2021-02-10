@@ -6,6 +6,6 @@ export interface Message {
 }
 
 export interface Position {
-    start: number;
+    pos: number;
     end: number;
 }
