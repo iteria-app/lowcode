@@ -17,7 +17,7 @@ function injectScript(file_path: string, tag: string) {
   node.appendChild(script)
 }
 
-injectScript(chrome.extension.getURL("js/injectScript.bundle.js"), "body")
+injectScript(browser.extension.getURL("js/injectScript.bundle.js"), "body")
 
 window.addEventListener("message", event => {
   //TODO if (event?.data?.payload?.event == "inspectedElement"
