@@ -112,7 +112,12 @@ export const changeAllFiles = (skSourceCode: string, enSourceCode: string, chang
       enSourceCode = before + changedMessages[i].enEN.value + after
     }
   }
-  return { skSourceCode, enSourceCode }
+
+  return {
+    skSourceCode,
+    enSourceCode
+  }
+
 }
 
 
