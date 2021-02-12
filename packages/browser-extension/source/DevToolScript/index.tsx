@@ -126,7 +126,7 @@ browser.devtools.panels
 
       console.log("sk_SK stringify",JSON.stringify(sk_SK))
       
-      const loadedFile = await loadFileFromReactProject('/Users/michalzaduban/Desktop/talentsbase/src/localizations/en_sk.json')
+      const loadedFile = await loadFileFromReactProject('/Users/michalzaduban/Desktop/talentsbase/src/localizations/en_EN.json')
       //@ts-ignore
       const loadedLocale = createAst(loadedFile,ScriptTarget.ESNext,ScriptKind.JSON )
 
