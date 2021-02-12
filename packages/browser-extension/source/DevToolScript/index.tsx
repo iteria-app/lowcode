@@ -9,8 +9,9 @@ import {WCMonacoEditor} from './wcEditor'
 import * as monaco from 'monaco-editor'
 import { createAst } from "../tsx/createSourceFile";
 import sk_SK from "../localization/sk_SK";
-import {  changeFileFromEnd, changeLocaleFile, getValuesFromLocalizationASTJSON, saveTableValuesAndParseBack } from "../localization/localizations";
-import { createTableWithMessages } from "../localization/localeTables";
+import { addNewLocale, changeAllFiles, changeLocaleFile, getValuesFromLocalizationASTJSON, saveAllValuesAndParseBack, saveTableValuesAndParseBack } from "../localization/localizations";
+import { createMultiTableWithMessages, createTableWithMessages } from "../localization/localeTables";
+import en_EN from "../localization/en_EN";
 
 console.log("[lowcode] devtools.js A");
 
@@ -127,19 +128,37 @@ browser.devtools.panels
 
       //@ts-ignore
       const tableBody:HTMLTableElement= panelWindow.document.getElementById('locale-tableBody')
+      //@ts-ignore
+      const allMessagesBody:HTMLTableElement= panelWindow.document.getElementById('multi-tableBody')
       const astLocale = createAst(JSON.stringify(sk_SK),ScriptTarget.ESNext,ScriptKind.JSON )
       const localeMessages = getValuesFromLocalizationASTJSON(astLocale)
       const original = JSON.parse(JSON.stringify(localeMessages));
+      const multiMessages = addNewLocale(JSON.stringify(sk_SK), JSON.stringify(en_EN) )
+      const originalMulti = JSON.parse(JSON.stringify(multiMessages));
       createTableWithMessages(localeMessages, panelWindow)
+      //@ts-ignore
+      createMultiTableWithMessages(multiMessages, panelWindow)
       const saveTableButton = panelWindow.document.getElementById('saveTable')
       saveTableButton?.addEventListener('click', ()=>{
       const messages = saveTableValuesAndParseBack(tableBody, localeMessages)
-      const resultFromEnd = changeFileFromEnd(JSON.stringify(sk_SK),messages, original)
-      console.log("Result from end", resultFromEnd)
       if(messages){
         const resultOfChanging = changeLocaleFile(JSON.stringify(sk_SK),messages, original)
         console.log("RESULT OF CHANGING", resultOfChanging, )
         fetch(`http://localhost:7500/files/${'/Users/michalzaduban/Desktop/LowcodeMyFork/january/lowcode/packages/browser-extension/source/localization/sk_SK.ts'}`, {method:'PUT', body:"export default " + resultOfChanging})
+      }
+      })
+
+      const saveAllButton = panelWindow.document.getElementById('saveAll')
+      saveAllButton?.addEventListener('click', ()=>{
+        //@ts-ignore
+      const allMessages = saveAllValuesAndParseBack(allMessagesBody, multiMessages)
+      console.log("ALl messages", allMessages, "Original", originalMulti)
+      if(allMessages){
+        const {skSourceCode, enSourceCode} = changeAllFiles(JSON.stringify(sk_SK),JSON.stringify(en_EN),allMessages, originalMulti)
+        console.log("RESULT OF CHANGING", enSourceCode, skSourceCode, )
+        fetch(`http://localhost:7500/files/${'/Users/michalzaduban/Desktop/LowcodeMyFork/january/lowcode/packages/browser-extension/source/localization/sk_SK.ts'}`, {method:'PUT', body:"export default " + skSourceCode})
+        fetch(`http://localhost:7500/files/${'/Users/michalzaduban/Desktop/LowcodeMyFork/january/lowcode/packages/browser-extension/source/localization/en_EN.ts'}`, {method:'PUT', body:"export default " + enSourceCode})
+
       }
      
       })

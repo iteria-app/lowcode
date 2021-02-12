@@ -1,3 +1,5 @@
+import { StringLiteral } from "ts-morph";
+
 export interface Message {
     id: string;
     value: string;
@@ -8,4 +10,15 @@ export interface Message {
 export interface Position {
     pos: number;
     end: number;
+}
+
+export interface MultiMessage {
+    id: string;
+    skSK: MessageLocale
+    enEN: MessageLocale
+}
+
+export interface MessageLocale {
+    value: string;
+    position: Position
 }
