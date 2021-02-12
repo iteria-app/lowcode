@@ -9,7 +9,7 @@ import {WCMonacoEditor} from './wcEditor'
 import * as monaco from 'monaco-editor'
 import { createAst } from "../tsx/createSourceFile";
 import sk_SK from "../localization/sk_SK";
-import { addNewLocale, changeAllFiles, changeLocaleFile, getValuesFromLocalizationASTJSON, saveAllValuesAndParseBack, saveTableValuesAndParseBack } from "../localization/localizations";
+import { addNewLocale, changeAllFiles, changeLocaleFile, getValuesFromLocalizationASTJSON, loadFileFromReactProject, saveAllValuesAndParseBack, saveTableValuesAndParseBack } from "../localization/localizations";
 import { createMultiTableWithMessages, createTableWithMessages } from "../localization/localeTables";
 import en_EN from "../localization/en_EN";
 
@@ -101,7 +101,7 @@ browser.devtools.panels
     });
 
     //https://stackoverflow.com/questions/11661613/chrome-devpanel-extension-communicating-with-background-page
-    extensionPanel.onShown.addListener(function tmp(aPanelWindow) {
+    extensionPanel.onShown.addListener(async function tmp(aPanelWindow) {
       console.log("devtools.js onShown", aPanelWindow);
 
       extensionPanel.onShown.removeListener(tmp); // Run once only
@@ -125,13 +125,19 @@ browser.devtools.panels
       //};
 
       console.log("sk_SK stringify",JSON.stringify(sk_SK))
+      
+      const loadedFile = await loadFileFromReactProject('/Users/michalzaduban/Desktop/talentsbase/src/localizations/en_sk.json')
+      //@ts-ignore
+      const loadedLocale = createAst(loadedFile,ScriptTarget.ESNext,ScriptKind.JSON )
 
+      
       //@ts-ignore
       const tableBody:HTMLTableElement= panelWindow.document.getElementById('locale-tableBody')
       //@ts-ignore
       const allMessagesBody:HTMLTableElement= panelWindow.document.getElementById('multi-tableBody')
       const astLocale = createAst(JSON.stringify(sk_SK),ScriptTarget.ESNext,ScriptKind.JSON )
-      const localeMessages = getValuesFromLocalizationASTJSON(astLocale)
+      
+      const localeMessages = getValuesFromLocalizationASTJSON(loadedLocale)
       const original = JSON.parse(JSON.stringify(localeMessages));
       const multiMessages = addNewLocale(JSON.stringify(sk_SK), JSON.stringify(en_EN) )
       const originalMulti = JSON.parse(JSON.stringify(multiMessages));
@@ -142,9 +148,10 @@ browser.devtools.panels
       saveTableButton?.addEventListener('click', ()=>{
       const messages = saveTableValuesAndParseBack(tableBody, localeMessages)
       if(messages){
-        const resultOfChanging = changeLocaleFile(JSON.stringify(sk_SK),messages, original)
+        //@ts-ignore
+        const resultOfChanging = changeLocaleFile(loadedFile,messages, original)
         console.log("RESULT OF CHANGING", resultOfChanging, )
-        fetch(`http://localhost:7500/files/${'/Users/michalzaduban/Desktop/LowcodeMyFork/january/lowcode/packages/browser-extension/source/localization/sk_SK.ts'}`, {method:'PUT', body:"export default " + resultOfChanging})
+        fetch(`http://localhost:7500/files/${'/Users/michalzaduban/Desktop/talentsbase/src/localizations/en_EN.json'}`, {method:'PUT', body:resultOfChanging})
       }
       })
 

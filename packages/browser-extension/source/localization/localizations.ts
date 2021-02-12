@@ -2,6 +2,8 @@ import { SourceFile, factory, ScriptKind, ScriptTarget, createSourceFile, Printe
 import sk_SK from "./sk_SK";
 import { Message, MultiMessage } from "./localizationInterfaces";
 import { createAst } from "../tsx/createSourceFile";
+import { readFile } from "../util/helperFunctions";
+
 
 
 export function getValuesFromLocalizationASTJSON(astLocale: SourceFile | undefined, languageLocale = "sk_SK") {
@@ -50,6 +52,11 @@ export const changeLocaleFile = (localeFile: string, changedMessages: Message[],
   }
   return localeFile
 
+}
+
+export const loadFileFromReactProject = async (pathToFile: string) => {
+  const file = await readFile(pathToFile).catch((err) => console.log("Error", err))
+  return file
 }
 
 
