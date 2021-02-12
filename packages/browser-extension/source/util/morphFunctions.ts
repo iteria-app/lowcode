@@ -1,14 +1,5 @@
 import { Project, SourceFile, SyntaxKind } from "ts-morph"
 
-export const addRelativeImportWithMorph = (
-  file: SourceFile,
-  newPageName: string
-) =>
-  file.addImportDeclaration({
-    defaultImport: newPageName,
-    moduleSpecifier: `./pages/${newPageName}`,
-  })
-
 export const renameFunctionWithMorph = (
   project: Project,
   code: string,

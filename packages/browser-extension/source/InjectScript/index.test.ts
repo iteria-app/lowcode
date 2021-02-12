@@ -8,16 +8,12 @@ import {
 } from "../tsx/ast"
 import { findAttributeByName, isValidJsxElement } from "../util/routeHandlers"
 
-const getCode = (filePath: string) =>
-  fs.readFileSync(filePath, { encoding: "utf-8" })
+import { APP_TXS_SAMPLE_CODE }  from './index.testdata'
 
 const getRouteNode = () => {
-  const code = getCode(
-    "/Users/martinmecir/Desktop/Work/ionic-react-conference-app/src/App.tsx"
-  )
+  const code = APP_TXS_SAMPLE_CODE
   return astFindSource(code, {
-    fileName:
-      "/Users/martinmecir/Desktop/Work/ionic-react-conference-app/src/components/App.tsx",
+    fileName: "/src/components/App.tsx",
     columnNumber: 13,
     lineNumber: 79,
   })
@@ -43,12 +39,9 @@ it("returns component name from attributes", async () => {
 })
 
 it("returns start of identifier on route element", () => {
-  const code = getCode(
-    "/Users/martinmecir/Desktop/Work/ionic-react-conference-app/src/App.tsx"
-  )
+  const code = APP_TXS_SAMPLE_CODE
   const nodeStart = startOfJsxIdentifier(code, {
-    fileName:
-      "/Users/martinmecir/Desktop/Work/ionic-react-conference-app/src/components/App.tsx",
+    fileName: "src/components/App.tsx",
     columnNumber: 13,
     lineNumber: 66,
   })
@@ -56,12 +49,9 @@ it("returns start of identifier on route element", () => {
 })
 
 test("returns start of route jsx element", () => {
-  const code = getCode(
-    "/Users/martinmecir/Desktop/Work/ionic-react-conference-app/src/App.tsx"
-  )
+  const code = APP_TXS_SAMPLE_CODE
   const nodeStart = startOfJsxNode(code, {
-    fileName:
-      "/Users/martinmecir/Desktop/Work/ionic-react-conference-app/src/components/App.tsx",
+    fileName: "/src/components/App.tsx",
     columnNumber: 13,
     lineNumber: 66,
   })

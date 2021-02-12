@@ -10,7 +10,6 @@ import { cloneElementInAst } from "./tsx/clone"
 import { createAst } from "./tsx/createSourceFile"
 import { writeFile, readFile } from "./util/helperFunctions"
 import {
-  addRelativeImportWithMorph,
   renameFunctionWithMorph,
 } from "./util/morphFunctions"
 import {
@@ -20,8 +19,15 @@ import {
   cloneRouteElements,
 } from "./util/routeHandlers"
 
-export const cloneRoute = async (code: string, source: SourceLineCol) => {
-  const uncastedNode = astFindSource(code, source)
+export const cloneRoute = async (routesCode: string, routesSource: SourceLineCol) => {
+  // Prompt for new page name
+  const newPageName = window.prompt(
+    "Insert new page path!\nURL will be formatted as: base_url/YOUR_INPUT"
+  )
+  if (!newPageName) return
+
+
+  const uncastedNode = astFindSource(routesCode, routesSource)
   if (!uncastedNode) {
     throw new Error("Element was not found in code")
   }
@@ -35,50 +41,46 @@ export const cloneRoute = async (code: string, source: SourceLineCol) => {
 
   const node = castRouteNodeToProperType(uncastedNode)
   const attributes = jsxElementGetAttributes(node)
-  const componentAttribute = findAttributeByName(attributes, "component")
-
-  if (!componentAttribute)
+  const originalPageName = findAttributeByName(attributes, "component") 
+  if (!originalPageName)
     throw new Error(
       "Failed to extract component name/render function from JSX tag"
     )
+  const srcPath = stripFileName(routesSource.fileName)
+  const originalPagePath = `${srcPath}/pages/${originalPageName}.tsx` // TODO check the relative import of the page
+  const newPagePath = `${srcPath}/pages/${newPageName}.tsx`
+  const newPageRelativeImport = `./pages/${newPageName}`
 
-  // Prompt for new page name
-  const newPageName = window.prompt(
-    "Insert new page path!\nURL will be formatted as: base_url/YOUR_INPUT"
-  )
-  if (!newPageName) return
-
-  const startOfNode = startOfJsxNode(code, source)
-  const ast = createAst(code)
-  if (!startOfNode || !ast) throw new Error("Something went wrong")
+  const startOfNode = startOfJsxNode(routesCode, routesSource)
+  const ast = createAst(routesCode)
+  if (!startOfNode || !ast) throw new Error("Something went wrong - not found in AST")
 
   // Update AST
   const updatedAst = cloneRouteElements(node, ast, startOfNode, newPageName)
   const printer = ts.createPrinter()
-  const newCode = printer.printFile(updatedAst)
+  const newRoutesCode = printer.printFile(updatedAst)
 
   const project = new Project()
-  const file = project.createSourceFile(`App.tsx`, newCode)
-  // Add import with Ts-Morph
-  addRelativeImportWithMorph(file, newPageName)
+  const newRoutesFile = project.createSourceFile(`App.tsx`, newRoutesCode)
+  newRoutesFile.addImportDeclaration({
+    defaultImport: newPageName,
+    moduleSpecifier: newPageRelativeImport,
+  })
 
-  writeFile(source.fileName, file.print())
-
-  const cloneCode = await readFile(
-    `/Users/martinmecir/Desktop/Work/ionic-react-conference-app/src/pages/${componentAttribute}.tsx`
-  )
-
+  const cloneCode = await readFile(originalPagePath)
   const newReactPage = renameFunctionWithMorph(
     project,
     cloneCode,
-    componentAttribute,
+    originalPageName,
     newPageName
   )
-
   writeFile(
-    `/Users/martinmecir/Desktop/Work/ionic-react-conference-app/src/pages/${newPageName}.tsx`,
+    newPagePath,
     newReactPage.print()
   )
+
+  // write only if previous steps were successful
+  writeFile(routesSource.fileName, newRoutesFile.print())
 }
 
 export const cloneElement = (code: string, source: SourceLineCol) => {
@@ -92,4 +94,17 @@ export const cloneElement = (code: string, source: SourceLineCol) => {
   const newCode = printer.printFile(alteredAst)
 
   writeFile(source.fileName, newCode)
+}
+
+function stripFileName(filePath: string) {
+  const backslash = filePath.lastIndexOf('\\')
+  if (backslash > 0) {
+    return filePath.substring(0, backslash)
+  }
+  const slash = filePath.lastIndexOf('/')
+  if (slash > 0) {
+    return filePath.substring(0, slash)
+  }
+
+  return filePath
 }
