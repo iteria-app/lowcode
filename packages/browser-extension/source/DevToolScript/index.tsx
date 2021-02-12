@@ -28,18 +28,19 @@ browser.devtools.panels
       if (msg?.event == "inspectedElementSource") {
         
       }
-      const pathFile = msg?.fileUrl
-      const path = pathFile.substring(8)
-      console.log("Path", path)
       
-      if (editorElement) {
-      console.log("Editor", editor)
-       editorElement.src = msg?.body
-       editorElement.value = msg?.body
-       console.log("MODEL", msg, "Payload",JSON.stringify(msg?.payload))
-       editor.focus();
-       editor.revealLineInCenter(lineNumber + 4);
-       editor.setPosition({
+      const pathFile = msg?.fileUrl
+      if (editorElement && pathFile) {
+        const path = pathFile.substring(8) // TODO constant
+        console.log("Path", path)
+
+        console.log("Editor", editor)
+        editorElement.src = msg?.body
+        editorElement.value = msg?.body
+        console.log("MODEL", msg, "Payload",JSON.stringify(msg?.payload))
+        editor.focus();
+        editor.revealLineInCenter(lineNumber + 4);
+        editor.setPosition({
           lineNumber: 60,
           column: 40,
         });
