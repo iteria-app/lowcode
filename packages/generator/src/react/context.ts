@@ -17,7 +17,9 @@ export class DefaultImportBuilder {
     }
 
     unique() {
-        return this.imports // TODO unique
+        return this.imports.filter((value,index,arr) => {
+            return arr.indexOf(value) === index;
+        })  //Unique
     }
 
     importDeclaration(declaration: ts.ImportDeclaration) {
