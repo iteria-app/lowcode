@@ -1,5 +1,4 @@
-import { StringLiteral } from "ts-morph"
-import ts, { ImportSpecifier } from "typescript"
+import ts from "typescript"
 import { Component } from './component'
 import grommetTable from './grommet/table'
 //import reactIntlTag from './react-intl/formatted-tag'
