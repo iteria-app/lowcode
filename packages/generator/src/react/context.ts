@@ -1,4 +1,5 @@
-import ts from "typescript"
+import { StringLiteral } from "ts-morph"
+import ts, { ImportSpecifier } from "typescript"
 import { Component } from './component'
 import grommetTable from './grommet/table'
 //import reactIntlTag from './react-intl/formatted-tag'
@@ -17,9 +18,34 @@ export class DefaultImportBuilder {
     }
 
     unique() {
-        return this.imports.filter((value,index,arr) => {
-            return arr.indexOf(value) === index;
-        })  //Unique
+
+//If we have import {A} from 'pkg1';
+        //   import {A,B} from 'pkg2'  -- it will be deleted  -- For having all symbols we have to take symbols and create new imports.
+        const uniqueNamedImports:ts.ImportSpecifier[] = []
+        return this.imports.filter(i => {
+            let returnValue:boolean = true
+            i.forEachChild(childNode => {
+                if(ts.isImportClause(childNode)){ 
+                    childNode.forEachChild(nIs => {
+                        if(ts.isNamedImports(nIs)){
+                            nIs.forEachChild(nI => {
+                                if(ts.isImportSpecifier(nI)){
+                                    if(uniqueNamedImports.indexOf(nI) === -1){   
+                                        uniqueNamedImports.push(nI)
+                                    }else{
+                                        returnValue = false
+                                    }
+                                }
+                            })
+                        }
+                    })                    
+                }
+            })
+            return returnValue
+         })
+
+        //  return this.imports
+                
     }
 
     importDeclaration(declaration: ts.ImportDeclaration) {
