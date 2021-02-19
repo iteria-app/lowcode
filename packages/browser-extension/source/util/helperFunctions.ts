@@ -21,3 +21,14 @@ export const readFile = async (filePath: string) => {
     throw new Error(err)
   }
 }
+
+
+export const readDir = async (dirPath: string) => {
+  try {
+    const res = await fetch(`http://localhost:7500/dir/${dirPath}`)
+    const dir = await res.json()
+    return dir
+  } catch (err) {
+    throw new Error(err)
+  }
+}

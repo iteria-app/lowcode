@@ -9,7 +9,7 @@ import {WCMonacoEditor} from './wcEditor'
 import * as monaco from 'monaco-editor'
 import { createAst } from "../tsx/createSourceFile";
 import sk_SK from "../localization/sk_SK";
-import { addNewLocale, changeAllFiles, changeLocaleFile, getValuesFromLocalizationASTJSON, loadFileFromReactProject, saveAllValuesAndParseBack, saveTableValuesAndParseBack } from "../localization/localizations";
+import { addNewLocale, changeAllFiles, changeLocaleFile, combineLocales, createDynamicLocales, createTemporaryLocales, getFilesFromDirectory, getLocaleFilesNames, getValuesFromLocalizationASTJSON, loadDirectoryFromProject, loadFileFromReactProject, saveAllValuesAndParseBack, saveTableValuesAndParseBack } from "../localization/localizations";
 import { createMultiTableWithMessages, createTableWithMessages } from "../localization/localeTables";
 import en_EN from "../localization/en_EN";
 
@@ -127,9 +127,22 @@ browser.devtools.panels
       console.log("sk_SK stringify",JSON.stringify(sk_SK))
       
       const loadedFile = await loadFileFromReactProject('/Users/michalzaduban/Desktop/talentsbase/src/localizations/en_EN.json')
+      const directory = await loadDirectoryFromProject('/Users/michalzaduban/Desktop/talentsbase/src/localizations')
+      const filesFromDirectory = await getFilesFromDirectory('/Users/michalzaduban/Desktop/talentsbase/src/localizations/')
+      console.log("Directory", directory)
+      //@ts-ignore
+      const fileNames =  getLocaleFilesNames(directory)
+      console.log("Files", filesFromDirectory)
+      console.log("FileNames", fileNames)
+      const temporary = await createTemporaryLocales(fileNames, filesFromDirectory)
+      console.log("Temporary", temporary)
+      //@ts-ignore
+      const dynamicLocales = createDynamicLocales(temporary)
       //@ts-ignore
       const loadedLocale = createAst(loadedFile,ScriptTarget.ESNext,ScriptKind.JSON )
-
+      const sourceCodes = [sk_SK, en_EN]
+      console.log("SOurce codes", sourceCodes)
+      const all = combineLocales(sourceCodes)
       
       //@ts-ignore
       const tableBody:HTMLTableElement= panelWindow.document.getElementById('locale-tableBody')
@@ -177,6 +190,7 @@ browser.devtools.panels
     });
 
   });
+
 
 
 

@@ -2,7 +2,8 @@ import { SourceFile, factory, ScriptKind, ScriptTarget, createSourceFile, Printe
 import sk_SK from "./sk_SK";
 import { Message, MultiMessage } from "./localizationInterfaces";
 import { createAst } from "../tsx/createSourceFile";
-import { readFile } from "../util/helperFunctions";
+import { readDir, readFile } from "../util/helperFunctions";
+import * as path from 'path'
 
 
 
@@ -55,10 +56,78 @@ export const changeLocaleFile = (localeFile: string, changedMessages: Message[],
 }
 
 export const loadFileFromReactProject = async (pathToFile: string) => {
-  const file = await readFile(pathToFile).catch((err) => console.log("Error", err))
-  return file
+  try {
+    const file = await readFile(pathToFile).catch((err) => console.log("Error", err))
+    return file
+  } catch (error) {
+    console.log("Error", error)
+  }
 }
 
+export const loadDirectoryFromProject = async (pathToDir: string) => {
+  try {
+    const dir = await readDir(pathToDir).catch((err) => console.log("Error", err))
+    return dir
+  } catch (error) {
+    console.log("Error", error)
+  }
+}
+
+export const getFilesFromDirectory = async (pathToDirectory: string) => {
+  try {
+    const directory = await readDir(pathToDirectory).catch((err) => console.log("Error", err))
+    const files = directory.map(async (file: string) => {
+      const loadedFile = await loadFileFromReactProject(`${pathToDirectory}${file}`);
+      return loadedFile
+    });
+    return files
+  } catch (error) {
+    console.log("err", error)
+  }
+}
+
+export const getLocaleFilesNames = (directory: string[]) => {
+  return directory.map((file: string) => {
+    //delete .json
+    return file.substring(0, file.length - 5)
+  })
+}
+
+export const getFile = async (file: any) => {
+  return await file
+}
+
+export const createTemporaryLocales = async (fileNames: string[], files: any[]) => {
+  const allFiles = await Promise.all(files.map((file: any) => getFile(file)))
+  const filesObjects = fileNames.map((file: string, index: number) => {
+    return { locale: file, source: allFiles[index] }
+  })
+  return filesObjects
+}
+
+export const createDynamicLocales = (localeFileObjects = []) => {
+  const asts = localeFileObjects.map((fileObject: any) => {
+    const ast = createAst(JSON.stringify(fileObject.source), ScriptTarget.ESNext, ScriptKind.JSON)
+    return { ...fileObject, source: ast }
+  })
+  console.log("ASTS", asts)
+  //@ts-ignore
+  // const finalMessages = skMessages.map((skMessage: Message) => {
+  //   return {
+  //     id: skMessage?.id,
+  //     skSK: {
+  //       value: skMessage.value,
+  //       position: skMessage.position
+  //     },
+  //     enEN: {
+  //       value: enMessages.find((message: Message) => message.id == skMessage.id)?.value,
+  //       position: enMessages.find((message: Message) => message.id == skMessage.id)?.position
+  //     }
+  //   }
+  // })
+  // console.log("result", finalMessages)
+  // return finalMessages
+}
 
 export const addNewLocale = (skSourceCode: string, enSourceCode: string) => {
   const skLocale = createAst(skSourceCode, ScriptTarget.ESNext, ScriptKind.JSON)
@@ -90,6 +159,39 @@ export function saveAllValuesAndParseBack(tableBody: HTMLTableElement, allMessag
     allMessages[r].enEN.value = tableBody.rows[r].cells[2].getElementsByTagName('input')[0]?.value
   }
   return allMessages
+}
+
+export const createAsts = (sourceCodes: any[]) => {
+  return sourceCodes.map((code: any) => createAst(JSON.stringify(code), ScriptTarget.ESNext, ScriptKind.JSON))
+}
+
+// export const getLocalesNames = (sourceCodes:[]) => {
+//   return  
+// }
+
+export const combineLocales = (sourceCodes: any[]) => {
+  const asts = createAsts(sourceCodes)
+  console.log("ASTS", asts)
+  //const pahtName = path.parse(sourceCodes[0]).base
+  const messages = asts.map((ast: any) => { return getValuesFromLocalizationASTJSON(ast) })
+  console.log("En Messages", messages)
+  console.log("path name")
+  //@ts-ignore
+  // const finalMessages = skMessages.map((skMessage: Message) => {
+  //   return {
+  //     id: skMessage?.id,
+  //     skSK: {
+  //       value: skMessage.value,
+  //       position: skMessage.position
+  //     },
+  //     enEN: {
+  //       value: enMessages.find((message: Message) => message.id == skMessage.id)?.value,
+  //       position: enMessages.find((message: Message) => message.id == skMessage.id)?.position
+  //     }
+  //   }
+  // })
+  // console.log("result", finalMessages)
+  // return finalMessages
 }
 
 
