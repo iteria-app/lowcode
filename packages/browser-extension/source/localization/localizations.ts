@@ -105,28 +105,62 @@ export const createTemporaryLocales = async (fileNames: string[], files: any[]) 
   return filesObjects
 }
 
+export const oneWithAllLocales = (allLocaleMessaages = []) => {
+  if (allLocaleMessaages.length == 0) return
+  //@ts-ignore
+  const firstLocale = allLocaleMessaages[0].messages.map((message: Message) => {
+    //@ts-ignore
+    const locale = allLocaleMessaages[0].locale
+    return {
+      id: message.id,
+      [locale]: {
+        value: message.value,
+        position: message.position
+      }
+    }
+  })
+  return firstLocale
+}
+
 export const createDynamicLocales = (localeFileObjects = []) => {
   const asts = localeFileObjects.map((fileObject: any) => {
-    const ast = createAst(JSON.stringify(fileObject.source), ScriptTarget.ESNext, ScriptKind.JSON)
+    const ast = createAst(fileObject.source, ScriptTarget.ESNext, ScriptKind.JSON)
     return { ...fileObject, source: ast }
   })
-  console.log("ASTS", asts)
+  const messages = asts.map((ast: any) => {
+    const localeMessages = getValuesFromLocalizationASTJSON(ast.source, ast.locale)
+    return { locale: ast.locale, messages: localeMessages }
+  })
   //@ts-ignore
-  // const finalMessages = skMessages.map((skMessage: Message) => {
-  //   return {
-  //     id: skMessage?.id,
-  //     skSK: {
-  //       value: skMessage.value,
-  //       position: skMessage.position
-  //     },
-  //     enEN: {
-  //       value: enMessages.find((message: Message) => message.id == skMessage.id)?.value,
-  //       position: enMessages.find((message: Message) => message.id == skMessage.id)?.position
-  //     }
-  //   }
-  // })
-  // console.log("result", finalMessages)
-  // return finalMessages
+  const firstLocaleMessages = oneWithAllLocales(messages)
+  const final = firstLocaleMessages.map((firstMessage: any) => {
+    const all = messages.map((message: any) => {
+      return message.messages.find((one: any) => one.id == firstMessage.id)
+    })
+    return {
+      id: firstMessage.id,
+      messages: all.map((oneMessage: any) => {
+        return {
+          locale: oneMessage.locale,
+          value: oneMessage.value,
+          position: oneMessage.position
+        }
+      })
+    }
+  })
+  return final
+}
+
+export function saveAllLocalesFromTable(tableBody: HTMLTableElement, allMessages = []) {
+  console.log(allMessages, tableBody)
+  for (var r = 0, n = tableBody.rows.length; r < n; r++) {
+    for (var c = 0, m = tableBody.rows[r].cells.length - 1; c < m; c++) {
+      console.log("R", r, "c", c)
+      //@ts-ignore
+      allMessages[r].messages[c].value = tableBody.rows[r].cells[c + 1]?.getElementsByTagName('input')[0]?.value
+    }
+  }
+  return allMessages
 }
 
 export const addNewLocale = (skSourceCode: string, enSourceCode: string) => {
@@ -194,6 +228,40 @@ export const combineLocales = (sourceCodes: any[]) => {
   // return finalMessages
 }
 
+export const updateFiles = async (sourceCodes = [], changedMessages = [], originalMessages = []) => {
+  const allFiles = await Promise.all(sourceCodes.map((file: any) => getFile(file)))
+  for (let i = changedMessages.length - 1; i >= 0; i--) {
+    console.log("I", i, originalMessages, allFiles)
+    //@ts-ignore
+    changedMessages[i].messages.forEach((message: any, index) => {
+      //@ts-ignore
+      console.log("Message", message, message.value, originalMessages[i].messages[index].value)
+      //@ts-ignore
+      if (message.value == originalMessages[i].messages[index].value) {
+        console.log("")
+      } else {
+        //@ts-ignore
+        const before = allFiles[index].substring(0, message.position.pos + 1)
+        //@ts-ignore
+        const after = allFiles[index].substring(message.position.end - 1)
+        console.log("Before", before, "After", after)
+        //@ts-ignore
+        allFiles[index] = before + message.value + after
+      }
+    })
+  }
+  return allFiles
+}
+
+export const sendUpdatedFiles = (updatedFiles = [], fileNames = []) => {
+  const finalUpdatedObjects = updatedFiles.map((file: any, index) => {
+    return { file: fileNames[index], source: file }
+  })
+  console.log("Updated Objects", finalUpdatedObjects)
+  finalUpdatedObjects.forEach((file: any) => {
+    fetch(`http://localhost:7500/files//Users/michalzaduban/Desktop/talentsbase/src/localizations/${file.file}.json`, { method: 'PUT', body: file.source })
+  })
+}
 
 export const changeAllFiles = (skSourceCode: string, enSourceCode: string, changedMessages: MultiMessage[], originalMessages: MultiMessage[]) => {
   for (let i = changedMessages.length; i >= 0; i--) {

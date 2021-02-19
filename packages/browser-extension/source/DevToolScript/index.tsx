@@ -9,8 +9,8 @@ import {WCMonacoEditor} from './wcEditor'
 import * as monaco from 'monaco-editor'
 import { createAst } from "../tsx/createSourceFile";
 import sk_SK from "../localization/sk_SK";
-import { addNewLocale, changeAllFiles, changeLocaleFile, combineLocales, createDynamicLocales, createTemporaryLocales, getFilesFromDirectory, getLocaleFilesNames, getValuesFromLocalizationASTJSON, loadDirectoryFromProject, loadFileFromReactProject, saveAllValuesAndParseBack, saveTableValuesAndParseBack } from "../localization/localizations";
-import { createMultiTableWithMessages, createTableWithMessages } from "../localization/localeTables";
+import { addNewLocale, changeAllFiles, changeLocaleFile, combineLocales, createDynamicLocales, createTemporaryLocales, getFilesFromDirectory, getLocaleFilesNames, getValuesFromLocalizationASTJSON, loadDirectoryFromProject, loadFileFromReactProject, saveAllLocalesFromTable, saveAllValuesAndParseBack, saveTableValuesAndParseBack, sendUpdatedFiles, updateFiles } from "../localization/localizations";
+import { createDynamicTable, createMultiTableWithMessages, createTableWithMessages } from "../localization/localeTables";
 import en_EN from "../localization/en_EN";
 
 console.log("[lowcode] devtools.js A");
@@ -138,12 +138,14 @@ browser.devtools.panels
       console.log("Temporary", temporary)
       //@ts-ignore
       const dynamicLocales = createDynamicLocales(temporary)
+      const originalDynamic = JSON.parse(JSON.stringify(dynamicLocales));
       //@ts-ignore
       const loadedLocale = createAst(loadedFile,ScriptTarget.ESNext,ScriptKind.JSON )
       const sourceCodes = [sk_SK, en_EN]
       console.log("SOurce codes", sourceCodes)
       const all = combineLocales(sourceCodes)
-      
+      //@ts-ignore
+      const dynamicTableBody:HTMLTableElement= panelWindow.document.getElementById('dynamic-tableBody')
       //@ts-ignore
       const tableBody:HTMLTableElement= panelWindow.document.getElementById('locale-tableBody')
       //@ts-ignore
@@ -157,6 +159,25 @@ browser.devtools.panels
       createTableWithMessages(localeMessages, panelWindow)
       //@ts-ignore
       createMultiTableWithMessages(multiMessages, panelWindow)
+      createDynamicTable(dynamicLocales, panelWindow)
+      const saveDynamic = panelWindow.document.getElementById('saveDynamic')
+      saveDynamic?.addEventListener('click', async ()=>{
+        //@ts-ignore
+      const savedDynamicLocales = saveAllLocalesFromTable(dynamicTableBody, dynamicLocales)
+      console.log("ALl messages", savedDynamicLocales, "Original", dynamicLocales)
+      if(savedDynamicLocales){
+        const changedFiles = await updateFiles(filesFromDirectory, savedDynamicLocales, originalDynamic)
+        console.log("CHANGED FILES", changedFiles)
+        //@ts-ignore
+        sendUpdatedFiles(changedFiles, fileNames)
+        //const {skSourceCode, enSourceCode} = changeAllFiles(JSON.stringify(sk_SK),JSON.stringify(en_EN),allMessages, originalMulti)
+        //console.log("RESULT OF CHANGING", enSourceCode, skSourceCode, )
+        //fetch(`http://localhost:7500/files/${'/Users/michalzaduban/Desktop/LowcodeMyFork/january/lowcode/packages/browser-extension/source/localization/sk_SK.ts'}`, {method:'PUT', body:"export default " + skSourceCode})
+        //fetch(`http://localhost:7500/files/${'/Users/michalzaduban/Desktop/LowcodeMyFork/january/lowcode/packages/browser-extension/source/localization/en_EN.ts'}`, {method:'PUT', body:"export default " + enSourceCode})
+
+      }
+      })
+
       const saveTableButton = panelWindow.document.getElementById('saveTable')
       saveTableButton?.addEventListener('click', ()=>{
       const messages = saveTableValuesAndParseBack(tableBody, localeMessages)

@@ -41,3 +41,24 @@ export function createMultiTableWithMessages(messages: MultiMessage[], panelWind
     })
 }
 
+
+export function createDynamicTable(allMessages = [], panelWindow: Window) {
+    const tableBody = panelWindow.document.getElementById('dynamic-tableBody')
+    console.log("Creating table with values", allMessages)
+    allMessages.forEach((message: any) => {
+        console.log("Messages", message)
+        const tr = panelWindow.document.createElement('tr')
+        tableBody?.appendChild(tr)
+        const messageId = panelWindow.document.createElement('td')
+        messageId.innerText = message.id
+        tr.append(messageId)
+        message.messages.forEach((localeMessage: any) => {
+            const input = panelWindow.document.createElement('input')
+            const cell = panelWindow.document.createElement('td')
+            input.value = localeMessage.value
+            cell.appendChild(input)
+            tr.appendChild(cell)
+        })
+    })
+}
+
