@@ -8,7 +8,7 @@ import {
 } from "./tsx/ast"
 import { cloneElementInAst } from "./tsx/clone"
 import { createAst } from "./tsx/createSourceFile"
-import { writeFile, readFile } from "./util/helperFunctions"
+import { writeFile, readFile } from "./util/fetch"
 import {
   renameFunctionWithMorph,
 } from "./util/morphFunctions"
@@ -18,8 +18,9 @@ import {
   findAttributeByName,
   cloneRouteElements,
 } from "./util/routeHandlers"
+import { CodeRW } from "./io/rw"
 
-export const cloneRoute = async (routesCode: string, routesSource: SourceLineCol) => {
+export const cloneRoute = async (routesCode: string, routesSource: SourceLineCol, io: CodeRW) => {
   // Prompt for new page name
   const newPageName = window.prompt(
     "Insert new page path!\nURL will be formatted as: base_url/YOUR_INPUT"
@@ -67,23 +68,25 @@ export const cloneRoute = async (routesCode: string, routesSource: SourceLineCol
     moduleSpecifier: newPageRelativeImport,
   })
 
-  const cloneCode = await readFile(originalPagePath)
-  const newReactPage = renameFunctionWithMorph(
-    project,
-    cloneCode,
-    originalPageName,
-    newPageName
-  )
-  writeFile(
-    newPagePath,
-    newReactPage.print()
-  )
+  const cloneCode = await io.readFile(originalPagePath)
+  if (cloneCode) {
+    const newReactPage = renameFunctionWithMorph(
+      project,
+      cloneCode,
+      originalPageName,
+      newPageName
+    )
+    io.writeFile(
+      newPagePath,
+      newReactPage.print()
+    )
+  }
 
   // write only if previous steps were successful
   writeFile(routesSource.fileName, newRoutesFile.print())
 }
 
-export const cloneElement = (code: string, source: SourceLineCol) => {
+export const cloneElement = (code: string, source: SourceLineCol, io: CodeRW) => {
   const confirmed = window.confirm("Component will be cloned on this page")
   if (!confirmed) return
 
@@ -93,7 +96,7 @@ export const cloneElement = (code: string, source: SourceLineCol) => {
   const printer = ts.createPrinter()
   const newCode = printer.printFile(alteredAst)
 
-  writeFile(source.fileName, newCode)
+  io.writeFile(source.fileName, newCode)
 }
 
 function stripFileName(filePath: string) {

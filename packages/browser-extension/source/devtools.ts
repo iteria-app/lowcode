@@ -1,13 +1,13 @@
-interface ReactDevtoolsAgent {
+export interface ReactDevtoolsAgent {
     inspectElement(opts: { id: number; path: Array<string>; rendererID: number }): void;
     getIDForNode(node: Node): number;
 }
 
-interface RenderInterace {
+export interface RenderInterace {
     getOwnersList(id: number): Array<any>;
 }
 
-interface OwnerListItem {
+export interface OwnerListItem {
     displayName: string;
     id: number;
     type: number; // enum
@@ -19,6 +19,46 @@ export interface DevToolsHook {
 }
 
 const rendererID = 1;
+
+export interface InspectedElementSource {
+  readonly fileName: string
+  readonly lineNumber: number
+  readonly columnNumber: number
+}
+
+export interface InspectedElementValue {
+  readonly id: number
+  readonly type: number
+  readonly displayName: string
+  readonly source?: InspectedElementSource
+  readonly owners: OwnerListItem[] | null
+
+  readonly rendererPackageName: string //"react-dom"
+  readonly rendererVersion: string //"16.13.1"
+
+  readonly key: null
+  readonly props: any
+  readonly hooks: any
+  readonly rootType: any
+  readonly state: any
+  readonly context: any
+  readonly hasLegacyContext: false
+  
+  readonly canEditFunctionProps: true
+  readonly canEditFunctionPropsDeletePaths: false
+  readonly canEditFunctionPropsRenamePaths: false
+  readonly canEditHooks: true
+  readonly canEditHooksAndDeletePaths: false
+  readonly canEditHooksAndRenamePaths: false
+  readonly canToggleSuspense: true
+  readonly canViewSource: false
+}
+
+export interface InspectedElementPayload {
+  readonly id: number
+  readonly type: string
+  readonly value: InspectedElementValue
+}
 
 export class DevTools {
   reactHook: DevToolsHook;

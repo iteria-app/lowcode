@@ -2,8 +2,9 @@ import { SourceFile, factory, ScriptKind, ScriptTarget, createSourceFile, Printe
 import sk_SK from "./sk_SK";
 import { Message, MultiMessage } from "./localizationInterfaces";
 import { createAst } from "../tsx/createSourceFile";
-import { readDir, readFile } from "../util/helperFunctions";
+import { readDir, readFile } from "../util/fetch"
 import * as path from 'path'
+import { CodeRW } from "../io/rw";
 
 
 
@@ -253,13 +254,13 @@ export const updateFiles = async (sourceCodes = [], changedMessages = [], origin
   return allFiles
 }
 
-export const sendUpdatedFiles = (updatedFiles = [], fileNames = []) => {
+export const sendUpdatedFiles = (updatedFiles = [], fileNames = [], io: CodeRW) => {
   const finalUpdatedObjects = updatedFiles.map((file: any, index) => {
     return { file: fileNames[index], source: file }
   })
   console.log("Updated Objects", finalUpdatedObjects)
   finalUpdatedObjects.forEach((file: any) => {
-    fetch(`http://localhost:7500/files//Users/michalzaduban/Desktop/talentsbase/src/localizations/${file.file}.json`, { method: 'PUT', body: file.source })
+    io.writeFile(`src/localizations/${file.file}.json`, file.source)
   })
 }
 

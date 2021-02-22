@@ -28,6 +28,7 @@ browser.runtime.onMessage.addListener((msg, sender) => {
           status: "ok",
           fileUrl,
           body: resp?.body,
+          ownersList: msg?.payload?.ownersList
         })
       })
       .catch(err => {

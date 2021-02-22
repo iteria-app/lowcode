@@ -13,7 +13,12 @@ import { addNewLocale, changeAllFiles, changeLocaleFile, combineLocales, createD
 import { createDynamicTable, createMultiTableWithMessages, createTableWithMessages } from "../localization/localeTables";
 import en_EN from "../localization/en_EN";
 
+import { InspectedElementPayload } from '../devtools'
+import { cloneInspectedElement } from '../cloneInspectedElement'
+
 console.log("[lowcode] devtools.js A");
+
+import { io, ioRefreshEditor } from '../util/global'
 
 browser.devtools.panels
   .create("Lowcode", "/icon.png", "/devtools.html")
@@ -33,24 +38,31 @@ browser.devtools.panels
       console.log("Column Number", columnNumber, "Line Number", lineNumber)
       const editorElement:WCMonacoEditor = panelWindow.document.getElementById("editor");  
       const editor = editorElement.editor
-      if (msg?.event == "inspectedElementSource") {
-        
-      }
-
-      
 
       const pathFile = msg?.fileUrl
       const path = pathFile?.substring(8)
       console.log("Path", path)
       
-      if (editorElement) {
-       editorElement.src = msg?.body
-       editorElement.value = msg?.body
-       editorElement.focus()
-       console.log("MODEL", msg, "Payload",JSON.stringify(msg?.payload))
-       editor.focus();
-       editor.revealLineInCenter(lineNumber + 4);
-       editor.setPosition({
+      if (msg?.event == "inspectedElement") {
+        try {
+          const inspectedElementPayload = msg.payload as InspectedElementPayload
+          console.log('inspectedElementPayload', inspectedElementPayload)
+          if (inspectedElementPayload) {
+            cloneInspectedElement(inspectedElementPayload, ioRefreshEditor)
+          }
+        } catch(err) {
+          console.error('error cloneInspectedElement', msg) 
+        }
+      }
+
+      if (msg?.event == "inspectedElementSource" && editorElement) {
+        editorElement.src = msg?.body
+        editorElement.value = msg?.body
+        editorElement.focus()
+        console.log("MODEL", msg, "Payload",JSON.stringify(msg?.payload))
+        editor.focus();
+        editor.revealLineInCenter(lineNumber + 4);
+        editor.setPosition({
           lineNumber: 60,
           column: 40,
         });
@@ -58,32 +70,28 @@ browser.devtools.panels
 
         if (saveButton) {
           saveButton.addEventListener('click', () => {
-            fetch(`http://localhost:7500/files/${path}`, {method:'PUT', body:editorElement.value})
+            io.writeFile(path, editorElement.value)
+            //fetch(`http://localhost:7500/files/${path}`, {method:'PUT', body:editorElement.value})
           })
         }
       }
 
-      if (msg?.event === "inspectedElement") {
+      if (msg?.event === "inspectedElement" && editor && rootElement && editorElement) {
         console.log("Editor", editor)
-      console.log("SK Locale")
-        if (rootElement) {
-          if (editorElement) {
-             editor.focus();
-             editorElement.src = msg?.body
-             editorElement.value = msg?.body
-             editorElement.focus();
-             editor.revealLineInCenter(lineNumber + 4);
-             editor.setPosition({
-              lineNumber: 60,
-              column: 40,
-             });
-            console.log("Position", editor.getPosition(), "Model", editor.getModel())
-            if(saveButton){
-              saveButton.addEventListener('click', () => {
-                fetch(`http://localhost:7500/files/${path}`, {method:'PUT', body:editorElement.value})
-             })
-            }
-          }
+        editor.focus();
+        editorElement.src = msg?.body
+        editorElement.value = msg?.body
+        editorElement.focus();
+        editor.revealLineInCenter(lineNumber + 4);
+        editor.setPosition({
+          lineNumber: 60, // TODO this should not be hardcoded
+          column: 40,
+        });
+        console.log("Position", editor.getPosition(), "Model", editor.getModel())
+        if(saveButton) {
+          saveButton.addEventListener('click', () => {
+            io.writeFile(path, editorElement.value)
+          })
         }
       }
     }
@@ -126,7 +134,7 @@ browser.devtools.panels
 
       console.log("sk_SK stringify",JSON.stringify(sk_SK))
       
-      const loadedFile = await loadFileFromReactProject('/Users/michalzaduban/Desktop/talentsbase/src/localizations/en_EN.json')
+      const loadedFile = await io.readFile('src/localization/en_EN.json')
       const directory = await loadDirectoryFromProject('/Users/michalzaduban/Desktop/talentsbase/src/localizations')
       const filesFromDirectory = await getFilesFromDirectory('/Users/michalzaduban/Desktop/talentsbase/src/localizations/')
       console.log("Directory", directory)
@@ -161,47 +169,41 @@ browser.devtools.panels
       createMultiTableWithMessages(multiMessages, panelWindow)
       createDynamicTable(dynamicLocales, panelWindow)
       const saveDynamic = panelWindow.document.getElementById('saveDynamic')
-      saveDynamic?.addEventListener('click', async ()=>{
+      saveDynamic?.addEventListener('click', async () => {
         //@ts-ignore
-      const savedDynamicLocales = saveAllLocalesFromTable(dynamicTableBody, dynamicLocales)
-      console.log("ALl messages", savedDynamicLocales, "Original", dynamicLocales)
-      if(savedDynamicLocales){
-        const changedFiles = await updateFiles(filesFromDirectory, savedDynamicLocales, originalDynamic)
-        console.log("CHANGED FILES", changedFiles)
-        //@ts-ignore
-        sendUpdatedFiles(changedFiles, fileNames)
-        //const {skSourceCode, enSourceCode} = changeAllFiles(JSON.stringify(sk_SK),JSON.stringify(en_EN),allMessages, originalMulti)
-        //console.log("RESULT OF CHANGING", enSourceCode, skSourceCode, )
-        //fetch(`http://localhost:7500/files/${'/Users/michalzaduban/Desktop/LowcodeMyFork/january/lowcode/packages/browser-extension/source/localization/sk_SK.ts'}`, {method:'PUT', body:"export default " + skSourceCode})
-        //fetch(`http://localhost:7500/files/${'/Users/michalzaduban/Desktop/LowcodeMyFork/january/lowcode/packages/browser-extension/source/localization/en_EN.ts'}`, {method:'PUT', body:"export default " + enSourceCode})
-
-      }
+        const savedDynamicLocales = saveAllLocalesFromTable(dynamicTableBody, dynamicLocales)
+        console.log("ALl messages", savedDynamicLocales, "Original", dynamicLocales)
+        if(savedDynamicLocales){
+          const changedFiles = await updateFiles(filesFromDirectory, savedDynamicLocales, originalDynamic)
+          console.log("CHANGED FILES", changedFiles)
+          //@ts-ignore
+          sendUpdatedFiles(changedFiles, fileNames, io)
+        }
       })
 
       const saveTableButton = panelWindow.document.getElementById('saveTable')
-      saveTableButton?.addEventListener('click', ()=>{
-      const messages = saveTableValuesAndParseBack(tableBody, localeMessages)
-      if(messages){
-        //@ts-ignore
-        const resultOfChanging = changeLocaleFile(loadedFile,messages, original)
-        console.log("RESULT OF CHANGING", resultOfChanging, )
-        fetch(`http://localhost:7500/files/${'/Users/michalzaduban/Desktop/talentsbase/src/localizations/en_EN.json'}`, {method:'PUT', body:resultOfChanging})
-      }
+      saveTableButton?.addEventListener('click', () =>{
+        const messages = saveTableValuesAndParseBack(tableBody, localeMessages)
+        if(messages){
+          //@ts-ignore
+          const resultOfChanging = changeLocaleFile(loadedFile,messages, original)
+          console.log("RESULT OF CHANGING", resultOfChanging, )
+          io.writeFile('src/localization/en_EN.ts', resultOfChanging)
+        }
       })
 
       const saveAllButton = panelWindow.document.getElementById('saveAll')
-      saveAllButton?.addEventListener('click', ()=>{
+      saveAllButton?.addEventListener('click', () => {
         //@ts-ignore
-      const allMessages = saveAllValuesAndParseBack(allMessagesBody, multiMessages)
-      console.log("ALl messages", allMessages, "Original", originalMulti)
-      if(allMessages){
-        const {skSourceCode, enSourceCode} = changeAllFiles(JSON.stringify(sk_SK),JSON.stringify(en_EN),allMessages, originalMulti)
-        console.log("RESULT OF CHANGING", enSourceCode, skSourceCode, )
-        fetch(`http://localhost:7500/files/${'/Users/michalzaduban/Desktop/LowcodeMyFork/january/lowcode/packages/browser-extension/source/localization/sk_SK.ts'}`, {method:'PUT', body:"export default " + skSourceCode})
-        fetch(`http://localhost:7500/files/${'/Users/michalzaduban/Desktop/LowcodeMyFork/january/lowcode/packages/browser-extension/source/localization/en_EN.ts'}`, {method:'PUT', body:"export default " + enSourceCode})
+        const allMessages = saveAllValuesAndParseBack(allMessagesBody, multiMessages)
+        console.log("ALl messages", allMessages, "Original", originalMulti)
+        if(allMessages){
+          const {skSourceCode, enSourceCode} = changeAllFiles(JSON.stringify(sk_SK),JSON.stringify(en_EN),allMessages, originalMulti)
+          console.log("RESULT OF CHANGING", enSourceCode, skSourceCode, )
 
-      }
-     
+          io.writeFile('src/localization/sk_SK.ts', "export default " + skSourceCode)
+          io.writeFile('src/localization/en_EN.ts', "export default " + enSourceCode)
+        }
       })
   
       const monacoElement = panelWindow.document.getElementById("monaco-editor");
@@ -211,7 +213,3 @@ browser.devtools.panels
     });
 
   });
-
-
-
-
