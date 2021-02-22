@@ -6,7 +6,8 @@ import { newCustomResponse } from './cacheHandlers';
 
 export const fetchProjectFromGitHub = async () => {
   const accessToken = prompt('Enter your GitHub access token');
-  const repoUrl = `https://api.github.com/repos/devias-io/react-material-dashboard/git/trees/23844d3d7a8f48ca47406e6e44211a60cc6ef2a5?recursive=1?access_token=${accessToken}`;
+  const repoUrl = `https://api.github.com/repos/Tommertom/svelte-ionic-app/git/trees/master?recursive=1?access_token=${accessToken}`
+  //const repoUrl = `https://api.github.com/repos/devias-io/react-material-dashboard/git/trees/23844d3d7a8f48ca47406e6e44211a60cc6ef2a5?recursive=1?access_token=${accessToken}`;
   // const repoUrl = `https://api.github.com/repos/nas5w/react-typescript-todo-app/git/trees/b9323b8ddaa2f29c73ab3a7f054dcbeb28ca6ce7?recursive=1?access_token=${accessToken}`;
   // const repoUrl = `https://api.github.com/repos/ionic-team/ionic-react-conference-app/git/trees/93cd376cc3f4a2867dfd2c748f56acaaf8155943?recursive=1?access_token=${accessToken}`;
 

@@ -89,6 +89,7 @@ importMap.set('@material/mwc-top-app-bar', [
   '/web_modules/@material/mwc-top-app-bar.js',
 ]);
 importMap.set('@urql/core', ['/web_modules/@urql/core.js']);
+importMap.set('react', ['/web_modules/react.js']);
 importMap.set('@urql/svelte', ['/web_modules/@urql/svelte.js']);
 importMap.set('fast-deep-equal', ['/web_modules/fast-deep-equal.js']);
 importMap.set('graphql', ['/web_modules/graphql.js']);

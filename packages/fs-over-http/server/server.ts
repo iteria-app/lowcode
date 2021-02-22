@@ -22,6 +22,15 @@ app.get("/files/:path(*)", (req: Request, res: Response) => {
   }
 })
 
+app.get("/dir/:path(*)", (req: Request, res: Response) => {
+  try {
+    const dir = fs.readdirSync(req.params.path)
+    res.send(dir)
+  } catch (err) {
+    res.status(500).json({ err: "Something went wrong" }).send()
+  }
+})
+
 app.put("/files/:path(*)", (req, res) => {
   try {
     console.log("put file", req.params.path)

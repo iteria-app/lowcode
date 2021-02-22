@@ -2,8 +2,16 @@ import { browser } from "webextension-polyfill-ts";
 import * as React from 'react';
 import ReactDOM from 'react-dom';
 import App from './App';
+import { SourceFile, CompilerOptions, ScriptTarget, ScriptKind, CompilerHost } from "typescript";
+import ts from "typescript";
 //@ts-ignore
 import {WCMonacoEditor} from './wcEditor'
+import * as monaco from 'monaco-editor'
+import { createAst } from "../tsx/createSourceFile";
+import sk_SK from "../localization/sk_SK";
+import { addNewLocale, changeAllFiles, changeLocaleFile, combineLocales, createDynamicLocales, createTemporaryLocales, getFilesFromDirectory, getLocaleFilesNames, getValuesFromLocalizationASTJSON, loadDirectoryFromProject, loadFileFromReactProject, saveAllLocalesFromTable, saveAllValuesAndParseBack, saveTableValuesAndParseBack, sendUpdatedFiles, updateFiles } from "../localization/localizations";
+import { createDynamicTable, createMultiTableWithMessages, createTableWithMessages } from "../localization/localeTables";
+import en_EN from "../localization/en_EN";
 
 console.log("[lowcode] devtools.js A");
 
@@ -28,19 +36,21 @@ browser.devtools.panels
       if (msg?.event == "inspectedElementSource") {
         
       }
-      
-      const pathFile = msg?.fileUrl
-      if (editorElement && pathFile) {
-        const path = pathFile.substring(8) // TODO constant
-        console.log("Path", path)
 
-        console.log("Editor", editor)
-        editorElement.src = msg?.body
-        editorElement.value = msg?.body
-        console.log("MODEL", msg, "Payload",JSON.stringify(msg?.payload))
-        editor.focus();
-        editor.revealLineInCenter(lineNumber + 4);
-        editor.setPosition({
+      
+
+      const pathFile = msg?.fileUrl
+      const path = pathFile?.substring(8)
+      console.log("Path", path)
+      
+      if (editorElement) {
+       editorElement.src = msg?.body
+       editorElement.value = msg?.body
+       editorElement.focus()
+       console.log("MODEL", msg, "Payload",JSON.stringify(msg?.payload))
+       editor.focus();
+       editor.revealLineInCenter(lineNumber + 4);
+       editor.setPosition({
           lineNumber: 60,
           column: 40,
         });
@@ -55,12 +65,13 @@ browser.devtools.panels
 
       if (msg?.event === "inspectedElement") {
         console.log("Editor", editor)
+      console.log("SK Locale")
         if (rootElement) {
           if (editorElement) {
              editor.focus();
              editorElement.src = msg?.body
              editorElement.value = msg?.body
-             editor.focus();
+             editorElement.focus();
              editor.revealLineInCenter(lineNumber + 4);
              editor.setPosition({
               lineNumber: 60,
@@ -90,15 +101,18 @@ browser.devtools.panels
     });
 
     //https://stackoverflow.com/questions/11661613/chrome-devpanel-extension-communicating-with-background-page
-    extensionPanel.onShown.addListener(function tmp(aPanelWindow) {
+    extensionPanel.onShown.addListener(async function tmp(aPanelWindow) {
       console.log("devtools.js onShown", aPanelWindow);
 
       extensionPanel.onShown.removeListener(tmp); // Run once only
       panelWindow = aPanelWindow;
 
       const editorElement:WCMonacoEditor = panelWindow.document.getElementById("editor");  
+      const editorInstance = editorElement.editor
       editorElement.editor.focus()
+      editorElement.focus()
 
+      
       // Release queued data
       let msg;
       while ((msg = data.shift())) {
@@ -109,6 +123,86 @@ browser.devtools.panels
       //panelWindow.respond = function (msg) {
       //  port.postMessage(msg);
       //};
+
+      console.log("sk_SK stringify",JSON.stringify(sk_SK))
+      
+      const loadedFile = await loadFileFromReactProject('/Users/michalzaduban/Desktop/talentsbase/src/localizations/en_EN.json')
+      const directory = await loadDirectoryFromProject('/Users/michalzaduban/Desktop/talentsbase/src/localizations')
+      const filesFromDirectory = await getFilesFromDirectory('/Users/michalzaduban/Desktop/talentsbase/src/localizations/')
+      console.log("Directory", directory)
+      //@ts-ignore
+      const fileNames =  getLocaleFilesNames(directory)
+      console.log("Files", filesFromDirectory)
+      console.log("FileNames", fileNames)
+      const temporary = await createTemporaryLocales(fileNames, filesFromDirectory)
+      console.log("Temporary", temporary)
+      //@ts-ignore
+      const dynamicLocales = createDynamicLocales(temporary)
+      const originalDynamic = JSON.parse(JSON.stringify(dynamicLocales));
+      //@ts-ignore
+      const loadedLocale = createAst(loadedFile,ScriptTarget.ESNext,ScriptKind.JSON )
+      const sourceCodes = [sk_SK, en_EN]
+      console.log("SOurce codes", sourceCodes)
+      const all = combineLocales(sourceCodes)
+      //@ts-ignore
+      const dynamicTableBody:HTMLTableElement= panelWindow.document.getElementById('dynamic-tableBody')
+      //@ts-ignore
+      const tableBody:HTMLTableElement= panelWindow.document.getElementById('locale-tableBody')
+      //@ts-ignore
+      const allMessagesBody:HTMLTableElement= panelWindow.document.getElementById('multi-tableBody')
+      const astLocale = createAst(JSON.stringify(sk_SK),ScriptTarget.ESNext,ScriptKind.JSON )
+      
+      const localeMessages = getValuesFromLocalizationASTJSON(loadedLocale)
+      const original = JSON.parse(JSON.stringify(localeMessages));
+      const multiMessages = addNewLocale(JSON.stringify(sk_SK), JSON.stringify(en_EN) )
+      const originalMulti = JSON.parse(JSON.stringify(multiMessages));
+      createTableWithMessages(localeMessages, panelWindow)
+      //@ts-ignore
+      createMultiTableWithMessages(multiMessages, panelWindow)
+      createDynamicTable(dynamicLocales, panelWindow)
+      const saveDynamic = panelWindow.document.getElementById('saveDynamic')
+      saveDynamic?.addEventListener('click', async ()=>{
+        //@ts-ignore
+      const savedDynamicLocales = saveAllLocalesFromTable(dynamicTableBody, dynamicLocales)
+      console.log("ALl messages", savedDynamicLocales, "Original", dynamicLocales)
+      if(savedDynamicLocales){
+        const changedFiles = await updateFiles(filesFromDirectory, savedDynamicLocales, originalDynamic)
+        console.log("CHANGED FILES", changedFiles)
+        //@ts-ignore
+        sendUpdatedFiles(changedFiles, fileNames)
+        //const {skSourceCode, enSourceCode} = changeAllFiles(JSON.stringify(sk_SK),JSON.stringify(en_EN),allMessages, originalMulti)
+        //console.log("RESULT OF CHANGING", enSourceCode, skSourceCode, )
+        //fetch(`http://localhost:7500/files/${'/Users/michalzaduban/Desktop/LowcodeMyFork/january/lowcode/packages/browser-extension/source/localization/sk_SK.ts'}`, {method:'PUT', body:"export default " + skSourceCode})
+        //fetch(`http://localhost:7500/files/${'/Users/michalzaduban/Desktop/LowcodeMyFork/january/lowcode/packages/browser-extension/source/localization/en_EN.ts'}`, {method:'PUT', body:"export default " + enSourceCode})
+
+      }
+      })
+
+      const saveTableButton = panelWindow.document.getElementById('saveTable')
+      saveTableButton?.addEventListener('click', ()=>{
+      const messages = saveTableValuesAndParseBack(tableBody, localeMessages)
+      if(messages){
+        //@ts-ignore
+        const resultOfChanging = changeLocaleFile(loadedFile,messages, original)
+        console.log("RESULT OF CHANGING", resultOfChanging, )
+        fetch(`http://localhost:7500/files/${'/Users/michalzaduban/Desktop/talentsbase/src/localizations/en_EN.json'}`, {method:'PUT', body:resultOfChanging})
+      }
+      })
+
+      const saveAllButton = panelWindow.document.getElementById('saveAll')
+      saveAllButton?.addEventListener('click', ()=>{
+        //@ts-ignore
+      const allMessages = saveAllValuesAndParseBack(allMessagesBody, multiMessages)
+      console.log("ALl messages", allMessages, "Original", originalMulti)
+      if(allMessages){
+        const {skSourceCode, enSourceCode} = changeAllFiles(JSON.stringify(sk_SK),JSON.stringify(en_EN),allMessages, originalMulti)
+        console.log("RESULT OF CHANGING", enSourceCode, skSourceCode, )
+        fetch(`http://localhost:7500/files/${'/Users/michalzaduban/Desktop/LowcodeMyFork/january/lowcode/packages/browser-extension/source/localization/sk_SK.ts'}`, {method:'PUT', body:"export default " + skSourceCode})
+        fetch(`http://localhost:7500/files/${'/Users/michalzaduban/Desktop/LowcodeMyFork/january/lowcode/packages/browser-extension/source/localization/en_EN.ts'}`, {method:'PUT', body:"export default " + enSourceCode})
+
+      }
+     
+      })
   
       const monacoElement = panelWindow.document.getElementById("monaco-editor");
       if (monacoElement) {
@@ -117,4 +211,7 @@ browser.devtools.panels
     });
 
   });
+
+
+
 
