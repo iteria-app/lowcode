@@ -6,8 +6,6 @@ test('my own test', () => {
     import{ TableRow, TableCell } from 'table-components';
     import{ ts } from 'type-script';
     
-    
-
     <Table property="">
         <TableRow>
             <TableCell>A cell</TableCell>

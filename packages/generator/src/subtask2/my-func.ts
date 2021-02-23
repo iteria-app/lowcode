@@ -2,11 +2,6 @@ import ts,{ factory } from 'typescript';
 import { TableColumn } from './column';
 import { createJsxElement } from './component';
 
-
-
-
-
-
 function createAst(
     code: string,
     scriptTarget = ts.ScriptTarget.ESNext,
@@ -55,35 +50,3 @@ export function createNewColumn(file: string, newColumnName: string): ts.SourceF
     }
     return ts.transform(sourceFile,[transformer]).transformed[0]
 }
-
-    
-
-  
-
-  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
