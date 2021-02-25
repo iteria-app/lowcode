@@ -2,7 +2,6 @@ import {createNewColumn} from './my-func';
 import ts from 'typescript';
 test('my own test', () => {
     const newFile = createNewColumn(` 
-
     import{ TableRow, TableCell } from 'table-components';
     import{ ts } from 'type-script';
     
