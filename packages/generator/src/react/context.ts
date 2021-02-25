@@ -1,4 +1,3 @@
-import { chdir } from "process"
 import ts, { factory } from "typescript"
 import { Component } from './component'
 import grommetTable from './grommet/table'
