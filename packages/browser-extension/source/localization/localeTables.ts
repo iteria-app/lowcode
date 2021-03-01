@@ -2,14 +2,14 @@ import ts from 'typescript'
 import { Message, MultiMessage } from './localizationInterfaces'
 
 
-export function createTableWithMessages(messages: Message[], panelWindow: Window) {
-    const tableBody = panelWindow.document.getElementById('locale-tableBody')
+export function createTableWithMessages(messages: Message[], document: HTMLDocument) {
+    const tableBody = document.getElementById('locale-tableBody')
     messages.forEach((message: Message) => {
-        const tr = panelWindow.document.createElement('tr')
+        const tr = document.createElement('tr')
         tableBody?.appendChild(tr)
-        const input = panelWindow.document.createElement('input')
-        const messageId = panelWindow.document.createElement('td')
-        const locale = panelWindow.document.createElement('td')
+        const input = document.createElement('input')
+        const messageId = document.createElement('td')
+        const locale = document.createElement('td')
         messageId.innerText = message.id
         input.value = message.value
         locale.appendChild(input)
@@ -19,17 +19,17 @@ export function createTableWithMessages(messages: Message[], panelWindow: Window
 }
 
 
-export function createMultiTableWithMessages(messages: MultiMessage[], panelWindow: Window) {
-    const tableBody = panelWindow.document.getElementById('multi-tableBody')
+export function createMultiTableWithMessages(messages: MultiMessage[], document: HTMLDocument) {
+    const tableBody = document.getElementById('multi-tableBody')
     console.log("Creating table with values", messages)
     messages.forEach((message: MultiMessage) => {
-        const tr = panelWindow.document.createElement('tr')
+        const tr = document.createElement('tr')
         tableBody?.appendChild(tr)
-        const skInput = panelWindow.document.createElement('input')
-        const enInput = panelWindow.document.createElement('input')
-        const messageId = panelWindow.document.createElement('td')
-        const skLocale = panelWindow.document.createElement('td')
-        const enLocale = panelWindow.document.createElement('td')
+        const skInput = document.createElement('input')
+        const enInput = document.createElement('input')
+        const messageId = document.createElement('td')
+        const skLocale = document.createElement('td')
+        const enLocale = document.createElement('td')
         messageId.innerText = message.id
         skInput.value = message.skSK.value
         skLocale.appendChild(skInput)
@@ -42,19 +42,19 @@ export function createMultiTableWithMessages(messages: MultiMessage[], panelWind
 }
 
 
-export function createDynamicTable(allMessages = [], panelWindow: Window) {
-    const tableBody = panelWindow.document.getElementById('dynamic-tableBody')
+export function createDynamicTable(allMessages = [], document: HTMLDocument) {
+    const tableBody = document.getElementById('dynamic-tableBody')
     console.log("Creating table with values", allMessages)
     allMessages.forEach((message: any) => {
         console.log("Messages", message)
-        const tr = panelWindow.document.createElement('tr')
+        const tr = document.createElement('tr')
         tableBody?.appendChild(tr)
-        const messageId = panelWindow.document.createElement('td')
+        const messageId = document.createElement('td')
         messageId.innerText = message.id
         tr.append(messageId)
         message.messages.forEach((localeMessage: any) => {
-            const input = panelWindow.document.createElement('input')
-            const cell = panelWindow.document.createElement('td')
+            const input = document.createElement('input')
+            const cell = document.createElement('td')
             input.value = localeMessage.value
             cell.appendChild(input)
             tr.appendChild(cell)

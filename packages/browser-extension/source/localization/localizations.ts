@@ -56,54 +56,35 @@ export const changeLocaleFile = (localeFile: string, changedMessages: Message[],
 
 }
 
-export const loadFileFromReactProject = async (pathToFile: string) => {
-  try {
-    const file = await readFile(pathToFile).catch((err) => console.log("Error", err))
-    return file
-  } catch (error) {
-    console.log("Error", error)
-  }
-}
+const JSON_EXTENSION = '.json'
 
-export const loadDirectoryFromProject = async (pathToDir: string) => {
+export const findLocaliozationFiles = async (pathToDir: string) => {
   try {
-    const dir = await readDir(pathToDir).catch((err) => console.log("Error", err))
+    const dir = await readDir(pathToDir, [JSON_EXTENSION]).catch((err) => console.log("Error", err))
     return dir
   } catch (error) {
     console.log("Error", error)
   }
 }
 
-export const getFilesFromDirectory = async (pathToDirectory: string) => {
-  try {
-    const directory = await readDir(pathToDirectory).catch((err) => console.log("Error", err))
-    const files = directory.map(async (file: string) => {
-      const loadedFile = await loadFileFromReactProject(`${pathToDirectory}${file}`);
-      return loadedFile
-    });
-    return files
-  } catch (error) {
-    console.log("err", error)
-  }
-}
-
 export const getLocaleFilesNames = (directory: string[]) => {
   return directory.map((file: string) => {
     //delete .json
-    return file.substring(0, file.length - 5)
+    return file//.substring(0, file.length - JSON_EXTENSION.length)// TODO make more robust indexOf('.')
   })
 }
 
-export const getFile = async (file: any) => {
-  return await file
+interface FileNameSource {
+  readonly locale: string
+  readonly source: string 
 }
 
-export const createTemporaryLocales = async (fileNames: string[], files: any[]) => {
-  const allFiles = await Promise.all(files.map((file: any) => getFile(file)))
-  const filesObjects = fileNames.map((file: string, index: number) => {
-    return { locale: file, source: allFiles[index] }
+export const createTemporaryLocales = async (fileNames: string[]): Promise<FileNameSource[]> => {
+  const allFiles = fileNames.map(fileName => readFile(fileName))
+  const filesObjects = fileNames.map(async (file: string, index: number) => {
+    return { locale: file, source: await allFiles[index] }
   })
-  return filesObjects
+  return Promise.all(filesObjects)
 }
 
 export const oneWithAllLocales = (allLocaleMessaages = []) => {
@@ -229,8 +210,7 @@ export const combineLocales = (sourceCodes: any[]) => {
   // return finalMessages
 }
 
-export const updateFiles = async (sourceCodes = [], changedMessages = [], originalMessages = []) => {
-  const allFiles = await Promise.all(sourceCodes.map((file: any) => getFile(file)))
+export const updateFiles = async (allFiles: FileNameSource[] = [], changedMessages = [], originalMessages = []) => {
   for (let i = changedMessages.length - 1; i >= 0; i--) {
     console.log("I", i, originalMessages, allFiles)
     //@ts-ignore
@@ -240,7 +220,7 @@ export const updateFiles = async (sourceCodes = [], changedMessages = [], origin
       //@ts-ignore
       if (message.value == originalMessages[i].messages[index].value) {
         console.log("")
-      } else {
+      } else if (message.position) {
         //@ts-ignore
         const before = allFiles[index].substring(0, message.position.pos + 1)
         //@ts-ignore

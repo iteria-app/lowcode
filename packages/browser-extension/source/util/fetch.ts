@@ -22,10 +22,10 @@ export const readFile = async (filePath: string) => {
   }
 }
 
-
-export const readDir = async (dirPath: string) => {
+export const readDir = async (dirPath: string, extensions: string[] = []) => {
   try {
-    const res = await fetch(`http://localhost:7500/dir/${dirPath}`)
+    const queryString = [extensions.map((ext) => 'ext=' + encodeURI(ext)), 'depth=10'].join('&')
+    const res = await fetch(`http://localhost:7500/dir/${dirPath}?${queryString}`)//extensions
     const dir = await res.json()
     return dir
   } catch (err) {
