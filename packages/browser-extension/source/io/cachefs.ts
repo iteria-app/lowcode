@@ -1,12 +1,13 @@
 import { CodeRW } from './rw'
+import { CodeDir } from './dir'
 import { Noop } from './noop'
 
-export class CacheFS implements CodeRW {
+export class CacheFS implements CodeRW, CodeDir {
     files: Map<string, string>
-    cachedRW: CodeRW
-    constructor(cachedRW: CodeRW = new Noop(), files: Map<string, string> = new Map()) {
+    cachedIO: CodeRW & CodeDir
+    constructor(cachedIO: CodeRW & CodeDir = new Noop(), files: Map<string, string> = new Map()) {
         this.files = files
-        this.cachedRW = cachedRW
+        this.cachedIO = cachedIO
     }
 
     readFile(path: string): Promise<string | undefined> {
@@ -15,12 +16,16 @@ export class CacheFS implements CodeRW {
             return Promise.resolve(content)
         }
 
-        return this.cachedRW.readFile(path)
+        return this.cachedIO.readFile(path)
     }
 
     writeFile(path: string, content: string): Promise<void> {
-        return this.cachedRW.writeFile(path, content).then(() => {
+        return this.cachedIO.writeFile(path, content).then(() => {
             this.files.set(path, content)
         })
+    }
+
+    readDirectory(path: string, /*extensions?: readonly string[], exclude?: readonly string[], include?: readonly string[], depth?: number*/): Promise<string[] | undefined> {
+        return this.cachedIO.readDirectory(path)
     }
 }
