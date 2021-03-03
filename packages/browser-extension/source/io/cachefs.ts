@@ -1,5 +1,5 @@
-import { CodeRW } from './rw'
-import { CodeDir } from './dir'
+import { CodeRW } from '../react-lowcode/io/rw'
+import { CodeDir } from '../react-lowcode/io/dir'
 import { Noop } from './noop'
 
 export class CacheFS implements CodeRW, CodeDir {

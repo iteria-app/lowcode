@@ -1,4 +1,4 @@
-import { DevTools, DevToolsHook } from "../devtools"
+import { DevTools, DevToolsHook } from "../react-lowcode/devtools"
 
 console.log("helloworld from content script, som v contentscripte")
 

@@ -1,5 +1,5 @@
-import { CodeRW } from './rw'
-import { CodeDir } from './dir'
+import { CodeRW } from '../react-lowcode/io/rw'
+import { CodeDir } from '../react-lowcode/io/dir'
 
 export class Noop implements CodeRW, CodeDir {
     readFile(): Promise<string | undefined> {

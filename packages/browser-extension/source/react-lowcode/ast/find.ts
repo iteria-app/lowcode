@@ -1,5 +1,5 @@
 import ts from "typescript"
-import { createAst } from "./createSourceFile"
+import { createAst } from "./factory"
 
 export interface SourceLineCol {
   fileName: string
@@ -81,26 +81,14 @@ export function astFindSource(code: string, source: SourceLineCol) {
   return null
 }
 
-export const jsxElementGetAttributes = (node: ts.JsxOpeningLikeElement) => {
-  const attributes: Array<Attribute> = []
+export const findElementInCode = (code: string, source: SourceLineCol) => {
+  const found = astFindSource(code, source)
+  if (found) {
+    const before = code.substring(0, found.end)
 
-  node.attributes.forEachChild((a: unknown) => {
-    const attribute = a as ts.JsxAttribute
-    const { initializer } = attribute
-
-    if (!initializer) return
-
-    if (initializer && ts.isStringLiteral(initializer)) {
-      attributes.push({
-        [attribute.name.text]: initializer.text,
-      })
-    } else if (initializer && ts.isJsxExpression(initializer)) {
-      attributes.push({
-        [attribute.name.text]:
-          //@ts-ignore
-          initializer.expression?.escapedText,
-      })
-    }
-  })
-  return attributes
+    const startEndOfLine = before.lastIndexOf("\n")
+    const lineStarts = startEndOfLine >= 0 ? startEndOfLine : 0
+    return code.substring(lineStarts, found.end)
+  }
+  return null
 }

@@ -1,24 +1,12 @@
 import { Project } from "ts-morph"
 import ts from "typescript"
-import {
-  SourceLineCol,
-  astFindSource,
-  jsxElementGetAttributes,
-  startOfJsxNode,
-} from "./tsx/ast"
-import { cloneElementInAst } from "./tsx/clone"
-import { createAst } from "./tsx/createSourceFile"
-import { writeFile, readFile } from "./util/fetch"
-import {
-  renameFunctionWithMorph,
-} from "./util/morphFunctions"
-import {
-  isValidJsxElement,
-  castRouteNodeToProperType,
-  findAttributeByName,
-  cloneRouteElements,
-} from "./util/routeHandlers"
-import { CodeRW } from "./io/rw"
+import { SourceLineCol, astFindSource, startOfJsxNode } from "../ast/find"
+import { jsxElementGetAttributes, findAttributeByName } from "../attributes"
+import { cloneElementInAst } from "./clone"
+import { createAst } from "../ast/factory"
+import { renameFunctionWithMorph } from "../functions/rename"
+import { isValidJsxElement, castRouteNodeToProperType, cloneRouteElements, } from "../routes/routeHandlers"
+import { CodeRW } from "../io/rw"
 
 export const cloneRoute = async (routesCode: string, routesSource: SourceLineCol, io: CodeRW) => {
   // Prompt for new page name
@@ -83,7 +71,7 @@ export const cloneRoute = async (routesCode: string, routesSource: SourceLineCol
   }
 
   // write only if previous steps were successful
-  writeFile(routesSource.fileName, newRoutesFile.print())
+  io.writeFile(routesSource.fileName, newRoutesFile.print())
 }
 
 export const cloneElement = (code: string, source: SourceLineCol, io: CodeRW) => {

@@ -1,21 +1,13 @@
 import ts from "typescript"
-import { Attribute } from "../tsx/ast"
-import { addElementsToAST } from "../tsx/transformer"
+import { addElementsToAST } from "../ast/transformer"
 import {
   createSelfClosingJsxRouteElement,
   createOpeningAndClosingJsxRouteElement,
-} from "./nodeCreators"
+} from "./factory"
 
 export const isValidJsxElement = (node: ts.Node) =>
   ts.isJsxOpeningLikeElement(node) || ts.isJsxElement(node)
 
-export const findAttributeByName = (
-  attributes: Array<Attribute>,
-  attributeName: string
-) => {
-  const attribute = attributes.find(a => a[attributeName])
-  return attribute ? attribute[attributeName] : null
-}
 export const castRouteNodeToProperType = (node: ts.Node) => {
   const castedNode = node as ts.JsxOpeningLikeElement | ts.JsxElement
   if (ts.isJsxOpeningLikeElement(castedNode)) {

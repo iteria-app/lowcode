@@ -1,20 +1,8 @@
 import ts from "typescript"
-import { SourceLineCol, astFindSource } from "./ast"
-import { createAst } from "./createSourceFile"
-import { isInsideMapPatternFunction } from "./mapRecognition"
-import { addElementsToAST } from "./transformer"
-
-export const findElementInCode = (code: string, source: SourceLineCol) => {
-  const found = astFindSource(code, source)
-  if (found) {
-    const before = code.substring(0, found.end)
-
-    const startEndOfLine = before.lastIndexOf("\n")
-    const lineStarts = startEndOfLine >= 0 ? startEndOfLine : 0
-    return code.substring(lineStarts, found.end)
-  }
-  return null
-}
+import { SourceLineCol, astFindSource } from "../ast/find"
+import { createAst } from "../ast/factory"
+import { isInsideMapPatternFunction } from "../functions/maps"
+import { addElementsToAST } from "../ast/transformer"
 
 export const addCodeSnippet = (
   code: string,

@@ -8,12 +8,12 @@ import { initLocalization } from "../localization/init";
 //@ts-ignore
 import {WCMonacoEditor} from './wcEditor'
 
-import { InspectedElementPayload } from '../devtools'
-import { cloneInspectedElement } from '../cloneInspectedElement'
+import { InspectedElementPayload } from '../react-lowcode/devtools'
+import { cloneInspectedElement } from '../react-lowcode/clone/inspected'
 
 console.log("[lowcode] devtools.js A");
 
-import { io, ioRefreshEditor } from '../util/global'
+import { io, ioRefreshEditor } from '../io/global'
 
 browser.devtools.panels
   .create("Lowcode", "/icon.png", "/devtools.html")
@@ -40,9 +40,9 @@ browser.devtools.panels
 
       
       if (msg?.type == 'lowcodeSources' && panelWindow) {
-        findLocaliozationFiles(msg?.path).then((foundFiles) => {
-          console.log('FOUND C', msg?.path, foundFiles)
-          const msgFiles = foundFiles.filter((file: string) => !file?.endsWith('/package.json') && !file?.endsWith('\\package.json'))
+        findLocaliozationFiles(msg.path, io).then((foundFiles) => {
+          console.log('FOUND C', msg.path, foundFiles)
+          const msgFiles = foundFiles.filter((file: string) => !file?.endsWith('/package.json') && !file?.endsWith('\\package.json')) // TODO exclude parameter in readDirectory
           initLocalization(msgFiles, panelWindow.document, io)
         })
       }

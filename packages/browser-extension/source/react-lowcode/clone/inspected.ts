@@ -1,8 +1,7 @@
-import { cloneRoute, cloneElement } from "./cloneElements"
-import { InspectedElementPayload } from "./devtools"
-import { readFile } from "./util/fetch"
+import { cloneRoute, cloneElement } from "./source"
+import { InspectedElementPayload } from "../devtools"
 
-import { CodeRW } from "./io/rw"
+import { CodeRW } from "../io/rw"
 
 export async function cloneInspectedElement(inspectedElement: InspectedElementPayload, io: CodeRW) {  
   console.log('cloneInspectedElement A', inspectedElement)
@@ -16,9 +15,9 @@ export async function cloneInspectedElement(inspectedElement: InspectedElementPa
     console.log('cloneInspectedElement B', ownerList, columnNumber, fileName, lineNumber, event)
     
     if (ownerList && columnNumber && fileName && lineNumber) {
-      const code = await readFile(fileName).catch(err => {
+      const code = await io.readFile(fileName).catch(err => {
         throw new Error(err)
-      })
+      }) || ''
       
       if (ownerList[ownerList.length - 1].displayName === "Route") {
         cloneRoute(code, { columnNumber, lineNumber, fileName }, io)

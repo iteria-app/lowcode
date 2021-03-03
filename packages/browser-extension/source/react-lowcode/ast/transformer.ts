@@ -1,5 +1,5 @@
 import ts from "typescript"
-import { wrapNodesWithFragment } from "../util/nodeCreators"
+import { wrapNodesWithFragment } from "../routes/factory"
 
 const addTransformer = <T extends ts.Node, U extends ts.Node | ts.JsxChild>(
   start: number,

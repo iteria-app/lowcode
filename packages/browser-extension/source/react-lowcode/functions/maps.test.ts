@@ -1,4 +1,7 @@
-export const functionalComponent = `import React from "react"
+import { astFindStart } from "../ast/find"
+import { isInsideMapPatternFunction } from "./maps"
+
+const functionalComponent = `import React from "react"
 
 function cl() {
   const arr = [1, 2, 3]
@@ -47,3 +50,9 @@ function cl() {
 
 export default cl
 `
+
+test("should ", () => {
+  const node = astFindStart(functionalComponent, 196)
+
+  expect(isInsideMapPatternFunction(node!)).toBeTruthy()
+})

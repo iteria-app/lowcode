@@ -1,10 +1,10 @@
-import { createAst } from "../tsx/createSourceFile";
+import { createAst } from "../react-lowcode/ast/factory";
 import sk_SK from "../localization/sk_SK";
 import { addNewLocale, changeAllFiles, changeLocaleFile, combineLocales, createDynamicLocales, createTemporaryLocales, getLocaleFilesNames, getValuesFromLocalizationASTJSON, findLocaliozationFiles, saveAllLocalesFromTable, saveAllValuesAndParseBack, saveTableValuesAndParseBack, sendUpdatedFiles, updateFiles } from "../localization/localizations";
 import { createDynamicTable, createMultiTableWithMessages, createTableWithMessages } from "../localization/localeTables";
 import en_EN from "../localization/en_EN";
 import { ScriptTarget, ScriptKind } from "typescript";
-import { CodeRW } from '../io/rw'
+import { CodeRW } from '../react-lowcode/io/rw'
 
 export async function initLocalization(directory: string[], document: HTMLDocument, io: CodeRW) {
     console.log('initLocalization', directory, document, io)
@@ -14,7 +14,7 @@ export async function initLocalization(directory: string[], document: HTMLDocume
     //@ts-ignore
     const fileNames = getLocaleFilesNames(directory)
     console.log("FileNames", fileNames)
-    const temporary = await createTemporaryLocales(fileNames)
+    const temporary = await createTemporaryLocales(fileNames, io)
     console.log("Temporary", temporary)
     //@ts-ignore
     const dynamicLocales = createDynamicLocales(temporary)

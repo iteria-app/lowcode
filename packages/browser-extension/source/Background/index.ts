@@ -1,6 +1,6 @@
 import "emoji-log"
 import { browser, Runtime } from "webextension-polyfill-ts"
-import { fetchLocalCode } from "../browser/fetchLocalCode"
+import { fetchLocalCode } from "../react-lowcode/devtools/fetchLocalCode"
 
 console.log("hello froom backgroundScript")
 

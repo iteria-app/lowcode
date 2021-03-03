@@ -1,12 +1,8 @@
 import { SourceFile, factory, ScriptKind, ScriptTarget, createSourceFile, Printer } from "typescript"
-import sk_SK from "./sk_SK";
 import { Message, MultiMessage } from "./localizationInterfaces";
-import { createAst } from "../tsx/createSourceFile";
-import { readDir, readFile } from "../util/fetch"
-import * as path from 'path'
-import { CodeRW } from "../io/rw";
-
-
+import { createAst } from "../react-lowcode/ast/factory";
+import { CodeRW } from "../react-lowcode/io/rw";
+import { CodeDir } from "../react-lowcode/io/dir";
 
 export function getValuesFromLocalizationASTJSON(astLocale: SourceFile | undefined, languageLocale = "sk_SK") {
   let localeMessages: Message[] = []
@@ -16,7 +12,7 @@ export function getValuesFromLocalizationASTJSON(astLocale: SourceFile | undefin
         id: property.name.text,
         value: property.initializer?.text,
         locale: languageLocale,
-        position: { pos: property.initializer.pos, end: property.initializer.end }
+        position: { pos: property.initializer?.pos, end: property.initializer?.end }
       }
       localeMessages = [...localeMessages, locale]
     })
@@ -58,13 +54,9 @@ export const changeLocaleFile = (localeFile: string, changedMessages: Message[],
 
 const JSON_EXTENSION = '.json'
 
-export const findLocaliozationFiles = async (pathToDir: string) => {
-  try {
-    const dir = await readDir(pathToDir, [JSON_EXTENSION]).catch((err) => console.log("Error", err))
-    return dir
-  } catch (error) {
-    console.log("Error", error)
-  }
+export const findLocaliozationFiles = async (pathToDir: string, io: CodeDir) => {
+  const dir = await io.readDirectory(pathToDir, [JSON_EXTENSION]).catch((err) => console.log("Error", err))
+  return dir || []
 }
 
 export const getLocaleFilesNames = (directory: string[]) => {
@@ -79,10 +71,10 @@ interface FileNameSource {
   readonly source: string 
 }
 
-export const createTemporaryLocales = async (fileNames: string[]): Promise<FileNameSource[]> => {
-  const allFiles = fileNames.map(fileName => readFile(fileName))
+export const createTemporaryLocales = async (fileNames: string[], io: CodeRW): Promise<FileNameSource[]> => {
+  const allFiles = fileNames.map(fileName => io.readFile(fileName))
   const filesObjects = fileNames.map(async (file: string, index: number) => {
-    return { locale: file, source: await allFiles[index] }
+    return { locale: file, source: await allFiles[index] || '' }
   })
   return Promise.all(filesObjects)
 }

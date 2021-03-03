@@ -1,22 +1,11 @@
 import ts from "typescript"
 
-export const isReturnOfFunctionExpression = (node: ts.Node) =>
-  ts.isBlock(node.parent) &&
-  ts.isFunctionExpression(node.parent.parent) &&
-  ts.isCallExpression(node.parent.parent.parent)
-
-export const isReturnOfArrowFunction = (node: ts.Node) =>
-  ts.isBlock(node.parent) &&
-  ts.isArrowFunction(node.parent.parent) &&
-  ts.isCallExpression(node.parent.parent.parent)
-
-export const isReturnlessArrowFunction = (node: ts.Node) =>
-  ts.isCallExpression(node.parent)
+import { isReturnOfFunctionExpression, isReturnOfArrowFunction, isReturnlessArrowFunction } from './returns'
 
 export const isMapFunctionPatternInJsx = (node: ts.Node) =>
   ((isReturnOfFunctionExpression(node) || isReturnOfArrowFunction(node)) &&
     ts.isJsxExpression(node.parent.parent.parent.parent)) ||
-  (isReturnlessArrowFunction(node) && ts.isJsxExpression(node.parent.parent))
+  (isReturnlessArrowFunction(node) && ts.isJsxExpression(node.parent.parent));
 
 export const isMapFunctionPatternInAnotherFunction = (node: ts.Node) =>
   ((isReturnOfFunctionExpression(node) || isReturnOfArrowFunction(node)) &&
@@ -24,7 +13,8 @@ export const isMapFunctionPatternInAnotherFunction = (node: ts.Node) =>
       ts.isReturnStatement(node.parent.parent.parent.parent))) ||
   (isReturnlessArrowFunction(node) &&
     (ts.isArrowFunction(node.parent.parent) ||
-      ts.isReturnStatement(node.parent.parent)))
+      ts.isReturnStatement(node.parent.parent)));
+
 
 export const isInsideMapPatternFunction = (node: ts.Node) => {
   let pointer = node
