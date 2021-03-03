@@ -40,8 +40,8 @@ Chrome extensions
 
 2. Install [Lowcode Chrome Extension](https://github.com/iteria-ui/lowcode/tree/master/packages/browser-extension)
 
-- Go to /packages/browser-extension
-- `yarn install` to install dependencies.
+- Go to /packages/browser-extension folder in repository.
+- `yarn install` to install dependencies. (You have to use yarn)
 - `yarn run dev:chrome` to start the development server for chrome extension
 - `yarn run dev:firefox` to start the development server for firefox addon
 - `yarn run dev:opera` to start the development server for opera extension
@@ -56,8 +56,8 @@ Chrome extensions
 
 3. Start [FS over HTTP](https://github.com/iteria-ui/lowcode/tree/master/packages/fs-over-http) (used for saving modified source code)
 
-- `cd packages/fs-over-http`
-- `yarn install` to install dependencies.
+- Go to /packages/fs-over-http folder in repository.
+- `yarn install` to install dependencies. (You have to use yarn)
 - `yarn start` to start the project.
 
 4. Start your reat applicantion in development mode and open in browser
