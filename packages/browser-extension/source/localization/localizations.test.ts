@@ -1,5 +1,5 @@
 import ts, { ScriptKind, ScriptTarget } from "typescript"
-import { createAst } from "../tsx/createSourceFile"
+import { createAst } from "../react-lowcode/ast/factory"
 import { changeLocaleFile, getValuesFromLocalizationASTJSON } from "./localizations"
 import sk_SK from "./sk_SK"
 

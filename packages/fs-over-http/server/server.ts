@@ -2,6 +2,8 @@ import fs from "fs"
 import express from "express"
 import { Request, Response } from "express"
 
+import { getAllFiles } from "./dir"
+
 //import cors from 'cors'
 const cors = require("cors")
 
@@ -22,10 +24,38 @@ app.get("/files/:path(*)", (req: Request, res: Response) => {
   }
 })
 
+function queryParseArray(queryParam: any): string[] {
+  if (typeof queryParam == 'string') {
+    return [queryParam]
+  } else if (Array.isArray(queryParam)) {
+    return queryParam
+  }
+
+  return []
+}
+
+function queryParseInt(queryParam: any): number {
+  if (typeof queryParam == 'string') {
+    return parseInt(queryParam)
+  }
+
+  return 0
+}
+
+app.get("/currentdir", (req: Request, res: Response) => {
+  try {
+    const extensions = queryParseArray(req.query.ext)
+    res.send({path: __dirname})
+  } catch (err) {
+    res.status(500).json({ err: "Something went wrong" }).send()
+  }
+})
+
 app.get("/dir/:path(*)", (req: Request, res: Response) => {
   try {
-    const dir = fs.readdirSync(req.params.path)
-    res.send(dir)
+    const extensions = queryParseArray(req.query.ext)
+    const depth = queryParseInt(req.query.depth) || 1
+    res.send(getAllFiles(req.params.path, extensions, depth))
   } catch (err) {
     res.status(500).json({ err: "Something went wrong" }).send()
   }

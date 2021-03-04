@@ -1,12 +1,14 @@
 import ts from "typescript"
-import fs from "fs"
 import {
   astFindSource,
-  jsxElementGetAttributes,
   startOfJsxIdentifier,
   startOfJsxNode,
-} from "../tsx/ast"
-import { findAttributeByName, isValidJsxElement } from "../util/routeHandlers"
+} from "../react-lowcode/ast/find"
+import {
+  jsxElementGetAttributes,
+} from "../react-lowcode/attributes"
+import { isValidJsxElement } from "../react-lowcode/routes/routeHandlers"
+import { findAttributeByName } from "../react-lowcode/attributes"
 
 import { APP_TXS_SAMPLE_CODE }  from './index.testdata'
 

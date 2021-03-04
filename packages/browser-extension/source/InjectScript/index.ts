@@ -1,6 +1,12 @@
-import { cloneRoute, cloneElement } from "../cloneElements"
-import { DevTools } from "../devtools"
-import { readFile } from "../util/helperFunctions"
+import { DevTools, DevToolsHook } from "../react-lowcode/devtools"
+
+console.log("helloworld from content script, som v contentscripte")
+
+declare global {
+  interface Window {
+    __REACT_DEVTOOLS_GLOBAL_HOOK__: DevToolsHook | null | undefined
+  }
+}
 
 window.addEventListener("message", async event => {
   if (
@@ -15,34 +21,10 @@ window.addEventListener("message", async event => {
       lineNumber,
     } = event?.data?.payload?.payload?.value?.source
     const devTools = new DevTools(window.__REACT_DEVTOOLS_GLOBAL_HOOK__)
-    const ownerList = devTools.getOwnersList(id)
+    const ownerList = devTools.getOwnersList(id) // demonstration that we can call dev tools API here
 
-    console.log("inspectedElement", ownerList, columnNumber, fileName, lineNumber, event)
-    
-    if (ownerList && columnNumber && fileName && lineNumber) {
-      try {
-        const code = await readFile(fileName).catch(err => {
-          throw new Error(err)
-        })
+    console.log("InjectScript inspectedElement", ownerList, columnNumber, fileName, lineNumber, event)
   
-        if (ownerList[ownerList.length - 1].displayName === "Route") {
-          cloneRoute(code, { columnNumber, lineNumber, fileName })
-        } else if (
-          ownerList[ownerList.length - 1].displayName === "IonTabButton"// TODO this is very specific and does nothing (this is just work in progress)
-        ) {
-          // TODO Somehow obtain source from Route at which IonTabButton points, then clone
-          const href = event?.data?.payload?.payload?.value?.props?.data?.href
-          console.log(href)
-          window.location.pathname = href
-          const something = event?.data?.payload?.payload?.value?.id
-          console.log(something)
-          devTools.inspectElementDevId(something)
-        } else {
-          cloneElement(code, { columnNumber, lineNumber, fileName })
-        }
-      } catch(err) {
-        console.error('error reading file', fileName, err) 
-      }
-    }
+    window.postMessage({ ... event?.data?.payload, event: "inspectedElementSource" }, "*")
   }
 })
