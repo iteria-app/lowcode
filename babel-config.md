@@ -1,6 +1,13 @@
-Ak tvoj projekt obsahuje babel dependency tak treba do projektu pridat @babel/plugin-transform-react-jsx-source:
-`npm install --save-dev @babel/plugin-transform-react-jsx-source` 
-or
+## Babel configuration
+
+If your project contains babel dependency then you need to add "@babel/plugin-transform-react-jsx-source to the project":
+
 `npm install --save-dev @babel/plugin-transform-react-jsx-source` 
 
-Potom treba pridať túto závislosť aj do `babel.config.js` => module.exports => plugins 
+or
+
+`npm install --save-dev @babel/plugin-transform-react-jsx-source` 
+
+
+Then you need to add this dependency to  `babel.config.js` => module.exports => plugins 
+
