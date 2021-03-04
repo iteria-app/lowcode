@@ -1,6 +1,6 @@
 ## Babel configuration
 
-If your project contains babel dependency then you need to add "@babel/plugin-transform-react-jsx-source to the project":
+If your react project is not classic CRA (Create React App) make sure to add "@babel/plugin-transform-react-jsx-source to the project":
 
 `npm install --save-dev @babel/plugin-transform-react-jsx-source` 
 
