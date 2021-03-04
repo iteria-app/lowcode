@@ -11,3 +11,18 @@ or
 
 Then you need to add this dependency to  `babel.config.js` => module.exports => plugins 
 
+Like this: 
+`module.exports = {
+  presets: [
+    '@babel/preset-react',
+    ['@babel/preset-env', {
+      modules: false,
+    }],
+  ],
+  plugins: [
+    '@babel/plugin-transform-runtime',
+    '@babel/plugin-transform-react-jsx-source'
+  ],
+};
+`
+
