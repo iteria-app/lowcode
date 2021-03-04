@@ -1,5 +1,5 @@
 import ts, { factory } from "typescript"
-import { defineComponent, createJsxSelfClosingElement, Component } from '../component'
+import { defineComponent, createJsxSelfClosingElement, Component } from '../react-component-helper'
 
 export const formattedDate = defineComponent('FormattedDate', 'react-intl')
 export const formattedTime = defineComponent('FormattedTime', 'react-intl')
@@ -10,7 +10,7 @@ export const formattedPlural = defineComponent('FormattedPlural', 'react-intl')
 export const formattedMessage = defineComponent('FormattedMessage', 'react-intl')
 
 function formattedValue(component: Component, expression: ts.Expression) {
-    return createJsxSelfClosingElement(component,
+    return createJsxSelfClosingElement(component.tagName,
         [
             factory.createJsxAttribute(
                 factory.createIdentifier("value"),
@@ -53,7 +53,7 @@ export class TagFormatter {
     }
     timeRange(from: ts.Expression, to: ts.Expression): ts.JsxChild[] {
         return [
-            createJsxSelfClosingElement(formattedDateTimeRange,
+            createJsxSelfClosingElement(formattedDateTimeRange.tagName,
                 [
                     factory.createJsxAttribute(
                         factory.createIdentifier("from"),
@@ -74,7 +74,7 @@ export class TagFormatter {
         ]
     }
     message(message: ts.StringLiteral | ts.JsxExpression, values: ts.Expression | undefined = undefined): ts.JsxChild[] {
-        return [createJsxSelfClosingElement(formattedMessage,
+        return [createJsxSelfClosingElement(formattedMessage.tagName,
             [
                 factory.createJsxAttribute(
                     factory.createIdentifier("id"),

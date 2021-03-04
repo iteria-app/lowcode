@@ -17,6 +17,7 @@
     "ts-factory-code-generator-generator": "^0.6.1",
     "ts-morph": "^9.1.0",
     "typescript": "^4.0.3",
+    "typescript-pluralize": "^1.0.1",
     "web-vitals": "^0.2.4"
   },
   "scripts": {

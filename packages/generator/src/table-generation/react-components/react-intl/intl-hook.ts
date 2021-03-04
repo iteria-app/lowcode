@@ -1,6 +1,6 @@
 //import { IntlProvider, FormatMessage } from "react-intl";
 import ts, { factory } from "typescript"
-import { defineHook, Hook } from '../../ts/hooks'
+import { defineHook, Hook } from '../../code-generation/hooks'
 
 export interface ObjectCall {
     methodName: string

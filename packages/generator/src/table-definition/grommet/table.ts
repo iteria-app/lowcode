@@ -1,6 +1,6 @@
-import { defineComponent } from '../component'
+import { defineComponent } from '../../table-generation/react-components/react-component-helper'
 
-const components = {
+export const GrommetTableComponents = {
     table: defineComponent('Table', 'grommet'),
     row: defineComponent('TableRow', 'grommet'),
     cell: defineComponent('TableCell', 'grommet'),
@@ -9,4 +9,6 @@ const components = {
     footer: defineComponent('TableFooter', 'grommet')
 }
 
-export default components
+export const GrommetDtTableComponents = {
+    table: defineComponent('DataTable', 'grommet')
+}

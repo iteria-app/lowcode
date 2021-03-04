@@ -1,7 +1,7 @@
 import { factory } from "typescript"
 
-import tagFormatter from './react-intl/formatted-tag'
-import { Property } from '../entity'
+import tagFormatter from './react-components/react-intl/formatted-tag'
+import { Property } from './entity'
 
 interface NameGetter {
   getName(): string

@@ -1,8 +1,7 @@
-import { defineComponent } from '../component'
+import { defineComponent } from '../../table-generation/react-components/react-component-helper'
 
-
-const muiCore = '@material-ui/core/'
-const components = {
+const muiCore = '@material-ui/data-grid/'
+export const MuiTableComponents = {
     table: defineComponent('Table', muiCore),
     row: defineComponent('TableRow', muiCore),
     cell: defineComponent('TableCell', muiCore),
@@ -11,4 +10,6 @@ const components = {
     footer: defineComponent('TableFooter', muiCore)
 }
 
-export default components
+export const MuiDtTableComponents = {
+    table: defineComponent('DataGrid', muiCore)
+}
