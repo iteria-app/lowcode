@@ -60,7 +60,7 @@ Chrome extensions
 - `yarn install` to install dependencies. (You have to use yarn)
 - `yarn start` to start the project.
 
-4. Start your reat applicantion in development mode and open in browser
+4. Start your React applicantion in development mode and open in browser
 
 - Use your React Aplication or use example React Application https://github.com/ionic-team/ionic-react-conference-app
 - Start local webpack dev server
