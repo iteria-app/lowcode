@@ -10,7 +10,6 @@ const addTransformer = <T extends ts.Node, U extends ts.Node | ts.JsxChild>(
       const nodeStart = node.pos
       if (nodeStart === start) {
         if (!ts.isJsxElement(node.parent)) {
-          console.log("som pici")
           return wrapNodesWithFragment(node, newNodes)
         } else return [node, ...newNodes]
       }
