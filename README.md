@@ -53,6 +53,7 @@ Chrome extensions
 - Check the `Developer Mode` button to enable it.
 - Click on the `Load Unpacked Extension…` button.
 - Select your extension’s extracted directory.
+- Exception is when you don't have standard RCA (`npx create-react-app your-app`) => see lowcode/babel-config.md
 
 3. Start [FS over HTTP](https://github.com/iteria-ui/lowcode/tree/master/packages/fs-over-http) (used for saving modified source code)
 
