@@ -12,7 +12,7 @@ or
 Then you need to add this dependency to  `babel.config.js` => module.exports => plugins 
 
 Like this: 
-`module.exports = {
+`module.exports = <br/><br/>{
   presets: [
     '@babel/preset-react',
     ['@babel/preset-env', {
