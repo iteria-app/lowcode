@@ -71,7 +71,7 @@ Chrome extensions
 - We have reused React Developer Tools Chrome extension
 - Lowcode listens for message "inspectedElement" from React Deveoper Tools are sending
 - Using Lowcode you can modify JSX/TSX source code either "visualy" (more features will come) or by integrade Monaco editor
-- Web Pack Dev serer will recompile (tested also with Hot Code Replace)
+- Web Pack Dev server will recompile (tested also with Hot Code Replace)
 
 ## Architecture
 
