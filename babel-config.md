@@ -26,3 +26,5 @@ Like this:
 };
 `
 
+![](/packages/browser-extension/.media/.github/babel.png)
+
