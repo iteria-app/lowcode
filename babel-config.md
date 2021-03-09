@@ -13,5 +13,5 @@ Then you need to add this dependency to  `babel.config.js` => module.exports => 
 
 Like this: 
 
-![](/packages/browser-extension/.media/.github/babel.png)
+![](/packages/browser-extension/.media/.github/Babel.png)
 
