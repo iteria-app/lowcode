@@ -1,4 +1,4 @@
-import { defineComponent } from '../../table-generation/react-components/react-component-helper'
+import { defineComponent } from '../../generation/react-components/react-component-helper'
 
 export const GrommetTableComponents = {
     table: defineComponent('Table', 'grommet'),

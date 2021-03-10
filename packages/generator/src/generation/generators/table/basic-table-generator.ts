@@ -1,12 +1,11 @@
 import ts, { factory } from "typescript"
-import { tagFormattedMessage, tagFormattedProperty } from '../typeAlias'
-import { createJsxElement, TableComponent, createFunctionalComponent } from '../react-components/react-component-helper'
-import { Entity, Property } from '../entity/index'
+import { createJsxElement, TableComponent, createFunctionalComponent } from '../../react-components/react-component-helper'
+import { Entity, Property } from '../../entity/index'
 import { TableGenerator } from './table-generator-factory'
-import { TableComponentDefinition, TableComponentDefinitionBase } from '../../table-definition/table-definition-core'
-import { MuiTableComponents } from '../../table-definition/material-ui/table'
+import { TableComponentDefinition } from '../../../definition/table-definition-core'
+import { MuiTableComponents } from '../../../definition/material-ui/table'
 import TableGeneratorBase from './table-generator-base'
-import GenerationContext from "../context"
+import GenerationContext from "../../context"
 
 export class BasicTableGenerator extends TableGeneratorBase  implements TableGenerator
 {
@@ -22,12 +21,12 @@ export class BasicTableGenerator extends TableGeneratorBase  implements TableGen
             [
                 createJsxElement(rowComponent.tagName, [],
                     this.getProperties()
-                        .map((prop) => this.propertyHead(prop, this._context.entity))
+                        .map((prop) => this.propertyHead(prop, this.context.entity))
                 ),
                 this.mapArrayToTableRows(
                     createJsxElement(rowComponent.tagName, [],
                         this.getProperties()
-                            ?.map(prop => this.propertyCell(prop, this._context.entity, this.getRowIdentifier()))
+                            ?.map(prop => this.propertyCell(prop, this.context.entity, this.getRowIdentifier()))
                     ),
                     this.getRowsIdentifier(), this.getRowIdentifier()
                 )
@@ -63,20 +62,48 @@ export class BasicTableGenerator extends TableGeneratorBase  implements TableGen
     }
 
     private propertyHead(prop: Property, entity: Entity) {
+        let childs: ts.JsxChild[] = [];
+
+        if(this.context.useFormatter) {
+            childs = [...childs, ...this.formatCellWithTag(prop)]
+        }else{
+            childs.push(factory.createJsxText(prop.getName(),false))
+        }
+
         return createJsxElement(this.prepareComponent(this.getTableDefinition().cell).tagName, [],
-            tagFormattedMessage(prop, entity)
+            [this.localizePropertyNameWithTag(prop)]
         )
     }
     
     private propertyCell(prop: Property, entity: Entity, row = factory.createIdentifier("row")) {
-        return createJsxElement(this.prepareComponent(this.getTableDefinition().cell).tagName, [], [
-            factory.createJsxText(
-                prop.getName(),
-                false
-            ),
-            ...tagFormattedProperty(prop, row)
-        ])
+        let childs: ts.JsxChild[] = [];
+
+        if(this.context.useFormatter) {
+            childs = [...childs, ...this.formatCellWithTag(prop)]
+        }else{
+            childs.push(factory.createJsxText(prop.getName(),
+                                              false))
+        }
+
+        return createJsxElement(this.prepareComponent(this.getTableDefinition().cell).tagName, 
+                                                      [],            
+                                                      childs)
     }
+
+    private formatCellWithTag(prop: Property): ts.JsxChild[] {
+        let childs: ts.JsxChild[] = [];
+
+        const propertyAccess = factory.createPropertyAccessExpression(
+            this.getRowIdentifier(),
+            factory.createIdentifier(prop.getName())
+          )
+
+       childs = [...childs, this.intlFormatter.formatPropertyUsingTag(prop, propertyAccess)]
+
+       return childs;
+    }
+
+    
     
     private mapArrayToTableRows(body: ts.ConciseBody, rows: ts.Expression = factory.createIdentifier("rows"), row: ts.Identifier = factory.createIdentifier("row")) {
         return factory.createJsxExpression(undefined,

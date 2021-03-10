@@ -1,11 +1,11 @@
 import { TableComponent } from '../react-components/react-component-helper'
 import GenerationContext from '../context'
-import { TableGenerator, TableGeneratorFactory } from './table-generator-factory'
+import { TableGenerator, TableGeneratorFactory } from './table/table-generator-factory'
 
-export class TablePageGenerator {
+export class ModuleGenerator {
     _context: GenerationContext;
   
-    constructor (context: GenerationContext){
+    constructor (context: GenerationContext) {
         this._context = context;
     }
 
@@ -18,7 +18,7 @@ export class TablePageGenerator {
         return generator.generateTableComponent();
     }
 
-    private getGenerator(): TableGenerator{
+    private getGenerator(): TableGenerator {
         let generatorFactory = new TableGeneratorFactory(this._context);
         return generatorFactory.getTableGenerator();
     }

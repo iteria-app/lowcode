@@ -1,4 +1,4 @@
-import { defineComponent } from '../../table-generation/react-components/react-component-helper'
+import { defineComponent } from '../../generation/react-components/react-component-helper'
 
 const muiCore = '@material-ui/data-grid/'
 export const MuiTableComponents = {

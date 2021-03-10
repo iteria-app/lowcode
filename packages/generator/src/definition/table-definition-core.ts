@@ -1,4 +1,4 @@
-import { Component } from '../table-generation/react-components/react-component-helper'
+import { Component } from '../generation/react-components/react-component-helper'
 
 export interface TableComponentDefinitionBase {
     readonly table: Component

@@ -1,4 +1,5 @@
 import ts, { factory } from "typescript"
+import TypescriptHelper from "../code-generation/ts-helper"
 
 export function createFunctionalComponent(componentName: string | ts.Identifier | undefined = undefined, params: ts.ParameterDeclaration[], body: ts.Statement[]): ts.FunctionDeclaration {
   return factory.createFunctionDeclaration(
@@ -36,7 +37,7 @@ export function createJsxAttribute(attribute:string, attributeValue:string) {
     ))
 }
 
-export function createJsxSelfClosingElement(tagIdentifier: ts.Identifier, attributes: readonly ts.JsxAttributeLike[] | undefined) {
+export function createJsxSelfClosingElement(tagIdentifier: ts.Identifier, attributes: readonly ts.JsxAttributeLike[] | undefined): ts.JsxSelfClosingElement {
   return factory.createJsxSelfClosingElement(tagIdentifier, undefined,
     factory.createJsxAttributes(attributes ?? []))
 }
@@ -53,22 +54,10 @@ export interface TableComponent {
 
 export function defineComponent(tagName: string, packageName: string): Component {
   const tagNameIdentifier = factory.createIdentifier(tagName)
+  let importDeclaration = TypescriptHelper.createImportDeclaration(tagName, packageName)
+
   return {
     tagName: tagNameIdentifier,
-    importDeclaration: factory.createImportDeclaration(
-      undefined,
-      undefined,
-      factory.createImportClause(
-        false,
-        undefined,
-        factory.createNamedImports([
-          factory.createImportSpecifier(
-            undefined,
-            tagNameIdentifier
-          ),
-        ])
-      ),
-      factory.createStringLiteral(packageName)
-    ),
+    importDeclaration
   }
 }

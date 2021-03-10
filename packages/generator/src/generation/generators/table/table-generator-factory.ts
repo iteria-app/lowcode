@@ -1,6 +1,6 @@
-import { TableType } from '../../table-definition/table-types';
-import { TableComponent } from '../react-components/react-component-helper'
-import GenerationContext from '../context'
+import { TableType } from '../../../definition/table-types';
+import { TableComponent } from '../../react-components/react-component-helper'
+import GenerationContext from '../../context'
 import {BasicTableGenerator} from './basic-table-generator'
 import MuiDataTableGenerator from './mui-dt-generator'
 import GrommetDataTableGenerator from './grommet-dt-generator'
