@@ -3,13 +3,13 @@ import { defineHook, Hook } from '../../code-generation/hooks'
 import TypescriptHelper from '../../code-generation/ts-helper'
 
 export enum IntlFormatingHookMethods {
-    formatDate,
-    formatTime,
-    formatNumber,
-    formatPlural,
-    formatRelativeTime,
-    formatDateTimeRange,
-    formatMessage
+    formatDate = "formatDate",
+    formatTime = "formatTime",
+    formatNumber = "formatNumber",
+    formatPlural = "formatPlural",
+    formatRelativeTime = "formatRelativeTime",
+    formatDateTimeRange = "formatDateTimeRange",
+    formatMessage = "formatMessage"
 }
 
 export default class ReactIntlHook {

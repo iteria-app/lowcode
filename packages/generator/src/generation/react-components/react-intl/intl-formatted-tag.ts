@@ -3,13 +3,13 @@ import { defineComponent, createJsxSelfClosingElement, Component } from '../reac
 import TypescriptHelper from '../../code-generation/ts-helper'
 
 export enum IntlFormatingTags {
-    FormattedDate,
-    FormattedTime,
-    FormattedNumber,
-    FormattedDateTimeRange,
-    FormattedRelativeTime,
-    FormattedPlural,
-    FormattedMessage
+    FormattedDate = "FormattedDate",
+    FormattedTime = "FormattedTime",
+    FormattedNumber = "FormattedNumber",
+    FormattedDateTimeRange = "FormattedDateTimeRange",
+    FormattedRelativeTime = "FormattedRelativeTime",
+    FormattedPlural = "FormattedPlural",
+    FormattedMessage = "FormattedMessage"
 }
 
 export default class ReactIntlTag {

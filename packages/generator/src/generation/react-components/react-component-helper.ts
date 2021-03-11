@@ -1,4 +1,5 @@
 import ts, { factory } from "typescript"
+import { isString } from "util"
 import TypescriptHelper from "../code-generation/ts-helper"
 
 export function createFunctionalComponent(componentName: string | ts.Identifier | undefined = undefined, params: ts.ParameterDeclaration[], body: ts.Statement[]): ts.FunctionDeclaration {
@@ -28,12 +29,20 @@ export function createJsxElement(tagIdentifier: ts.Identifier, attributes: reado
   return factory.createJsxElement(jsxOpeningElement, children ?? [], jsxClosingElement)
 }
 
-export function createJsxAttribute(attribute:string, attributeValue:string) {
+export function createJsxAttribute(attribute:string, attributeValue:ts.Identifier|string) {
+  let valueIdentifier: ts.Identifier;
+
+  if(typeof attributeValue === 'string'){
+    valueIdentifier = factory.createIdentifier(attributeValue)
+  }else{
+    valueIdentifier = attributeValue
+  }
+
   return factory.createJsxAttribute(
     factory.createIdentifier(attribute),
     factory.createJsxExpression(
       undefined,
-      factory.createIdentifier(attributeValue)
+      valueIdentifier
     ))
 }
 

@@ -10,8 +10,6 @@ import { TableComponentDefinitionBase } from '../../../definition/table-definiti
 
 export default class MuiDataTableGenerator extends TableGeneratorBase implements TableGenerator 
 {
-    _entitiesInputParameterName: string = 'entities';
-
     constructor(generationContext: GenerationContext) {
         super(generationContext);
     }
@@ -27,23 +25,6 @@ export default class MuiDataTableGenerator extends TableGeneratorBase implements
         return MuiDtTableComponents;
     }
 
-    private createInputParameter(): ts.ParameterDeclaration {
-      return factory.createParameterDeclaration(
-        undefined,
-        undefined,
-        undefined,
-        factory.createObjectBindingPattern([factory.createBindingElement(
-          undefined,
-          undefined,
-          factory.createIdentifier(this._entitiesInputParameterName),
-          undefined
-        )]),
-        undefined,
-        undefined,
-        undefined
-      )
-    }
-
     private createStatements(): ts.Statement[] {
       let statements = new Array<ts.Statement>()
 
@@ -55,7 +36,7 @@ export default class MuiDataTableGenerator extends TableGeneratorBase implements
 
       var dataGridComponent = this.prepareComponent(this.getTableDefinition().table);
 
-      var rowsAttribute = createJsxAttribute("rows", this._entitiesInputParameterName)
+      var rowsAttribute = createJsxAttribute("rows", this.getInputParameterIdentifier())
 
       statements.push(factory.createReturnStatement(factory.createParenthesizedExpression(createJsxSelfClosingElement(dataGridComponent.tagName, [columnAttribute, rowsAttribute]))))
 

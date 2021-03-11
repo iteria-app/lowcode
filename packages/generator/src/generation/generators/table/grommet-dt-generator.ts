@@ -19,7 +19,7 @@ export default class GrommetDataTableGenerator extends TableGeneratorBase implem
     
     generateTableComponent(): TableComponent {
         var statements = this.createStatements();
-        var functionalComponent = createFunctionalComponent("DataTableComponent", [], statements);
+        var functionalComponent = createFunctionalComponent("DataTableComponent", [this.createInputParameter()], statements);
         
         return {functionDeclaration: functionalComponent, imports: this.uniqueImports()};
     }
@@ -31,9 +31,10 @@ export default class GrommetDataTableGenerator extends TableGeneratorBase implem
         let columnsDeclaration = this.createColumns(columnsIdentifier);
         var columnAttribute = createJsxAttribute("columns", "columns")
         statements.push(factory.createVariableStatement(undefined, columnsDeclaration))
-  
+        var rowsAttribute = createJsxAttribute("rows", this.getInputParameterIdentifier())
+
         var dataGridComponent = this.prepareComponent(this.getTableDefinition().table);
-        statements.push(factory.createReturnStatement(factory.createParenthesizedExpression(createJsxSelfClosingElement(dataGridComponent.tagName, [columnAttribute]))));
+        statements.push(factory.createReturnStatement(factory.createParenthesizedExpression(createJsxSelfClosingElement(dataGridComponent.tagName, [columnAttribute, rowsAttribute]))));
   
         return statements;
       }
@@ -101,6 +102,4 @@ export default class GrommetDataTableGenerator extends TableGeneratorBase implem
             factory.createParenthesizedExpression(formattedTag)
           )
     }
-
-
 }

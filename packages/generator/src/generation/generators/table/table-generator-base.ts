@@ -4,9 +4,9 @@ import ts, { factory } from "typescript"
 import { TableComponentDefinitionBase } from '../../../definition/table-definition-core'
 import { Component } from '../../react-components/react-component-helper'
 import { camalizeString } from '../../../utils/utils'
-import Pluralize from "typescript-pluralize"
 import TypescriptHelper from "../../code-generation/ts-helper"
 import ReactIntlFormatter from  '../../react-components/react-intl/intl-formatter'
+import Pluralize from "typescript-pluralize"
 
 export default abstract class TableGeneratorBase{
     protected readonly context:GenerationContext;
@@ -18,7 +18,7 @@ export default abstract class TableGeneratorBase{
         this.intlFormatter = new ReactIntlFormatter(this.context, this._imports);
     }
 
-    getProperties(): Property[]{
+    protected getProperties(): Property[]{
         return this.context.entity.properties.filter(this.filterProp)
     }
 
@@ -42,12 +42,8 @@ export default abstract class TableGeneratorBase{
         return camalizeString(this.context.entity.getName())
     }
 
-    protected getRowsIdentifier() : ts.Identifier {
+    protected getInputParameterIdentifier() : ts.Identifier {
         return factory.createIdentifier(Pluralize.plural(this.getEntityName()))
-    }
-
-    protected getRowIdentifier() : ts.Identifier {
-        return factory.createIdentifier(this.getEntityName())
     }
 
     protected localizePropertyNameWithTag(property: Property): ts.JsxSelfClosingElement {
@@ -65,5 +61,22 @@ export default abstract class TableGeneratorBase{
         }
   
         return localizedName;
-      }
+    }
+
+    protected createInputParameter(): ts.ParameterDeclaration {
+        return factory.createParameterDeclaration(
+          undefined,
+          undefined,
+          undefined,
+          factory.createObjectBindingPattern([factory.createBindingElement(
+            undefined,
+            undefined,
+            this.getInputParameterIdentifier(),
+            undefined
+          )]),
+          undefined,
+          undefined,
+          undefined
+        )
+    }
 }

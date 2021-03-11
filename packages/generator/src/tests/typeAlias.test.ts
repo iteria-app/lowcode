@@ -38,7 +38,7 @@ function sourceFileEntity(myClassFile: SourceFile) {
 }
 
 describe("table generation", () => {
-  test(".mui table generation", () => {
+  test(".mui table generation without formatting", () => {
       const sourceFile = createAst('')
       const myClassFile = parseGraphqlTypes(graphqlGenTs1)
       const testEntity = sourceFileEntity(myClassFile)
@@ -59,6 +59,75 @@ describe("table generation", () => {
       const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
 
       console.log('generated:', printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page.imports, page.functionDeclaration]), sourceFile))
+  });
+
+  test(".mui table generation with formatting", () => {
+    const sourceFile = createAst('')
+    const myClassFile = parseGraphqlTypes(graphqlGenTs1)
+    const testEntity = sourceFileEntity(myClassFile)
+
+    let generationContext = {useFormatter:true, tableType: TableType.MuiTable, entity: testEntity!!};
+    let generator = new ModuleGenerator(generationContext);
+
+    const page = generator.generateTablePage()
+    
+    /*ts.transform(sourceFile, [
+        (context) => (node) => {
+          return ts.visitNode(node, n => {
+            return node
+          })
+        }
+      ])*/
+    // TODO https://github.com/vvakame/typescript-formatter/blob/master/lib/formatter.ts
+    const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
+
+    console.log('generated:', printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page.imports, page.functionDeclaration]), sourceFile))
+});
+
+test(".grommet table generation without formatting", () => {
+  const sourceFile = createAst('')
+  const myClassFile = parseGraphqlTypes(graphqlGenTs1)
+  const testEntity = sourceFileEntity(myClassFile)
+
+  let generationContext = {useFormatter:false, tableType: TableType.GrommetTable, entity: testEntity!!};
+  let generator = new ModuleGenerator(generationContext);
+
+  const page = generator.generateTablePage()
+  
+  /*ts.transform(sourceFile, [
+      (context) => (node) => {
+        return ts.visitNode(node, n => {
+          return node
+        })
+      }
+    ])*/
+  // TODO https://github.com/vvakame/typescript-formatter/blob/master/lib/formatter.ts
+  const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
+
+  console.log('generated:', printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page.imports, page.functionDeclaration]), sourceFile))
+  });
+
+  test(".grommet table generation with formatting", () => {
+  const sourceFile = createAst('')
+  const myClassFile = parseGraphqlTypes(graphqlGenTs1)
+  const testEntity = sourceFileEntity(myClassFile)
+
+  let generationContext = {useFormatter:true, tableType: TableType.GrommetTable, entity: testEntity!!};
+  let generator = new ModuleGenerator(generationContext);
+
+  const page = generator.generateTablePage()
+
+  /*ts.transform(sourceFile, [
+      (context) => (node) => {
+        return ts.visitNode(node, n => {
+          return node
+        })
+      }
+    ])*/
+  // TODO https://github.com/vvakame/typescript-formatter/blob/master/lib/formatter.ts
+  const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
+
+  console.log('generated:', printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page.imports, page.functionDeclaration]), sourceFile))
   });
 
   test(".mui data table generation", () => {

@@ -14,102 +14,109 @@ export class BasicTableGenerator extends TableGeneratorBase  implements TableGen
     }
 
     generateTableComponent(): TableComponent {
-        const tableComponent = this.prepareComponent(this.getTableDefinition().table)
-        const rowComponent = this.prepareComponent(this.getTableDefinition().row)
-        
-        let element = createJsxElement(tableComponent.tagName, [],
-            [
-                createJsxElement(rowComponent.tagName, [],
-                    this.getProperties()
-                        .map((prop) => this.propertyHead(prop, this.context.entity))
-                ),
-                this.mapArrayToTableRows(
-                    createJsxElement(rowComponent.tagName, [],
-                        this.getProperties()
-                            ?.map(prop => this.propertyCell(prop, this.context.entity, this.getRowIdentifier()))
-                    ),
-                    this.getRowsIdentifier(), this.getRowIdentifier()
-                )
-            ]
-        )
+        var statements = this.createStatements()
+        var functionalComponent = createFunctionalComponent("TableComponent", [this.createInputParameter()], statements)
 
-        return {imports: this.uniqueImports(), functionDeclaration: this.entityTablePage(element)};
+        return {imports: this.uniqueImports(), functionDeclaration: functionalComponent}
+    }
+
+    private createStatements(): ts.Statement[] {
+      let statements = new Array<ts.Statement>()
+
+      const tableComponent = this.prepareComponent(this.getTableDefinition().table)
+        
+      let table = createJsxElement(tableComponent.tagName, [],
+          [
+              this.createHeader(),
+              this.mapArrayToTableRows(
+                  this.createBody()
+              )
+          ]
+      )
+
+      var returnStatement = factory.createReturnStatement(table);
+      statements.push(returnStatement)
+
+      return statements;
+    }
+
+    private createHeader(): ts.JsxChild {
+      const headerComponent = this.prepareComponent(this.getTableDefinition().header);
+      const rowComponent = this.prepareComponent(this.getTableDefinition().row)
+
+      let headerRow = createJsxElement(rowComponent.tagName, [], this.getProperties()
+                      .map((prop) => this.propertyHead(prop, this.context.entity)))
+
+      let tableHeader = createJsxElement(headerComponent.tagName, [], [headerRow])
+
+      return tableHeader
+    }
+
+    private createBody(): ts.JsxElement {
+      const bodyComponent = this.prepareComponent(this.getTableDefinition().body);
+      const rowComponent = this.prepareComponent(this.getTableDefinition().row)
+
+      let bodyRow = createJsxElement(rowComponent.tagName, [],this.getProperties()
+                       ?.map(prop => this.propertyCell(prop, this.context.entity)))
+
+      let tableBody = createJsxElement(bodyComponent.tagName, [], [bodyRow])
+
+      return tableBody
     }
 
     getTableDefinition() : TableComponentDefinition {
         return MuiTableComponents;
     }
 
-    private entityTablePage(table: ts.JsxElement) {
-        var returnStatement = factory.createReturnStatement(table);
-
-        const params = [factory.createParameterDeclaration(
-            undefined,
-            undefined,
-            undefined,
-            factory.createObjectBindingPattern([factory.createBindingElement(
-              undefined,
-              undefined,
-              this.getRowsIdentifier(),
-              undefined
-            )]),
-            undefined,
-            undefined,
-            undefined
-          )]
-    
-        return createFunctionalComponent('Table', params, [returnStatement])
-    }
-
     private propertyHead(prop: Property, entity: Entity) {
-        let childs: ts.JsxChild[] = [];
+        let child: ts.JsxChild;
 
         if(this.context.useFormatter) {
-            childs = [...childs, ...this.formatCellWithTag(prop)]
+            child = this.formatCellWithTag(prop)
         }else{
-            childs.push(factory.createJsxText(prop.getName(),false))
+            child = factory.createJsxText(prop.getName(),false)
         }
 
-        return createJsxElement(this.prepareComponent(this.getTableDefinition().cell).tagName, [],
-            [this.localizePropertyNameWithTag(prop)]
+        return createJsxElement(this.prepareComponent(this.getTableDefinition().cell).tagName, 
+                                                      [],
+                                                      [child]
         )
     }
     
-    private propertyCell(prop: Property, entity: Entity, row = factory.createIdentifier("row")) {
-        let childs: ts.JsxChild[] = [];
+    private propertyCell(prop: Property, entity: Entity) {
+        let child: ts.JsxChild;
 
         if(this.context.useFormatter) {
-            childs = [...childs, ...this.formatCellWithTag(prop)]
+            child = this.formatCellWithTag(prop)
         }else{
-            childs.push(factory.createJsxText(prop.getName(),
-                                              false))
+            child = factory.createJsxExpression(
+                undefined,
+                factory.createPropertyAccessExpression(
+                  this.getRowIdentifier(),
+                  factory.createIdentifier(prop.getName())
+                )
+              )
         }
 
         return createJsxElement(this.prepareComponent(this.getTableDefinition().cell).tagName, 
                                                       [],            
-                                                      childs)
+                                                      [child])
     }
 
-    private formatCellWithTag(prop: Property): ts.JsxChild[] {
-        let childs: ts.JsxChild[] = [];
+    private formatCellWithTag(prop: Property): ts.JsxSelfClosingElement {
+       const propertyAccess = factory.createPropertyAccessExpression(
+          this.getRowIdentifier(),
+          factory.createIdentifier(prop.getName())
+       )
 
-        const propertyAccess = factory.createPropertyAccessExpression(
-            this.getRowIdentifier(),
-            factory.createIdentifier(prop.getName())
-          )
-
-       childs = [...childs, this.intlFormatter.formatPropertyUsingTag(prop, propertyAccess)]
-
-       return childs;
+      return this.intlFormatter.formatPropertyUsingTag(prop, propertyAccess)
     }
 
-    
-    
-    private mapArrayToTableRows(body: ts.ConciseBody, rows: ts.Expression = factory.createIdentifier("rows"), row: ts.Identifier = factory.createIdentifier("row")) {
+    private mapArrayToTableRows(body: ts.ConciseBody) {
         return factory.createJsxExpression(undefined,
             factory.createCallExpression(
                 factory.createPropertyAccessExpression(
-                    rows,
+                    this.getInputParameterIdentifier(),
                     factory.createIdentifier("map")
                 ),
                 undefined,
@@ -120,7 +127,7 @@ export class BasicTableGenerator extends TableGeneratorBase  implements TableGen
                         undefined,
                         undefined,
                         undefined,
-                        row,
+                        this.getRowIdentifier(),
                         undefined,
                         undefined,
                         undefined
@@ -131,6 +138,10 @@ export class BasicTableGenerator extends TableGeneratorBase  implements TableGen
                 )]
             )
         )
+    }
+
+    protected getRowIdentifier() : ts.Identifier {
+        return factory.createIdentifier(this.getEntityName())
     }
 }
 
