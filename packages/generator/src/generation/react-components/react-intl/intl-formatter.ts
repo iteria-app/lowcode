@@ -5,8 +5,8 @@ import { TableType } from "../../../definition/table-types"
 import { PropertyType, getPropertyType } from "../../typeAlias"
 import ReactIntlHook from "./intl-hook"
 import ReactIntlTag from "./intl-formatted-tag"
-import { defaultCipherList } from "constants"
 
+//TODO: add support for https://github.com/IanKBovard/I18N-Grommet/tree/feat/i18n/src/js/pages/Reacti18next
 export default class ReactIntlFormatter {
     _context: GenerationContext;
     _intlFormattedTag: ReactIntlTag;

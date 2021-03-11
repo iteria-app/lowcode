@@ -10,7 +10,7 @@ export class ModuleGenerator {
     }
 
     generateTablePage() {
-        let generator = this.getGenerator();
+        let generator = this.getTableGenerator();
         return this.getTable(generator);
     }
 
@@ -18,7 +18,7 @@ export class ModuleGenerator {
         return generator.generateTableComponent();
     }
 
-    private getGenerator(): TableGenerator {
+    private getTableGenerator(): TableGenerator {
         let generatorFactory = new TableGeneratorFactory(this._context);
         return generatorFactory.getTableGenerator();
     }
