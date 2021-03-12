@@ -1,6 +1,6 @@
 import { Property } from '../../entity/index'
 import GenerationContext from '../../context'
-import ts, { factory } from "typescript"
+import ts, { createJsxText, factory } from "typescript"
 import { TableComponentDefinitionBase } from '../../../definition/table-definition-core'
 import { Component } from '../../react-components/react-component-helper'
 import { camalizeString } from '../../../utils/utils'
@@ -50,14 +50,25 @@ export default abstract class TableGeneratorBase{
         return this.intlFormatter.localizePropertyNameUsingTag(property, this.context.entity)
     }
 
-    protected getHeaderTitle(property: Property): ts.Expression{
-        let localizedName: ts.Expression;
+    protected getHeaderTitle(property: Property): ts.Identifier | ts.JsxSelfClosingElement{
+        let localizedName;
   
         if(this.context.useFormatter){
           localizedName = this.intlFormatter.localizePropertyNameUsingTag(property, this.context.entity);
         }else{
-          localizedName = 
-            factory.createStringLiteral(property.getName())
+          localizedName = factory.createIdentifier(property.getName())
+        }
+  
+        return localizedName;
+    }
+
+    protected getHeaderTitleJsxText(property: Property): ts.JsxText | ts.JsxSelfClosingElement{
+        let localizedName;
+  
+        if(this.context.useFormatter){
+          localizedName = this.intlFormatter.localizePropertyNameUsingTag(property, this.context.entity);
+        }else{
+          localizedName = factory.createJsxText(property.getName())
         }
   
         return localizedName;

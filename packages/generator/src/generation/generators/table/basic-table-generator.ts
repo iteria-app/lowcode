@@ -66,13 +66,7 @@ export class BasicTableGenerator extends TableGeneratorBase  implements TableGen
     }
 
     private propertyHead(prop: Property, entity: Entity) {
-        let child: ts.JsxChild;
-
-        if(this.context.useFormatter) {
-            child = this.formatCellWithTag(prop)
-        }else{
-            child = factory.createJsxText(prop.getName(),false)
-        }
+        let child = this.getHeaderTitleJsxText(prop);
 
         return createJsxElement(this.prepareComponent(this.getTableDefinition().cell).tagName, 
                                                       [],

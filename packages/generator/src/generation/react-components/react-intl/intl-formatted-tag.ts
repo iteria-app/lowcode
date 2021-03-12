@@ -19,18 +19,18 @@ export default class ReactIntlTag {
         this._imports = imports;
     }
 
-    formatDate(value: ts.Expression): ts.JsxSelfClosingElement {
+    formatDate(value: ts.JsxExpression): ts.JsxSelfClosingElement {
         this.prepareImport(IntlFormatingTags.FormattedDate)
         return this.formattedValue(IntlFormatingTags.FormattedDate, value)
     }
 
-    formatTime(value: ts.Expression): ts.JsxSelfClosingElement {
+    formatTime(value: ts.JsxExpression): ts.JsxSelfClosingElement {
         this.prepareImport(IntlFormatingTags.FormattedTime)
 
         return this.formattedValue(IntlFormatingTags.FormattedTime, value)
     }
 
-    formatDateTime(value: ts.Expression): ts.JsxSelfClosingElement {
+    formatDateTime(value: ts.JsxExpression): ts.JsxSelfClosingElement {
         this.prepareImport(IntlFormatingTags.FormattedDate)
 
         return this.formattedValue(IntlFormatingTags.FormattedDate, value),
@@ -41,19 +41,19 @@ export default class ReactIntlTag {
             this.formattedValue(IntlFormatingTags.FormattedTime, value)
     }
 
-    formatNumber(value: ts.Expression): ts.JsxSelfClosingElement {
+    formatNumber(value: ts.JsxExpression): ts.JsxSelfClosingElement {
         this.prepareImport(IntlFormatingTags.FormattedDate)
 
         return this.formattedValue(IntlFormatingTags.FormattedNumber, value)
     }
 
-    formatPlural(value: ts.Expression): ts.JsxSelfClosingElement {
+    formatPlural(value: ts.JsxExpression): ts.JsxSelfClosingElement {
         this.prepareImport(IntlFormatingTags.FormattedDate)
 
         return this.formattedValue(IntlFormatingTags.FormattedPlural, value)
     }
 
-    formatDuration(value: ts.Expression, unit: ts.Expression): ts.JsxSelfClosingElement {
+    formatDuration(value: ts.JsxExpression, unit: ts.Expression): ts.JsxSelfClosingElement {
         this.prepareImport(IntlFormatingTags.FormattedDate)
 
         return this.formattedValue(IntlFormatingTags.FormattedRelativeTime, value
@@ -61,7 +61,7 @@ export default class ReactIntlTag {
         )
     }
 
-    formatTimeRange(from: ts.Expression, to: ts.Expression): ts.JsxSelfClosingElement {
+    formatTimeRange(from: ts.JsxExpression, to: ts.JsxExpression): ts.JsxSelfClosingElement {
         this.prepareImport(IntlFormatingTags.FormattedDateTimeRange)
 
         let tagNameIdentifier:ts.Identifier = factory.createIdentifier(IntlFormatingTags.FormattedDateTimeRange.toString())
@@ -113,18 +113,16 @@ export default class ReactIntlTag {
         return createJsxSelfClosingElement(tagNameIdentifier, attributes)
     }
 
-    private formattedValue(tagNformattingTagame: IntlFormatingTags, expression: ts.Expression) {
+    private formattedValue(tagNformattingTagame: IntlFormatingTags, expression: ts.JsxExpression) {
         let identifierTagName: ts.Identifier = factory.createIdentifier(tagNformattingTagame.toString())
 
         return createJsxSelfClosingElement(identifierTagName,
             [
                 factory.createJsxAttribute(
                     factory.createIdentifier("value"),
-                    factory.createJsxExpression(
-                        undefined,
-                        expression
-                    )
-                )]
+                    expression
+                )
+            ]
         )
     }
 

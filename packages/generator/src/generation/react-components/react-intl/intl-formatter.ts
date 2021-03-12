@@ -74,7 +74,7 @@ export default class ReactIntlFormatter {
           break;
         case PropertyType.navigation:
           // TODO clickable chips with href/navigation to a page
-          formattedElement = this.localizeMessage(factory.createStringLiteral(prop.getName()), factory.createStringLiteral(prop.getName()), undefined)
+          formattedElement = expression
           break;
         default:
           formattedElement = expression

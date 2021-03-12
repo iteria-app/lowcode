@@ -130,7 +130,7 @@ test(".grommet table generation without formatting", () => {
   console.log('generated:', printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page.imports, page.functionDeclaration]), sourceFile))
   });
 
-  test(".mui data table generation", () => {
+  test(".mui data table generation without formatting", () => {
       const sourceFile = createAst('')
       const myClassFile = parseGraphqlTypes(graphqlGenTs1)
       const testEntity = sourceFileEntity(myClassFile)
@@ -160,7 +160,7 @@ test(".grommet table generation without formatting", () => {
       console.log('generated:', printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page.imports, page.functionDeclaration]), sourceFile))
   });
 
-  test(".grommet data table generation", () => {
+  test(".grommet data table generation without formatting", () => {
       const sourceFile = createAst('')
       const myClassFile = parseGraphqlTypes(graphqlGenTs1)
       const testEntity = sourceFileEntity(myClassFile)
@@ -174,6 +174,21 @@ test(".grommet table generation without formatting", () => {
 
       console.log('generated:', printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page.imports, page.functionDeclaration]), sourceFile))
   });
+
+  test(".grommet data table generation with formatting", () => {
+    const sourceFile = createAst('')
+    const myClassFile = parseGraphqlTypes(graphqlGenTs1)
+    const testEntity = sourceFileEntity(myClassFile)
+
+    let generationContext = {useFormatter:true, uiFramework: UiFramework.Grommet, tableType: TableType.DataTable, entity: testEntity!!};
+    let generator = new ModuleGenerator(generationContext);
+
+    const page = generator.generateTablePage()
+    
+    const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
+
+    console.log('generated:', printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page.imports, page.functionDeclaration]), sourceFile))
+});
 })
 
 function parseGraphqlTypes(sourceCode: string) {
