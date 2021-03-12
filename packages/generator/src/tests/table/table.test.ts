@@ -1,9 +1,9 @@
 // TODO https://github.com/vvakame/typescript-formatter/blob/master/lib/formatter.ts
 import { Project, SourceFile } from "ts-morph"
 import ts, { factory } from "typescript"
-import { graphqlGenTs1 } from "./typeAlias.example"
-import { TableType } from '../definition/table-types'
-import { ModuleGenerator } from '../generation/generators/module-generator'
+import { graphqlGenTs1 } from "../typeAlias.example"
+import { TableType, UiFramework } from '../../definition/context-types'
+import { ModuleGenerator } from '../../generation/generators/module-generator'
 
 export function createAst(
   code:string,
@@ -43,7 +43,7 @@ describe("table generation", () => {
       const myClassFile = parseGraphqlTypes(graphqlGenTs1)
       const testEntity = sourceFileEntity(myClassFile)
 
-      let generationContext = {useFormatter:false, tableType: TableType.MuiTable, entity: testEntity!!};
+      let generationContext = {useFormatter:false, uiFramework: UiFramework.Mui, tableType: TableType.BasicTable,  entity: testEntity!!};
       let generator = new ModuleGenerator(generationContext);
 
       const page = generator.generateTablePage()
@@ -66,7 +66,7 @@ describe("table generation", () => {
     const myClassFile = parseGraphqlTypes(graphqlGenTs1)
     const testEntity = sourceFileEntity(myClassFile)
 
-    let generationContext = {useFormatter:true, tableType: TableType.MuiTable, entity: testEntity!!};
+    let generationContext = {useFormatter:true, uiFramework: UiFramework.Mui, tableType: TableType.BasicTable, entity: testEntity!!};
     let generator = new ModuleGenerator(generationContext);
 
     const page = generator.generateTablePage()
@@ -89,7 +89,7 @@ test(".grommet table generation without formatting", () => {
   const myClassFile = parseGraphqlTypes(graphqlGenTs1)
   const testEntity = sourceFileEntity(myClassFile)
 
-  let generationContext = {useFormatter:false, tableType: TableType.GrommetTable, entity: testEntity!!};
+  let generationContext = {useFormatter:false, uiFramework: UiFramework.Grommet, tableType: TableType.BasicTable, entity: testEntity!!};
   let generator = new ModuleGenerator(generationContext);
 
   const page = generator.generateTablePage()
@@ -112,7 +112,7 @@ test(".grommet table generation without formatting", () => {
   const myClassFile = parseGraphqlTypes(graphqlGenTs1)
   const testEntity = sourceFileEntity(myClassFile)
 
-  let generationContext = {useFormatter:true, tableType: TableType.GrommetTable, entity: testEntity!!};
+  let generationContext = {useFormatter:true, uiFramework: UiFramework.Grommet, tableType: TableType.BasicTable, entity: testEntity!!};
   let generator = new ModuleGenerator(generationContext);
 
   const page = generator.generateTablePage()
@@ -135,7 +135,7 @@ test(".grommet table generation without formatting", () => {
       const myClassFile = parseGraphqlTypes(graphqlGenTs1)
       const testEntity = sourceFileEntity(myClassFile)
 
-      let generationContext = {useFormatter:false, tableType: TableType.MuiDataTable, entity: testEntity!!};
+      let generationContext = {useFormatter:false,uiFramework: UiFramework.Mui, tableType: TableType.DataTable, entity: testEntity!!};
       let generator = new ModuleGenerator(generationContext);
 
       const page = generator.generateTablePage()
@@ -150,7 +150,7 @@ test(".grommet table generation without formatting", () => {
       const myClassFile = parseGraphqlTypes(graphqlGenTs1)
       const testEntity = sourceFileEntity(myClassFile)
 
-      let generationContext = {useFormatter:true, tableType: TableType.MuiDataTable, entity: testEntity!!};
+      let generationContext = {useFormatter:true, uiFramework: UiFramework.Mui, tableType: TableType.DataTable, entity: testEntity!!};
       let generator = new ModuleGenerator(generationContext);
 
       const page = generator.generateTablePage()
@@ -165,7 +165,7 @@ test(".grommet table generation without formatting", () => {
       const myClassFile = parseGraphqlTypes(graphqlGenTs1)
       const testEntity = sourceFileEntity(myClassFile)
 
-      let generationContext = {useFormatter:false, tableType: TableType.GrommetDataTable, entity: testEntity!!};
+      let generationContext = {useFormatter:false, uiFramework: UiFramework.Grommet, tableType: TableType.DataTable, entity: testEntity!!};
       let generator = new ModuleGenerator(generationContext);
 
       const page = generator.generateTablePage()

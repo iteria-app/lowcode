@@ -1,12 +1,12 @@
-import { TableType } from '../../../definition/table-types';
-import { TableComponent } from '../../react-components/react-component-helper'
+import { TableType, UiFramework } from '../../../definition/context-types';
+import { PageComponent } from '../../react-components/react-component-helper'
 import GenerationContext from '../../context'
 import {BasicTableGenerator} from './basic-table-generator'
 import MuiDataTableGenerator from './mui-dt-generator'
 import GrommetDataTableGenerator from './grommet-dt-generator'
 
 export interface TableGenerator{
-    generateTableComponent(): TableComponent;
+    generateTableComponent(): PageComponent;
 }
 
 export class TableGeneratorFactory{
@@ -17,21 +17,17 @@ export class TableGeneratorFactory{
     }
 
     getTableGenerator(): TableGenerator{
-        let generator: TableGenerator;
+        let generator: TableGenerator = new BasicTableGenerator(this._context);
 
-        switch(this._context.tableType){
-            case TableType.MuiTable:
-                generator = new BasicTableGenerator(this._context);
-                break;
-            case TableType.GrommetTable:
-                generator = new BasicTableGenerator(this._context);
-                break;
-            case TableType.MuiDataTable:
-                generator = new MuiDataTableGenerator(this._context);
-                break;
-            case TableType.GrommetDataTable:
-                generator = new GrommetDataTableGenerator(this._context);
-                break;
+        if(this._context.tableType === TableType.DataTable) {
+            switch(this._context.uiFramework){
+                case UiFramework.Mui:
+                    generator = new MuiDataTableGenerator(this._context);
+                    break;
+                case UiFramework.Grommet:
+                    generator = new GrommetDataTableGenerator(this._context);
+                    break;
+            }
         }
 
         return generator;

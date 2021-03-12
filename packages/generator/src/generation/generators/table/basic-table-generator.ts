@@ -1,5 +1,5 @@
 import ts, { factory } from "typescript"
-import { createJsxElement, TableComponent, createFunctionalComponent } from '../../react-components/react-component-helper'
+import { createJsxElement, PageComponent, createFunctionalComponent } from '../../react-components/react-component-helper'
 import { Entity, Property } from '../../entity/index'
 import { TableGenerator } from './table-generator-factory'
 import { TableComponentDefinition } from '../../../definition/table-definition-core'
@@ -13,7 +13,7 @@ export class BasicTableGenerator extends TableGeneratorBase  implements TableGen
         super(generationContext);
     }
 
-    generateTableComponent(): TableComponent {
+    generateTableComponent(): PageComponent {
         var statements = this.createStatements()
         var functionalComponent = createFunctionalComponent("TableComponent", [this.createInputParameter()], statements)
 
@@ -29,7 +29,7 @@ export class BasicTableGenerator extends TableGeneratorBase  implements TableGen
           [
               this.createHeader(),
               this.mapArrayToTableRows(
-                  this.createBody()
+                  this.createBodyRow()
               )
           ]
       )
@@ -52,16 +52,13 @@ export class BasicTableGenerator extends TableGeneratorBase  implements TableGen
       return tableHeader
     }
 
-    private createBody(): ts.JsxElement {
-      const bodyComponent = this.prepareComponent(this.getTableDefinition().body);
+    private createBodyRow(): ts.JsxElement {
       const rowComponent = this.prepareComponent(this.getTableDefinition().row)
 
       let bodyRow = createJsxElement(rowComponent.tagName, [],this.getProperties()
                        ?.map(prop => this.propertyCell(prop, this.context.entity)))
 
-      let tableBody = createJsxElement(bodyComponent.tagName, [], [bodyRow])
-
-      return tableBody
+      return bodyRow
     }
 
     getTableDefinition() : TableComponentDefinition {
@@ -103,17 +100,20 @@ export class BasicTableGenerator extends TableGeneratorBase  implements TableGen
                                                       [child])
     }
 
-    private formatCellWithTag(prop: Property): ts.JsxSelfClosingElement {
-       const propertyAccess = factory.createPropertyAccessExpression(
+    private formatCellWithTag(prop: Property): ts.JsxChild {
+       const propertyAccess = factory.createJsxExpression(undefined, factory.createPropertyAccessExpression(
           this.getRowIdentifier(),
           factory.createIdentifier(prop.getName())
-       )
+       ))
 
       return this.intlFormatter.formatPropertyUsingTag(prop, propertyAccess)
     }
 
     private mapArrayToTableRows(body: ts.ConciseBody) {
-        return factory.createJsxExpression(undefined,
+        const bodyComponent = this.prepareComponent(this.getTableDefinition().body);
+
+        return createJsxElement(bodyComponent.tagName, [], 
+        [factory.createJsxExpression(undefined,
             factory.createCallExpression(
                 factory.createPropertyAccessExpression(
                     this.getInputParameterIdentifier(),
@@ -137,7 +137,7 @@ export class BasicTableGenerator extends TableGeneratorBase  implements TableGen
                     body
                 )]
             )
-        )
+        )])
     }
 
     protected getRowIdentifier() : ts.Identifier {

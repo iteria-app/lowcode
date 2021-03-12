@@ -1,6 +1,6 @@
 import ts, { factory } from "typescript"
 import { getPropertyType, PropertyType } from '../../typeAlias'
-import { createFunctionalComponent, TableComponent, createJsxSelfClosingElement, createJsxAttribute } from '../../react-components/react-component-helper'
+import { createFunctionalComponent, PageComponent, createJsxSelfClosingElement, createJsxAttribute } from '../../react-components/react-component-helper'
 import { Property } from '../../entity/index'
 import { TableGenerator } from './table-generator-factory'
 import TableGeneratorBase from './table-generator-base'
@@ -14,7 +14,7 @@ export default class MuiDataTableGenerator extends TableGeneratorBase implements
         super(generationContext);
     }
     
-    generateTableComponent(): TableComponent {
+    generateTableComponent(): PageComponent {
         var statements = this.createStatements();
         var functionalComponent = createFunctionalComponent("DataTableComponent", [this.createInputParameter()], statements);
         
@@ -133,7 +133,7 @@ export default class MuiDataTableGenerator extends TableGeneratorBase implements
         )],
         undefined,
         factory.createToken(ts.SyntaxKind.EqualsGreaterThanToken),
-        this.intlFormatter.formatPropertyUsingHook(prop, "value")
+        this.intlFormatter.formatPropertyUsingHook(prop, factory.createIdentifier("value"))
       )
     }
 }

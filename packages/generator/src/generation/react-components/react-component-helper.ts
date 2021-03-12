@@ -1,5 +1,4 @@
 import ts, { factory } from "typescript"
-import { isString } from "util"
 import TypescriptHelper from "../code-generation/ts-helper"
 
 export function createFunctionalComponent(componentName: string | ts.Identifier | undefined = undefined, params: ts.ParameterDeclaration[], body: ts.Statement[]): ts.FunctionDeclaration {
@@ -56,7 +55,7 @@ export interface Component {
   importDeclaration: ts.ImportDeclaration
 }
 
-export interface TableComponent {
+export interface PageComponent {
   functionDeclaration: ts.FunctionDeclaration
   imports: ts.ImportDeclaration[]
 }

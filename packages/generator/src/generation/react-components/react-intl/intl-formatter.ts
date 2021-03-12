@@ -1,7 +1,7 @@
-import ts, { factory } from "typescript"
+import ts, { factory, JsxSelfClosingElement } from "typescript"
 import { Entity, Property } from '../../entity'
 import GenerationContext from "../../context"
-import { TableType } from "../../../definition/table-types"
+import { TableType } from "../../../definition/context-types"
 import { PropertyType, getPropertyType } from "../../typeAlias"
 import ReactIntlHook from "./intl-hook"
 import ReactIntlTag from "./intl-formatted-tag"
@@ -18,16 +18,16 @@ export default class ReactIntlFormatter {
         this._intlFormattedTag = new ReactIntlTag(imports);
     }
 
-    formatPropertyUsingHook(prop: Property, fallbackProperty: string|undefined): ts.Expression {
+    formatPropertyUsingHook(prop: Property, fallbackExpression: ts.Expression): ts.Expression {
       //TODO null chaining in case of: type.isNullable(), type.isUndefined(), type.isUnionOrIntersection(),
       let expression: ts.Expression = factory.createIdentifier(prop.getName())
 
-      if (this._context.tableType == TableType.MuiTable || this._context.tableType == TableType.GrommetTable) {
+      /*if (this._context.tableType == TableType.MuiTable || this._context.tableType == TableType.GrommetTable) {
           expression = factory.createPropertyAccessExpression(
               factory.createIdentifier("row"),
               factory.createIdentifier(prop.getName())
             )
-      }
+      }*/
     
       let propertyType: PropertyType = getPropertyType(prop);
     
@@ -43,9 +43,7 @@ export default class ReactIntlFormatter {
         case PropertyType.navigation:
           // TODO clickable chips with href/navigation to a page
         default:
-          if(fallbackProperty){
-            expression = factory.createIdentifier(fallbackProperty);
-          }
+            expression = fallbackExpression
           break;
       }
 
@@ -56,11 +54,11 @@ export default class ReactIntlFormatter {
       return expression;
   }
 
-  formatPropertyUsingTag(prop: Property, expression: ts.Expression): ts.JsxSelfClosingElement {
+  formatPropertyUsingTag(prop: Property, expression: ts.JsxExpression): ts.JsxSelfClosingElement | ts.JsxExpression {
     //TODO null chaining in case of: type.isNullable(), type.isUndefined(), type.isUnionOrIntersection(),
     let propertyType: PropertyType = getPropertyType(prop);
     
-    let formattedElement: ts.JsxSelfClosingElement
+    let formattedElement
 
       switch(propertyType) {
         case PropertyType.currency:
@@ -76,11 +74,10 @@ export default class ReactIntlFormatter {
           break;
         case PropertyType.navigation:
           // TODO clickable chips with href/navigation to a page
-          formattedElement = this.localizeMessage(factory.createStringLiteral(''), factory.createStringLiteral(''), undefined)
+          formattedElement = this.localizeMessage(factory.createStringLiteral(prop.getName()), factory.createStringLiteral(prop.getName()), undefined)
           break;
         default:
-          //TODO do some fallback if type is not supported
-           formattedElement = this.localizeMessage(factory.createStringLiteral(''), factory.createStringLiteral(''), undefined)
+          formattedElement = expression
           break;
       }
 
