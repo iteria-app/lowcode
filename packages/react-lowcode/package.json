@@ -10,7 +10,7 @@
   "homepage": "https://iteria.app/",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/iteria-app/lowcode.git"
+    "url": "git+https://github.com/iteria-app/lowcode.git",
     "directory": "packages/react-lowcode"
   },
   "keywords": [
