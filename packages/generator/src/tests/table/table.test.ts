@@ -38,6 +38,7 @@ function sourceFileEntity(myClassFile: SourceFile) {
 }
 
 describe("table generation", () => {
+  
   test(".mui table generation without formatting", () => {
       const sourceFile = createAst('')
       const myClassFile = parseGraphqlTypes(graphqlGenTs1)

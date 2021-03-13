@@ -1,5 +1,5 @@
 import ts, { factory } from "typescript"
-import { createFunctionalComponent, createJsxElement, TableComponent, createJsxSelfClosingElement, createJsxAttribute } from '../../react-components/react-component-helper'
+import { createFunctionalComponent, createJsxElement, PageComponent, createJsxSelfClosingElement, createJsxAttribute } from '../../react-components/react-component-helper'
 import { Entity, Property } from '../../entity/index'
 import { TableGenerator } from './table-generator-factory'
 import { TableComponentDefinitionBase } from '../../../definition/table-definition-core'
@@ -17,7 +17,7 @@ export default class GrommetDataTableGenerator extends TableGeneratorBase implem
         return GrommetDtTableComponents;
     }
     
-    generateTableComponent(): TableComponent {
+    generateTableComponent(): PageComponent {
         var statements = this.createStatements();
         var functionalComponent = createFunctionalComponent("DataTableComponent", [this.createInputParameter()], statements);
         
@@ -83,7 +83,7 @@ export default class GrommetDataTableGenerator extends TableGeneratorBase implem
     }
 
     private getRender(property: Property):ts.ArrowFunction {
-        let formattedTag: ts.JsxSelfClosingElement = this.intlFormatter.formatPropertyUsingTag(property, factory.createJsxExpression(undefined, factory.createIdentifier("val")))
+        let formattedTag = this.intlFormatter.formatPropertyUsingTag(property, factory.createJsxExpression(undefined, factory.createIdentifier("val")))
 
         return factory.createArrowFunction(
             undefined,
