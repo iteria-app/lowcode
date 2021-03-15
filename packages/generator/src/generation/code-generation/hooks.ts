@@ -1,8 +1,8 @@
-import ts, { factory } from "typescript"
+import ts from "typescript"
 import TypescriptHelper from "../code-generation/ts-helper"
 
 export interface Hook {
-    hookName: ts.Identifier
+    hookName: string
     defaultInstanceName: string
     importDeclaration: ts.ImportDeclaration
 }
@@ -11,7 +11,7 @@ export function defineHook(defaultInstanceName: string, hookName: string, packag
     let importDeclaration = TypescriptHelper.createImportDeclaration(hookName, packageName)
 
     return {
-        hookName: factory.createIdentifier(hookName),
+        hookName: hookName,
         defaultInstanceName,
         importDeclaration
     }

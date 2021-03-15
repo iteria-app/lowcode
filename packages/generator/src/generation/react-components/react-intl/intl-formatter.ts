@@ -1,27 +1,34 @@
 import ts, { factory, JsxSelfClosingElement } from "typescript"
 import { Entity, Property } from '../../entity'
 import GenerationContext from "../../context"
-import { TableType } from "../../../definition/context-types"
 import { PropertyType, getPropertyType } from "../../typeAlias"
-import ReactIntlHook from "./intl-hook"
+import ReactIntlHook from "./intl-imperative"
 import ReactIntlTag from "./intl-formatted-tag"
 
 //TODO: add support for https://github.com/IanKBovard/I18N-Grommet/tree/feat/i18n/src/js/pages/Reacti18next
 export default class ReactIntlFormatter {
     _context: GenerationContext;
     _intlFormattedTag: ReactIntlTag;
-    _intlHook: ReactIntlHook;
+    _intlImperative: ReactIntlHook;
 
     constructor(context: GenerationContext, imports: ts.ImportDeclaration[]){
         this._context = context;
-        this._intlHook = new ReactIntlHook(imports);
+        this._intlImperative = new ReactIntlHook(imports);
         this._intlFormattedTag = new ReactIntlTag(imports);
     }
 
-    formatPropertyUsingHook(prop: Property, fallbackExpression: ts.Expression): ts.Expression {
-      //TODO null chaining in case of: type.isNullable(), type.isUndefined(), type.isUnionOrIntersection(),
-      let expression: ts.Expression = factory.createIdentifier(prop.getName())
+    //TODO: check why is not working adding imports by passing arrays of imports from generators
+    getImports(){
+      return [...this._intlImperative.getImports(), ...this._intlFormattedTag.getImports()]
+    }
 
+    getImperativeHook(): ts.VariableStatement{
+      return this._intlImperative.getImperativeHook();
+    }
+
+    formatPropertyUsingImperative(property: Property, expression: ts.Expression, fallbackExpression: ts.Expression): ts.Expression {
+      //TODO null chaining in case of: type.isNullable(), type.isUndefined(), type.isUnionOrIntersection(),
+  
       /*if (this._context.tableType == TableType.MuiTable || this._context.tableType == TableType.GrommetTable) {
           expression = factory.createPropertyAccessExpression(
               factory.createIdentifier("row"),
@@ -29,17 +36,17 @@ export default class ReactIntlFormatter {
             )
       }*/
     
-      let propertyType: PropertyType = getPropertyType(prop);
+      let propertyType: PropertyType = getPropertyType(property);
     
       switch(propertyType) {
         case PropertyType.currency:
         case PropertyType.numeric:
-          return this._intlHook.formatNumber(expression)
+          return this._intlImperative.formatNumber(expression)
         case PropertyType.date:
         case PropertyType.datetime:
-          return this._intlHook.formatDate(expression)
+          return this._intlImperative.formatDate(expression)
         case PropertyType.time:
-          return this._intlHook.formatTime(expression)
+          return this._intlImperative.formatTime(expression)
         case PropertyType.navigation:
           // TODO clickable chips with href/navigation to a page
         default:

@@ -75,6 +75,21 @@ class TypescriptHelper {
     
         return uniqueImportDeclarations;
     }
+
+    createVariableStatement(variableName:string, expression:ts.Expression, flag: ts.NodeFlags): ts.VariableStatement {
+      return factory.createVariableStatement(
+        undefined,
+        factory.createVariableDeclarationList(
+          [factory.createVariableDeclaration(
+            factory.createIdentifier(variableName),
+            undefined,
+            undefined,
+            expression
+          )],
+          flag
+        )
+      )
+    }
 }
 
 export default new TypescriptHelper()

@@ -19,6 +19,10 @@ export default class ReactIntlTag {
         this._imports = imports;
     }
 
+    getImports(){
+        return this._imports;
+    }
+
     formatDate(value: ts.JsxExpression): ts.JsxSelfClosingElement {
         this.prepareImport(IntlFormatingTags.FormattedDate)
         return this.formattedValue(IntlFormatingTags.FormattedDate, value)

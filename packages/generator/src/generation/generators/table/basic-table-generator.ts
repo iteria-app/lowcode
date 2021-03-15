@@ -14,8 +14,10 @@ export class BasicTableGenerator extends TableGeneratorBase  implements TableGen
     }
 
     generateTableComponent(): PageComponent {
-        var statements = this.createStatements()
+        var statements = this. createStatements()
         var functionalComponent = createFunctionalComponent("TableComponent", [this.createInputParameter()], statements)
+
+        this._imports = [...this._imports, ...this.intlFormatter.getImports()]
 
         return {imports: this.uniqueImports(), functionDeclaration: functionalComponent}
     }

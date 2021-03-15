@@ -17,6 +17,8 @@ export default class MuiDataTableGenerator extends TableGeneratorBase implements
     generateTableComponent(): PageComponent {
         var statements = this.createStatements();
         var functionalComponent = createFunctionalComponent("DataTableComponent", [this.createInputParameter()], statements);
+
+        this._imports = [...this._imports, ...this.intlFormatter.getImports()]
         
         return {functionDeclaration: functionalComponent, imports: this.uniqueImports()};
     }
@@ -27,6 +29,10 @@ export default class MuiDataTableGenerator extends TableGeneratorBase implements
 
     private createStatements(): ts.Statement[] {
       let statements = new Array<ts.Statement>()
+
+      if(this.context.useFormatter){
+        statements.push(this.intlFormatter.getImperativeHook())
+      }
 
       let columnsIdentifier = factory.createIdentifier("columns")
       let columnsDeclaration = this.createColumns(columnsIdentifier)
@@ -133,7 +139,7 @@ export default class MuiDataTableGenerator extends TableGeneratorBase implements
         )],
         undefined,
         factory.createToken(ts.SyntaxKind.EqualsGreaterThanToken),
-        this.intlFormatter.formatPropertyUsingHook(prop, factory.createIdentifier("value"))
+        this.intlFormatter.formatPropertyUsingImperative(prop, factory.createIdentifier("value"), factory.createIdentifier("value"))
       )
     }
 }

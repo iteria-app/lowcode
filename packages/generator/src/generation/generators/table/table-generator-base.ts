@@ -50,13 +50,13 @@ export default abstract class TableGeneratorBase{
         return this.intlFormatter.localizePropertyNameUsingTag(property, this.context.entity)
     }
 
-    protected getHeaderTitle(property: Property): ts.Identifier | ts.JsxSelfClosingElement{
+    protected getHeaderTitle(property: Property): ts.StringLiteral | ts.JsxSelfClosingElement{
         let localizedName;
   
         if(this.context.useFormatter){
           localizedName = this.intlFormatter.localizePropertyNameUsingTag(property, this.context.entity);
         }else{
-          localizedName = factory.createIdentifier(property.getName())
+          localizedName = factory.createStringLiteral(property.getName())
         }
   
         return localizedName;

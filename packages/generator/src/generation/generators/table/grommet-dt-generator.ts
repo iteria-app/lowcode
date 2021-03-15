@@ -20,6 +20,8 @@ export default class GrommetDataTableGenerator extends TableGeneratorBase implem
     generateTableComponent(): PageComponent {
         var statements = this.createStatements();
         var functionalComponent = createFunctionalComponent("DataTableComponent", [this.createInputParameter()], statements);
+
+        this._imports = [...this._imports, ...this.intlFormatter.getImports()]
         
         return {functionDeclaration: functionalComponent, imports: this.uniqueImports()};
     }
