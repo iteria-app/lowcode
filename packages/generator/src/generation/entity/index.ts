@@ -9,4 +9,5 @@ export interface Entity {
 export interface Property {
     getName(): string
     getType(): Type<ts.Type>
+    getTypeText(): string
 }

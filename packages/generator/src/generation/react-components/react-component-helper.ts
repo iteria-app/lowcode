@@ -1,4 +1,5 @@
 import ts, { factory } from "typescript"
+import TypescriptHelper from "../code-generation/ts-helper"
 
 export function createFunctionalComponent(componentName: string | ts.Identifier | undefined = undefined, params: ts.ParameterDeclaration[], body: ts.Statement[]): ts.FunctionDeclaration {
   return factory.createFunctionDeclaration(
@@ -27,16 +28,24 @@ export function createJsxElement(tagIdentifier: ts.Identifier, attributes: reado
   return factory.createJsxElement(jsxOpeningElement, children ?? [], jsxClosingElement)
 }
 
-export function createJsxAttribute(attribute:string, attributeValue:string) {
+export function createJsxAttribute(attribute:string, attributeValue:ts.Identifier|string) {
+  let valueIdentifier: ts.Identifier;
+
+  if(typeof attributeValue === 'string'){
+    valueIdentifier = factory.createIdentifier(attributeValue)
+  }else{
+    valueIdentifier = attributeValue
+  }
+
   return factory.createJsxAttribute(
     factory.createIdentifier(attribute),
     factory.createJsxExpression(
       undefined,
-      factory.createIdentifier(attributeValue)
+      valueIdentifier
     ))
 }
 
-export function createJsxSelfClosingElement(tagIdentifier: ts.Identifier, attributes: readonly ts.JsxAttributeLike[] | undefined) {
+export function createJsxSelfClosingElement(tagIdentifier: ts.Identifier, attributes: readonly ts.JsxAttributeLike[] | undefined): ts.JsxSelfClosingElement {
   return factory.createJsxSelfClosingElement(tagIdentifier, undefined,
     factory.createJsxAttributes(attributes ?? []))
 }
@@ -46,29 +55,17 @@ export interface Component {
   importDeclaration: ts.ImportDeclaration
 }
 
-export interface TableComponent {
+export interface PageComponent {
   functionDeclaration: ts.FunctionDeclaration
   imports: ts.ImportDeclaration[]
 }
 
 export function defineComponent(tagName: string, packageName: string): Component {
   const tagNameIdentifier = factory.createIdentifier(tagName)
+  let importDeclaration = TypescriptHelper.createImportDeclaration(tagName, packageName)
+
   return {
     tagName: tagNameIdentifier,
-    importDeclaration: factory.createImportDeclaration(
-      undefined,
-      undefined,
-      factory.createImportClause(
-        false,
-        undefined,
-        factory.createNamedImports([
-          factory.createImportSpecifier(
-            undefined,
-            tagNameIdentifier
-          ),
-        ])
-      ),
-      factory.createStringLiteral(packageName)
-    ),
+    importDeclaration
   }
 }
