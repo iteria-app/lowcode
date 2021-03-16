@@ -38,6 +38,18 @@ export default abstract class TableGeneratorBase{
         return component;
     }
 
+    protected addImportDeclaration(specifier: string, module: string, isNameSpaceImport: boolean = false){
+      let importDeclaration = TypescriptHelper.createImportDeclaration(specifier, module)
+
+      if(isNameSpaceImport){
+        importDeclaration = TypescriptHelper.createNameSpaceImport(specifier, module)
+      }else{
+        importDeclaration = TypescriptHelper.createImportDeclaration(specifier, module)
+      }
+
+      this._imports = [...this._imports, importDeclaration]
+    }
+
     protected getEntityName(){
         return camalizeString(this.context.entity.getName())
     }
