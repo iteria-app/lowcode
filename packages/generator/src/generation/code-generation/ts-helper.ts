@@ -20,6 +20,20 @@ class TypescriptHelper {
           )
     }
 
+    createNameSpaceImport(namespace: string, module: string): ts.ImportDeclaration {
+      return factory.createImportDeclaration(
+        undefined,
+        undefined,
+        factory.createImportClause(
+          false,
+          undefined,
+          factory.createNamespaceImport(factory.createIdentifier(namespace))
+        ),
+        factory.createStringLiteral(module)
+      )
+    }
+
+    //TODO: improve this to be able also process namespace imports
     uniqueImports(imports:ts.ImportDeclaration[]): ts.ImportDeclaration[]{
         let uniqueImports: Map<string,string> = new Map<string, string>();
     

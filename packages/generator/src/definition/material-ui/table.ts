@@ -1,7 +1,7 @@
 import { defineComponent } from '../../generation/react-components/react-component-helper'
 
-const muiCore = '@material-ui/core'
-const muiDataGrid = '@material-ui/data-grid'
+export const muiCore = '@material-ui/core'
+export const muiDataGrid = '@material-ui/data-grid'
 
 export const MuiTableComponents = {
     table: defineComponent('Table', muiCore),
@@ -13,5 +13,6 @@ export const MuiTableComponents = {
 }
 
 export const MuiDtTableComponents = {
-    table: defineComponent('DataGrid', muiDataGrid)
+    table: defineComponent('DataGrid', muiDataGrid),
+    gridColParams: defineComponent('GridColParams', muiDataGrid)
 }

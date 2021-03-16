@@ -41,37 +41,30 @@ export default class ReactIntlImperative {
     }
 
     formatDate(value: ts.Expression): ts.CallExpression {
-        this.prepareImport(IntlFormatingImperativeMethods.formatDate)
         return this.formatValue([value], IntlFormatingImperativeMethods.formatDate)
     }
 
     formatTime(value: ts.Expression): ts.CallExpression {
-        this.prepareImport(IntlFormatingImperativeMethods.formatTime)
         return this.formatValue([value], IntlFormatingImperativeMethods.formatTime)
     }
     
     formatNumber(value: ts.Expression): ts.CallExpression {
-        this.prepareImport(IntlFormatingImperativeMethods.formatNumber)
         return this.formatValue([value], IntlFormatingImperativeMethods.formatNumber)
     }
 
     formatPlural(value: ts.Expression): ts.CallExpression {
-        this.prepareImport(IntlFormatingImperativeMethods.formatPlural)
         return this.formatValue([value], IntlFormatingImperativeMethods.formatPlural)
     }
 
     formatDuration(value: ts.Expression, unit: ts.Expression): ts.CallExpression {
-        this.prepareImport(IntlFormatingImperativeMethods.formatRelativeTime)
         return this.formatValue([value, unit], IntlFormatingImperativeMethods.formatRelativeTime)
     }
 
     formatTimeRange(from: ts.Expression, to: ts.Expression): ts.CallExpression {
-        this.prepareImport(IntlFormatingImperativeMethods.formatDateTimeRange)
         return this.formatValue([from, to], IntlFormatingImperativeMethods.formatDateTimeRange)
     }
 
     formatMessage(message: ts.StringLiteral | ts.JsxExpression, values: ts.Expression): ts.CallExpression {
-        this.prepareImport(IntlFormatingImperativeMethods.formatMessage)
         return this.formatValue([message, values], IntlFormatingImperativeMethods.formatMessage)
     }
 
