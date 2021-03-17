@@ -40,8 +40,8 @@ Chrome extensions
 
 2. Install [Lowcode Chrome Extension](https://github.com/iteria-ui/lowcode/tree/master/packages/browser-extension)
 
-- Go to /packages/browser-extension
-- `yarn install` to install dependencies.
+- Go to [/packages/browser-extension](https://github.com/iteria-app/lowcode/tree/master/packages/browser-extension) folder in repository.
+- `yarn install` to install dependencies. (You should use yarn rather then npm)
 - `yarn run dev:chrome` to start the development server for chrome extension
 - `yarn run dev:firefox` to start the development server for firefox addon
 - `yarn run dev:opera` to start the development server for opera extension
@@ -53,14 +53,15 @@ Chrome extensions
 - Check the `Developer Mode` button to enable it.
 - Click on the `Load Unpacked Extension…` button.
 - Select your extension’s extracted directory.
+- Exception is when you don't have standard CRA (`npx create-react-app your-app`) => see lowcode/babel-config.md
 
 3. Start [FS over HTTP](https://github.com/iteria-ui/lowcode/tree/master/packages/fs-over-http) (used for saving modified source code)
 
-- `cd packages/fs-over-http`
-- `yarn install` to install dependencies.
+- Go to [/packages/fs-over-http](https://github.com/iteria-app/lowcode/tree/master/packages/fs-over-http) folder in repository.
+- `yarn install` to install dependencies. (You should use yarn rather then npm)
 - `yarn start` to start the project.
 
-4. Start your reat applicantion in development mode and open in browser
+4. Start your React applicantion in development mode and open in browser
 
 - Use your React Aplication or use example React Application https://github.com/ionic-team/ionic-react-conference-app
 - Start local webpack dev server
@@ -71,7 +72,7 @@ Chrome extensions
 - We have reused React Developer Tools Chrome extension
 - Lowcode listens for message "inspectedElement" from React Deveoper Tools are sending
 - Using Lowcode you can modify JSX/TSX source code either "visualy" (more features will come) or by integrade Monaco editor
-- Web Pack Dev serer will recompile (tested also with Hot Code Replace)
+- Web Pack Dev server will recompile (tested also with Hot Code Replace)
 
 ## Architecture
 
