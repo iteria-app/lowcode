@@ -1,0 +1,44 @@
+{
+  "name": "@iteria-app/react-lowcode",
+  "version": "0.1.3",
+  "description": "Automate React Apps.",
+  "scripts": {
+    "build": "etsc && npx tsc --emitDeclarationOnly",
+    "tscd": "npx tsc --emitDeclarationOnly",
+    "etsc": "etsc"
+  },
+  "homepage": "https://iteria.app/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/iteria-app/lowcode.git",
+    "directory": "packages/react-lowcode"
+  },
+  "keywords": [
+    "lowcode",
+    "react",
+    "codeless",
+    "generator",
+    "codegen",
+    "ast",
+    "jsx",
+    "tsx",
+    "morph",
+    "refactor"
+  ],
+  "author": "iteria",
+  "license": "AGPL-3.0-or-later",
+  "dependencies": {
+    "ts-morph": "^10.0.1",
+    "typescript": "^4.2.3",
+    "user": "0.0.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^26.0.20",
+    "esbuild-node-tsc": "^1.2.0",
+    "nodemon": "^2.0.7"
+  },
+  "bugs": {
+    "url": "https://github.com/iteria-app/lowcode/issues"
+  },
+  "main": "index.js"
+}
