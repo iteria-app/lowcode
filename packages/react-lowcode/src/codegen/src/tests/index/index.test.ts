@@ -1,7 +1,7 @@
 // TODO https://github.com/vvakame/typescript-formatter/blob/master/lib/formatter.ts
 import { Project, SourceFile } from "ts-morph"
 import ts, { factory } from "typescript"
-import { graphqlGenTs1 } from "../typeAlias.example"
+import { graphqlGenTs1 } from "../../../typeAlias.example"
 import { TableType, UiFramework } from '../../definition/context-types'
 import { ModuleGenerator } from '../../generation/generators/module-generator'
 
@@ -20,7 +20,7 @@ export function createAst(
   )
 }
 
-function sourceFileEntity(myClassFile: SourceFile) {
+export function sourceFileEntity(myClassFile: SourceFile) {
   const typeName = "Customer"
   const typeAlias = myClassFile.getTypeAlias(typeName)
   const props = typeAlias?.getType()?.getProperties() ?? []
@@ -192,7 +192,7 @@ test(".grommet table generation without formatting", () => {
 });
 })
 
-function parseGraphqlTypes(sourceCode: string) {
+export function parseGraphqlTypes(sourceCode: string) {
   // initialize
   const project = new Project({
     // Optionally specify compiler options, tsconfig.json, in-memory file system, and more here.
