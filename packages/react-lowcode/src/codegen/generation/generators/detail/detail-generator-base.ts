@@ -3,7 +3,7 @@ import GenerationContext from '../../context'
 import ts, { factory } from "typescript"
 import { DetailComponentDefinitionBase } from '../../../definition/detail-definition-core'
 import { Component } from '../../react-components/react-component-helper'
-import { camalizeString } from '../../../utils/utils'
+import { camalizeString } from '../../../../strings/camel'
 import Pluralize from "typescript-pluralize"
 import TypescriptHelper from "../../code-generation/ts-helper"
 import ReactIntlFormatter from  '../../react-components/react-intl/intl-formatter'

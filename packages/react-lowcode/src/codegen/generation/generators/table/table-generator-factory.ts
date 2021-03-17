@@ -21,7 +21,7 @@ export class TableGeneratorFactory{
 
         if(this._context.tableType === TableType.DataTable) {
             switch(this._context.uiFramework){
-                case UiFramework.Mui:
+                case UiFramework.MaterialUI:
                     generator = new MuiDataTableGenerator(this._context);
                     break;
                 case UiFramework.Grommet:

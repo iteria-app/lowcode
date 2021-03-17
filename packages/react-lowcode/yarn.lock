@@ -1848,6 +1848,11 @@ typedarray-to-buffer@^3.1.5:
   dependencies:
     is-typedarray "^1.0.0"
 
+typescript-pluralize@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/typescript-pluralize/-/typescript-pluralize-1.0.1.tgz#374739c59b31a2714b450d51e68748ddd56a9413"
+  integrity sha512-kZlNdRrHqRSJa0aDcyAucGfyYKf0I0MaDenQ3QRV1xEfPMC0D92hn5houKTbLkFbWIIaA16iUa20IazE8r2xNQ==
+
 typescript@^4.2.3:
   version "4.2.3"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.2.3.tgz#39062d8019912d43726298f09493d598048c1ce3"
@@ -1925,6 +1930,11 @@ use@^3.1.0:
   version "3.1.1"
   resolved "https://registry.yarnpkg.com/use/-/use-3.1.1.tgz#d50c8cac79a19fbc20f2911f56eb973f4e10070f"
   integrity sha512-cwESVXlO3url9YWlFW/TA9cshCEhtu7IKJ/p5soJ/gGpj7vbvFrAY/eIioQ6Dw23KjZhYgiIo8HOs1nQ2vr/oQ==
+
+user@0.0.0:
+  version "0.0.0"
+  resolved "https://registry.yarnpkg.com/user/-/user-0.0.0.tgz#f27f1b23fc511f2a8efa40db55cfba123824e02a"
+  integrity sha1-8n8bI/xRHyqO+kDbVc+6Ejgk4Co=
 
 widest-line@^3.1.0:
   version "3.1.0"
