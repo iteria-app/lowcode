@@ -5,7 +5,7 @@ export enum TableType {
 
 
 export enum UiFramework {
-   Mui,
+   MaterialUI,
    Grommet,
    Ionic
 }

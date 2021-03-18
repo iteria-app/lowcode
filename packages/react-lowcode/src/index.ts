@@ -5,5 +5,6 @@ import * as devtools from './devtools'
 import * as functions from './functions'
 import * as io from './io'
 import * as routes from './routes'
+import * as codegen from './codegen'
 
-export { ast, attributes, clone, devtools, functions, io, routes }
+export { ast, attributes, clone, devtools, functions, io, routes, codegen }

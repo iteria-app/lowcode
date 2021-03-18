@@ -1,78 +1,30 @@
 # Low Code
 
-Work in progress. Visual Editor for your source codes.
+Work in progress. Visual Editor and Code Generator for your React source codes
+integrated with Monaco Editor and React Dev Tools.
 
-How it works:
+## [WEB Demo](https://demo.iteria.app/?repo=github.com/iteria-app/example-material-ui)
+Try online without any installation on our example projects:
+* [Material UI Example](https://demo.iteria.app/?repo=github.com/iteria-app/example-material-ui)
+* [Grommet Example](https://demo.iteria.app/?repo=github.com/iteria-app/grommet)
 
-1. Attach the Visual Editor <script> (a chrome plugin TBD)
-2. Start your Svelte / React project in development mode
-3. Use Visual Editor in your Chrome/Edge/Firefox.
-4. Recompile ...
+![](https://iteria.app/web-demo.png)
 
-## Features of Lowcode
-
-- Navigate to the source code (a specific JSX/TSX file) while browsing your React application in developmen mode
-- Edit the source code directly in Chrome "visualy" or by using Monaco Editor
-- Add a new page to your app without writing code
-- We support React + React-router (UI toolkits: Material-UI, Ionic, Semantic UI, Ant Design, Grommet)
-
-### Navigate to the source code (a specific file)
-
-### Edit the source code directly in Chrome
+## [Chrome Extension](/packages/browser-extension)
+Start your local development server and modify your application withing the browser.
+Works out of the box with Create React Application boilerplate (the development mode enriches the React components bundle with `__source` property containing sorce code path, line and column)
 
 ![](/packages/browser-extension/.media/.github/Extension.gif)
 
-### Add a new page to your app without writing code
+## [React Lowcode](/packages/react-lowcode)
 
-![](/packages/browser-extension/.media/.github/Newpage.gif)
+React source code manipulation and code generator.
 
-### Edit your localization files
+```
+import { codegen } from '@iteria-app/react-lowcode'
 
-![](/packages/browser-extension/.media/.github/Localizations.gif)
+codegen.generatePages(typescriptSourceGeneratedFromGraphql, io, options)
+```
 
-## Getting started
-
-Chrome extensions
-
-1. Ensure React Developer Tools chrome extension installed
-
-- React Developer Tools Chrome extension [React devtools in marketplace](https://chrome.google.com/webstore/detail/react-developer-tools/fmkadmapgofadopljbjfkapdkoienihi?hl=en)
-
-2. Install [Lowcode Chrome Extension](https://github.com/iteria-ui/lowcode/tree/master/packages/browser-extension)
-
-- Go to /packages/browser-extension
-- `yarn install` to install dependencies.
-- `yarn run dev:chrome` to start the development server for chrome extension
-- `yarn run dev:firefox` to start the development server for firefox addon
-- `yarn run dev:opera` to start the development server for opera extension
-- `yarn run build:chrome` to build chrome extension
-- `yarn run build:firefox` to build firefox addon
-- `yarn run build:opera` to build opera extension
-- `yarn run build` builds and packs extensions all at once to extension/ directory
-- Go to the browser address bar and type `chrome://extensions`
-- Check the `Developer Mode` button to enable it.
-- Click on the `Load Unpacked Extension…` button.
-- Select your extension’s extracted directory.
-
-3. Start [FS over HTTP](https://github.com/iteria-ui/lowcode/tree/master/packages/fs-over-http) (used for saving modified source code)
-
-- `cd packages/fs-over-http`
-- `yarn install` to install dependencies.
-- `yarn start` to start the project.
-
-4. Start your reat applicantion in development mode and open in browser
-
-- Use your React Aplication or use example React Application https://github.com/ionic-team/ionic-react-conference-app
-- Start local webpack dev server
-
-## How it works
-
-- Babel plugin (used out of the box in Create React Application boilerplate) enriches the javascript with `__source` property (sorce code path, line and column)
-- We have reused React Developer Tools Chrome extension
-- Lowcode listens for message "inspectedElement" from React Deveoper Tools are sending
-- Using Lowcode you can modify JSX/TSX source code either "visualy" (more features will come) or by integrade Monaco editor
-- Web Pack Dev serer will recompile (tested also with Hot Code Replace)
-
-## Architecture
-
-![](/packages/browser-extension/.media/.github/Architecture.png)
+## VS Code plugin
+We plan to integrate the [React Lowcode](/packages/react-lowcode) into the VS Code / Theia and also reuse existing ecosystem.
