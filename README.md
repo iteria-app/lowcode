@@ -3,16 +3,16 @@
 Work in progress. Visual Editor and Code Generator for your React source codes
 integrated with Monaco Editor and React Dev Tools.
 
-## [WEB Demo](https://demo.iteria.app/?repo=github.com/iteria-app/example-material-ui) (used out of the box in Create React Application boilerplate) enriches the javascript with `__source` property (sorce code path, line and column)
+## [WEB Demo](https://demo.iteria.app/?repo=github.com/iteria-app/example-material-ui)
 Try online without any installation on our example projects:
-* [Material UI Example] (https://demo.iteria.app/?repo=github.com/iteria-app/example-material-ui)
+* [Material UI Example](https://demo.iteria.app/?repo=github.com/iteria-app/example-material-ui)
 * [Grommet Example](https://demo.iteria.app/?repo=github.com/iteria-app/grommet)
 ![](https://iteria.app/web-demo.png)
 
 ## [Chrome Extension](/packages/browser-extension)
+Start your local development server and modify your application withing the browser.
+Works out of the box with Create React Application boilerplate (the development mode enriches the React components bundle with `__source` property containing sorce code path, line and column)
 ![](/packages/browser-extension/.media/.github/Extension.gif)
-
-Note, this needs installation of a Chrome Browser Plugin and locally running your dev server.
 
 ## [React Lowcode](/packages/react-lowcode)
 
