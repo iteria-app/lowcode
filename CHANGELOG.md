@@ -1,4 +1,4 @@
-## 0.3.0 (Unreleased)
+## 0.4.0 (Unreleased)
 
 BUG FIXES:
 
@@ -7,6 +7,12 @@ FEATURES:
 
 IMPROVEMENTS:
 
+
+## 0.3.0 (2021-03-19)
+
+FEATURES:
+* Editor for localization message using `contentEditable`
+* JSON localization messages parsing and patching API
 
 ## 0.2.0 (2021-03-17)
 

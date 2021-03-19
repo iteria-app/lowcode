@@ -1,16 +1,5 @@
-import { StringLiteral } from "ts-morph";
+import { CharRange } from "@iteria-app/react-lowcode/esm/ast";
 
-export interface Message {
-    id: string;
-    value: string;
-    locale: string;
-    position: Position
-}
-
-export interface Position {
-    pos: number;
-    end: number;
-}
 
 export interface MultiMessage {
     id: string;
@@ -20,5 +9,5 @@ export interface MultiMessage {
 
 export interface MessageLocale {
     value: string;
-    position: Position
+    position: CharRange
 }

@@ -1,5 +1,6 @@
-import { SourceFile, factory, ScriptKind, ScriptTarget, createSourceFile, Printer } from "typescript"
-import { Message, MultiMessage } from "./localizationInterfaces";
+import { SourceFile, ScriptKind, ScriptTarget } from "typescript"
+import { Message } from "@iteria-app/react-lowcode/esm/localization";
+import { MultiMessage } from "./localizationInterfaces";
 import { createAst } from "../react-lowcode/ast/factory";
 import { CodeRW } from "../react-lowcode/io/rw";
 import { CodeDir } from "../react-lowcode/io/dir";
