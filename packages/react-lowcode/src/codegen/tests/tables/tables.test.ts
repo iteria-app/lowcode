@@ -68,6 +68,8 @@ describe("table generation", () => {
 
     generatePages(graphqlGenTs1, testWriter, options)
 
+    console.log('generated:' + testWriter.getSourceString())
+
   });
 
   test(".mui table generation without formatting", () => {
