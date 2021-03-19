@@ -28,7 +28,7 @@
   "author": "iteria",
   "license": "AGPL-3.0-or-later",
   "dependencies": {
-    "ts-morph": "^10.0.1",
+    "ts-morph": "^9.1.0",
     "typescript-pluralize": "^1.0.1",
     "user": "0.0.0",
     "web-vitals": "^0.2.4",
