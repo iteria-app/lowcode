@@ -1,9 +1,11 @@
-// TODO https://github.com/vvakame/typescript-formatter/blob/master/lib/formatter.ts
 import { Project, SourceFile } from "ts-morph"
 import ts, { factory } from "typescript"
 import { graphqlGenTs1 } from "../typeAlias.example"
 import { TableType, UiFramework } from '../../definition/context-types'
 import { ModuleGenerator } from '../../generation/generators/module-generator'
+
+import {generatePages} from '../../index'
+import { CodeDir, CodeRW } from "../../../io"
 
 export function createAst(
   code:string,
@@ -37,8 +39,37 @@ export function sourceFileEntity(myClassFile: SourceFile) {
   }
 }
 
+class testDemoWriter implements CodeRW, CodeDir {
+  private _sourceCodeString: string = ''
+
+  readDirectory(path: string, extensions?: readonly string[], exclude?: readonly string[], include?: readonly string[], depth?: number): Promise<string[] | undefined> {
+    throw new Error("Method not implemented.")
+  }
+
+  async readFile(path: string, encoding?: string) {
+    return ''
+  }
+
+  async writeFile(path: string, data: string) {
+    this._sourceCodeString = data
+  }
+
+  getSourceString(): string {
+    return this._sourceCodeString
+  }
+}
+
 describe("table generation", () => {
   
+  test (".test table generation from index", ()=>{
+    var options = {names:['Customer']}
+
+    var testWriter = new testDemoWriter()
+
+    generatePages(graphqlGenTs1, testWriter, options)
+
+  });
+
   test(".mui table generation without formatting", () => {
       const sourceFile = createAst('')
       const myClassFile = parseGraphqlTypes(graphqlGenTs1)

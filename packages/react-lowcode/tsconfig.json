@@ -5,7 +5,8 @@
     "moduleResolution": "node",
     "declaration": true,
     "outDir": "esm",
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true
   },
   "include": ["src"],
   "exclude": [

@@ -1853,11 +1853,6 @@ typescript-pluralize@^1.0.1:
   resolved "https://registry.yarnpkg.com/typescript-pluralize/-/typescript-pluralize-1.0.1.tgz#374739c59b31a2714b450d51e68748ddd56a9413"
   integrity sha512-kZlNdRrHqRSJa0aDcyAucGfyYKf0I0MaDenQ3QRV1xEfPMC0D92hn5houKTbLkFbWIIaA16iUa20IazE8r2xNQ==
 
-typescript@^4.2.3:
-  version "4.2.3"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.2.3.tgz#39062d8019912d43726298f09493d598048c1ce3"
-  integrity sha512-qOcYwxaByStAWrBf4x0fibwZvMRG+r4cQoTjbPtUlrWjBHbmCAww1i448U0GJ+3cNNEtebDteo/cHOR3xJ4wEw==
-
 unc-path-regex@^0.1.2:
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/unc-path-regex/-/unc-path-regex-0.1.2.tgz#e73dd3d7b0d7c5ed86fbac6b0ae7d8c6a69d50fa"
