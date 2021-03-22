@@ -4,8 +4,10 @@ import { Entity, Property } from '../../entity/index'
 import { TableGenerator } from './table-generator-factory'
 import { TableComponentDefinition } from '../../../definition/table-definition-core'
 import { MuiTableComponents } from '../../../definition/material-ui/table'
+import { GrommetTableComponents } from '../../../definition/grommet/table'
 import TableGeneratorBase from './table-generator-base'
 import GenerationContext from "../../context"
+import { UiFramework } from "../../../definition/context-types"
 
 export class BasicTableGenerator extends TableGeneratorBase  implements TableGenerator
 {
@@ -64,7 +66,14 @@ export class BasicTableGenerator extends TableGeneratorBase  implements TableGen
     }
 
     getTableDefinition() : TableComponentDefinition {
-        return MuiTableComponents;
+        if(this.context.uiFramework === UiFramework.Grommet){
+            return GrommetTableComponents
+        } else if(this.context.uiFramework === UiFramework.MaterialUI){
+            return MuiTableComponents
+        } else{
+            console.log('Unsupported ui framework for generation basic table')
+            throw new Error('Unsupported ui framework for generation basic table')
+        }
     }
 
     private propertyHead(prop: Property, entity: Entity) {
@@ -102,7 +111,17 @@ export class BasicTableGenerator extends TableGeneratorBase  implements TableGen
           factory.createIdentifier(prop.getName())
        ))
 
-      return this.intlFormatter.formatPropertyUsingTag(prop, propertyAccess)
+       var formattedChild = this.intlFormatter.tryFormatPropertyUsingTag(prop, propertyAccess)
+
+       let child: ts.JsxChild
+
+       if(formattedChild){
+        child = propertyAccess
+       } else{
+           child = propertyAccess
+       }
+
+      return child
     }
 
     private mapArrayToTableRows(body: ts.ConciseBody) {

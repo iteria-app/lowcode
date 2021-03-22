@@ -33,10 +33,10 @@ export default class GrommetDataTableGenerator extends TableGeneratorBase implem
         let columnsDeclaration = this.createColumns(columnsIdentifier);
         var columnAttribute = createJsxAttribute("columns", "columns")
         statements.push(factory.createVariableStatement(undefined, columnsDeclaration))
-        var rowsAttribute = createJsxAttribute("rows", this.getInputParameterIdentifier())
+        var dataAttribute = createJsxAttribute("data", this.getInputParameterIdentifier())
 
         var dataGridComponent = this.prepareComponent(this.getTableDefinition().table);
-        statements.push(factory.createReturnStatement(factory.createParenthesizedExpression(createJsxSelfClosingElement(dataGridComponent.tagName, [columnAttribute, rowsAttribute]))));
+        statements.push(factory.createReturnStatement(factory.createParenthesizedExpression(createJsxSelfClosingElement(dataGridComponent.tagName, [columnAttribute, dataAttribute]))));
   
         return statements;
       }
@@ -85,7 +85,23 @@ export default class GrommetDataTableGenerator extends TableGeneratorBase implem
     }
 
     private getRender(property: Property):ts.ArrowFunction {
-        let formattedTag = this.intlFormatter.formatPropertyUsingTag(property, factory.createJsxExpression(undefined, factory.createIdentifier("val")))
+        let fallbackExpression = factory.createIdentifier("val")
+        let propertyAccessExpression = factory.createPropertyAccessExpression(
+            fallbackExpression, 
+            factory.createIdentifier(property.getName()))
+        
+        let expression = factory.createJsxExpression(undefined, 
+                            propertyAccessExpression)
+
+        let formattedChild: ts.Expression
+
+        let formattedTag = this.intlFormatter.tryFormatPropertyUsingTag(property, expression)
+
+        if(formattedTag) {
+            formattedChild = formattedTag
+        } else {
+            formattedChild = propertyAccessExpression
+        }
 
         return factory.createArrowFunction(
             undefined,
@@ -101,7 +117,7 @@ export default class GrommetDataTableGenerator extends TableGeneratorBase implem
             )],
             undefined,
             factory.createToken(ts.SyntaxKind.EqualsGreaterThanToken),
-            factory.createParenthesizedExpression(formattedTag)
+            factory.createParenthesizedExpression(formattedChild)
           )
     }
 }

@@ -61,11 +61,11 @@ export default class ReactIntlFormatter {
       return expression;
   }
 
-  formatPropertyUsingTag(prop: Property, expression: ts.JsxExpression): ts.JsxSelfClosingElement | ts.JsxExpression {
+  tryFormatPropertyUsingTag(prop: Property, expression: ts.JsxExpression): ts.JsxSelfClosingElement | undefined {
     //TODO null chaining in case of: type.isNullable(), type.isUndefined(), type.isUnionOrIntersection(),
     let propertyType: PropertyType = getPropertyType(prop);
     
-    let formattedElement
+    let formattedElement = undefined
 
       switch(propertyType) {
         case PropertyType.currency:
@@ -78,13 +78,6 @@ export default class ReactIntlFormatter {
           break;
         case PropertyType.time:
           formattedElement = this._intlFormattedTag.formatTime(expression)
-          break;
-        case PropertyType.navigation:
-          // TODO clickable chips with href/navigation to a page
-          formattedElement = expression
-          break;
-        default:
-          formattedElement = expression
           break;
       }
 
