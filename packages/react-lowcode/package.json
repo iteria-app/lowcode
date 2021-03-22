@@ -1,11 +1,13 @@
 {
   "name": "@iteria-app/react-lowcode",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Automate React Apps.",
   "scripts": {
-    "build": "etsc && npx tsc --emitDeclarationOnly",
+    "build": "npx tsc",
     "tscd": "npx tsc --emitDeclarationOnly",
-    "etsc": "etsc"
+    "tsc": "npx tsc",
+    "etsc": "etsc",
+    "etscbuild": "etsc && npx tsc --emitDeclarationOnly"
   },
   "homepage": "https://iteria.app/",
   "repository": {

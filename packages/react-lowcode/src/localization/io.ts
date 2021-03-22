@@ -11,8 +11,8 @@ export async function updateLocaleMessageFile(messageId: string, newMessageValue
   
 export function patchLocaleMessageSourceCode(messageId: string, newValue: string, originalLocaleJSON: string) {
   const originalMessages = parseLocaleJSON(originalLocaleJSON)
-  const found = originalMessages.find((message) => message.id == messageId)
-  if (found) {
+  const found = originalMessages?.find((message) => message.id == messageId)
+  if (originalMessages && found) {
     const changedMessage = {
       ...found,
       value: newValue

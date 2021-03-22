@@ -10,7 +10,7 @@ export interface InspectedElement {
 
 export class LocaleMessageEditor {
 
-  protected prevContenEditable: HTMLElement
+  protected prevContenEditable?: HTMLElement = undefined
 
   instrumentMessageHTML(target: HTMLElement, inspectedElement: InspectedElement, callback: (event: ChangedMessage) => void) {
     if (typeof target?.contentEditable != 'undefined' && target.contentEditable !== 'true' && target.children.length == 0) {
@@ -31,7 +31,7 @@ export class LocaleMessageEditor {
           const self = this
           editMessageHTML(messageId, target, (changed) => {
             callback(changed)
-            self.prevContenEditable = null
+            self.prevContenEditable = undefined
           })
         }
       }
@@ -47,7 +47,8 @@ function editMessageHTML(messageId: string, target: HTMLElement, success: ((even
     target.contentEditable = 'false'
     target.removeEventListener('blur', blurHandler)
     
-    const newMessageValue = event.target['innerText']
+    const  blurTarget = event?.target as HTMLElement
+    const newMessageValue = blurTarget.innerText ?? ''
     console.log('click edittedMessage', messageId, newMessageValue)
     success({ messageId, newMessageValue })
   }

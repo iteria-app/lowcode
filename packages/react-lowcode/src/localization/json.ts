@@ -5,7 +5,9 @@ import { Message } from ".";
 
 export function parseLocaleJSON(localeSourceCode: string, languageLocale = "en") {
     const localeAst = createAst(localeSourceCode, ScriptTarget.ESNext, ScriptKind.JSON)
-    return parseLocaleAST(localeAst, languageLocale)
+    if (localeAst) {
+      return parseLocaleAST(localeAst, languageLocale)
+    }
 }
 
 export function parseLocaleAST(ast: SourceFile, languageLocale = "en") {
