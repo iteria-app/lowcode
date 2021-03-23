@@ -1,7 +1,7 @@
 import { Property } from '../../entity/index'
 import GenerationContext from '../../context'
 import ts, { factory } from "typescript"
-import { DetailComponentDefinitionBase } from '../../../definition/detail-definition-core'
+import { FormikComponentDefinitionBase } from '../../../definition/detail-definition-core'
 import { Component } from '../../react-components/react-component-helper'
 import { camalizeString } from '../../../../strings/camel'
 import Pluralize from "typescript-pluralize"
@@ -22,7 +22,7 @@ export default abstract class DetailGeneratorBase{
         return this.context.entity.properties.filter(this.filterProp)
     }
 
-    protected abstract getDetailDefinition(): DetailComponentDefinitionBase
+    protected abstract getDetailDefinition(): FormikComponentDefinitionBase
 
     protected uniqueImports(){
         return TypescriptHelper.uniqueImports(this._imports);

@@ -38,12 +38,12 @@ function sourceFileEntity(myClassFile: SourceFile) {
 }
 
 
-  test(".grommet TextInput generation", () => {
+  test(".mui formik generation", () => {
       const sourceFile = createAst('')
       const myClassFile = parseGraphqlTypes(graphqlGenTs1)
       const testEntity = sourceFileEntity(myClassFile)
 
-      let generationContext = {useFormatter:false, uiFramework: UiFramework.Grommet, tableType: TableType.BasicTable, entity: testEntity!!};
+      let generationContext = {useFormatter:false, uiFramework: UiFramework.MaterialUI, tableType: TableType.BasicTable, entity: testEntity!!};
       let generator = new ModuleGenerator(generationContext);
 
       const page = generator.generateDetailPage()
