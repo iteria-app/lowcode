@@ -6,11 +6,12 @@ import { TableComponentDefinitionBase } from '../../../definition/table-definiti
 import GenerationContext from "../../context"
 import TableGeneratorBase from './table-generator-base'
 import { GrommetDtTableComponents } from '../../../definition/grommet/table'
+import { Formatter } from "../../../definition/context-types"
 
 export default class GrommetDataTableGenerator extends TableGeneratorBase implements TableGenerator 
 {
-    constructor(generationContext: GenerationContext) {
-        super(generationContext);
+    constructor(generationContext: GenerationContext, entity: Entity) {
+        super(generationContext, entity);
     }
 
     getTableDefinition() : TableComponentDefinitionBase {
@@ -19,7 +20,7 @@ export default class GrommetDataTableGenerator extends TableGeneratorBase implem
     
     generateTableComponent(): PageComponent {
         var statements = this.createStatements();
-        var functionalComponent = createFunctionalComponent("DataTableComponent", [this.createInputParameter()], statements);
+        var functionalComponent = createFunctionalComponent(this.getComponentName(), [this.createInputParameter()], statements);
 
         this._imports = [...this._imports, ...this.intlFormatter.getImports()]
         
@@ -74,7 +75,7 @@ export default class GrommetDataTableGenerator extends TableGeneratorBase implem
             )
         ];
 
-        if(this.context.useFormatter){
+        if(this.context.formatter === Formatter.Intl){
             properties.push(factory.createPropertyAssignment(
                 factory.createIdentifier("render"),
                 this.getRender(property)

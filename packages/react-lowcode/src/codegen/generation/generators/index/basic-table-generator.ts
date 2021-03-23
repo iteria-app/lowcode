@@ -7,17 +7,17 @@ import { MuiTableComponents } from '../../../definition/material-ui/table'
 import { GrommetTableComponents } from '../../../definition/grommet/table'
 import TableGeneratorBase from './table-generator-base'
 import GenerationContext from "../../context"
-import { UiFramework } from "../../../definition/context-types"
+import { Formatter, UiFramework } from "../../../definition/context-types"
 
 export class BasicTableGenerator extends TableGeneratorBase  implements TableGenerator
 {
-    constructor(generationContext: GenerationContext) {
-        super(generationContext);
+    constructor(generationContext: GenerationContext, entity: Entity) {
+        super(generationContext, entity);
     }
 
     generateTableComponent(): PageComponent {
         var statements = this. createStatements()
-        var functionalComponent = createFunctionalComponent("TableComponent", [this.createInputParameter()], statements)
+        var functionalComponent = createFunctionalComponent(this.getComponentName(), [this.createInputParameter()], statements)
 
         this._imports = [...this._imports, ...this.intlFormatter.getImports()]
 
@@ -49,7 +49,7 @@ export class BasicTableGenerator extends TableGeneratorBase  implements TableGen
       const rowComponent = this.prepareComponent(this.getTableDefinition().row)
 
       let headerRow = createJsxElement(rowComponent.tagName, [], this.getProperties()
-                      .map((prop) => this.propertyHead(prop, this.context.entity)))
+                      .map((prop) => this.propertyHead(prop, this._entity)))
 
       let tableHeader = createJsxElement(headerComponent.tagName, [], [headerRow])
 
@@ -60,7 +60,7 @@ export class BasicTableGenerator extends TableGeneratorBase  implements TableGen
       const rowComponent = this.prepareComponent(this.getTableDefinition().row)
 
       let bodyRow = createJsxElement(rowComponent.tagName, [],this.getProperties()
-                       ?.map(prop => this.propertyCell(prop, this.context.entity)))
+                       ?.map(prop => this.propertyCell(prop, this._entity)))
 
       return bodyRow
     }
@@ -88,7 +88,7 @@ export class BasicTableGenerator extends TableGeneratorBase  implements TableGen
     private propertyCell(prop: Property, entity: Entity) {
         let child: ts.JsxChild;
 
-        if(this.context.useFormatter) {
+        if(this.context.formatter === Formatter.Intl) {
             child = this.formatCellWithTag(prop)
         }else{
             child = factory.createJsxExpression(
