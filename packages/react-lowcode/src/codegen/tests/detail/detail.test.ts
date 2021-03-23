@@ -44,7 +44,7 @@ function sourceFileEntity(myClassFile: SourceFile) {
       const testEntity = sourceFileEntity(myClassFile)
 
       let generationContext = {useFormatter:false, uiFramework: UiFramework.MaterialUI, tableType: TableType.BasicTable, entity: testEntity!!};
-      let generator = new ModuleGenerator(generationContext);
+      let generator = new ModuleGenerator(generationContext , testEntity!!);
 
       const page = generator.generateDetailPage()
       

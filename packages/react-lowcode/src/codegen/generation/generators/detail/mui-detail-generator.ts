@@ -12,7 +12,7 @@ import GenerationContext from "../../context";
 import DetailGeneratorBase from "./detail-generator-base";
 import { MuiFormikDetailComponents } from "../../../definition/material-ui/detail";
 import TypescriptHelper from "../../code-generation/ts-helper";
-import { AnyTxtRecord } from "node:dns";
+import { Formatter } from "../../../definition/context-types"
 
 export default class MuiDetailGenerator
   extends DetailGeneratorBase
@@ -50,9 +50,10 @@ export default class MuiDetailGenerator
   private createStatements(): ts.Statement[] {
     let statements = new Array<ts.Statement>();
 
-    if (this.context.useFormatter) {
-      statements.push(this.intlFormatter.getImperativeHook());
+    if(this.context.formatter === Formatter.Intl){
+      statements.push(this.intlFormatter.getImperativeHook())
     }
+
     var formikComponentDefinition = this.prepareComponent(
       this.getDetailDefinition().formik
     );
