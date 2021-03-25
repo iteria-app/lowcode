@@ -6,23 +6,24 @@ import {
   createJsxSelfClosingElement,
   createJsxAttribute,
 } from "../../react-components/react-component-helper";
+import { Entity, Property } from '../../entity/index'
 import { DetailGenerator } from "./detail-generator-factory";
-import { FormikComponentDefinitionBase } from "../../../definition/detail-definition-core";
+import { DetailComponentDefinitionBase } from "../../../definition/detail-definition-core";
 import GenerationContext from "../../context";
 import DetailGeneratorBase from "./detail-generator-base";
-import { GrommetFormikDetailComponents } from "../../../definition/grommet/detail";
+import { GrommetDetailComponents } from "../../../definition/grommet/detail";
 import TypescriptHelper from "../../code-generation/ts-helper";
 import { Formatter } from "../../../definition/context-types"
 
 export default class GrommetDetailGenerator
   extends DetailGeneratorBase
   implements DetailGenerator {
-  constructor(generationContext: GenerationContext) {
-    super(generationContext);
+    constructor(generationContext: GenerationContext, entity: Entity) {
+      super(generationContext, entity);
   }
 
-  getDetailDefinition(): FormikComponentDefinitionBase {
-    return GrommetFormikDetailComponents;
+  getDetailDefinition(): DetailComponentDefinitionBase {
+    return GrommetDetailComponents;
   }
 
   generateDetailComponent(): PageComponent {
@@ -43,9 +44,6 @@ export default class GrommetDetailGenerator
     return { functionDeclaration: functionalComponent, imports: uniqueImports };
   }
 
-  getFormikDefinition(): FormikComponentDefinitionBase {
-    return GrommetFormikDetailComponents;
-  }
   private createStatements(): ts.Statement[] {
     let statements = new Array<ts.Statement>();
 

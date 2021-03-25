@@ -7,22 +7,23 @@ import {
   createJsxAttribute,
 } from "../../react-components/react-component-helper";
 import { DetailGenerator } from "./detail-generator-factory";
-import { FormikComponentDefinitionBase } from "../../../definition/detail-definition-core";
+import { DetailComponentDefinitionBase } from "../../../definition/detail-definition-core";
 import GenerationContext from "../../context";
 import DetailGeneratorBase from "./detail-generator-base";
-import { MuiFormikDetailComponents } from "../../../definition/material-ui/detail";
 import TypescriptHelper from "../../code-generation/ts-helper";
 import { Formatter } from "../../../definition/context-types"
+import { MuiDetailComponents } from "../../../definition/material-ui/detail";
+import { Entity } from "../../entity";
 
 export default class MuiDetailGenerator
   extends DetailGeneratorBase
   implements DetailGenerator {
-  constructor(generationContext: GenerationContext) {
-    super(generationContext);
+    constructor(generationContext: GenerationContext, entity: Entity) {
+      super(generationContext, entity);
   }
 
-  getDetailDefinition(): FormikComponentDefinitionBase {
-    return MuiFormikDetailComponents;
+  getDetailDefinition(): DetailComponentDefinitionBase {
+    return MuiDetailComponents;
   }
 
   generateDetailComponent(): PageComponent {
@@ -41,10 +42,6 @@ export default class MuiDetailGenerator
     );
 
     return { functionDeclaration: functionalComponent, imports: uniqueImports };
-  }
-
-  getFormikDefinition(): FormikComponentDefinitionBase {
-    return MuiFormikDetailComponents;
   }
 
   private createStatements(): ts.Statement[] {
