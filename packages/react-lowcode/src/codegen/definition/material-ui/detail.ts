@@ -5,6 +5,7 @@ export const formik = 'formik'
 
 export const MuiInputComponents = {
     textInput: defineComponent('TextInput', muiCore),
+    checkBox: defineComponent('CheckBox', muiCore),
     button: defineComponent('Button', muiCore),
 }
 

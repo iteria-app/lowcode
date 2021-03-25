@@ -53,6 +53,21 @@ function sourceFileEntity(myClassFile: SourceFile) {
       console.log('generated:', printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page.imports, page.functionDeclaration]), sourceFile))
   });
 
+  test(".grommet formik generation", () => {
+    const sourceFile = createAst('')
+    const myClassFile = parseGraphqlTypes(graphqlGenTs1)
+    const testEntity = sourceFileEntity(myClassFile)
+
+    let generationContext = {useFormatter:false, uiFramework: UiFramework.Grommet, tableType: TableType.BasicTable, entity: testEntity!!};
+    let generator = new ModuleGenerator(generationContext , testEntity!!);
+
+    const page = generator.generateDetailPage()
+    
+    const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
+
+    console.log('generated:', printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page.imports, page.functionDeclaration]), sourceFile))
+});
+
 function parseGraphqlTypes(sourceCode: string) {
   // initialize
   const project = new Project({
