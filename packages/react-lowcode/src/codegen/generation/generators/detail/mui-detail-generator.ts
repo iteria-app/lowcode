@@ -96,6 +96,9 @@ export default class MuiDetailGenerator
       case PropertyType.string:
         input = this.createTextFieldComponent(propertyName, propertyName)
         break
+      case PropertyType.datetime:
+        input = this.createDateComponent(propertyName, propertyName)
+        break
     }
 
     return input
@@ -241,7 +244,68 @@ export default class MuiDetailGenerator
       factory.createJsxClosingElement(factory.createIdentifier("form"))
     );
   }
-
+  private createDateComponent(name: string, label: string) : ts.JsxSelfClosingElement {
+    return(
+      factory.createJsxSelfClosingElement(
+        factory.createIdentifier("TextField"),
+        undefined,
+        factory.createJsxAttributes([
+          factory.createJsxAttribute(
+            factory.createIdentifier("fullWidth"),
+            undefined
+          ),
+          factory.createJsxAttribute(
+            factory.createIdentifier("id"),
+            factory.createStringLiteral(name)
+          ),
+          factory.createJsxAttribute(
+            factory.createIdentifier("type"),
+            factory.createStringLiteral("date")
+          ),
+          factory.createJsxAttribute(
+            factory.createIdentifier("label"),
+            factory.createStringLiteral(label)
+          ),
+          factory.createJsxAttribute(
+            factory.createIdentifier("InputLabelProps"),
+            factory.createJsxExpression(
+              undefined,
+              factory.createObjectLiteralExpression(
+                [factory.createPropertyAssignment(
+                  factory.createIdentifier("shrink"),
+                  factory.createTrue()
+                )],
+                false
+              )
+            )
+          ),
+          factory.createJsxAttribute(
+            factory.createIdentifier("value"),
+            factory.createJsxExpression(
+              undefined,
+              factory.createPropertyAccessExpression(
+                factory.createPropertyAccessExpression(
+                  factory.createIdentifier("formik"),
+                  factory.createIdentifier("values")
+                ),
+                factory.createIdentifier(name)
+              )
+            )
+          ),
+          factory.createJsxAttribute(
+            factory.createIdentifier("onChange"),
+            factory.createJsxExpression(
+              undefined,
+              factory.createPropertyAccessExpression(
+                factory.createIdentifier("formik"),
+                factory.createIdentifier("handleChange")
+              )
+            )
+          )
+        ])
+      )      
+    )
+  }
   private createFormikWrapper(formik: ts.JsxElement) {
     return factory.createJsxElement(
       factory.createJsxOpeningElement(
@@ -302,6 +366,11 @@ export default class MuiDetailGenerator
 
       switch(propType) {
       case PropertyType.string:
+        assignment = factory.createPropertyAssignment(
+          factory.createIdentifier(propertyName),
+          factory.createStringLiteral(""))
+        break
+      case PropertyType.datetime:
         assignment = factory.createPropertyAssignment(
           factory.createIdentifier(propertyName),
           factory.createStringLiteral(""))
