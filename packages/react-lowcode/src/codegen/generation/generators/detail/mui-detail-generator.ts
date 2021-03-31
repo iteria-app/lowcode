@@ -13,7 +13,8 @@ import DetailGeneratorBase from "./detail-generator-base";
 import TypescriptHelper from "../../code-generation/ts-helper";
 import { Formatter } from "../../../definition/context-types";
 import { MuiDetailComponents } from "../../../definition/material-ui/detail";
-import { Entity } from "../../entity";
+import { Entity, Property } from "../../entity";
+import { getPropertyType, PropertyType } from "../../typeAlias";
 
 export default class MuiDetailGenerator
   extends DetailGeneratorBase
@@ -49,16 +50,16 @@ export default class MuiDetailGenerator
       statements.push(this.intlFormatter.getImperativeHook());
     }
 
-    
-     //console.log(this._entity.getName + " + " + this._entity.getType);
-      
-    var fname = this.createTextFieldComponent("firstName", "First name");
+    /*var fname = this.createTextFieldComponent("firstName", "First name");
     var lname = this.createTextFieldComponent("lastName", "Last name");
     var email = this.createTextFieldComponent("email", "Email");
     var isActive = this.createCheckboxComponent("isActive");
     var submitButton = this.createSubmitButton();
 
-    var fields = [fname, lname, email, isActive, submitButton];
+    var fields = [fname, lname, email, isActive, submitButton];*/
+
+    let fields = this.createInputsForEntity();
+
     var formElement = this.createFormElement(fields);
   
     let wrapper = this.createFormikWrapper(formElement);
@@ -69,6 +70,35 @@ export default class MuiDetailGenerator
     );
 
     return statements;
+  }
+
+  private createInputsForEntity(): ts.JsxChild[] {
+    let inputs: ts.JsxChild[] = []
+
+    this.getProperties().forEach(property => {
+      let propertyInput = this.tryCreateInputForProperty(property)
+
+      if(propertyInput){
+        inputs.push(propertyInput)
+      }
+    });
+
+    return inputs
+  }
+
+  private tryCreateInputForProperty(property: Property): ts.JsxChild | undefined {
+    let propType: PropertyType = getPropertyType(property)
+    let propertyName = property.getName()
+
+    let input:ts.JsxChild | undefined
+
+    switch(propType) {
+      case PropertyType.string:
+        input = this.createTextFieldComponent(propertyName, propertyName)
+        break
+    }
+
+    return input
   }
 
   private createTextFieldComponent(
@@ -121,6 +151,7 @@ export default class MuiDetailGenerator
       ])
     );
   }
+
   private createCheckboxComponent(name: string): ts.JsxSelfClosingElement {
     return factory.createJsxSelfClosingElement(
       factory.createIdentifier("Checkbox"),
@@ -156,6 +187,7 @@ export default class MuiDetailGenerator
       ])
     );
   }
+
   private createSubmitButton(): ts.JsxElement {
     return factory.createJsxElement(
       factory.createJsxOpeningElement(
@@ -186,6 +218,7 @@ export default class MuiDetailGenerator
       factory.createJsxClosingElement(factory.createIdentifier("div"))
     );
   }
+
   private createFormElement(fields: ts.JsxChild[]): ts.JsxElement {
     return factory.createJsxElement(
       factory.createJsxOpeningElement(
@@ -208,6 +241,7 @@ export default class MuiDetailGenerator
       factory.createJsxClosingElement(factory.createIdentifier("form"))
     );
   }
+
   private createFormikWrapper(formik: ts.JsxElement) {
     return factory.createJsxElement(
       factory.createJsxOpeningElement(
@@ -245,6 +279,38 @@ export default class MuiDetailGenerator
       factory.createJsxClosingElement(factory.createIdentifier("div"))
     );
   }
+
+  private creteInitialValuesForEntity(){
+    let inputs: ts.PropertyAssignment[] = []
+
+    this.getProperties().forEach(property => {
+      let propertyInput = this.tryCreateInitialValueForProperty(property)
+
+      if(propertyInput){
+        inputs.push(propertyInput)
+      }
+    });
+
+    return inputs
+  }
+
+  private tryCreateInitialValueForProperty(property: Property): ts.PropertyAssignment | undefined {
+      let propType: PropertyType = getPropertyType(property)
+      let propertyName = property.getName()
+
+      let assignment:ts.PropertyAssignment | undefined
+
+      switch(propType) {
+      case PropertyType.string:
+        assignment = factory.createPropertyAssignment(
+          factory.createIdentifier(propertyName),
+          factory.createStringLiteral(""))
+        break
+    }
+
+    return assignment
+  }
+
   private createConstFunction(componentName: string, body: ts.Statement[]): ts.VariableStatement {
     return factory.createVariableStatement(
       [factory.createModifier(ts.SyntaxKind.ExportKeyword)],
@@ -305,24 +371,7 @@ export default class MuiDetailGenerator
                               factory.createPropertyAssignment(
                                 factory.createIdentifier("initialValues"),
                                 factory.createObjectLiteralExpression(
-                                  [
-                                    factory.createPropertyAssignment(
-                                      factory.createIdentifier("firstName"),
-                                      factory.createStringLiteral("")
-                                    ),
-                                    factory.createPropertyAssignment(
-                                      factory.createIdentifier("lastName"),
-                                      factory.createStringLiteral("")
-                                    ),
-                                    factory.createPropertyAssignment(
-                                      factory.createIdentifier("email"),
-                                      factory.createStringLiteral("")
-                                    ),
-                                    factory.createPropertyAssignment(
-                                      factory.createIdentifier("isActive"),
-                                      factory.createFalse()
-                                    ),
-                                  ],
+                                  this.creteInitialValuesForEntity(),
                                   false
                                 )
                               ),

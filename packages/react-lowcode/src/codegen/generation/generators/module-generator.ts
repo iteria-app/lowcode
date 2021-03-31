@@ -43,7 +43,7 @@ export class ModuleGenerator {
     }
 
     private getDetailGenerator(): DetailGenerator {
-        let generatorFactory = new DetailGeneratorFactory(this._context);
+        let generatorFactory = new DetailGeneratorFactory(this._context, this._entity);
         return generatorFactory.getDetailGenerator();
     }
 }

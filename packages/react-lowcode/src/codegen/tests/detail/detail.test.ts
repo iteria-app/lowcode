@@ -21,7 +21,7 @@ export function createAst(
 }
 
 function sourceFileEntity(myClassFile: SourceFile) {
-  const typeName = "Parent"
+  const typeName = "Customer"
   const typeAlias = myClassFile.getTypeAlias(typeName)
   const props = typeAlias?.getType()?.getProperties() ?? []
   if (typeAlias) {
