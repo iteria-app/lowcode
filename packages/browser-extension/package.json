@@ -28,6 +28,7 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.12.5",
+    "@iteria-app/react-lowcode": "^0.3.1",
     "@monaco-editor/react": "^3.7.5",
     "@ts-morph/bootstrap": "^0.8.0",
     "advanced-css-reset": "^1.2.2",

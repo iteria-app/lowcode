@@ -37,7 +37,7 @@ export interface InspectedElementValue {
   readonly rendererVersion: string //"16.13.1"
 
   readonly key: null
-  readonly props: any
+  readonly props: {[prop: string] : any}
   readonly hooks: any
   readonly rootType: any
   readonly state: any
@@ -100,6 +100,10 @@ export class DevTools {
 export function triggerInspectElement(devTools: DevTools, target: HTMLElement) {
   const id = devTools.getIDForNode(target);
   if (id) {
+    devTools.inspectElementDevId(id);
+    devTools.inspectElementDevId(id + 1);
+    devTools.inspectElementDevId(id - 1);
+
     const owners = devTools.getOwnersList(id);
     for (let owner of owners ?? []) {
       devTools.inspectElementDevId(owner.id);
