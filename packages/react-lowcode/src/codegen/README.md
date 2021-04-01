@@ -32,4 +32,19 @@ export type Customer = {
 `
 
 codegen.generatePages(graphqlGeneratedTypes, io, { names: ['Customer'] })
-```
+
+
+## HOW TO
+
+Integrate generated table into material-ui example
+
+1. Download material-ui-example project from https://github.com/iteria-app/example-material-ui
+ 
+3. Open material-ui-example project and run it (yarn install, yarn start) 
+
+2. Run test 'mui table generation with formatting' 
+    from packages\react-lowcode\src\codegen\tests\index\tables.test.ts (lowcode project)
+3. Copy generated output from OUTPUT window and replace file src\views\test\GeneratedCustomersTable.tsx
+   within material-ui-example file
+4. navigate to generated customers
+
