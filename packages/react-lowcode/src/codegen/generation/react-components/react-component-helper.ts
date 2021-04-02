@@ -56,7 +56,7 @@ export interface Component {
 }
 
 export interface PageComponent {
-  functionDeclaration: ts.FunctionDeclaration
+  functionDeclaration: ts.FunctionDeclaration | ts.VariableStatement
   imports: ts.ImportDeclaration[]
 }
 

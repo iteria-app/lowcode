@@ -1,5 +1,5 @@
 import { ModuleGenerator } from './generation/generators/module-generator'
-import { UiFramework, TableType } from './definition/context-types'
+import { UiFramework, TableType, Formatter } from './definition/context-types'
 import { CodeDir, CodeRW } from '../io'
 
 import ts, { factory } from "typescript"
@@ -31,13 +31,10 @@ export function generatePages(inputSourceCode: string, io: CodeRW & CodeDir, opt
                     getTypeText: () => prop.getDeclarations()[0].getText()
                 }))
             }
-            const context = {
-                useFormatter: true,
-                tableType: TableType.DataTable,
-                uiFramework: options.uiFramework ?? UiFramework.MaterialUI,
-                entity,
-            }
-            const generator = new ModuleGenerator(context)
+
+            let context = {uiFramework: UiFramework.MaterialUI, formatter: Formatter.None, index: {tableType: TableType.BasicTable, height: "400px"}};
+            
+            const generator = new ModuleGenerator(context, entity)
             const page = generator.generateTablePage(/* TODO entity / type name should be input - not in context */)
             
             const filePath = `src/components/${typeName}.tsx`

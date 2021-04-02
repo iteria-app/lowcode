@@ -3,9 +3,13 @@ export enum TableType {
    DataTable
 }
 
-
 export enum UiFramework {
    MaterialUI,
    Grommet,
    Ionic
+}
+
+export enum Formatter {
+   None,
+   Intl
 }

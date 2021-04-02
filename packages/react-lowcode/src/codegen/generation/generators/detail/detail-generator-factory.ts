@@ -1,9 +1,9 @@
 import { UiFramework } from '../../../definition/context-types';
 import { PageComponent } from '../../react-components/react-component-helper'
 import GenerationContext from '../../context'
-//import {BasicDetailGenerator} from './basic-detail-generator'
-//import MuiDataDetailGenerator from './mui-dt-generator'
-import GrommetDataDetailGenerator from './grommet-detail-generator'
+import GrommetDetailGenerator from './grommet-detail-generator'
+import MuiDataDetailGenerator from './mui-detail-generator'
+import { Entity } from '../../entity';
 
 export interface DetailGenerator{
     generateDetailComponent(): PageComponent;
@@ -11,26 +11,22 @@ export interface DetailGenerator{
 
 export class DetailGeneratorFactory{
     private _context: GenerationContext;
+    private _entity: Entity;
 
-    constructor(context: GenerationContext){
+    constructor(context: GenerationContext, entity: Entity){
         this._context = context;
+        this._entity = entity;
     }
 
     getDetailGenerator(): DetailGenerator{
-        let generator: DetailGenerator = new GrommetDataDetailGenerator(this._context);;
+        let generator: DetailGenerator = new MuiDataDetailGenerator(this._context, this._entity);
 
         switch(this._context.uiFramework){
-            /*case DetailType.MuiDetail:
-                generator = new BasicDetailGenerator(this._context);
+             case UiFramework.Grommet:
+                generator = new GrommetDetailGenerator(this._context, this._entity);
                 break;
-            case TableType.GrommetTable:
-                generator = new BasicDetailGenerator(this._context);
-                break;
-             case DetailType.MuiDataDetail:
-                generator = new MuiDataDetailGenerator(this._context);
-                break;*/
-            case UiFramework.Grommet:
-                generator = new GrommetDataDetailGenerator(this._context);
+            case UiFramework.MaterialUI:
+                generator = new MuiDataDetailGenerator(this._context, this._entity);
                 break;
         }
 

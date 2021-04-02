@@ -1,12 +1,13 @@
 import { defineComponent } from '../../generation/react-components/react-component-helper'
 
-export const Grommet = 'grommet'
+export const muiCore = '@material-ui/core'
 export const formik = 'formik'
 
-export const GrommetDetailComponents = {
-    textInput: defineComponent('TextInput', Grommet),
-    checkBox: defineComponent('CheckBox', Grommet),
-    button: defineComponent('Button', Grommet),
+export const MuiDetailComponents = {
+    textInput: defineComponent('TextInput', muiCore),
+    checkBox: defineComponent('CheckBox', muiCore),
+    button: defineComponent('Button', muiCore),
+
     formik: defineComponent('Formik', formik),
     form: defineComponent('Form', formik),
     field: defineComponent('Field', formik),
