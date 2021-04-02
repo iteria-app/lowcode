@@ -40,6 +40,16 @@ export default class MuiDetailGenerator
     uniqueImports.push(
       TypescriptHelper.createNameSpaceImport("React", "react")
     );
+    uniqueImports.push(
+      TypescriptHelper.createImportDeclaration(
+        "TextField, Button, Checkbox",
+        "@material-ui/core"
+      )
+    );
+    uniqueImports.push(
+      TypescriptHelper.createImportDeclaration("useFormik", "formik")
+    );
+
     return { functionDeclaration: functionalComponent, imports: uniqueImports };
   }
 
@@ -50,18 +60,10 @@ export default class MuiDetailGenerator
       statements.push(this.intlFormatter.getImperativeHook());
     }
 
-    /*var fname = this.createTextFieldComponent("firstName", "First name");
-    var lname = this.createTextFieldComponent("lastName", "Last name");
-    var email = this.createTextFieldComponent("email", "Email");
-    var isActive = this.createCheckboxComponent("isActive");
-    var submitButton = this.createSubmitButton();
-
-    var fields = [fname, lname, email, isActive, submitButton];*/
-
     let fields = this.createInputsForEntity();
 
     var formElement = this.createFormElement(fields);
-  
+
     let wrapper = this.createFormikWrapper(formElement);
     statements.push(
       factory.createReturnStatement(
@@ -73,35 +75,37 @@ export default class MuiDetailGenerator
   }
 
   private createInputsForEntity(): ts.JsxChild[] {
-    let inputs: ts.JsxChild[] = []
+    let inputs: ts.JsxChild[] = [];
 
-    this.getProperties().forEach(property => {
-      let propertyInput = this.tryCreateInputForProperty(property)
+    this.getProperties().forEach((property) => {
+      let propertyInput = this.tryCreateInputForProperty(property);
 
-      if(propertyInput){
-        inputs.push(propertyInput)
+      if (propertyInput) {
+        inputs.push(propertyInput);
       }
     });
 
-    return inputs
+    return inputs;
   }
 
-  private tryCreateInputForProperty(property: Property): ts.JsxChild | undefined {
-    let propType: PropertyType = getPropertyType(property)
-    let propertyName = property.getName()
+  private tryCreateInputForProperty(
+    property: Property
+  ): ts.JsxChild | undefined {
+    let propType: PropertyType = getPropertyType(property);
+    let propertyName = property.getName();
 
-    let input:ts.JsxChild | undefined
+    let input: ts.JsxChild | undefined;
 
-    switch(propType) {
+    switch (propType) {
       case PropertyType.string:
-        input = this.createTextFieldComponent(propertyName, propertyName)
-        break
+        input = this.createTextFieldComponent(propertyName, propertyName);
+        break;
       case PropertyType.datetime:
-        input = this.createDateComponent(propertyName, propertyName)
-        break
+        input = this.createDateComponent(propertyName, propertyName);
+        break;
     }
 
-    return input
+    return input;
   }
 
   private createTextFieldComponent(
@@ -244,67 +248,70 @@ export default class MuiDetailGenerator
       factory.createJsxClosingElement(factory.createIdentifier("form"))
     );
   }
-  private createDateComponent(name: string, label: string) : ts.JsxSelfClosingElement {
-    return(
-      factory.createJsxSelfClosingElement(
-        factory.createIdentifier("TextField"),
-        undefined,
-        factory.createJsxAttributes([
-          factory.createJsxAttribute(
-            factory.createIdentifier("fullWidth"),
-            undefined
-          ),
-          factory.createJsxAttribute(
-            factory.createIdentifier("id"),
-            factory.createStringLiteral(name)
-          ),
-          factory.createJsxAttribute(
-            factory.createIdentifier("type"),
-            factory.createStringLiteral("date")
-          ),
-          factory.createJsxAttribute(
-            factory.createIdentifier("label"),
-            factory.createStringLiteral(label)
-          ),
-          factory.createJsxAttribute(
-            factory.createIdentifier("InputLabelProps"),
-            factory.createJsxExpression(
-              undefined,
-              factory.createObjectLiteralExpression(
-                [factory.createPropertyAssignment(
+  private createDateComponent(
+    name: string,
+    label: string
+  ): ts.JsxSelfClosingElement {
+    return factory.createJsxSelfClosingElement(
+      factory.createIdentifier("TextField"),
+      undefined,
+      factory.createJsxAttributes([
+        factory.createJsxAttribute(
+          factory.createIdentifier("fullWidth"),
+          undefined
+        ),
+        factory.createJsxAttribute(
+          factory.createIdentifier("id"),
+          factory.createStringLiteral(name)
+        ),
+        factory.createJsxAttribute(
+          factory.createIdentifier("type"),
+          factory.createStringLiteral("date")
+        ),
+        factory.createJsxAttribute(
+          factory.createIdentifier("label"),
+          factory.createStringLiteral(label)
+        ),
+        factory.createJsxAttribute(
+          factory.createIdentifier("InputLabelProps"),
+          factory.createJsxExpression(
+            undefined,
+            factory.createObjectLiteralExpression(
+              [
+                factory.createPropertyAssignment(
                   factory.createIdentifier("shrink"),
                   factory.createTrue()
-                )],
-                false
-              )
-            )
-          ),
-          factory.createJsxAttribute(
-            factory.createIdentifier("value"),
-            factory.createJsxExpression(
-              undefined,
-              factory.createPropertyAccessExpression(
-                factory.createPropertyAccessExpression(
-                  factory.createIdentifier("formik"),
-                  factory.createIdentifier("values")
                 ),
-                factory.createIdentifier(name)
-              )
-            )
-          ),
-          factory.createJsxAttribute(
-            factory.createIdentifier("onChange"),
-            factory.createJsxExpression(
-              undefined,
-              factory.createPropertyAccessExpression(
-                factory.createIdentifier("formik"),
-                factory.createIdentifier("handleChange")
-              )
+              ],
+              false
             )
           )
-        ])
-      )      
-    )
+        ),
+        factory.createJsxAttribute(
+          factory.createIdentifier("value"),
+          factory.createJsxExpression(
+            undefined,
+            factory.createPropertyAccessExpression(
+              factory.createPropertyAccessExpression(
+                factory.createIdentifier("formik"),
+                factory.createIdentifier("values")
+              ),
+              factory.createIdentifier(name)
+            )
+          )
+        ),
+        factory.createJsxAttribute(
+          factory.createIdentifier("onChange"),
+          factory.createJsxExpression(
+            undefined,
+            factory.createPropertyAccessExpression(
+              factory.createIdentifier("formik"),
+              factory.createIdentifier("handleChange")
+            )
+          )
+        ),
+      ])
+    );
   }
   private createFormikWrapper(formik: ts.JsxElement) {
     return factory.createJsxElement(
@@ -344,43 +351,50 @@ export default class MuiDetailGenerator
     );
   }
 
-  private creteInitialValuesForEntity(){
-    let inputs: ts.PropertyAssignment[] = []
+  private creteInitialValuesForEntity() {
+    let inputs: ts.PropertyAssignment[] = [];
 
-    this.getProperties().forEach(property => {
-      let propertyInput = this.tryCreateInitialValueForProperty(property)
+    this.getProperties().forEach((property) => {
+      let propertyInput = this.tryCreateInitialValueForProperty(property);
 
-      if(propertyInput){
-        inputs.push(propertyInput)
+      if (propertyInput) {
+        inputs.push(propertyInput);
       }
     });
 
-    return inputs
+    return inputs;
   }
 
-  private tryCreateInitialValueForProperty(property: Property): ts.PropertyAssignment | undefined {
-      let propType: PropertyType = getPropertyType(property)
-      let propertyName = property.getName()
+  private tryCreateInitialValueForProperty(
+    property: Property
+  ): ts.PropertyAssignment | undefined {
+    let propType: PropertyType = getPropertyType(property);
+    let propertyName = property.getName();
 
-      let assignment:ts.PropertyAssignment | undefined
+    let assignment: ts.PropertyAssignment | undefined;
 
-      switch(propType) {
+    switch (propType) {
       case PropertyType.string:
         assignment = factory.createPropertyAssignment(
           factory.createIdentifier(propertyName),
-          factory.createStringLiteral(""))
-        break
+          factory.createStringLiteral("")
+        );
+        break;
       case PropertyType.datetime:
         assignment = factory.createPropertyAssignment(
           factory.createIdentifier(propertyName),
-          factory.createStringLiteral(""))
-        break
+          factory.createStringLiteral("")
+        );
+        break;
     }
 
-    return assignment
+    return assignment;
   }
 
-  private createConstFunction(componentName: string, body: ts.Statement[]): ts.VariableStatement {
+  private createConstFunction(
+    componentName: string,
+    body: ts.Statement[]
+  ): ts.VariableStatement {
     return factory.createVariableStatement(
       [factory.createModifier(ts.SyntaxKind.ExportKeyword)],
       factory.createVariableDeclarationList([
@@ -488,10 +502,7 @@ export default class MuiDetailGenerator
                   ts.NodeFlags.Const
                 )
               ),
-              factory.createBlock(
-                body,
-                true
-              )
+              factory.createBlock(body, true),
             ])
           )
         ),
