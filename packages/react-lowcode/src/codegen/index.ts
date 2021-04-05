@@ -4,6 +4,8 @@ import { CodeDir, CodeRW } from '../io'
 
 import ts, { factory } from "typescript"
 import { Project } from "ts-morph"
+import { HookImport } from '../ast/hooks'
+import { TagImport } from '../ast/tags'
 
 interface CodegenOptions {
     // whitelisted entity names
@@ -50,3 +52,50 @@ export function generatePages(inputSourceCode: string, io: CodeRW & CodeDir, opt
         }
     })
 }
+
+interface ThemeCodegen {
+    providerTag(...children: ts.JsxChild[])
+}
+
+ interface IntlCodegen {
+    providerTag(...children: ts.JsxChild[])
+ }
+
+export interface AppGenerators {
+    newSourceFileContext(path: string): JsxFileContext
+    theme: ThemeCodegen,
+    intl: IntlCodegen,
+    //authorization: AuthorizationCodegen
+}
+
+export class JsxFileContext {
+
+    uniqueImports() {
+        return []
+    }
+  
+    useHook(hook: HookImport, ...params: []) {
+        // TODO unique import
+        return null
+    }
+  
+    tag(tag: TagImport, ...children: ts.JsxChild[]) {
+        // TODO unique import
+        return null
+    }
+  
+    returnFragment(...children: ts.JsxChild[]): ts.Statement {
+  
+        if (children?.length == 1) {
+            // TODO handle one child
+        }
+    
+        factory.createReturnStatement(factory.createJsxFragment(
+            factory.createJsxOpeningFragment(),
+            children,
+            factory.createJsxJsxClosingFragment()
+          ))
+    
+        return null
+    }
+}  
