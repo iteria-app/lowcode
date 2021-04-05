@@ -149,8 +149,8 @@ export default class MuiDataTableGenerator extends TableGeneratorBase implements
         factory.createStringLiteral(propertyName)
         ),
         factory.createPropertyAssignment(
-          factory.createIdentifier("width"),
-          factory.createNumericLiteral(180)
+          factory.createIdentifier("flex"),
+          factory.createNumericLiteral(1)
           ),
         factory.createPropertyAssignment(
           factory.createIdentifier("type"),
