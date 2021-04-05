@@ -2,7 +2,7 @@ import { TableType, UiFramework } from '../../../definition/context-types';
 import { PageComponent } from '../../react-components/react-component-helper'
 import GenerationContext from '../../context'
 import {BasicTableGenerator} from './basic-table-generator'
-import MuiDataTableGenerator from './mui-dt-generator'
+import MuiDataTableGenerator from './mui-datatable-generator'
 import GrommetDataTableGenerator from './grommet-dt-generator'
 import { Entity } from '../../entity';
 
