@@ -16,7 +16,11 @@ Generate CRUD application using bottom-up approach:
 
 
 We are thinging about chain of generators: 
-Tables + FKs -> GraphQL API (Hasura with conventions) -> GraphQL queries -> graphql-codegen -> @iteria-app/react-lowcode/codegen
+1. Domain model (Enties/Tables + reltions/FKs
+2. GraphQL API (Hasura with conventions)
+3. GraphQL queries
+4. `graphql-codegen`
+5. @iteria-app/react-lowcode/codegen
 
 At the moment we are focusing on *@iteria-app/react-lowcode/codegen*.
 ### Generate Server API
@@ -79,7 +83,7 @@ Methods:
 * controls GraphQL Query / Mutation
 * uses widget codegens
 
-## Templates
+## Codegen Templates
 Tagged template literals are implementaion details and allows us to write human readable code.
 Should be wrapped by interfaces.
 
@@ -90,6 +94,56 @@ DOM `<input` => React Dev Tolll `<ReactComponent` => framework + variant => avia
 
 # Code morph 
 Refactoring rules for generationg new code but also for changing existing code.
+
+## App initialization
+React Context...
+
+### React Router
+
+useRouter()
+
+```
+<Switch>
+  <Route exact path='/' component={Dashboard} />
+  <Route exact path='/hello' component={HelloWorld} />
+  <Route exact path='/customers' component={CustomerListView} />
+</Switch>
+```
+
+### Theme Provider
+
+```
+<Grommet
+  theme={{ global: { colors: { doc: '#ff99cc' } } }}
+>
+  <Box pad="large" background="doc" />
+</Grommet>
+```
+
+### Localization 
+
+```
+// import IntlProvider from 'react-intl'
+
+ReactDOM.render(
+  <IntlProvider locale={navigator.language}>
+    <App importantDate={new Date(1459913574887)} />
+  </IntlProvider>,
+  document.getElementById('container')
+)
+```
+
+### GraphQL Provider
+
+```
+import { createClient, Provider } from 'urql';
+
+const client = createClient(...);
+
+export const App = () => (
+  <Provider value={client}><Todos /></Provider>
+);
+```
 
 ## Labels / Messages
 
@@ -144,5 +198,5 @@ Outputs:
 
 ### Saving to files
 File Changes:
-* Unique imports
+* Unique imports, react context & app initialization
 * Modified part of a source code (source range: start character, end character)
