@@ -1,13 +1,13 @@
-import { ts } from '../../ts-tag'
+import { tsAst } from '../../ts-tag'
 
-ts`<FormField label="Field label">
+tsAst`<FormField label="Field label">
   <TextInput placeholder="type here" />
 </FormField>`
 
-ts`<FormField label="Field label" component={() => <TextInput placeholder="type here" />}></FormField>`
+tsAst`<FormField label="Field label" component={() => <TextInput placeholder="type here" />}></FormField>`
 
 const placeholder = 'type here'
-ts`<TextInput
+tsAst`<TextInput
   placeholder="${placeholder}"
   value={value}
   a11yTitle="aaa"

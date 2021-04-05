@@ -16,7 +16,11 @@ Generate CRUD application using bottom-up approach:
 
 
 We are thinging about chain of generators: 
-Tables + FKs -> GraphQL API (Hasura with conventions) -> GraphQL queries -> graphql-codegen -> @iteria-app/react-lowcode/codegen
+1. Domain model (Enties/Tables + reltions/FKs
+2. GraphQL API (Hasura with conventions)
+3. GraphQL queries
+4. `graphql-codegen`
+5. @iteria-app/react-lowcode/codegen
 
 At the moment we are focusing on *@iteria-app/react-lowcode/codegen*.
 ### Generate Server API
@@ -41,31 +45,158 @@ Existing tool
 ## Interfaces
 Typesafe codegen
 
-changeLabelKey
-changeLabelValue
+
+### EntitiyCodegen Widgets
+interface EntityCodegen should be implemented by many codegen classes
+* generateEntityField(widget, entity, field)
 
 GoF Decorators:
 * form binding
 * authorization
 
-## Templates
-Tagged template literals allows us to write human readable code.
+### Widgets
+
+#### Widget
+Model (abstraction wraps AST)
+
+Widget
+BrowseWidget
+FormWidget
+interface BrowseTable extends BrowseWidget
+interface DataTable extends BrowseWidget
+interface BrowseList extends BrowseWidget
+interfaces TextInput extends FormWidget
+#### Widget Factory
+Methods:
+* createTextInput(variant): FormWidget
+* createTextArea(variant): FormWidget
+* createTable(): BrowseWidget
+* createDataTable(): BrowseWidget
+* ...
+### Browse entities (pages)
+* multiple entities
+* controls GraphQL Query (maybe mutation if the widges supports CRUD)
+* uses widget codegen
+
+### Readonly Entity Detail Page
+* one entity (and composite/children entities)
+* controls GraphQL Query / Mutation
+* uses widget codegens
+
+## Codegen Templates
+Tagged template literals are implementaion details and allows us to write human readable code.
+Should be wrapped by interfaces.
 
 ## Metadata matching
-Matching in WYSIWIG => apply code morph.
+Intention: Matching in WYSIWIG => apply code morph.
 
-<input => <ReactComponent => framework + variant => avialable possible commands
-
+DOM `<input` => React Dev Tolll `<ReactComponent` => framework + variant => avialable possible code morph commands
 
 # Code morph 
-Refactoring rules
+Refactoring rules for generationg new code but also for changing existing code.
 
-## add/remove column
+## App initialization
+React Context...
 
-## add/remove formfield
+### React Router
 
-## clone menu item
-(clone route)
+useRouter()
+
+```
+<Switch>
+  <Route exact path='/' component={Dashboard} />
+  <Route exact path='/hello' component={HelloWorld} />
+  <Route exact path='/customers' component={CustomerListView} />
+</Switch>
+```
+
+### Theme Provider
+
+```
+<Grommet
+  theme={{ global: { colors: { doc: '#ff99cc' } } }}
+>
+  <Box pad="large" background="doc" />
+</Grommet>
+```
+
+### Localization 
+
+```
+// import IntlProvider from 'react-intl'
+
+ReactDOM.render(
+  <IntlProvider locale={navigator.language}>
+    <App importantDate={new Date(1459913574887)} />
+  </IntlProvider>,
+  document.getElementById('container')
+)
+```
+
+### GraphQL Provider
+
+```
+import { createClient, Provider } from 'urql';
+
+const client = createClient(...);
+
+export const App = () => (
+  <Provider value={client}><Todos /></Provider>
+);
+```
+
+## Labels / Messages
+
+changeLabelMessageId
+patchMessageTranslations
+
+
+## Entitiy Fields vs. Widget
+
+### Table/DataTable
+Methods:
+* generateEntityField(component, entity, field)
+
+GoF Decorators:
+* Authorization (Castle)
+
+Uses
+* CodegenContext.Localization
+
+### Forms
+
+Methods:
+* generateEntityField(component, entity, field)
+
+GoF Decorators:
+* Binding
+* Authorization (Castle)
+
+Uses
+* CodegenContext.Localization
+
+
+## Navigation
+* Clone menu item
+* Clone route (`react-router` / filesystem based)
+
+### Parsing & Serialization
+
+Source Code -> AST -> Model + AST
+
+Model + AST -> AST -> Source Code
 
 ## Serialization 
-Model (imports, controller component + view only component) + Naming conventions -> Files
+Inputs:
+* Model + AST
+* Naming conventions / patterns
+Outputs:
+* New Files / File Changes
+
+### Patterns
+#### Pattern controller component + view only component
+
+### Saving to files
+File Changes:
+* Unique imports, react context & app initialization
+* Modified part of a source code (source range: start character, end character)

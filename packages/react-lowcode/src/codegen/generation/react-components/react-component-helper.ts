@@ -1,7 +1,7 @@
 import ts, { factory } from "typescript"
 import TypescriptHelper from "../code-generation/ts-helper"
 
-export function createFunctionalComponent(componentName: string | ts.Identifier | undefined = undefined, params: ts.ParameterDeclaration[], body: ts.Statement[]): ts.FunctionDeclaration {
+export function createFunctionalComponent(componentName: string | ts.Identifier | undefined = undefined, params: /* TODO generalize */ts.ParameterDeclaration[], body: ts.Statement[]): ts.FunctionDeclaration {
   return factory.createFunctionDeclaration(
     undefined,
     [

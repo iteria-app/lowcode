@@ -1,10 +1,13 @@
 import ts, {
+  factory,
   SourceFile,
   CompilerOptions,
   ScriptTarget,
   ScriptKind,
   CompilerHost,
 } from "typescript"
+import { TagImport } from "../../../ast/tags"
+import { HookImport } from "../../../ast/hooks"
 //'@typescript/vfs'
 
 export function createAst(
