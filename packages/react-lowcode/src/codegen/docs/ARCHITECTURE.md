@@ -41,31 +41,108 @@ Existing tool
 ## Interfaces
 Typesafe codegen
 
-changeLabelKey
-changeLabelValue
+
+### EntitiyCodegen Widgets
+interface EntityCodegen should be implemented by many codegen classes
+* generateEntityField(widget, entity, field)
 
 GoF Decorators:
 * form binding
 * authorization
 
+### Widgets
+
+#### Widget
+Model (abstraction wraps AST)
+
+Widget
+BrowseWidget
+FormWidget
+interface BrowseTable extends BrowseWidget
+interface DataTable extends BrowseWidget
+interface BrowseList extends BrowseWidget
+interfaces TextInput extends FormWidget
+#### Widget Factory
+Methods:
+* createTextInput(variant): FormWidget
+* createTextArea(variant): FormWidget
+* createTable(): BrowseWidget
+* createDataTable(): BrowseWidget
+* ...
+### Browse entities (pages)
+* multiple entities
+* controls GraphQL Query (maybe mutation if the widges supports CRUD)
+* uses widget codegen
+
+### Readonly Entity Detail Page
+* one entity (and composite/children entities)
+* controls GraphQL Query / Mutation
+* uses widget codegens
+
 ## Templates
-Tagged template literals allows us to write human readable code.
+Tagged template literals are implementaion details and allows us to write human readable code.
+Should be wrapped by interfaces.
 
 ## Metadata matching
-Matching in WYSIWIG => apply code morph.
+Intention: Matching in WYSIWIG => apply code morph.
 
-<input => <ReactComponent => framework + variant => avialable possible commands
-
+DOM `<input` => React Dev Tolll `<ReactComponent` => framework + variant => avialable possible code morph commands
 
 # Code morph 
-Refactoring rules
+Refactoring rules for generationg new code but also for changing existing code.
 
-## add/remove column
+## Labels / Messages
 
-## add/remove formfield
+changeLabelMessageId
+patchMessageTranslations
 
-## clone menu item
-(clone route)
+
+## Entitiy Fields vs. Widget
+
+### Table/DataTable
+Methods:
+* generateEntityField(component, entity, field)
+
+GoF Decorators:
+* Authorization (Castle)
+
+Uses
+* CodegenContext.Localization
+
+### Forms
+
+Methods:
+* generateEntityField(component, entity, field)
+
+GoF Decorators:
+* Binding
+* Authorization (Castle)
+
+Uses
+* CodegenContext.Localization
+
+
+## Navigation
+* Clone menu item
+* Clone route (`react-router` / filesystem based)
+
+### Parsing & Serialization
+
+Source Code -> AST -> Model + AST
+
+Model + AST -> AST -> Source Code
 
 ## Serialization 
-Model (imports, controller component + view only component) + Naming conventions -> Files
+Inputs:
+* Model + AST
+* Naming conventions / patterns
+Outputs:
+* New Files / File Changes
+
+### Patterns
+#### Pattern controller component + view only component
+
+### Saving to files
+File Changes:
+* Unique imports
+* Modified part of a source code (source range: start character, end character)
