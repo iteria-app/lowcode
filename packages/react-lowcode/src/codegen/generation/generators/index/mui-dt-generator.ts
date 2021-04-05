@@ -1,23 +1,24 @@
 import ts, { factory } from "typescript"
 import { getPropertyType, PropertyType } from '../../typeAlias'
 import { createFunctionalComponent, PageComponent, createJsxSelfClosingElement, createJsxAttribute } from '../../react-components/react-component-helper'
-import { Property } from '../../entity/index'
+import { Entity, Property } from '../../entity/index'
 import { TableGenerator } from './table-generator-factory'
 import TableGeneratorBase from './table-generator-base'
 import GenerationContext from "../../context"
 import { MuiDtTableComponents, muiDataGrid } from '../../../definition/material-ui/table'
 import { TableComponentDefinitionBase } from '../../../definition/table-definition-core'
 import TypescriptHelper from "../../code-generation/ts-helper"
+import { Formatter } from "../../../definition/context-types"
 
 export default class MuiDataTableGenerator extends TableGeneratorBase implements TableGenerator 
 {
-    constructor(generationContext: GenerationContext) {
-        super(generationContext);
+    constructor(generationContext: GenerationContext, entity: Entity) {
+        super(generationContext, entity);
     }
     
     generateTableComponent(): PageComponent {
         var statements = this.createStatements();
-        var functionalComponent = createFunctionalComponent("DataTableComponent", [this.createInputParameter()], statements);
+        var functionalComponent = createFunctionalComponent(this.getComponentName(), [this.createInputParameter()], statements);
 
         this._imports = [...this._imports, ...this.intlFormatter.getImports()]
 
@@ -34,7 +35,7 @@ export default class MuiDataTableGenerator extends TableGeneratorBase implements
     private createStatements(): ts.Statement[] {
       let statements = new Array<ts.Statement>()
 
-      if(this.context.useFormatter){
+      if(this.context.formatter === Formatter.Intl){
         statements.push(this.intlFormatter.getImperativeHook())
       }
 
@@ -74,7 +75,7 @@ export default class MuiDataTableGenerator extends TableGeneratorBase implements
                 [
                   factory.createPropertyAssignment(
                     factory.createIdentifier("height"),
-                    factory.createNumericLiteral("400")
+                    factory.createStringLiteral(this.context?.index?.height ?? "400px")
                   ),
                   factory.createPropertyAssignment(
                     factory.createIdentifier("width"),
@@ -148,12 +149,16 @@ export default class MuiDataTableGenerator extends TableGeneratorBase implements
         factory.createStringLiteral(propertyName)
         ),
         factory.createPropertyAssignment(
+          factory.createIdentifier("width"),
+          factory.createNumericLiteral(180)
+          ),
+        factory.createPropertyAssignment(
           factory.createIdentifier("type"),
           factory.createStringLiteral(muiColumnType)
         )
       ];
 
-      if(this.context.useFormatter){
+      if(this.context.formatter === Formatter.Intl){
         properties.push(factory.createPropertyAssignment(
           factory.createIdentifier("valueFormatter"),
           this.getValueFormatter(property)
@@ -181,7 +186,7 @@ export default class MuiDataTableGenerator extends TableGeneratorBase implements
     private getHeaderRender(property: Property): ts.ArrowFunction {
       this.addImportDeclaration('GridColParams', muiDataGrid)
 
-      let localizedProperty = this.intlFormatter.localizePropertyNameUsingTag(property, this.context.entity)
+      let localizedProperty = this.intlFormatter.localizePropertyNameUsingTag(property, this._entity)
       
       return factory.createArrowFunction(
         undefined,

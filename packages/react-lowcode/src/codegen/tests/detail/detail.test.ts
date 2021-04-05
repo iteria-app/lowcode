@@ -21,7 +21,7 @@ export function createAst(
 }
 
 function sourceFileEntity(myClassFile: SourceFile) {
-  const typeName = "Parent"
+  const typeName = "Customer"
   const typeAlias = myClassFile.getTypeAlias(typeName)
   const props = typeAlias?.getType()?.getProperties() ?? []
   if (typeAlias) {
@@ -38,13 +38,13 @@ function sourceFileEntity(myClassFile: SourceFile) {
 }
 
 
-  test(".grommet TextInput generation", () => {
+  test(".mui formik generation", () => {
       const sourceFile = createAst('')
       const myClassFile = parseGraphqlTypes(graphqlGenTs1)
       const testEntity = sourceFileEntity(myClassFile)
 
-      let generationContext = {useFormatter:false, uiFramework: UiFramework.Grommet, tableType: TableType.BasicTable, entity: testEntity!!};
-      let generator = new ModuleGenerator(generationContext);
+      let generationContext = {useFormatter:false, uiFramework: UiFramework.MaterialUI, tableType: TableType.BasicTable, entity: testEntity!!};
+      let generator = new ModuleGenerator(generationContext , testEntity!!);
 
       const page = generator.generateDetailPage()
       
@@ -52,6 +52,21 @@ function sourceFileEntity(myClassFile: SourceFile) {
 
       console.log('generated:', printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page.imports, page.functionDeclaration]), sourceFile))
   });
+
+  test(".grommet formik generation", () => {
+    const sourceFile = createAst('')
+    const myClassFile = parseGraphqlTypes(graphqlGenTs1)
+    const testEntity = sourceFileEntity(myClassFile)
+
+    let generationContext = {useFormatter:false, uiFramework: UiFramework.Grommet, tableType: TableType.BasicTable, entity: testEntity!!};
+    let generator = new ModuleGenerator(generationContext , testEntity!!);
+
+    const page = generator.generateDetailPage()
+    
+    const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
+
+    console.log('generated:', printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page.imports, page.functionDeclaration]), sourceFile))
+});
 
 function parseGraphqlTypes(sourceCode: string) {
   // initialize

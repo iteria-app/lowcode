@@ -6,11 +6,12 @@ import { TableComponentDefinitionBase } from '../../../definition/table-definiti
 import GenerationContext from "../../context"
 import TableGeneratorBase from './table-generator-base'
 import { GrommetDtTableComponents } from '../../../definition/grommet/table'
+import { Formatter } from "../../../definition/context-types"
 
 export default class GrommetDataTableGenerator extends TableGeneratorBase implements TableGenerator 
 {
-    constructor(generationContext: GenerationContext) {
-        super(generationContext);
+    constructor(generationContext: GenerationContext, entity: Entity) {
+        super(generationContext, entity);
     }
 
     getTableDefinition() : TableComponentDefinitionBase {
@@ -19,7 +20,7 @@ export default class GrommetDataTableGenerator extends TableGeneratorBase implem
     
     generateTableComponent(): PageComponent {
         var statements = this.createStatements();
-        var functionalComponent = createFunctionalComponent("DataTableComponent", [this.createInputParameter()], statements);
+        var functionalComponent = createFunctionalComponent(this.getComponentName(), [this.createInputParameter()], statements);
 
         this._imports = [...this._imports, ...this.intlFormatter.getImports()]
         
@@ -33,10 +34,10 @@ export default class GrommetDataTableGenerator extends TableGeneratorBase implem
         let columnsDeclaration = this.createColumns(columnsIdentifier);
         var columnAttribute = createJsxAttribute("columns", "columns")
         statements.push(factory.createVariableStatement(undefined, columnsDeclaration))
-        var rowsAttribute = createJsxAttribute("rows", this.getInputParameterIdentifier())
+        var dataAttribute = createJsxAttribute("data", this.getInputParameterIdentifier())
 
         var dataGridComponent = this.prepareComponent(this.getTableDefinition().table);
-        statements.push(factory.createReturnStatement(factory.createParenthesizedExpression(createJsxSelfClosingElement(dataGridComponent.tagName, [columnAttribute, rowsAttribute]))));
+        statements.push(factory.createReturnStatement(factory.createParenthesizedExpression(createJsxSelfClosingElement(dataGridComponent.tagName, [columnAttribute, dataAttribute]))));
   
         return statements;
       }
@@ -74,7 +75,7 @@ export default class GrommetDataTableGenerator extends TableGeneratorBase implem
             )
         ];
 
-        if(this.context.useFormatter){
+        if(this.context.formatter === Formatter.Intl){
             properties.push(factory.createPropertyAssignment(
                 factory.createIdentifier("render"),
                 this.getRender(property)
@@ -85,7 +86,23 @@ export default class GrommetDataTableGenerator extends TableGeneratorBase implem
     }
 
     private getRender(property: Property):ts.ArrowFunction {
-        let formattedTag = this.intlFormatter.formatPropertyUsingTag(property, factory.createJsxExpression(undefined, factory.createIdentifier("val")))
+        let fallbackExpression = factory.createIdentifier("val")
+        let propertyAccessExpression = factory.createPropertyAccessExpression(
+            fallbackExpression, 
+            factory.createIdentifier(property.getName()))
+        
+        let expression = factory.createJsxExpression(undefined, 
+                            propertyAccessExpression)
+
+        let formattedChild: ts.Expression
+
+        let formattedTag = this.intlFormatter.tryFormatPropertyUsingTag(property, expression)
+
+        if(formattedTag) {
+            formattedChild = formattedTag
+        } else {
+            formattedChild = propertyAccessExpression
+        }
 
         return factory.createArrowFunction(
             undefined,
@@ -101,7 +118,7 @@ export default class GrommetDataTableGenerator extends TableGeneratorBase implem
             )],
             undefined,
             factory.createToken(ts.SyntaxKind.EqualsGreaterThanToken),
-            factory.createParenthesizedExpression(formattedTag)
+            factory.createParenthesizedExpression(formattedChild)
           )
     }
 }

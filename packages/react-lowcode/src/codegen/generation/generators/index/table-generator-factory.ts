@@ -4,6 +4,7 @@ import GenerationContext from '../../context'
 import {BasicTableGenerator} from './basic-table-generator'
 import MuiDataTableGenerator from './mui-dt-generator'
 import GrommetDataTableGenerator from './grommet-dt-generator'
+import { Entity } from '../../entity';
 
 export interface TableGenerator{
     generateTableComponent(): PageComponent;
@@ -11,21 +12,24 @@ export interface TableGenerator{
 
 export class TableGeneratorFactory{
     private _context: GenerationContext;
+    private _entity: Entity;
 
-    constructor(context: GenerationContext){
+
+    constructor(context: GenerationContext, entity: Entity){
         this._context = context;
+        this._entity = entity;
     }
 
     getTableGenerator(): TableGenerator{
-        let generator: TableGenerator = new BasicTableGenerator(this._context);
+        let generator: TableGenerator = new BasicTableGenerator(this._context, this._entity);
 
-        if(this._context.tableType === TableType.DataTable) {
+        if(this._context.index?.tableType === TableType.DataTable) {
             switch(this._context.uiFramework){
                 case UiFramework.MaterialUI:
-                    generator = new MuiDataTableGenerator(this._context);
+                    generator = new MuiDataTableGenerator(this._context, this._entity);
                     break;
                 case UiFramework.Grommet:
-                    generator = new GrommetDataTableGenerator(this._context);
+                    generator = new GrommetDataTableGenerator(this._context, this._entity);
                     break;
             }
         }
