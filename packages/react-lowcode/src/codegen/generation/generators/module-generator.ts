@@ -1,6 +1,6 @@
 import { PageComponent } from '../react-components/react-component-helper'
 import GenerationContext from '../context'
-import { TableGenerator, TableGeneratorFactory } from './index/table-generator-factory'
+import { TableGenerator, TableGeneratorFactory } from './list/table-generator-factory'
 import { DetailGenerator, DetailGeneratorFactory } from './detail/detail-generator-factory'
 import { Entity } from '../entity';
 
