@@ -1,9 +1,10 @@
-## 0.4.0 (Unreleased)
+## 0.4.0 (2021-04-07)
 
 BUG FIXES:
 
 FEATURES:
 * *React Code Generator* generates a CRUD detail form (list of entities eg. Order Detail)
+* AST remove functionality
 
 IMPROVEMENTS:
 
