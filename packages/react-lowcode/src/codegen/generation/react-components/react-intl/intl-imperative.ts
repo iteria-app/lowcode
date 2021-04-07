@@ -1,5 +1,5 @@
 import ts, { factory, textChangeRangeIsUnchanged } from "typescript"
-import { defineHook, Hook } from '../../code-generation/hooks'
+import { defineHook } from '../../code-generation/hooks'
 import TypescriptHelper from '../../code-generation/ts-helper'
 
 export enum IntlFormatingImperativeMethods {
