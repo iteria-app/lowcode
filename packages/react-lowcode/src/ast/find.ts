@@ -92,3 +92,12 @@ export const findElementInCode = (code: string, source: SourceLineCol) => {
   }
   return null
 }
+
+export const getAstAndNodeFromSource = (
+  code: string,
+  source: SourceLineCol
+) => {
+  const node = astFindSource(code, source)
+  const ast = createAst(code)
+  return { node, ast }
+}
