@@ -330,12 +330,12 @@ export default class MuiDetailGenerator
               factory.createObjectLiteralExpression(
                 [
                   factory.createPropertyAssignment(
-                    factory.createIdentifier("height"),
-                    factory.createNumericLiteral("400")
+                    factory.createIdentifier("marginLeft"),
+                    factory.createNumericLiteral("25")
                   ),
                   factory.createPropertyAssignment(
-                    factory.createIdentifier("width"),
-                    factory.createStringLiteral("100%")
+                    factory.createIdentifier("marginRight"),
+                    factory.createNumericLiteral("25")
                   ),
                 ],
                 false
@@ -425,14 +425,7 @@ export default class MuiDetailGenerator
                 undefined,
                 undefined,
                 undefined,
-                factory.createObjectBindingPattern([
-                  factory.createBindingElement(
-                    undefined,
-                    undefined,
-                    factory.createIdentifier("customer"),
-                    undefined
-                  ),
-                ]),
+                factory.createIdentifier("(customer)"),
                 undefined,
                 undefined,
                 undefined
