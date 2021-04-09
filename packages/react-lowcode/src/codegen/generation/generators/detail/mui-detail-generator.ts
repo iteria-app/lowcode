@@ -52,7 +52,7 @@ export default class MuiDetailGenerator
     );
 
     uniqueImports.push(
-      TypescriptHelper.createImportDeclaration("Customer", "./Customer")
+      createImportDeclaration("Customer", "./Customer")
     );
 
     return { functionDeclaration: functionalComponent, imports: uniqueImports };
