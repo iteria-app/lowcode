@@ -4,10 +4,10 @@ import ts, { createJsxText, factory } from "typescript"
 import { DetailComponentDefinitionBase } from '../../../definition/detail-definition-core'
 import { Component } from '../../react-components/react-component-helper'
 import { camalizeString } from '../../../../strings/camel'
-import TypescriptHelper from "../../code-generation/ts-helper"
 import ReactIntlFormatter from  '../../react-components/react-intl/intl-formatter'
 import Pluralize from "typescript-pluralize"
 import { Formatter } from '../../../definition/context-types'
+import { createImportDeclaration, createNameSpaceImport, uniqueImports } from '../../ts/imports'
 
 export default abstract class DetailGeneratorBase{
     protected readonly context:GenerationContext;
@@ -32,7 +32,7 @@ export default abstract class DetailGeneratorBase{
     protected abstract getDetailDefinition(): DetailComponentDefinitionBase
 
     protected uniqueImports(){
-        return TypescriptHelper.uniqueImports(this._imports);
+        return uniqueImports(this._imports);
     }
 
     private filterProp(prop: Property) {
@@ -46,12 +46,12 @@ export default abstract class DetailGeneratorBase{
     }
 
     protected addImportDeclaration(specifier: string, module: string, isNameSpaceImport: boolean = false){
-      let importDeclaration = TypescriptHelper.createImportDeclaration(specifier, module)
+      let importDeclaration = createImportDeclaration(specifier, module)
 
       if(isNameSpaceImport){
-        importDeclaration = TypescriptHelper.createNameSpaceImport(specifier, module)
+        importDeclaration = createNameSpaceImport(specifier, module)
       }else{
-        importDeclaration = TypescriptHelper.createImportDeclaration(specifier, module)
+        importDeclaration = createImportDeclaration(specifier, module)
       }
 
       this._imports = [...this._imports, importDeclaration]

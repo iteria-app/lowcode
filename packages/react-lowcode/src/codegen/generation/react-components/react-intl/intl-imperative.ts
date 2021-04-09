@@ -1,6 +1,7 @@
 import ts, { factory, textChangeRangeIsUnchanged } from "typescript"
-import { defineHook, Hook } from '../../code-generation/hooks'
-import TypescriptHelper from '../../code-generation/ts-helper'
+import { defineHook } from '../../ts/hooks'
+import { createImportDeclaration } from "../../ts/imports";
+import { createVariableStatement } from "../../ts/variables";
 
 export enum IntlFormatingImperativeMethods {
     formatDate = "formatDate",
@@ -37,7 +38,7 @@ export default class ReactIntlImperative {
             []
           )
 
-        return TypescriptHelper.createVariableStatement(hook.defaultInstanceName, callExpression, ts.NodeFlags.Const)
+        return createVariableStatement(hook.defaultInstanceName, callExpression, ts.NodeFlags.Const)
     }
 
     formatDate(value: ts.Expression): ts.CallExpression {
@@ -80,7 +81,7 @@ export default class ReactIntlImperative {
     }
 
     private prepareImport(methodName: IntlFormatingImperativeMethods | string) {
-        let declaration = TypescriptHelper.createImportDeclaration(methodName.toString(), 'react-intl')
+        let declaration = createImportDeclaration(methodName.toString(), 'react-intl')
         this._imports.push(declaration)
     }
 }

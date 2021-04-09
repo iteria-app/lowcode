@@ -37,7 +37,7 @@ export function generatePages(inputSourceCode: string, io: CodeRW & CodeDir, opt
             let context = {uiFramework: UiFramework.MaterialUI, formatter: Formatter.None, index: {tableType: TableType.BasicTable, height: "400px"}};
             
             const generator = new ModuleGenerator(context, entity)
-            const page = generator.generateTablePage(/* TODO entity / type name should be input - not in context */)
+            const page = generator.generateIndexPage(/* TODO entity / type name should be input - not in context */)
             
             const filePath = `src/components/${typeName}.tsx`
             const sourceFile = ts.createSourceFile(
@@ -54,11 +54,11 @@ export function generatePages(inputSourceCode: string, io: CodeRW & CodeDir, opt
 }
 
 interface ThemeCodegen {
-    providerTag(...children: ts.JsxChild[])
+    providerTag(...children: ts.JsxChild[]): any
 }
 
  interface IntlCodegen {
-    providerTag(...children: ts.JsxChild[])
+    providerTag(...children: ts.JsxChild[]): any
  }
 
 export interface AppGenerators {
@@ -84,7 +84,7 @@ export class JsxFileContext {
         return null
     }
   
-    returnFragment(...children: ts.JsxChild[]): ts.Statement {
+    returnFragment(...children: ts.JsxChild[]): ts.Statement | null {
   
         if (children?.length == 1) {
             // TODO handle one child

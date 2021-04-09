@@ -19,8 +19,8 @@ export class ModuleGenerator {
         };
     }
 
-    generateTablePage() {
-        let generator = this.getTableGenerator();
+    generateIndexPage() {
+        let generator = this.getIndexGenerator();
         return this.getTable(generator);
     }
 
@@ -28,7 +28,7 @@ export class ModuleGenerator {
         return generator.generateTableComponent();
     }
 
-    private getTableGenerator(): TableGenerator {
+    private getIndexGenerator(): TableGenerator {
         let generatorFactory = new TableGeneratorFactory(this._context, this._entity);
         return generatorFactory.getTableGenerator();
     }

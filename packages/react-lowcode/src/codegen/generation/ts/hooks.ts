@@ -1,9 +1,9 @@
 import { Hook } from "../../../ast/hooks"
-import TypescriptHelper from "../code-generation/ts-helper"
+import { createImportDeclaration } from "./imports"
 
 
 export function defineHook(defaultInstanceName: string, hookName: string, packageName: string): Hook {
-    let importDeclaration = TypescriptHelper.createImportDeclaration(hookName, packageName)
+    let importDeclaration = createImportDeclaration(hookName, packageName)
 
     return {
         hookName: hookName,

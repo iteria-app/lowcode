@@ -10,11 +10,11 @@ import { DetailGenerator } from "./detail-generator-factory";
 import { DetailComponentDefinitionBase } from "../../../definition/detail-definition-core";
 import GenerationContext from "../../context";
 import DetailGeneratorBase from "./detail-generator-base";
-import TypescriptHelper from "../../code-generation/ts-helper";
 import { Formatter } from "../../../definition/context-types";
 import { MuiDetailComponents } from "../../../definition/material-ui/detail";
 import { Entity, Property } from "../../entity";
 import { getPropertyType, PropertyType } from "../../typeAlias";
+import { createImportDeclaration, createNameSpaceImport } from "../../ts/imports";
 
 export default class MuiDetailGenerator
   extends DetailGeneratorBase
@@ -38,16 +38,16 @@ export default class MuiDetailGenerator
 
     var uniqueImports = this.uniqueImports();
     uniqueImports.push(
-      TypescriptHelper.createNameSpaceImport("React", "react")
+      createNameSpaceImport("React", "react")
     );
     uniqueImports.push(
-      TypescriptHelper.createImportDeclaration(
+      createImportDeclaration(
         "TextField, Button, Checkbox",
         "@material-ui/core"
       )
     );
     uniqueImports.push(
-      TypescriptHelper.createImportDeclaration("useFormik", "formik")
+      createImportDeclaration("useFormik", "formik")
     );
 
     return { functionDeclaration: functionalComponent, imports: uniqueImports };

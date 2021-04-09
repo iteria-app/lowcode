@@ -12,8 +12,8 @@ import { DetailComponentDefinitionBase } from "../../../definition/detail-defini
 import GenerationContext from "../../context";
 import DetailGeneratorBase from "./detail-generator-base";
 import { GrommetDetailComponents } from "../../../definition/grommet/detail";
-import TypescriptHelper from "../../code-generation/ts-helper";
 import { Formatter } from "../../../definition/context-types"
+import { createNameSpaceImport } from "../../ts/imports";
 
 export default class GrommetDetailGenerator
   extends DetailGeneratorBase
@@ -38,7 +38,7 @@ export default class GrommetDetailGenerator
 
     var uniqueImports = this.uniqueImports();
     uniqueImports.push(
-      TypescriptHelper.createNameSpaceImport("React", "react")
+      createNameSpaceImport("React", "react")
     );
 
     return { functionDeclaration: functionalComponent, imports: uniqueImports };
