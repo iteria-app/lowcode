@@ -29,6 +29,7 @@ export default class MuiDetailGenerator
 
   generateDetailComponent(): PageComponent {
     var statements = this.createStatements();
+
     var functionalComponent = this.createConstFunction(
       "FormikComponent",
       statements
@@ -50,12 +51,15 @@ export default class MuiDetailGenerator
       createImportDeclaration("useFormik", "formik")
     );
 
+    uniqueImports.push(
+      TypescriptHelper.createImportDeclaration("Customer", "./Customer")
+    );
+
     return { functionDeclaration: functionalComponent, imports: uniqueImports };
   }
 
   private createStatements(): ts.Statement[] {
     let statements = new Array<ts.Statement>();
-
     if (this.context.formatter === Formatter.Intl) {
       statements.push(this.intlFormatter.getImperativeHook());
     }
@@ -326,12 +330,12 @@ export default class MuiDetailGenerator
               factory.createObjectLiteralExpression(
                 [
                   factory.createPropertyAssignment(
-                    factory.createIdentifier("height"),
-                    factory.createNumericLiteral("400")
+                    factory.createIdentifier("marginLeft"),
+                    factory.createNumericLiteral("25")
                   ),
                   factory.createPropertyAssignment(
-                    factory.createIdentifier("width"),
-                    factory.createStringLiteral("100%")
+                    factory.createIdentifier("marginRight"),
+                    factory.createNumericLiteral("25")
                   ),
                 ],
                 false
@@ -377,13 +381,13 @@ export default class MuiDetailGenerator
       case PropertyType.string:
         assignment = factory.createPropertyAssignment(
           factory.createIdentifier(propertyName),
-          factory.createStringLiteral("")
+          factory.createIdentifier("customer." + propertyName)
         );
         break;
       case PropertyType.datetime:
         assignment = factory.createPropertyAssignment(
           factory.createIdentifier(propertyName),
-          factory.createStringLiteral("")
+          factory.createIdentifier("customer." + propertyName)
         );
         break;
     }
@@ -408,7 +412,7 @@ export default class MuiDetailGenerator
             ),
             [
               factory.createTypeReferenceNode(
-                factory.createIdentifier("Props"),
+                factory.createIdentifier("Customer"),
                 undefined
               ),
             ]
@@ -421,14 +425,7 @@ export default class MuiDetailGenerator
                 undefined,
                 undefined,
                 undefined,
-                factory.createObjectBindingPattern([
-                  factory.createBindingElement(
-                    undefined,
-                    undefined,
-                    factory.createIdentifier("onSubmit"),
-                    undefined
-                  ),
-                ]),
+                factory.createIdentifier("(customer)"),
                 undefined,
                 undefined,
                 undefined
@@ -478,18 +475,7 @@ export default class MuiDetailGenerator
                                   factory.createToken(
                                     ts.SyntaxKind.EqualsGreaterThanToken
                                   ),
-                                  factory.createBlock(
-                                    [
-                                      factory.createExpressionStatement(
-                                        factory.createCallExpression(
-                                          factory.createIdentifier("onSubmit"),
-                                          undefined,
-                                          [factory.createIdentifier("values")]
-                                        )
-                                      ),
-                                    ],
-                                    false
-                                  )
+                                  factory.createBlock([], false)
                                 )
                               ),
                             ],
