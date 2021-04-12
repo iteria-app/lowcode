@@ -7,7 +7,7 @@ import {
 import { Entity, Property } from '../../entity/index'
 import { DetailGenerator } from "./detail-generator-factory";
 import { DetailComponentDefinitionBase } from "../../../definition/detail-definition-core";
-import GenerationContext from "../../context";
+import GenerationContext from "../../context/context";
 import { GrommetDetailComponents } from "../../../definition/grommet/detail";
 import { Formatter } from "../../../definition/context-types"
 import { createNameSpaceImport, uniqueImports } from "../../ts/imports";

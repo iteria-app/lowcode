@@ -5,7 +5,7 @@ import { TableGenerator } from './table-generator-factory'
 import { TableComponentDefinition } from '../../../definition/table-definition-core'
 import { MuiTableComponents } from '../../../definition/material-ui/table'
 import { GrommetTableComponents } from '../../../definition/grommet/table'
-import GenerationContext from "../../context"
+import GenerationContext from "../../context/context"
 import { Formatter, UiFramework } from "../../../definition/context-types"
 import { uniqueImports } from "../../ts/imports"
 import { GeneratorHelper } from "../helper"

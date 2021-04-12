@@ -1,7 +1,7 @@
 import { factory, Type } from "typescript"
 
-import tagFormatter from './react-components/react-intl/intl-formatted-tag'
-import { Property } from './entity'
+import tagFormatter from '../react-components/react-intl/intl-formatted-tag'
+import { Property } from '../entity'
 import { NumericLiteral } from "ts-morph"
 
 interface NameGetter {

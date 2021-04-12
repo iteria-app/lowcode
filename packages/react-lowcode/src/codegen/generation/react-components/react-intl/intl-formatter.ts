@@ -1,7 +1,7 @@
 import ts, { factory, JsxSelfClosingElement } from "typescript"
 import { Entity, Property } from '../../entity'
-import GenerationContext from "../../context"
-import { PropertyType, getPropertyType } from "../../typeAlias"
+import GenerationContext from "../../context/context"
+import { PropertyType, getPropertyType } from "../../graphql/typeAlias"
 import ReactIntlHook from "./intl-imperative"
 import ReactIntlTag from "./intl-formatted-tag"
 

@@ -1,9 +1,9 @@
 import ts, { factory } from "typescript"
-import { getPropertyType, PropertyType } from '../../typeAlias'
+import { getPropertyType, PropertyType } from '../../graphql/typeAlias'
 import { createFunctionalComponent, PageComponent, createJsxSelfClosingElement, createJsxAttribute } from '../../react-components/react-component-helper'
 import { Entity, getProperties, Property } from '../../entity/index'
 import { TableGenerator } from './table-generator-factory'
-import GenerationContext from "../../context"
+import GenerationContext from "../../context/context"
 import { MuiDtTableComponents, muiDataGrid } from '../../../definition/material-ui/table'
 import { TableComponentDefinitionBase } from '../../../definition/table-definition-core'
 import { Formatter } from "../../../definition/context-types"
