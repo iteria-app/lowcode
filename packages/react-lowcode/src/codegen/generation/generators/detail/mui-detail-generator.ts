@@ -1,26 +1,31 @@
 import ts, { factory } from "typescript";
 import {
-  createFunctionalComponent,
-  createJsxElement,
   PageComponent,
-  createJsxSelfClosingElement,
-  createJsxAttribute,
 } from "../../react-components/react-component-helper";
 import { DetailGenerator } from "./detail-generator-factory";
 import { DetailComponentDefinitionBase } from "../../../definition/detail-definition-core";
 import GenerationContext from "../../context";
-import DetailGeneratorBase from "./detail-generator-base";
 import { Formatter } from "../../../definition/context-types";
 import { MuiDetailComponents } from "../../../definition/material-ui/detail";
-import { Entity, Property } from "../../entity";
+import { Entity, getProperties, Property } from "../../entity";
 import { getPropertyType, PropertyType } from "../../typeAlias";
-import { createImportDeclaration, createNameSpaceImport } from "../../ts/imports";
+import { createImportDeclaration, createNameSpaceImport, uniqueImports } from "../../ts/imports";
+import { GeneratorHelper } from "../helper";
+import ReactIntlFormatter from "../../react-components/react-intl/intl-formatter";
 
 export default class MuiDetailGenerator
-  extends DetailGeneratorBase
   implements DetailGenerator {
+  private readonly _helper: GeneratorHelper
+  private _imports: ts.ImportDeclaration[] = []
+  private _context: GenerationContext
+  private _entity: Entity
+  private _intlFormatter: ReactIntlFormatter
+
   constructor(generationContext: GenerationContext, entity: Entity) {
-    super(generationContext, entity);
+    this._helper = new GeneratorHelper(generationContext, entity)
+    this._context = generationContext
+    this._entity = entity
+    this._intlFormatter = new ReactIntlFormatter(generationContext, this._imports)
   }
 
   getDetailDefinition(): DetailComponentDefinitionBase {
@@ -35,33 +40,33 @@ export default class MuiDetailGenerator
       statements
     );
 
-    this._imports = [...this._imports, ...this.intlFormatter.getImports()];
+    this._imports = [...this._imports, ...this._intlFormatter.getImports()];
 
-    var uniqueImports = this.uniqueImports();
-    uniqueImports.push(
+    var uniqueFileImports = uniqueImports(this._imports)
+    uniqueFileImports.push(
       createNameSpaceImport("React", "react")
     );
-    uniqueImports.push(
+    uniqueFileImports.push(
       createImportDeclaration(
         "TextField, Button, Checkbox",
         "@material-ui/core"
       )
     );
-    uniqueImports.push(
+    uniqueFileImports.push(
       createImportDeclaration("useFormik", "formik")
     );
 
-    uniqueImports.push(
+    uniqueFileImports.push(
       createImportDeclaration("Customer", "./Customer")
     );
 
-    return { functionDeclaration: functionalComponent, imports: uniqueImports };
+    return { functionDeclaration: functionalComponent, imports: uniqueFileImports };
   }
 
   private createStatements(): ts.Statement[] {
     let statements = new Array<ts.Statement>();
-    if (this.context.formatter === Formatter.Intl) {
-      statements.push(this.intlFormatter.getImperativeHook());
+    if (this._context.formatter === Formatter.Intl) {
+      statements.push(this._intlFormatter.getImperativeHook());
     }
 
     let fields = this.createInputsForEntity();
@@ -81,7 +86,7 @@ export default class MuiDetailGenerator
   private createInputsForEntity(): ts.JsxChild[] {
     let inputs: ts.JsxChild[] = [];
 
-    this.getProperties().forEach((property) => {
+    getProperties(this._entity).forEach((property) => {
       let propertyInput = this.tryCreateInputForProperty(property);
 
       if (propertyInput) {
@@ -252,6 +257,7 @@ export default class MuiDetailGenerator
       factory.createJsxClosingElement(factory.createIdentifier("form"))
     );
   }
+
   private createDateComponent(
     name: string,
     label: string
@@ -317,6 +323,7 @@ export default class MuiDetailGenerator
       ])
     );
   }
+
   private createFormikWrapper(formik: ts.JsxElement) {
     return factory.createJsxElement(
       factory.createJsxOpeningElement(
@@ -358,7 +365,7 @@ export default class MuiDetailGenerator
   private creteInitialValuesForEntity() {
     let inputs: ts.PropertyAssignment[] = [];
 
-    this.getProperties().forEach((property) => {
+    getProperties(this._entity).forEach((property) => {
       let propertyInput = this.tryCreateInitialValueForProperty(property);
 
       if (propertyInput) {

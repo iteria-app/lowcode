@@ -2,24 +2,30 @@ import ts, { factory } from "typescript";
 import {
   createFunctionalComponent,
   createJsxElement,
-  PageComponent,
-  createJsxSelfClosingElement,
-  createJsxAttribute,
+  PageComponent
 } from "../../react-components/react-component-helper";
 import { Entity, Property } from '../../entity/index'
 import { DetailGenerator } from "./detail-generator-factory";
 import { DetailComponentDefinitionBase } from "../../../definition/detail-definition-core";
 import GenerationContext from "../../context";
-import DetailGeneratorBase from "./detail-generator-base";
 import { GrommetDetailComponents } from "../../../definition/grommet/detail";
 import { Formatter } from "../../../definition/context-types"
-import { createNameSpaceImport } from "../../ts/imports";
+import { createNameSpaceImport, uniqueImports } from "../../ts/imports";
+import ReactIntlFormatter from "../../react-components/react-intl/intl-formatter";
+import { GeneratorHelper } from "../helper";
 
 export default class GrommetDetailGenerator
-  extends DetailGeneratorBase
   implements DetailGenerator {
+  private readonly _helper: GeneratorHelper
+  private _imports: ts.ImportDeclaration[] = []
+  private _context: GenerationContext
+  private _entity: Entity
+  private _intlFormatter: ReactIntlFormatter
     constructor(generationContext: GenerationContext, entity: Entity) {
-      super(generationContext, entity);
+      this._helper = new GeneratorHelper(generationContext, entity)
+      this._context = generationContext
+      this._entity = entity
+      this._intlFormatter = new ReactIntlFormatter(generationContext, this._imports)
   }
 
   getDetailDefinition(): DetailComponentDefinitionBase {
@@ -34,25 +40,26 @@ export default class GrommetDetailGenerator
       statements
     );
 
-    this._imports = [...this._imports, ...this.intlFormatter.getImports()];
+    this._imports = [...this._imports, ...this._intlFormatter.getImports()];
 
-    var uniqueImports = this.uniqueImports();
-    uniqueImports.push(
+    var uniqueFileImports = uniqueImports(this._imports);
+    uniqueFileImports.push(
       createNameSpaceImport("React", "react")
     );
 
-    return { functionDeclaration: functionalComponent, imports: uniqueImports };
+    return { functionDeclaration: functionalComponent, imports: uniqueFileImports };
   }
 
   private createStatements(): ts.Statement[] {
     let statements = new Array<ts.Statement>();
 
-    if(this.context.formatter === Formatter.Intl){
-      statements.push(this.intlFormatter.getImperativeHook())
+    if(this._context.formatter === Formatter.Intl){
+      statements.push(this._intlFormatter.getImperativeHook())
     }
 
-    var formikComponentDefinition = this.prepareComponent(
-      this.getDetailDefinition().formik
+    var formikComponentDefinition = this._helper.prepareComponent(
+      this.getDetailDefinition().formik,
+      this._imports
     );
 
     var fnameFieldComponent = this.createFormikTextFieldElement(
