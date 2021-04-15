@@ -48,12 +48,16 @@ export default class MuiDetailGenerator
     );
     uniqueFileImports.push(
       createImportDeclaration(
-        "TextField, Button, Checkbox",
+        "TextField",
         "@material-ui/core"
       )
     );
     uniqueFileImports.push(
       createImportDeclaration("useFormik", "formik")
+    );
+
+    uniqueFileImports.push(
+      createImportDeclaration("useIntl", "react-intl")
     );
 
     uniqueFileImports.push(
@@ -145,12 +149,25 @@ export default class MuiDetailGenerator
           factory.createIdentifier("value"),
           factory.createJsxExpression(
             undefined,
-            factory.createPropertyAccessExpression(
+            factory.createCallExpression(
               factory.createPropertyAccessExpression(
-                factory.createIdentifier("formik"),
-                factory.createIdentifier("values")
+                factory.createIdentifier("intl"),
+                factory.createIdentifier("formatMessage")
               ),
-              factory.createIdentifier(name)
+              undefined,
+              [factory.createObjectLiteralExpression(
+                [factory.createPropertyAssignment(
+                  factory.createIdentifier("id"),
+                  factory.createPropertyAccessExpression(
+                    factory.createPropertyAccessExpression(
+                      factory.createIdentifier("formik"),
+                      factory.createIdentifier("values")
+                    ),
+                    factory.createIdentifier(text)
+                  )
+                )],
+                false
+              )]
             )
           )
         ),
@@ -301,12 +318,19 @@ export default class MuiDetailGenerator
           factory.createIdentifier("value"),
           factory.createJsxExpression(
             undefined,
-            factory.createPropertyAccessExpression(
+            factory.createCallExpression(
               factory.createPropertyAccessExpression(
-                factory.createIdentifier("formik"),
-                factory.createIdentifier("values")
+                factory.createIdentifier("intl"),
+                factory.createIdentifier("formatDate")
               ),
-              factory.createIdentifier(name)
+              undefined,
+              [factory.createPropertyAccessExpression(
+                factory.createPropertyAccessExpression(
+                  factory.createIdentifier("formik"),
+                  factory.createIdentifier("values")
+                ),
+                factory.createIdentifier(name)
+              )]
             )
           )
         ),
@@ -441,6 +465,22 @@ export default class MuiDetailGenerator
             undefined,
             factory.createToken(ts.SyntaxKind.EqualsGreaterThanToken),
             factory.createBlock([
+              factory.createVariableStatement(
+                undefined,
+                factory.createVariableDeclarationList(
+                  [factory.createVariableDeclaration(
+                    factory.createIdentifier("intl"),
+                    undefined,
+                    undefined,
+                    factory.createCallExpression(
+                      factory.createIdentifier("useIntl"),
+                      undefined,
+                      []
+                    )
+                  )],
+                  ts.NodeFlags.Const
+                )
+              ),
               factory.createVariableStatement(
                 undefined,
                 factory.createVariableDeclarationList(
