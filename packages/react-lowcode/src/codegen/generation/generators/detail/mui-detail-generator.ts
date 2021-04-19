@@ -1,7 +1,5 @@
 import ts, { factory } from "typescript";
-import {
-  PageComponent,
-} from "../../react-components/react-component-helper";
+import { PageComponent } from "../../react-components/react-component-helper";
 import { DetailGenerator } from "./detail-generator-factory";
 import { DetailComponentDefinitionBase } from "../../../definition/detail-definition-core";
 import GenerationContext from "../../context";
@@ -9,23 +7,27 @@ import { Formatter } from "../../../definition/context-types";
 import { MuiDetailComponents } from "../../../definition/material-ui/detail";
 import { Entity, getProperties, Property } from "../../entity";
 import { getPropertyType, PropertyType } from "../../typeAlias";
-import { createImportDeclaration, createNameSpaceImport, uniqueImports } from "../../ts/imports";
+import {
+  createImportDeclaration,
+  createNameSpaceImport,
+  uniqueImports,
+} from "../../ts/imports";
 import { GeneratorHelper } from "../helper";
 import ReactIntlFormatter from "../../react-components/react-intl/intl-formatter";
 
-export default class MuiDetailGenerator
-  implements DetailGenerator {
-  private readonly _helper: GeneratorHelper
-  private _imports: ts.ImportDeclaration[] = []
-  private _context: GenerationContext
-  private _entity: Entity
-  private _intlFormatter: ReactIntlFormatter
+export default class MuiDetailGenerator implements DetailGenerator {
+  private _imports: ts.ImportDeclaration[] = [];
+  private _context: GenerationContext;
+  private _entity: Entity;
+  private _intlFormatter: ReactIntlFormatter;
 
   constructor(generationContext: GenerationContext, entity: Entity) {
-    this._helper = new GeneratorHelper(generationContext, entity)
-    this._context = generationContext
-    this._entity = entity
-    this._intlFormatter = new ReactIntlFormatter(generationContext, this._imports)
+    this._context = generationContext;
+    this._entity = entity;
+    this._intlFormatter = new ReactIntlFormatter(
+      generationContext,
+      this._imports
+    );
   }
 
   getDetailDefinition(): DetailComponentDefinitionBase {
@@ -42,29 +44,21 @@ export default class MuiDetailGenerator
 
     this._imports = [...this._imports, ...this._intlFormatter.getImports()];
 
-    var uniqueFileImports = uniqueImports(this._imports)
+    var uniqueFileImports = uniqueImports(this._imports);
+    uniqueFileImports.push(createNameSpaceImport("React", "react"));
     uniqueFileImports.push(
-      createNameSpaceImport("React", "react")
+      createImportDeclaration("TextField", "@material-ui/core")
     );
-    uniqueFileImports.push(
-      createImportDeclaration(
-        "TextField",
-        "@material-ui/core"
-      )
-    );
-    uniqueFileImports.push(
-      createImportDeclaration("useFormik", "formik")
-    );
+    uniqueFileImports.push(createImportDeclaration("useFormik", "formik"));
 
-    uniqueFileImports.push(
-      createImportDeclaration("useIntl", "react-intl")
-    );
+    uniqueFileImports.push(createImportDeclaration("useIntl", "react-intl"));
 
-    uniqueFileImports.push(
-      createImportDeclaration("Customer", "./Customer")
-    );
+    uniqueFileImports.push(createImportDeclaration("Customer", "./Customer"));
 
-    return { functionDeclaration: functionalComponent, imports: uniqueFileImports };
+    return {
+      functionDeclaration: functionalComponent,
+      imports: uniqueFileImports,
+    };
   }
 
   private createStatements(): ts.Statement[] {
@@ -155,19 +149,23 @@ export default class MuiDetailGenerator
                 factory.createIdentifier("formatMessage")
               ),
               undefined,
-              [factory.createObjectLiteralExpression(
-                [factory.createPropertyAssignment(
-                  factory.createIdentifier("id"),
-                  factory.createPropertyAccessExpression(
-                    factory.createPropertyAccessExpression(
-                      factory.createIdentifier("formik"),
-                      factory.createIdentifier("values")
+              [
+                factory.createObjectLiteralExpression(
+                  [
+                    factory.createPropertyAssignment(
+                      factory.createIdentifier("id"),
+                      factory.createPropertyAccessExpression(
+                        factory.createPropertyAccessExpression(
+                          factory.createIdentifier("formik"),
+                          factory.createIdentifier("values")
+                        ),
+                        factory.createIdentifier(text)
+                      )
                     ),
-                    factory.createIdentifier(text)
-                  )
-                )],
-                false
-              )]
+                  ],
+                  false
+                ),
+              ]
             )
           )
         ),
@@ -324,13 +322,15 @@ export default class MuiDetailGenerator
                 factory.createIdentifier("formatDate")
               ),
               undefined,
-              [factory.createPropertyAccessExpression(
+              [
                 factory.createPropertyAccessExpression(
-                  factory.createIdentifier("formik"),
-                  factory.createIdentifier("values")
+                  factory.createPropertyAccessExpression(
+                    factory.createIdentifier("formik"),
+                    factory.createIdentifier("values")
+                  ),
+                  factory.createIdentifier(name)
                 ),
-                factory.createIdentifier(name)
-              )]
+              ]
             )
           )
         ),
@@ -426,6 +426,82 @@ export default class MuiDetailGenerator
     return assignment;
   }
 
+  private createUseIntlVariable(): ts.VariableStatement {
+    return factory.createVariableStatement(
+      undefined,
+      factory.createVariableDeclarationList(
+        [
+          factory.createVariableDeclaration(
+            factory.createIdentifier("intl"),
+            undefined,
+            undefined,
+            factory.createCallExpression(
+              factory.createIdentifier("useIntl"),
+              undefined,
+              []
+            )
+          ),
+        ],
+        ts.NodeFlags.Const
+      )
+    );
+  }
+  private createFormikVariale(): ts.VariableStatement {
+    return factory.createVariableStatement(
+      undefined,
+      factory.createVariableDeclarationList(
+        [
+          factory.createVariableDeclaration(
+            factory.createIdentifier("formik"),
+            undefined,
+            undefined,
+            factory.createCallExpression(
+              factory.createIdentifier("useFormik"),
+              undefined,
+              [
+                factory.createObjectLiteralExpression(
+                  [
+                    factory.createPropertyAssignment(
+                      factory.createIdentifier("initialValues"),
+                      factory.createObjectLiteralExpression(
+                        this.creteInitialValuesForEntity(),
+                        false
+                      )
+                    ),
+                    factory.createPropertyAssignment(
+                      factory.createIdentifier("onSubmit"),
+                      factory.createArrowFunction(
+                        undefined,
+                        undefined,
+                        [
+                          factory.createParameterDeclaration(
+                            undefined,
+                            undefined,
+                            undefined,
+                            factory.createIdentifier("values"),
+                            undefined,
+                            undefined,
+                            undefined
+                          ),
+                        ],
+                        undefined,
+                        factory.createToken(
+                          ts.SyntaxKind.EqualsGreaterThanToken
+                        ),
+                        factory.createBlock([], false)
+                      )
+                    ),
+                  ],
+                  true
+                ),
+              ]
+            )
+          ),
+        ],
+        ts.NodeFlags.Const
+      )
+    );
+  }
   private createConstFunction(
     componentName: string,
     body: ts.Statement[]
@@ -465,76 +541,8 @@ export default class MuiDetailGenerator
             undefined,
             factory.createToken(ts.SyntaxKind.EqualsGreaterThanToken),
             factory.createBlock([
-              factory.createVariableStatement(
-                undefined,
-                factory.createVariableDeclarationList(
-                  [factory.createVariableDeclaration(
-                    factory.createIdentifier("intl"),
-                    undefined,
-                    undefined,
-                    factory.createCallExpression(
-                      factory.createIdentifier("useIntl"),
-                      undefined,
-                      []
-                    )
-                  )],
-                  ts.NodeFlags.Const
-                )
-              ),
-              factory.createVariableStatement(
-                undefined,
-                factory.createVariableDeclarationList(
-                  [
-                    factory.createVariableDeclaration(
-                      factory.createIdentifier("formik"),
-                      undefined,
-                      undefined,
-                      factory.createCallExpression(
-                        factory.createIdentifier("useFormik"),
-                        undefined,
-                        [
-                          factory.createObjectLiteralExpression(
-                            [
-                              factory.createPropertyAssignment(
-                                factory.createIdentifier("initialValues"),
-                                factory.createObjectLiteralExpression(
-                                  this.creteInitialValuesForEntity(),
-                                  false
-                                )
-                              ),
-                              factory.createPropertyAssignment(
-                                factory.createIdentifier("onSubmit"),
-                                factory.createArrowFunction(
-                                  undefined,
-                                  undefined,
-                                  [
-                                    factory.createParameterDeclaration(
-                                      undefined,
-                                      undefined,
-                                      undefined,
-                                      factory.createIdentifier("values"),
-                                      undefined,
-                                      undefined,
-                                      undefined
-                                    ),
-                                  ],
-                                  undefined,
-                                  factory.createToken(
-                                    ts.SyntaxKind.EqualsGreaterThanToken
-                                  ),
-                                  factory.createBlock([], false)
-                                )
-                              ),
-                            ],
-                            true
-                          ),
-                        ]
-                      )
-                    ),
-                  ],
-                  ts.NodeFlags.Const
-                )
-              ),
+              this.createUseIntlVariable(),
+              this.createFormikVariale(),
               factory.createBlock(body, true),
             ])
           )
