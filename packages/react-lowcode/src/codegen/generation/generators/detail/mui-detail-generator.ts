@@ -14,6 +14,8 @@ import {
 } from "../../ts/imports";
 import { GeneratorHelper } from "../helper";
 import ReactIntlFormatter from "../../react-components/react-intl/intl-formatter";
+import { VariableStatement } from "ts-morph";
+import { InputType } from "./input-types";
 
 export default class MuiDetailGenerator implements DetailGenerator {
   private _imports: ts.ImportDeclaration[] = [];
@@ -50,9 +52,6 @@ export default class MuiDetailGenerator implements DetailGenerator {
       createImportDeclaration("TextField", "@material-ui/core")
     );
     uniqueFileImports.push(createImportDeclaration("useFormik", "formik"));
-
-    uniqueFileImports.push(createImportDeclaration("useIntl", "react-intl"));
-
     uniqueFileImports.push(createImportDeclaration("Customer", "./Customer"));
 
     return {
@@ -139,36 +138,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
           factory.createIdentifier("label"),
           factory.createStringLiteral(text)
         ),
-        factory.createJsxAttribute(
-          factory.createIdentifier("value"),
-          factory.createJsxExpression(
-            undefined,
-            factory.createCallExpression(
-              factory.createPropertyAccessExpression(
-                factory.createIdentifier("intl"),
-                factory.createIdentifier("formatMessage")
-              ),
-              undefined,
-              [
-                factory.createObjectLiteralExpression(
-                  [
-                    factory.createPropertyAssignment(
-                      factory.createIdentifier("id"),
-                      factory.createPropertyAccessExpression(
-                        factory.createPropertyAccessExpression(
-                          factory.createIdentifier("formik"),
-                          factory.createIdentifier("values")
-                        ),
-                        factory.createIdentifier(text)
-                      )
-                    ),
-                  ],
-                  false
-                ),
-              ]
-            )
-          )
-        ),
+        this.getTextValueAttribute(name, InputType.text),
         factory.createJsxAttribute(
           factory.createIdentifier("onChange"),
           factory.createJsxExpression(
@@ -312,28 +282,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
             )
           )
         ),
-        factory.createJsxAttribute(
-          factory.createIdentifier("value"),
-          factory.createJsxExpression(
-            undefined,
-            factory.createCallExpression(
-              factory.createPropertyAccessExpression(
-                factory.createIdentifier("intl"),
-                factory.createIdentifier("formatDate")
-              ),
-              undefined,
-              [
-                factory.createPropertyAccessExpression(
-                  factory.createPropertyAccessExpression(
-                    factory.createIdentifier("formik"),
-                    factory.createIdentifier("values")
-                  ),
-                  factory.createIdentifier(name)
-                ),
-              ]
-            )
-          )
-        ),
+        this.getTextValueAttribute(name, InputType.date),
         factory.createJsxAttribute(
           factory.createIdentifier("onChange"),
           factory.createJsxExpression(
@@ -345,6 +294,94 @@ export default class MuiDetailGenerator implements DetailGenerator {
           )
         ),
       ])
+    );
+  }
+
+  private getTextValueAttribute(
+    name: string,
+    type: InputType
+  ): ts.JsxAttribute {
+    if (this._context.formatter === Formatter.Intl) {
+      if (type === InputType.date) {
+        return this.createDateValueFormattedAttribute(name)
+      } else {
+        return this.createTextValueFormattedAttribute(name);
+      }
+    } else {
+      return this.createTextValueAttribute(name);
+    }
+  }
+
+  private createDateValueFormattedAttribute(name: string): ts.JsxAttribute {
+    return(
+      factory.createJsxAttribute(
+        factory.createIdentifier("value"),
+        factory.createJsxExpression(
+          undefined,
+          factory.createCallExpression(
+            factory.createPropertyAccessExpression(
+              factory.createIdentifier("intl"),
+              factory.createIdentifier("formatDate")
+            ),
+            undefined,
+            [factory.createPropertyAccessExpression(
+              factory.createPropertyAccessExpression(
+                factory.createIdentifier("formik"),
+                factory.createIdentifier("values")
+              ),
+              factory.createIdentifier(name)
+            )]
+          )
+        )
+      )
+    )
+  }
+
+  private createTextValueFormattedAttribute(name: string): ts.JsxAttribute {
+    return factory.createJsxAttribute(
+      factory.createIdentifier("value"),
+      factory.createJsxExpression(
+        undefined,
+        factory.createCallExpression(
+          factory.createPropertyAccessExpression(
+            factory.createIdentifier("intl"),
+            factory.createIdentifier("formatMessage")
+          ),
+          undefined,
+          [
+            factory.createObjectLiteralExpression(
+              [
+                factory.createPropertyAssignment(
+                  factory.createIdentifier("id"),
+                  factory.createPropertyAccessExpression(
+                    factory.createPropertyAccessExpression(
+                      factory.createIdentifier("formik"),
+                      factory.createIdentifier("values")
+                    ),
+                    factory.createIdentifier(name)
+                  )
+                ),
+              ],
+              false
+            ),
+          ]
+        )
+      )
+    );
+  }
+  private createTextValueAttribute(name: string): ts.JsxAttribute {
+    return factory.createJsxAttribute(
+      factory.createIdentifier("value"),
+      factory.createJsxExpression(
+        undefined,
+        factory.createPropertyAccessExpression(
+          factory.createPropertyAccessExpression(
+            factory.createIdentifier("formik"),
+            factory.createIdentifier("values")
+          ),
+          factory.createIdentifier(name)
+        )
+      )
     );
   }
 
@@ -424,6 +461,14 @@ export default class MuiDetailGenerator implements DetailGenerator {
     }
 
     return assignment;
+  }
+
+  private getIntlVariable(): ts.VariableStatement | ts.EmptyStatement {
+    if (this._context.formatter === Formatter.Intl) {
+      return this.createUseIntlVariable();
+    } else {
+      return factory.createEmptyStatement();
+    }
   }
 
   private createUseIntlVariable(): ts.VariableStatement {
@@ -541,7 +586,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
             undefined,
             factory.createToken(ts.SyntaxKind.EqualsGreaterThanToken),
             factory.createBlock([
-              this.createUseIntlVariable(),
+              this.getIntlVariable(),
               this.createFormikVariale(),
               factory.createBlock(body, true),
             ])
