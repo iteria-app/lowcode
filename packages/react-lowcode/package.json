@@ -7,7 +7,13 @@
     "tscd": "npx tsc --emitDeclarationOnly",
     "tsc": "npx tsc",
     "etsc": "etsc",
-    "etscbuild": "etsc && npx tsc --emitDeclarationOnly"
+    "etscbuild": "etsc && npx tsc --emitDeclarationOnly",
+    "codegenBasicTable": "ts-node src/codegen/cli/index.ts -p \"d:\\Dev\\LowCode\\ui-material-fork\\example-material-ui\\src\\views\\generated\\\\\" -f \"GeneratedBasicTable.tsx\" -u \"MaterialUI\" --fr \"None\" -c \"list\" -t \"BasicTable\"",
+    "codegenMuiTable": "ts-node src/codegen/cli/index.ts -p \"d:\\Dev\\LowCode\\ui-material-fork\\example-material-ui\\src\\views\\generated\\\\\" -f \"GeneratedDataTable.tsx\" -u \"MaterialUI\" --fr \"None\" -c \"list\" -t \"DataTable\"",
+    "codegenBasicTableF": "ts-node src/codegen/cli/index.ts -p \"d:\\Dev\\LowCode\\ui-material-fork\\example-material-ui\\src\\views\\generated\\\\\" -f \"GeneratedBasicTableF.tsx\" -u \"MaterialUI\" --fr \"Intl\" -c \"list\" -t \"BasicTable\"",
+    "codegenMuiTableF": "ts-node src/codegen/cli/index.ts -p \"d:\\Dev\\LowCode\\ui-material-fork\\example-material-ui\\src\\views\\generated\\\\\" -f \"GeneratedDataTableF.tsx\" -u \"MaterialUI\" --fr \"Intl\" -c \"list\" -t \"DataTable\"",
+    "codegenMuiDetail": "ts-node src/codegen/cli/index.ts -p \"d:\\Dev\\LowCode\\ui-material-fork\\example-material-ui\\src\\views\\generated\\\\\" -f \"GeneratedMuiDetail.tsx\" -u \"MaterialUI\" --fr \"None\" -c \"detail\" -t \"BasicTable\"",
+    "codegenAll": "npm run codegenBasicTable && npm run codegenMuiTable && npm run codegenBasicTableF && npm run codegenMuiTableF && npm run codegenMuiDetail"
   },
   "homepage": "https://iteria.app/",
   "repository": {
@@ -30,31 +36,32 @@
   "author": "iteria",
   "license": "AGPL-3.0-or-later",
   "dependencies": {
-    "ts-morph": "^9.1.0",
-    "typescript-pluralize": "^1.0.1",
-    "user": "0.0.0",
-    "web-vitals": "^0.2.4",
-    "typescript": "^4.0.3",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
     "@testing-library/user-event": "^12.1.10",
     "@types/jest": "^26.0.20",
-    "@types/node": "^12.0.0",
     "@types/react": "^16.9.53",
     "@types/react-dom": "^16.9.8",
     "code-block-writer": "^10.1.1",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "react-scripts": "4.0.1",
-    "ts-factory-code-generator-generator": "^0.6.1"
+    "ts-factory-code-generator-generator": "^0.6.1",
+    "ts-morph": "^9.1.0",
+    "typescript-pluralize": "^1.0.1",
+    "user": "0.0.0",
+    "web-vitals": "^0.2.4"
   },
   "devDependencies": {
     "@types/jest": "^26.0.20",
-    "esbuild-node-tsc": "^1.2.0",
-    "nodemon": "^2.0.7",
+    "@types/node": "^12.20.10",
     "esbuild": "^0.8.34",
     "esbuild-jest": "^0.3.0",
-    "ts-jest": "^26.4.4"
+    "esbuild-node-tsc": "^1.2.0",
+    "nodemon": "^2.0.7",
+    "ts-jest": "^26.4.4",
+    "ts-node": "^9.1.1",
+    "typescript": "^4.2.4"
   },
   "bugs": {
     "url": "https://github.com/iteria-app/lowcode/issues"
