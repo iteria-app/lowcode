@@ -1,7 +1,5 @@
 import ts, { factory } from "typescript";
-import {
-  PageComponent,
-} from "../../react-components/react-component-helper";
+import { PageComponent } from "../../react-components/react-component-helper";
 import { DetailGenerator } from "./detail-generator-factory";
 import { DetailComponentDefinitionBase } from "../../../definition/detail-definition-core";
 import GenerationContext from "../../context/context";
@@ -9,23 +7,27 @@ import { Formatter } from "../../../definition/context-types";
 import { MuiDetailComponents } from "../../../definition/material-ui/detail";
 import { Entity, getProperties, Property } from "../../entity";
 import { getPropertyType, PropertyType } from "../../graphql/typeAlias";
-import { createImportDeclaration, createNameSpaceImport, uniqueImports } from "../../ts/imports";
-import { GeneratorHelper } from "../helper";
+import {
+  createImportDeclaration,
+  createNameSpaceImport,
+  uniqueImports,
+} from "../../ts/imports";
 import ReactIntlFormatter from "../../react-components/react-intl/intl-formatter";
+import { InputType } from "./input-types";
 
-export default class MuiDetailGenerator
-  implements DetailGenerator {
-  private readonly _helper: GeneratorHelper
-  private _imports: ts.ImportDeclaration[] = []
-  private _context: GenerationContext
-  private _entity: Entity
-  private _intlFormatter: ReactIntlFormatter
+export default class MuiDetailGenerator implements DetailGenerator {
+  private _imports: ts.ImportDeclaration[] = [];
+  private _context: GenerationContext;
+  private _entity: Entity;
+  private _intlFormatter: ReactIntlFormatter;
 
   constructor(generationContext: GenerationContext, entity: Entity) {
-    this._helper = new GeneratorHelper(generationContext, entity)
-    this._context = generationContext
-    this._entity = entity
-    this._intlFormatter = new ReactIntlFormatter(generationContext, this._imports)
+    this._context = generationContext;
+    this._entity = entity;
+    this._intlFormatter = new ReactIntlFormatter(
+      generationContext,
+      this._imports
+    );
   }
 
   getDetailDefinition(): DetailComponentDefinitionBase {
@@ -42,25 +44,21 @@ export default class MuiDetailGenerator
 
     this._imports = [...this._imports, ...this._intlFormatter.getImports()];
 
-    var uniqueFileImports = uniqueImports(this._imports)
-    uniqueFileImports.push(
-      createNameSpaceImport("React", "react")
-    );
+    var uniqueFileImports = uniqueImports(this._imports);
+    uniqueFileImports.push(createNameSpaceImport("React", "react"));
     uniqueFileImports.push(
       createImportDeclaration(
-        "TextField, Button, Checkbox",
+        "TextField, Avatar, Card, CardHeader, CardContent, Grid",
         "@material-ui/core"
       )
     );
-    uniqueFileImports.push(
-      createImportDeclaration("useFormik", "formik")
-    );
+    uniqueFileImports.push(createImportDeclaration("useFormik", "formik"));
+    uniqueFileImports.push(createImportDeclaration("Customer", "./Customer"));
 
-    uniqueFileImports.push(
-      createImportDeclaration("Customer", "./Customer")
-    );
-
-    return { functionDeclaration: functionalComponent, imports: uniqueFileImports };
+    return {
+      functionDeclaration: functionalComponent,
+      imports: uniqueFileImports,
+    };
   }
 
   private createStatements(): ts.Statement[] {
@@ -70,8 +68,8 @@ export default class MuiDetailGenerator
     }
 
     let fields = this.createInputsForEntity();
-
-    var formElement = this.createFormElement(fields);
+    let card = this.createCardElement(fields);
+    var formElement = this.createFormElement(card);
 
     let wrapper = this.createFormikWrapper(formElement);
     statements.push(
@@ -106,11 +104,24 @@ export default class MuiDetailGenerator
     let input: ts.JsxChild | undefined;
 
     switch (propType) {
-      case PropertyType.string:
-        input = this.createTextFieldComponent(propertyName, propertyName);
+      case PropertyType.string: {
+        if (propertyName.toLocaleLowerCase().includes("avatar")) {
+          input = this.createAvatarElement(propertyName);
+        } else {
+          input = this.createTextFieldElement(
+            propertyName,
+            propertyName,
+            InputType.text
+          );
+        }
         break;
+      }
       case PropertyType.datetime:
-        input = this.createDateComponent(propertyName, propertyName);
+        input = this.createTextFieldElement(
+          propertyName,
+          propertyName,
+          InputType.date
+        );
         break;
     }
 
@@ -141,19 +152,7 @@ export default class MuiDetailGenerator
           factory.createIdentifier("label"),
           factory.createStringLiteral(text)
         ),
-        factory.createJsxAttribute(
-          factory.createIdentifier("value"),
-          factory.createJsxExpression(
-            undefined,
-            factory.createPropertyAccessExpression(
-              factory.createPropertyAccessExpression(
-                factory.createIdentifier("formik"),
-                factory.createIdentifier("values")
-              ),
-              factory.createIdentifier(name)
-            )
-          )
-        ),
+        this.getTextValueAttribute(name, InputType.text),
         factory.createJsxAttribute(
           factory.createIdentifier("onChange"),
           factory.createJsxExpression(
@@ -235,7 +234,61 @@ export default class MuiDetailGenerator
     );
   }
 
-  private createFormElement(fields: ts.JsxChild[]): ts.JsxElement {
+  private createAvatarElement(name: string): ts.JsxElement {
+    return factory.createJsxElement(
+      factory.createJsxOpeningElement(
+        factory.createIdentifier("Grid"),
+        undefined,
+        factory.createJsxAttributes([
+          factory.createJsxAttribute(
+            factory.createIdentifier("item"),
+            undefined
+          ),
+          factory.createJsxAttribute(
+            factory.createIdentifier("md"),
+            factory.createJsxExpression(
+              undefined,
+              factory.createNumericLiteral("6")
+            )
+          ),
+          factory.createJsxAttribute(
+            factory.createIdentifier("xs"),
+            factory.createJsxExpression(
+              undefined,
+              factory.createNumericLiteral("12")
+            )
+          ),
+        ])
+      ),
+      [
+        factory.createJsxSelfClosingElement(
+          factory.createIdentifier("Avatar"),
+          undefined,
+          factory.createJsxAttributes([
+            factory.createJsxAttribute(
+              factory.createIdentifier("id"),
+              factory.createStringLiteral(name)
+            ),
+            factory.createJsxAttribute(
+              factory.createIdentifier("src"),
+              factory.createJsxExpression(
+                undefined,
+                factory.createPropertyAccessExpression(
+                  factory.createPropertyAccessExpression(
+                    factory.createIdentifier("formik"),
+                    factory.createIdentifier("values")
+                  ),
+                  factory.createIdentifier(name)
+                )
+              )
+            ),
+          ])
+        ),
+      ],
+      factory.createJsxClosingElement(factory.createIdentifier("Grid"))
+    );
+  }
+  private createFormElement(card: ts.JsxElement): ts.JsxElement {
     return factory.createJsxElement(
       factory.createJsxOpeningElement(
         factory.createIdentifier("form"),
@@ -253,7 +306,7 @@ export default class MuiDetailGenerator
           ),
         ])
       ),
-      fields,
+      [card],
       factory.createJsxClosingElement(factory.createIdentifier("form"))
     );
   }
@@ -297,19 +350,7 @@ export default class MuiDetailGenerator
             )
           )
         ),
-        factory.createJsxAttribute(
-          factory.createIdentifier("value"),
-          factory.createJsxExpression(
-            undefined,
-            factory.createPropertyAccessExpression(
-              factory.createPropertyAccessExpression(
-                factory.createIdentifier("formik"),
-                factory.createIdentifier("values")
-              ),
-              factory.createIdentifier(name)
-            )
-          )
-        ),
+        this.getTextValueAttribute(name, InputType.date),
         factory.createJsxAttribute(
           factory.createIdentifier("onChange"),
           factory.createJsxExpression(
@@ -323,7 +364,138 @@ export default class MuiDetailGenerator
       ])
     );
   }
+  private getTextValueAttribute(
+    name: string,
+    type: InputType
+  ): ts.JsxAttribute {
+    if (this._context.formatter === Formatter.Intl) {
+      if (type === InputType.date) {
+        return this.createDateValueFormattedAttribute(name);
+      } else {
+        return this.createTextValueFormattedAttribute(name);
+      }
+    } else {
+      return this.createTextValueAttribute(name);
+    }
+  }
 
+  private createCardElement(elements: ts.JsxChild[]): ts.JsxElement {
+    return factory.createJsxElement(
+      factory.createJsxOpeningElement(
+        factory.createIdentifier("Card"),
+        undefined,
+        factory.createJsxAttributes([])
+      ),
+      [
+        factory.createJsxElement(
+          factory.createJsxOpeningElement(
+            factory.createIdentifier("CardContent"),
+            undefined,
+            factory.createJsxAttributes([])
+          ),
+          [
+            factory.createJsxElement(
+              factory.createJsxOpeningElement(
+                factory.createIdentifier("Grid"),
+                undefined,
+                factory.createJsxAttributes([
+                  factory.createJsxAttribute(
+                    factory.createIdentifier("container"),
+                    undefined
+                  ),
+                  factory.createJsxAttribute(
+                    factory.createIdentifier("spacing"),
+                    factory.createJsxExpression(
+                      undefined,
+                      factory.createNumericLiteral("3")
+                    )
+                  ),
+                ])
+              ),
+              elements,
+              factory.createJsxClosingElement(factory.createIdentifier("Grid"))
+            ),
+          ],
+          factory.createJsxClosingElement(
+            factory.createIdentifier("CardContent")
+          )
+        ),
+      ],
+      factory.createJsxClosingElement(factory.createIdentifier("Card"))
+    );
+  }
+
+  private createDateValueFormattedAttribute(name: string): ts.JsxAttribute {
+    return factory.createJsxAttribute(
+      factory.createIdentifier("value"),
+      factory.createJsxExpression(
+        undefined,
+        factory.createCallExpression(
+          factory.createPropertyAccessExpression(
+            factory.createIdentifier("intl"),
+            factory.createIdentifier("formatDate")
+          ),
+          undefined,
+          [
+            factory.createPropertyAccessExpression(
+              factory.createPropertyAccessExpression(
+                factory.createIdentifier("formik"),
+                factory.createIdentifier("values")
+              ),
+              factory.createIdentifier(name)
+            ),
+          ]
+        )
+      )
+    );
+  }
+  private createTextValueFormattedAttribute(name: string): ts.JsxAttribute {
+    return factory.createJsxAttribute(
+      factory.createIdentifier("value"),
+      factory.createJsxExpression(
+        undefined,
+        factory.createCallExpression(
+          factory.createPropertyAccessExpression(
+            factory.createIdentifier("intl"),
+            factory.createIdentifier("formatMessage")
+          ),
+          undefined,
+          [
+            factory.createObjectLiteralExpression(
+              [
+                factory.createPropertyAssignment(
+                  factory.createIdentifier("id"),
+                  factory.createPropertyAccessExpression(
+                    factory.createPropertyAccessExpression(
+                      factory.createIdentifier("formik"),
+                      factory.createIdentifier("values")
+                    ),
+                    factory.createIdentifier(name)
+                  )
+                ),
+              ],
+              false
+            ),
+          ]
+        )
+      )
+    );
+  }
+  private createTextValueAttribute(name: string): ts.JsxAttribute {
+    return factory.createJsxAttribute(
+      factory.createIdentifier("value"),
+      factory.createJsxExpression(
+        undefined,
+        factory.createPropertyAccessExpression(
+          factory.createPropertyAccessExpression(
+            factory.createIdentifier("formik"),
+            factory.createIdentifier("values")
+          ),
+          factory.createIdentifier(name)
+        )
+      )
+    );
+  }
   private createFormikWrapper(formik: ts.JsxElement) {
     return factory.createJsxElement(
       factory.createJsxOpeningElement(
@@ -352,16 +524,11 @@ export default class MuiDetailGenerator
         ])
       ),
       [
-        factory.createJsxText("\
-              ", true),
         formik,
-        factory.createJsxText("\
-            ", true),
       ],
       factory.createJsxClosingElement(factory.createIdentifier("div"))
     );
   }
-
   private creteInitialValuesForEntity() {
     let inputs: ts.PropertyAssignment[] = [];
 
@@ -375,7 +542,6 @@ export default class MuiDetailGenerator
 
     return inputs;
   }
-
   private tryCreateInitialValueForProperty(
     property: Property
   ): ts.PropertyAssignment | undefined {
@@ -401,7 +567,89 @@ export default class MuiDetailGenerator
 
     return assignment;
   }
-
+  private getIntlVariable(): ts.VariableStatement | ts.EmptyStatement {
+    if (this._context.formatter === Formatter.Intl) {
+      return this.createUseIntlVariable();
+    } else {
+      return factory.createEmptyStatement();
+    }
+  }
+  private createUseIntlVariable(): ts.VariableStatement {
+    return factory.createVariableStatement(
+      undefined,
+      factory.createVariableDeclarationList(
+        [
+          factory.createVariableDeclaration(
+            factory.createIdentifier("intl"),
+            undefined,
+            undefined,
+            factory.createCallExpression(
+              factory.createIdentifier("useIntl"),
+              undefined,
+              []
+            )
+          ),
+        ],
+        ts.NodeFlags.Const
+      )
+    );
+  }
+  private createFormikVariale(): ts.VariableStatement {
+    return factory.createVariableStatement(
+      undefined,
+      factory.createVariableDeclarationList(
+        [
+          factory.createVariableDeclaration(
+            factory.createIdentifier("formik"),
+            undefined,
+            undefined,
+            factory.createCallExpression(
+              factory.createIdentifier("useFormik"),
+              undefined,
+              [
+                factory.createObjectLiteralExpression(
+                  [
+                    factory.createPropertyAssignment(
+                      factory.createIdentifier("initialValues"),
+                      factory.createObjectLiteralExpression(
+                        this.creteInitialValuesForEntity(),
+                        false
+                      )
+                    ),
+                    factory.createPropertyAssignment(
+                      factory.createIdentifier("onSubmit"),
+                      factory.createArrowFunction(
+                        undefined,
+                        undefined,
+                        [
+                          factory.createParameterDeclaration(
+                            undefined,
+                            undefined,
+                            undefined,
+                            factory.createIdentifier("values"),
+                            undefined,
+                            undefined,
+                            undefined
+                          ),
+                        ],
+                        undefined,
+                        factory.createToken(
+                          ts.SyntaxKind.EqualsGreaterThanToken
+                        ),
+                        factory.createBlock([], false)
+                      )
+                    ),
+                  ],
+                  true
+                ),
+              ]
+            )
+          ),
+        ],
+        ts.NodeFlags.Const
+      )
+    );
+  }
   private createConstFunction(
     componentName: string,
     body: ts.Statement[]
@@ -441,65 +689,58 @@ export default class MuiDetailGenerator
             undefined,
             factory.createToken(ts.SyntaxKind.EqualsGreaterThanToken),
             factory.createBlock([
-              factory.createVariableStatement(
-                undefined,
-                factory.createVariableDeclarationList(
-                  [
-                    factory.createVariableDeclaration(
-                      factory.createIdentifier("formik"),
-                      undefined,
-                      undefined,
-                      factory.createCallExpression(
-                        factory.createIdentifier("useFormik"),
-                        undefined,
-                        [
-                          factory.createObjectLiteralExpression(
-                            [
-                              factory.createPropertyAssignment(
-                                factory.createIdentifier("initialValues"),
-                                factory.createObjectLiteralExpression(
-                                  this.creteInitialValuesForEntity(),
-                                  false
-                                )
-                              ),
-                              factory.createPropertyAssignment(
-                                factory.createIdentifier("onSubmit"),
-                                factory.createArrowFunction(
-                                  undefined,
-                                  undefined,
-                                  [
-                                    factory.createParameterDeclaration(
-                                      undefined,
-                                      undefined,
-                                      undefined,
-                                      factory.createIdentifier("values"),
-                                      undefined,
-                                      undefined,
-                                      undefined
-                                    ),
-                                  ],
-                                  undefined,
-                                  factory.createToken(
-                                    ts.SyntaxKind.EqualsGreaterThanToken
-                                  ),
-                                  factory.createBlock([], false)
-                                )
-                              ),
-                            ],
-                            true
-                          ),
-                        ]
-                      )
-                    ),
-                  ],
-                  ts.NodeFlags.Const
-                )
-              ),
+              this.getIntlVariable(),
+              this.createFormikVariale(),
               factory.createBlock(body, true),
             ])
           )
         ),
       ])
     );
+  }
+  private createTextFieldElement(
+    name: string,
+    text: string,
+    type: InputType
+  ): ts.JsxElement {
+    return factory.createJsxElement(
+      factory.createJsxOpeningElement(
+        factory.createIdentifier("Grid"),
+        undefined,
+        factory.createJsxAttributes([
+          factory.createJsxAttribute(
+            factory.createIdentifier("item"),
+            undefined
+          ),
+          factory.createJsxAttribute(
+            factory.createIdentifier("md"),
+            factory.createJsxExpression(
+              undefined,
+              factory.createNumericLiteral("6")
+            )
+          ),
+          factory.createJsxAttribute(
+            factory.createIdentifier("xs"),
+            factory.createJsxExpression(
+              undefined,
+              factory.createNumericLiteral("12")
+            )
+          ),
+        ])
+      ),
+      [this.getTextFieldElement(name, text, type)],
+      factory.createJsxClosingElement(factory.createIdentifier("Grid"))
+    );
+  }
+  private getTextFieldElement(
+    name: string,
+    text: string,
+    type: InputType
+  ): ts.JsxSelfClosingElement {
+    if (type === InputType.date) {
+      return this.createDateComponent(name, text);
+    } else {
+      return this.createTextFieldComponent(name, text);
+    }
   }
 }

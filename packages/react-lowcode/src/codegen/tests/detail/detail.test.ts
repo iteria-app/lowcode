@@ -2,7 +2,7 @@
 import { Project, SourceFile } from "ts-morph"
 import ts, { factory } from "typescript"
 import { graphqlGenTs1 } from "../typeAlias.example"
-import { UiFramework, TableType } from '../../definition/context-types'
+import { UiFramework, TableType, Formatter } from '../../definition/context-types'
 import { ModuleGenerator } from '../../generation/generators/module-generator'
 import { createAst, parseGraphqlTypes, sourceFileEntity } from "../helper"
 
@@ -11,7 +11,7 @@ import { createAst, parseGraphqlTypes, sourceFileEntity } from "../helper"
       const myClassFile = parseGraphqlTypes(graphqlGenTs1)
       const testEntity = sourceFileEntity(myClassFile)
 
-      let generationContext = {useFormatter:false, uiFramework: UiFramework.MaterialUI, tableType: TableType.BasicTable, entity: testEntity!!};
+      let generationContext = {formatter: Formatter.Intl, uiFramework: UiFramework.MaterialUI, tableType: TableType.BasicTable, entity: testEntity!!};
       let generator = new ModuleGenerator(generationContext , testEntity!!);
 
       const page = generator.generateDetailPage()
