@@ -329,7 +329,11 @@ export default class MuiDetailGenerator implements DetailGenerator {
         ),
         factory.createJsxAttribute(
           factory.createIdentifier("type"),
-          factory.createStringLiteral("date")
+          factory.createStringLiteral("datetime")
+        ),
+        factory.createJsxAttribute(
+          factory.createIdentifier("disabled"),
+          undefined
         ),
         factory.createJsxAttribute(
           factory.createIdentifier("label"),
