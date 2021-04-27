@@ -1,6 +1,6 @@
 import { UiFramework } from '../../../definition/context-types';
 import { PageComponent } from '../../react-components/react-component-helper'
-import GenerationContext from '../../context'
+import GenerationContext from '../../context/context'
 import GrommetDetailGenerator from './grommet-detail-generator'
 import MuiDataDetailGenerator from './mui-detail-generator'
 import { Entity } from '../../entity';

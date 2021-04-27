@@ -5,7 +5,7 @@ import { routingHook } from '../../routes'
 import { AppGenerators } from '..'
 
 export function srcAppTsx(app: AppGenerators) {
-    let appProps = []
+    /*let appProps = []
     const themeProvider = app.theme.providerTag()
     const intlProvider = app.intl.providerTag()
     //TODO appProps = intlProvider.declareProps(appProps)

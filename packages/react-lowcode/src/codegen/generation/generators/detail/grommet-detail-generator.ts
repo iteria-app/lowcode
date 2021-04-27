@@ -3,15 +3,15 @@ import {
   PageComponent,
 } from "../../react-components/react-component-helper";
 import { DetailComponentDefinitionBase } from "../../../definition/detail-definition-core";
-import GenerationContext from "../../context";
 import { Formatter } from "../../../definition/context-types";
 import { Entity, getProperties, Property } from "../../entity";
-import { getPropertyType, PropertyType } from "../../typeAlias";
 import { createImportDeclaration, createNameSpaceImport, uniqueImports } from "../../ts/imports";
 import { GeneratorHelper } from "../helper";
 import ReactIntlFormatter from "../../react-components/react-intl/intl-formatter";
 import { GrommetDetailComponents } from "../../../definition/grommet/detail";
 import { DetailGenerator } from "../detail/detail-generator-factory";
+import { getPropertyType, PropertyType } from "../../graphql/typeAlias";
+import GenerationContext from "../../context/context";
 
 export default class GrommetDetailGenerator
   implements DetailGenerator {

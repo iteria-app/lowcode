@@ -2,11 +2,11 @@ import ts, { factory } from "typescript";
 import { PageComponent } from "../../react-components/react-component-helper";
 import { DetailGenerator } from "./detail-generator-factory";
 import { DetailComponentDefinitionBase } from "../../../definition/detail-definition-core";
-import GenerationContext from "../../context";
+import GenerationContext from "../../context/context";
 import { Formatter } from "../../../definition/context-types";
 import { MuiDetailComponents } from "../../../definition/material-ui/detail";
 import { Entity, getProperties, Property } from "../../entity";
-import { getPropertyType, PropertyType } from "../../typeAlias";
+import { getPropertyType, PropertyType } from "../../graphql/typeAlias";
 import {
   createImportDeclaration,
   createNameSpaceImport,

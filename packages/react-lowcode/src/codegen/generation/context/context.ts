@@ -1,5 +1,5 @@
-import { TableType, UiFramework, Formatter } from '../definition/context-types'
-import { Naming } from './interfaces/naming';
+import { TableType, UiFramework, Formatter } from '../../definition/context-types'
+import { Naming } from '../interfaces/naming';
 
 export default interface GenerationContext {
     formatter?: Formatter,

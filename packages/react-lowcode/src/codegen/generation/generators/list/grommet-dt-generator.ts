@@ -3,7 +3,7 @@ import { createFunctionalComponent, createJsxElement, PageComponent, createJsxSe
 import { Entity, getProperties, Property } from '../../entity/index'
 import { TableGenerator } from './table-generator-factory'
 import { TableComponentDefinitionBase } from '../../../definition/table-definition-core'
-import GenerationContext from "../../context"
+import GenerationContext from "../../context/context"
 import { GrommetDtTableComponents } from '../../../definition/grommet/table'
 import { Formatter } from "../../../definition/context-types"
 import { GeneratorHelper } from "../helper"
