@@ -3,7 +3,7 @@ import { Project, SourceFile } from "ts-morph"
 import ts, { factory } from "typescript"
 import { graphqlGenTs1 } from "../typeAlias.example"
 import { UiFramework, TableType, Formatter } from '../../definition/context-types'
-import { ModuleGenerator } from '../../generation/generators/app-generator'
+import { AppGenerator } from '../../generation/generators/app-generator'
 import { createAst, parseGraphqlTypes, sourceFileEntity } from "../helper"
 
   test(".mui formik generation", () => {
@@ -12,7 +12,7 @@ import { createAst, parseGraphqlTypes, sourceFileEntity } from "../helper"
       const testEntity = sourceFileEntity(myClassFile)
 
       let generationContext = {formatter: Formatter.Intl, uiFramework: UiFramework.MaterialUI, tableType: TableType.BasicTable, entity: testEntity!!};
-      let generator = new ModuleGenerator(generationContext , testEntity!!);
+      let generator = new AppGenerator(generationContext , testEntity!!);
 
       const page = generator.generateDetailPage()
       
@@ -27,7 +27,7 @@ import { createAst, parseGraphqlTypes, sourceFileEntity } from "../helper"
     const testEntity = sourceFileEntity(myClassFile)
 
     let generationContext = {useFormatter:false, uiFramework: UiFramework.Grommet, tableType: TableType.BasicTable, entity: testEntity!!};
-    let generator = new ModuleGenerator(generationContext , testEntity!!);
+    let generator = new AppGenerator(generationContext , testEntity!!);
 
     const page = generator.generateDetailPage()
     

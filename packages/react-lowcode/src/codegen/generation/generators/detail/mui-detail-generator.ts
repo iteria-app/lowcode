@@ -14,22 +14,32 @@ import {
 } from "../../ts/imports";
 import ReactIntlFormatter from "../../react-components/react-intl/intl-formatter";
 import { InputType } from "./input-types";
+import { WidgetContext } from "../../context/widget-context"
+import { SourceLineCol } from "../../../../ast"
 
 export default class MuiDetailGenerator implements DetailGenerator {
   private _imports: ts.ImportDeclaration[] = [];
   private _context: GenerationContext;
   private _entity: Entity;
+  private _widgetContext: WidgetContext | undefined;
   private _intlFormatter: ReactIntlFormatter;
 
-  constructor(generationContext: GenerationContext, entity: Entity) {
+  constructor(generationContext: GenerationContext, entity: Entity, widgetContext?: WidgetContext) {
     this._context = generationContext;
     this._entity = entity;
+    this._widgetContext = widgetContext;
     this._intlFormatter = new ReactIntlFormatter(
       generationContext,
       this._imports
     );
   }
 
+  insertFormWidget(position: SourceLineCol, property: Property, columnIndex?: number) {
+    if(this._widgetContext){
+      let sourceCode = this._widgetContext.getSourceCode(position)
+    }
+  }
+  
   getDetailDefinition(): DetailComponentDefinitionBase {
     return MuiDetailComponents;
   }
