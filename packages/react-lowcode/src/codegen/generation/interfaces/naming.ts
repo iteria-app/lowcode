@@ -8,7 +8,7 @@ export interface Naming {
     getDetailComponentFileName(entityName: string): string
 }
 
-export class LowcodeNaming implements Naming {
+export class CodegenNaming implements Naming {
     getDetailComponentName(entityName: string): string {
         return `${entityName}DetailComponent`
     }

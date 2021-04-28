@@ -9,6 +9,7 @@ import { Formatter } from "../../../definition/context-types"
 import { GeneratorHelper } from "../helper"
 import ReactIntlFormatter from "../../react-components/react-intl/intl-formatter"
 import { uniqueImports } from "../../ts/imports"
+import { SourceLineCol } from "../../../../ast"
 
 export default class GrommetDataTableGenerator implements TableGenerator 
 {
@@ -23,6 +24,9 @@ export default class GrommetDataTableGenerator implements TableGenerator
        this._context = generationContext
        this._entity = entity
        this._intlFormatter = new ReactIntlFormatter(generationContext, this._imports)
+    }
+    insertColumn(componentPosition: SourceLineCol, property: Property, columnIndex?: number) {
+        throw new Error("Method not implemented.")
     }
 
     getTableDefinition() : TableComponentDefinitionBase {

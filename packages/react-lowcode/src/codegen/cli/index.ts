@@ -7,7 +7,7 @@ import ts, {factory} from 'typescript'
 
 import { graphqlGenTs1 } from "../tests/typeAlias.example"
 import { Formatter, TableType, UiFramework } from "../definition/context-types"
-import { ModuleGenerator } from "../generation/generators/module-generator"
+import { AppGenerator } from "../generation/generators/app-generator"
 import { createAst, parseGraphqlTypes, sourceFileEntity } from "../tests/helper"
 
 const args = yargs.options({
@@ -30,7 +30,7 @@ class LocalCodegenCli{
         let tableType : TableType = (<any>TableType)[args['table']];
         
         let generationContext = {uiFramework: uif, formatter: formatter, index: {tableType: tableType, height: "400px"}};
-        let generator = new ModuleGenerator(generationContext, testEntity!!);
+        let generator = new AppGenerator(generationContext, testEntity!!);
   
         const page = generator.generateIndexPage()
         
@@ -52,7 +52,7 @@ class LocalCodegenCli{
         let tableType : TableType = (<any>TableType)[args['table']];
         
         let generationContext = {uiFramework: uif, formatter: formatter, index: {tableType: tableType, height: "400px"}};
-        let generator = new ModuleGenerator(generationContext, testEntity!!);
+        let generator = new AppGenerator(generationContext, testEntity!!);
   
         const page = generator.generateDetailPage()
         

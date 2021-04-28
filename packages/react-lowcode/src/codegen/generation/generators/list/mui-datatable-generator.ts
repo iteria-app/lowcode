@@ -10,6 +10,8 @@ import { Formatter } from "../../../definition/context-types"
 import { createNameSpaceImport, uniqueImports } from "../../ts/imports"
 import { GeneratorHelper } from "../helper"
 import ReactIntlFormatter from "../../react-components/react-intl/intl-formatter"
+import { WidgetContext } from "../../context/widget-context"
+import { SourceLineCol } from "../../../../ast"
 
 export default class MuiDataTableGenerator implements TableGenerator 
 {
@@ -18,12 +20,20 @@ export default class MuiDataTableGenerator implements TableGenerator
     private _context: GenerationContext
     private _entity: Entity
     private _intlFormatter: ReactIntlFormatter
+    private _widgetContext: WidgetContext | undefined
 
-    constructor(generationContext: GenerationContext, entity: Entity) {
+    constructor(generationContext: GenerationContext, entity: Entity, widgetContext?: WidgetContext,) {
        this._helper = new GeneratorHelper(generationContext, entity)
        this._context = generationContext
        this._entity = entity
+       this._widgetContext = widgetContext
        this._intlFormatter = new ReactIntlFormatter(generationContext, this._imports)
+    }
+  
+    insertColumn(position: SourceLineCol, property: Property, columnIndex?: number) {
+      if(this._widgetContext){
+        let sourceCode = this._widgetContext.getSourceCode(position)
+      }
     }
     
     generateTableComponent(): PageComponent {

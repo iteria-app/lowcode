@@ -1,7 +1,7 @@
 import ts, { factory } from "typescript"
 import { graphqlGenTs1 } from "../typeAlias.example"
 import { Formatter, TableType, UiFramework } from '../../definition/context-types'
-import { ModuleGenerator } from '../../generation/generators/module-generator'
+import { AppGenerator } from '../../generation/generators/app-generator'
 
 import {generatePages} from '../../index'
 import { CodeDir, CodeRW } from "../../../io"
@@ -46,7 +46,7 @@ describe("table generation", () => {
       const testEntity = sourceFileEntity(myClassFile)
 
       let generationContext = {uiFramework: UiFramework.MaterialUI, formatter: Formatter.None, index: {tableType: TableType.BasicTable, height: "400px"}};
-      let generator = new ModuleGenerator(generationContext, testEntity!!);
+      let generator = new AppGenerator(generationContext, testEntity!!);
 
       const page = generator.generateIndexPage()
       
@@ -69,7 +69,7 @@ describe("table generation", () => {
     const testEntity = sourceFileEntity(myClassFile)
 
     let generationContext = {uiFramework: UiFramework.MaterialUI, formatter: Formatter.Intl, index: {tableType: TableType.BasicTable, height: "400px"}};
-    let generator = new ModuleGenerator(generationContext, testEntity!!);
+    let generator = new AppGenerator(generationContext, testEntity!!);
 
     const page = generator.generateIndexPage()
     
@@ -92,7 +92,7 @@ test(".grommet table generation without formatting", () => {
   const testEntity = sourceFileEntity(myClassFile)
 
   let generationContext = {uiFramework: UiFramework.Grommet, formatter: Formatter.None, index: {tableType: TableType.BasicTable, height: "400px"}};
-  let generator = new ModuleGenerator(generationContext, testEntity!!);
+  let generator = new AppGenerator(generationContext, testEntity!!);
 
   const page = generator.generateIndexPage()
   
@@ -115,7 +115,7 @@ test(".grommet table generation without formatting", () => {
   const testEntity = sourceFileEntity(myClassFile)
 
   let generationContext = {uiFramework: UiFramework.Grommet, formatter: Formatter.Intl, index: {tableType: TableType.BasicTable, height: "400px"}};
-  let generator = new ModuleGenerator(generationContext, testEntity!!);
+  let generator = new AppGenerator(generationContext, testEntity!!);
 
   const page = generator.generateIndexPage()
 
@@ -138,7 +138,7 @@ test(".grommet table generation without formatting", () => {
       const testEntity = sourceFileEntity(myClassFile)
 
       let generationContext = {uiFramework: UiFramework.MaterialUI, formatter: Formatter.None, index: {tableType: TableType.DataTable, height: "400px"}};
-      let generator = new ModuleGenerator(generationContext, testEntity!!);
+      let generator = new AppGenerator(generationContext, testEntity!!);
 
       const page = generator.generateIndexPage()
       
@@ -153,7 +153,7 @@ test(".grommet table generation without formatting", () => {
       const testEntity = sourceFileEntity(myClassFile)
 
       let generationContext = {uiFramework: UiFramework.MaterialUI, formatter: Formatter.Intl, index: {tableType: TableType.DataTable, height: "400px"}};
-      let generator = new ModuleGenerator(generationContext, testEntity!!);
+      let generator = new AppGenerator(generationContext, testEntity!!);
 
       const page = generator.generateIndexPage()
       
@@ -168,7 +168,7 @@ test(".grommet table generation without formatting", () => {
       const testEntity = sourceFileEntity(myClassFile)
 
       let generationContext = {uiFramework: UiFramework.Grommet, formatter: Formatter.None, index: {tableType: TableType.DataTable, height: "400px"}};
-      let generator = new ModuleGenerator(generationContext, testEntity!!);
+      let generator = new AppGenerator(generationContext, testEntity!!);
 
       const page = generator.generateIndexPage()
       
@@ -183,7 +183,7 @@ test(".grommet table generation without formatting", () => {
     const testEntity = sourceFileEntity(myClassFile)
 
     let generationContext = {uiFramework: UiFramework.Grommet, formatter: Formatter.Intl, index: {tableType: TableType.DataTable, height: "400px"}};
-    let generator = new ModuleGenerator(generationContext, testEntity!!);
+    let generator = new AppGenerator(generationContext, testEntity!!);
 
     const page = generator.generateIndexPage()
     

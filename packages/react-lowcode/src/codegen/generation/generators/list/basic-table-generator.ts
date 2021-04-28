@@ -10,6 +10,7 @@ import { Formatter, UiFramework } from "../../../definition/context-types"
 import { uniqueImports } from "../../ts/imports"
 import { GeneratorHelper } from "../helper"
 import ReactIntlFormatter from "../../react-components/react-intl/intl-formatter"
+import { SourceLineCol } from "../../../../ast"
 
 export class BasicTableGenerator implements TableGenerator
 {
@@ -20,10 +21,13 @@ export class BasicTableGenerator implements TableGenerator
     private _intlFormatter: ReactIntlFormatter
 
     constructor(generationContext: GenerationContext, entity: Entity) {
-         this._helper = new GeneratorHelper(generationContext, entity)
+       this._helper = new GeneratorHelper(generationContext, entity)
        this._context = generationContext
        this._entity = entity
        this._intlFormatter = new ReactIntlFormatter(generationContext, this._imports)
+    }
+    insertColumn(componentPosition: SourceLineCol, property: Property, columnIndex?: number) {
+        throw new Error("Method not implemented.")
     }
 
     generateTableComponent(): PageComponent {

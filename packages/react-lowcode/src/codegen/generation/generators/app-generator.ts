@@ -4,7 +4,7 @@ import { TableGenerator, TableGeneratorFactory } from './list/table-generator-fa
 import { DetailGenerator, DetailGeneratorFactory } from './detail/detail-generator-factory'
 import { Entity } from '../entity';
 
-export class ModuleGenerator {
+export class AppGenerator {
     _context: GenerationContext;
     _entity: Entity;
   

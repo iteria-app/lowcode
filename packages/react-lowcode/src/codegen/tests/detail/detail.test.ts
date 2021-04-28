@@ -3,7 +3,7 @@ import { Project, SourceFile } from "ts-morph"
 import ts, { factory } from "typescript"
 import { graphqlGenTs1 } from "../typeAlias.example"
 import { UiFramework, TableType, Formatter } from '../../definition/context-types'
-import { ModuleGenerator } from '../../generation/generators/module-generator'
+import { ModuleGenerator } from '../../generation/generators/app-generator'
 import { createAst, parseGraphqlTypes, sourceFileEntity } from "../helper"
 
   test(".mui formik generation", () => {
