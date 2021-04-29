@@ -1,5 +1,7 @@
+import { Formatter, TableType, UiFramework } from "../../definition/context-types";
 import { Property } from "../../generation/entity";
 import { GeneratorFacade } from "../../generation/facade/facade-generator";
+import MuiDetailGenerator from "../../generation/generators/detail/mui-detail-generator";
 import { parseGraphqlTypes, sourceFileEntity } from "../helper";
 import { graphqlGenTs1 } from "../typeAlias.example";
 
@@ -22,7 +24,7 @@ describe("codegen facade", () => {
 
     test(".add widget to existing detail page", () => {
       let facade = new GeneratorFacade();
-      facade.insertFormWidget({lineNumber: 37,columnNumber: 0, fileName: 'C:\\Private\\mat-app\\lowcode\\packages\\react-lowcode\\src\\codegen\\tests\\list\\datail-test-file.ts'}, {entityField: getTestProperty('name')[0]})
+      facade.insertFormWidget({lineNumber: 37,columnNumber: 0, fileName: 'C:\\Private\\mat-app\\lowcode\\packages\\react-lowcode\\src\\codegen\\tests\\list\\datail-test-file-ast.txt'}, {entityField: getTestProperty('name')[0]})
 
     });
 })

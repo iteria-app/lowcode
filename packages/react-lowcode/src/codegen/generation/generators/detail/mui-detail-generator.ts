@@ -15,7 +15,8 @@ import {
 import ReactIntlFormatter from "../../react-components/react-intl/intl-formatter";
 import { InputType } from "./input-types";
 import { WidgetContext } from "../../context/widget-context"
-import { SourceLineCol } from "../../../../ast"
+import { createAst, SourceLineCol } from "../../../../ast"
+import { SourceFileContext } from "./page-context";
 
 export default class MuiDetailGenerator implements DetailGenerator {
   private _imports: ts.ImportDeclaration[] = [];
