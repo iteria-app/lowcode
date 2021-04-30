@@ -77,11 +77,67 @@ Budget.propTypes = {
 
 export default Budget;`
 
+const grommetSource = `import React from "react";
+import { Box, Text, Heading } from "grommet";
+import { StatusBadge } from ".";
+
+const statusColors:{[index: string]: string} = {
+  Off: "status-critical",
+  Suspended: "status-warning",
+  On: "status-ok"
+};
+
+
+interface VirtualMachinesCardProps {
+  data: {
+    name: string,
+    count: number,
+    On: number,
+    Off: number,
+    Suspended: number
+  };
+}
+
+export const VirtualMachinesCard: React.FC<VirtualMachinesCardProps> = ({ data, ...rest }) => (
+  <Box round pad="medium" direction="column" background="white" {...rest}>
+    <Heading level="2" margin="none" size="small">
+      {data.name}
+    </Heading>
+    <Text size="90px" weight="bold">
+      {data.count}
+    </Text>
+    <Box gap="medium" pad={{ vertical: "small" }}>
+      {["On", "Suspended", "Off"].map(status => (
+        <Box direction="row" align="center" key={status}>
+          <StatusBadge size="xlarge" background={statusColors[status]} />
+          <Box pad="xsmall">
+            <Text size="small" color="dark-1" margin={{ left: "xsmall" }}>
+              {status} ({data[status as 'On'|'Off'|'Suspended']})
+            </Text>
+          </Box>
+        </Box>
+      ))}
+    </Box>
+  </Box>
+);
+`
+
 test("should remove element from source code", () => {
   const sourceFile = removeElementInAst(sourceCode, {
     columnNumber: 13,
     fileName: "/src/views/reports/DashboardView/Budget.tsx",
     lineNumber: 47,
+  })
+  if (!sourceFile) return
+  const printer = ts.createPrinter()
+  console.log(printer.printFile(sourceFile))
+})
+
+test("should replace element with <span> when removing top most element from layout", () => {
+  const sourceFile = removeElementInAst(grommetSource, {
+    lineNumber: 23,
+    columnNumber: 3,
+    fileName: "/src/components/VirtualMachinesCard.tsx",
   })
   if (!sourceFile) return
   const printer = ts.createPrinter()

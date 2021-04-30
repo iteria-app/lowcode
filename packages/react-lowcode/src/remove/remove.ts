@@ -1,3 +1,4 @@
+import ts from "typescript"
 import {
   getAstAndNodeFromSource,
   removeElementFromAst,
@@ -13,7 +14,12 @@ export const removeElementInAst = (code: string, source: SourceLineCol) => {
     return alert(
       "You are trying to remove element which is inside map function, this could remove multiple elements on this page"
     )
-
   const alteredAst = removeElementFromAst(ast, node.pos)
   return alteredAst
 }
+
+export const isTopMostElementInReturnedLayout = (node: ts.Node) =>
+  (ts.isParenthesizedExpression(node.parent) &&
+    ts.isReturnStatement(node.parent.parent)) ||
+  (ts.isParenthesizedExpression(node.parent) &&
+    ts.isArrowFunction(node.parent.parent))
