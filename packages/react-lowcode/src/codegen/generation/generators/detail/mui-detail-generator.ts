@@ -37,6 +37,8 @@ export default class MuiDetailGenerator implements DetailGenerator {
   insertFormWidget(position: SourceLineCol, property: Property, columnIndex?: number) {
     if(this._widgetContext){
       let sourceCode = this._widgetContext.getSourceCode(position)
+      let node = sourceCode?.getChildren();
+      //let ast = createAst(sourceCode)
     }
   }
   

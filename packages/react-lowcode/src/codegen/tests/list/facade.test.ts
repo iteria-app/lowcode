@@ -24,7 +24,7 @@ describe("codegen facade", () => {
 
     test(".add widget to existing detail page", () => {
       let facade = new GeneratorFacade();
-      facade.insertFormWidget({lineNumber: 38,columnNumber: 19, fileName: 'D:\\Dev\\LowCode\\lowcode-fork\\lowcode\\packages\\react-lowcode\\src\\codegen\\tests\\list\\datail-test-file.txt'}, {entityField: getTestProperty('name')[0]})
+      facade.insertFormWidget({lineNumber: 38,columnNumber: 19, fileName: 'C:\\Private\\mat-app\\lowcode\\packages\\react-lowcode\\src\\codegen\\tests\\list\\detail-test-file.txt'}, {entityField: getTestProperty('name')[0]})
 
     });
 })
