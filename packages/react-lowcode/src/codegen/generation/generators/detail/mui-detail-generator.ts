@@ -1,4 +1,4 @@
-import ts, { factory } from "typescript";
+import ts, { factory, SourceFile } from "typescript";
 import { PageComponent } from "../../react-components/react-component-helper";
 import { DetailGenerator } from "./detail-generator-factory";
 import { DetailComponentDefinitionBase } from "../../../definition/detail-definition-core";
@@ -14,8 +14,13 @@ import {
 } from "../../ts/imports";
 import ReactIntlFormatter from "../../react-components/react-intl/intl-formatter";
 import { InputType } from "./input-types";
-import { WidgetContext } from "../../context/widget-context"
-import { createAst, SourceLineCol } from "../../../../ast"
+import { WidgetContext } from "../../context/widget-context";
+import {
+  createAst,
+  replaceElementsToAST,
+  SourceLineCol,
+} from "../../../../ast";
+import { findVariableDeclarations } from "../../ts/ast";
 
 export default class MuiDetailGenerator implements DetailGenerator {
   private _imports: ts.ImportDeclaration[] = [];
@@ -24,7 +29,11 @@ export default class MuiDetailGenerator implements DetailGenerator {
   private _widgetContext: WidgetContext | undefined;
   private _intlFormatter: ReactIntlFormatter;
 
-  constructor(generationContext: GenerationContext, entity: Entity, widgetContext?: WidgetContext) {
+  constructor(
+    generationContext: GenerationContext,
+    entity: Entity,
+    widgetContext?: WidgetContext
+  ) {
     this._context = generationContext;
     this._entity = entity;
     this._widgetContext = widgetContext;
@@ -34,14 +43,92 @@ export default class MuiDetailGenerator implements DetailGenerator {
     );
   }
 
-  insertFormWidget(position: SourceLineCol, property: Property, columnIndex?: number) {
-    if(this._widgetContext){
-      let sourceCode = this._widgetContext.getSourceCode(position)
-      let node = sourceCode?.getChildren();
-      //let ast = createAst(sourceCode)
+  insertFormWidget(
+    position: SourceLineCol,
+    property: Property,
+    columnIndex?: number
+  ) {
+    let alteredSource = "";
+    if (this._widgetContext) {
+      let sourceCode = this._widgetContext.getSourceCodeString(position);
+      let ast = createAst(sourceCode);
+
+      if (ast) {
+        let widgetParentNode = this._widgetContext.findWidgetParentNode(
+          sourceCode,
+          position
+        );
+
+        if (widgetParentNode) {
+          let gridDeclarationNode = this.findGridDeclaration(widgetParentNode);
+
+          if (gridDeclarationNode) {
+            let gridDeclarationArray = gridDeclarationNode.getChildAt(
+              2
+            ) as ts.ArrayLiteralExpression;
+
+            if (gridDeclarationArray) {
+              ast = this.addNewField(gridDeclarationArray, property, ast);
+            }
+          }
+        }
+
+        alteredSource = this.printSourceCode(ast);
+        console.log(alteredSource);
+      }
     }
   }
-  
+
+  private addNewField(
+    gridDeclarationParent: ts.ArrayLiteralExpression,
+    property: Property,
+    ast: SourceFile
+  ): ts.SourceFile {
+    let newField = this.createTextFieldElement("xxx", "xxx", InputType.text)
+
+    let newElements = [...gridDeclarationParent.elements, newField];
+
+    return replaceElementsToAST(
+      ast,
+      gridDeclarationParent.pos,
+      factory.createArrayLiteralExpression(newElements)
+    );
+  }
+
+  private getUsedFormatter(
+    columnsDefinition: ts.ArrayLiteralExpression
+  ): Formatter {
+    return columnsDefinition.elements.length === 0
+      ? Formatter.None
+      : (columnsDefinition.elements[0] as ts.ObjectLiteralExpression).properties
+          .length > 3
+      ? Formatter.Intl
+      : Formatter.None;
+  }
+  private printSourceCode(sourceFile: SourceFile): string {
+    const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed });
+    return printer.printFile(sourceFile);
+  }
+
+  private findGridDeclaration(
+    widgetParent: ts.Node
+  ): ts.VariableDeclaration | undefined {
+    let array: ts.VariableDeclaration[] = [];
+    findVariableDeclarations(widgetParent, array);
+
+    if (array.length > 0) {
+      let gridDeclaration = array.filter((def: ts.VariableDeclaration) => {
+        return def.getChildAt(0).getFullText().trim() === "Grid";
+      });
+
+      if (gridDeclaration && gridDeclaration.length > 0) {
+        return gridDeclaration[0] as ts.VariableDeclaration;
+      }
+    }
+
+    return undefined;
+  }
+
   getDetailDefinition(): DetailComponentDefinitionBase {
     return MuiDetailComponents;
   }
@@ -539,9 +626,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
           ),
         ])
       ),
-      [
-        formik,
-      ],
+      [formik],
       factory.createJsxClosingElement(factory.createIdentifier("div"))
     );
   }
