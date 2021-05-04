@@ -1,4 +1,6 @@
 import { astFindSource, SourceLineCol } from "../../../ast";
+import ts, { factory } from "typescript"
+
 
 export interface Node {
     getText(includeJsDocComments?: boolean): string;
@@ -42,6 +44,18 @@ export function findWidgetDefinition(code: string, position: SourceLineCol){
     }
 }
 
-function findStartOfWidgetDefinition(code:string, position: SourceLineCol){
-    
+export function findVariableDeclarations(parentNode: ts.Node, array: ts.VariableDeclaration[]) {
+    if(parentNode != undefined){
+        if(ts.isVariableDeclaration(parentNode)){
+            array.push(parentNode)
+        }
+        else if(parentNode.getChildCount() > 0){
+            var children = parentNode.getChildren()
+            children.forEach((child) => {
+                findVariableDeclarations(child, array)
+            });
+        }
+    }
 }
+
+

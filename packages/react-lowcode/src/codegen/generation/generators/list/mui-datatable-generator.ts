@@ -1,4 +1,4 @@
-import ts, { factory } from "typescript"
+import ts, { factory, SourceFile } from "typescript"
 import { getPropertyType, PropertyType } from '../../graphql/typeAlias'
 import { createFunctionalComponent, PageComponent, createJsxSelfClosingElement, createJsxAttribute } from '../../react-components/react-component-helper'
 import { Entity, getProperties, Property } from '../../entity/index'
@@ -11,7 +11,8 @@ import { createNameSpaceImport, uniqueImports } from "../../ts/imports"
 import { GeneratorHelper } from "../helper"
 import ReactIntlFormatter from "../../react-components/react-intl/intl-formatter"
 import { WidgetContext } from "../../context/widget-context"
-import { SourceLineCol } from "../../../../ast"
+import { createAst, replaceElementsToAST, SourceLineCol } from "../../../../ast"
+import { findVariableDeclarations } from "../../ts/ast"
 
 export default class MuiDataTableGenerator implements TableGenerator 
 {
@@ -30,10 +31,74 @@ export default class MuiDataTableGenerator implements TableGenerator
        this._intlFormatter = new ReactIntlFormatter(generationContext, this._imports)
     }
   
-    insertColumn(position: SourceLineCol, property: Property, columnIndex?: number) {
+    insertColumn(position: SourceLineCol, property: Property, columnIndex?: number): string {
+      let alteredSource = ''
       if(this._widgetContext){
-        let sourceCode = this._widgetContext.getSourceCode(position)
+        let sourceCode = this._widgetContext.getSourceCodeString(position)
+        let ast = createAst(sourceCode)
+
+        if(ast){
+          let widgetParentNode = this._widgetContext.findWidgetParentNode(sourceCode, position)
+
+          if(widgetParentNode)
+          {
+            let columnsDeclarationNode = this.findColumnsDeclaration(widgetParentNode)
+
+            if(columnsDeclarationNode){
+              let columnDeclarationArray = columnsDeclarationNode.getChildAt(2) as ts.ArrayLiteralExpression
+
+              if(columnDeclarationArray){
+                ast = this.addNewColumn(columnDeclarationArray, property, ast)
+              }
+            }
+          }
+
+          alteredSource = this.printSourceCode(ast)
+          console.log(alteredSource)
+        }
       }
+
+      return alteredSource
+    }
+
+    private computePositionForNewColumn(columnsDefinition: ts.ArrayLiteralExpression, columnIndex?: number){
+      
+    }
+
+    private printSourceCode(sourceFile: SourceFile): string{
+      const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
+      return printer.printFile(sourceFile)
+    }
+
+    private addNewColumn(columnDeclarationParent: ts.ArrayLiteralExpression, property: Property, ast:SourceFile): ts.SourceFile{
+        let newColumn = this.createColumnDefinition(property, this.getUsedFormatter(columnDeclarationParent))
+        let newElements = [...columnDeclarationParent.elements , newColumn]
+       
+        return replaceElementsToAST(ast, columnDeclarationParent.pos, factory.createArrayLiteralExpression(newElements))
+    }
+
+    private getUsedFormatter(columnsDefinition: ts.ArrayLiteralExpression): Formatter {
+        return columnsDefinition.elements.length === 0 ? Formatter.None 
+                                                       : (columnsDefinition.elements[0] as ts.ObjectLiteralExpression).properties.length > 3 
+                                                          ? Formatter.Intl 
+                                                          : Formatter.None
+    }
+
+    private findColumnsDeclaration(widgetParent: ts.Node): ts.VariableDeclaration | undefined{
+      let array: ts.VariableDeclaration[] = []
+      findVariableDeclarations(widgetParent, array)
+
+       if(array.length > 0){
+         let columnDeclaration = array.filter((def: ts.VariableDeclaration) => {
+           return def.getChildAt(0).getFullText().trim() === 'columns'
+         });
+        
+         if(columnDeclaration && columnDeclaration.length > 0){
+           return columnDeclaration[0] as ts.VariableDeclaration
+         }
+       }
+
+       return undefined
     }
     
     generateTableComponent(): PageComponent {
@@ -128,7 +193,7 @@ export default class MuiDataTableGenerator implements TableGenerator
       let propertiesColumnDefinitions = Array<ts.ObjectLiteralExpression>()
 
       getProperties(this._entity).forEach(property => {
-        propertiesColumnDefinitions.push(this.createColumnDefinition(property))
+        propertiesColumnDefinitions.push(this.createColumnDefinition(property, this._context.formatter??Formatter.None))
       });
 
       return factory.createVariableDeclarationList(
@@ -145,7 +210,7 @@ export default class MuiDataTableGenerator implements TableGenerator
       )
     }
 
-    private createColumnDefinition(property: Property): ts.ObjectLiteralExpression {
+    private createColumnDefinition(property: Property, formatter: Formatter): ts.ObjectLiteralExpression {
       let propertyName = property.getName()
       let propType: PropertyType = getPropertyType(property)
       let muiColumnType = 'string'
@@ -178,7 +243,7 @@ export default class MuiDataTableGenerator implements TableGenerator
         )
       ];
 
-      if(this._context.formatter === Formatter.Intl){
+      if(formatter === Formatter.Intl){
         properties.push(factory.createPropertyAssignment(
           factory.createIdentifier("valueFormatter"),
           this.getValueFormatter(property)

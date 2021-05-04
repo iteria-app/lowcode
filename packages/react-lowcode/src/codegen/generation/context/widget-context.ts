@@ -11,17 +11,11 @@ export class WidgetContext{
         this._sourceFileContext = sourceFileContext;
     }
 
-    getSourceCode(position: SourceLineCol): ts.Node  | null | undefined{
-        let sourceCode = this._sourceFileContext.getSourceCode();
-
-        if(sourceCode != undefined && sourceCode.length > 0){
-            let widgetDeclarationNode = this.findWidgetDeclaration(sourceCode, position)
-
-            return widgetDeclarationNode
-        }
+    getSourceCodeString(position: SourceLineCol): string{
+        return this._sourceFileContext.getSourceCode();
     }
 
-    findWidgetDeclaration(sourceCode:string, position: SourceLineCol): ts.Node  | null | undefined{
+    findWidgetParentNode(sourceCode:string, position: SourceLineCol): ts.Node  | null | undefined{
         let astCode = astFindSource(sourceCode, position)
 
         if(astCode){
@@ -46,10 +40,12 @@ export class WidgetContext{
     }
 
     isTableDeclaration(node: ts.Node): boolean{
+        ///TODO: check also for export key word
        return ts.isFunctionDeclaration(node)
     }
 
     isDetailDeclaration(node: ts.Node): boolean{
+        ///TODO: check also for export key word
         return ts.isVariableDeclaration(node)
     }
 }

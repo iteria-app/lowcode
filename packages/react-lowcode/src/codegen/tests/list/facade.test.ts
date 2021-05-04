@@ -9,7 +9,9 @@ import { graphqlGenTs1 } from "../typeAlias.example";
     const myClassFile = parseGraphqlTypes(graphqlGenTs1)
     const testEntity = sourceFileEntity(myClassFile)
     
-    let property = testEntity?.properties.filter(((prop)=> { prop.getName().toLowerCase() === name }))
+    let property = testEntity?.properties.filter(((prop)=> { 
+      return prop.getName().toLowerCase() === name 
+    }))
 
     return property ?? []
 }
