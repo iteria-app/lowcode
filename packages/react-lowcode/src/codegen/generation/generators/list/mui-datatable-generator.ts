@@ -31,7 +31,9 @@ export default class MuiDataTableGenerator implements TableGenerator
        this._intlFormatter = new ReactIntlFormatter(generationContext, this._imports)
     }
   
-    insertColumn(position: SourceLineCol, property: Property, columnIndex?: number): string {
+    insertColumn(position: SourceLineCol, 
+                 property: Property, 
+                 columnIndex?: number): string {
       let alteredSource = ''
       if(this._widgetContext){
         let sourceCode = this._widgetContext.getSourceCodeString(position)
@@ -48,7 +50,10 @@ export default class MuiDataTableGenerator implements TableGenerator
               let columnDeclarationArray = columnsDeclarationNode.getChildAt(2) as ts.ArrayLiteralExpression
 
               if(columnDeclarationArray){
-                ast = this.addNewColumn(columnDeclarationArray, property, ast, columnIndex)
+                ast = this.addNewColumn(columnDeclarationArray, 
+                                        property, 
+                                        ast, 
+                                        columnIndex)
               }
             }
           }
@@ -71,9 +76,13 @@ export default class MuiDataTableGenerator implements TableGenerator
                           ast:SourceFile,
                           columnIndex?: number): ts.SourceFile{
       
-        let newColumnsDefinition = this.getNewColumnsDeclaration(columnDeclarationParent, property, columnIndex)
+        let newColumnsDefinition = this.getNewColumnsDeclaration(columnDeclarationParent, 
+                                                                 property, 
+                                                                 columnIndex)
        
-        return replaceElementsToAST(ast, columnDeclarationParent.pos, factory.createArrayLiteralExpression(newColumnsDefinition))
+        return replaceElementsToAST(ast, 
+                                    columnDeclarationParent.pos, 
+                                    factory.createArrayLiteralExpression(newColumnsDefinition))
     }
 
     private getNewColumnsDeclaration(columnDeclarationParent: ts.ArrayLiteralExpression, 
@@ -85,7 +94,9 @@ export default class MuiDataTableGenerator implements TableGenerator
         let newColumnDefinition = this.createColumnDefinition(property, this.getUsedFormatter(columnDeclarationParent))
         
         if(columnIndex && columnIndex > 0 && columnIndex < oldElements.length + 1){
-          newElements = [...oldElements.slice(0, columnIndex-1), newColumnDefinition, ...oldElements.slice(columnIndex-1)]
+          newElements = [...oldElements.slice(0, columnIndex-1), 
+                         newColumnDefinition, 
+                         ...oldElements.slice(columnIndex-1)]
         }else{
           newElements = [...oldElements, newColumnDefinition]
         }
@@ -119,7 +130,9 @@ export default class MuiDataTableGenerator implements TableGenerator
     
     generateTableComponent(): PageComponent {
         var statements = this.createStatements();
-        var functionalComponent = createFunctionalComponent(this._helper.getComponentName(), [this._helper.createInputParameter()], statements);
+        var functionalComponent = createFunctionalComponent(this._helper.getComponentName(), 
+                                                            [this._helper.createInputParameter()], 
+                                                            statements);
 
         this._imports = [...this._imports, ...this._intlFormatter.getImports()]
 
