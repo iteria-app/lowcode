@@ -20,7 +20,7 @@ describe("codegen facade", () => {
  
     test(".add column to existing table", () => {
       let facade = new GeneratorFacade();
-      facade.insertColumn({lineNumber: 15,columnNumber: 73, fileName: 'C:\\Private\\mat-app\\lowcode\\packages\\react-lowcode\\src\\codegen\\tests\\list\\list-test-file.txt'}, {entityField: getTestProperty('name')[0]})
+      facade.insertColumn({lineNumber: 15,columnNumber: 73, fileName: 'D:\\Dev\\LowCode\\lowcode-fork\\lowcode\\packages\\react-lowcode\\src\\codegen\\tests\\list\\list-test-file.txt'}, {entityField: getTestProperty('name')[0], index:8})
 
     });
 

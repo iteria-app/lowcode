@@ -1,4 +1,4 @@
-import ts, { factory, SourceFile } from "typescript"
+import ts, { factory, NodeArray, SourceFile } from "typescript"
 import { getPropertyType, PropertyType } from '../../graphql/typeAlias'
 import { createFunctionalComponent, PageComponent, createJsxSelfClosingElement, createJsxAttribute } from '../../react-components/react-component-helper'
 import { Entity, getProperties, Property } from '../../entity/index'
@@ -48,7 +48,7 @@ export default class MuiDataTableGenerator implements TableGenerator
               let columnDeclarationArray = columnsDeclarationNode.getChildAt(2) as ts.ArrayLiteralExpression
 
               if(columnDeclarationArray){
-                ast = this.addNewColumn(columnDeclarationArray, property, ast)
+                ast = this.addNewColumn(columnDeclarationArray, property, ast, columnIndex)
               }
             }
           }
@@ -61,23 +61,39 @@ export default class MuiDataTableGenerator implements TableGenerator
       return alteredSource
     }
 
-    private computePositionForNewColumn(columnsDefinition: ts.ArrayLiteralExpression, columnIndex?: number){
-      
-    }
-
     private printSourceCode(sourceFile: SourceFile): string{
       const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
       return printer.printFile(sourceFile)
     }
 
-    private addNewColumn(columnDeclarationParent: ts.ArrayLiteralExpression, property: Property, ast:SourceFile): ts.SourceFile{
-        let newColumn = this.createColumnDefinition(property, this.getUsedFormatter(columnDeclarationParent))
-        let newElements = [...columnDeclarationParent.elements , newColumn]
+    private addNewColumn(columnDeclarationParent: ts.ArrayLiteralExpression, 
+                          property: Property, 
+                          ast:SourceFile,
+                          columnIndex?: number): ts.SourceFile{
+      
+        let newColumnsDefinition = this.getNewColumnsDeclaration(columnDeclarationParent, property, columnIndex)
        
-        return replaceElementsToAST(ast, columnDeclarationParent.pos, factory.createArrayLiteralExpression(newElements))
+        return replaceElementsToAST(ast, columnDeclarationParent.pos, factory.createArrayLiteralExpression(newColumnsDefinition))
     }
 
-    private getUsedFormatter(columnsDefinition: ts.ArrayLiteralExpression): Formatter {
+    private getNewColumnsDeclaration(columnDeclarationParent: ts.ArrayLiteralExpression, 
+      property: Property,
+      columnIndex?: number): ts.Expression[]{
+        let newElements: ts.Expression[] = []
+        let oldElements = columnDeclarationParent.elements
+        
+        let newColumnDefinition = this.createColumnDefinition(property, this.getUsedFormatter(columnDeclarationParent))
+        
+        if(columnIndex && columnIndex > 0 && columnIndex < oldElements.length + 1){
+          newElements = [...oldElements.slice(0, columnIndex-1), newColumnDefinition, ...oldElements.slice(columnIndex-1)]
+        }else{
+          newElements = [...oldElements, newColumnDefinition]
+        }
+
+        return newElements
+    }
+
+    private getUsedFormatter(columnsDefinition:  ts.ArrayLiteralExpression): Formatter {
         return columnsDefinition.elements.length === 0 ? Formatter.None 
                                                        : (columnsDefinition.elements[0] as ts.ObjectLiteralExpression).properties.length > 3 
                                                           ? Formatter.Intl 
