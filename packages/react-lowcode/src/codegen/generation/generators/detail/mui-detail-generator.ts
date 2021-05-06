@@ -60,12 +60,10 @@ export default class MuiDetailGenerator implements DetailGenerator {
         );
 
         if (widgetParentNode) {
-          let gridDeclarationNode = this.findGridDeclaration(widgetParentNode);
+          let formikDeclarationNode = this.findGridDeclaration(widgetParentNode);
 
-          if (gridDeclarationNode) {
-            let gridDeclarationArray = gridDeclarationNode.getChildAt(
-              2
-            ) as ts.ArrayLiteralExpression;
+          if (formikDeclarationNode) {
+            let gridDeclarationArray = formikDeclarationNode.getChildAt(1) as ts.ArrayLiteralExpression;
 
             if (gridDeclarationArray) {
               ast = this.addNewField(gridDeclarationArray, property, ast);
@@ -117,12 +115,13 @@ export default class MuiDetailGenerator implements DetailGenerator {
     findVariableDeclarations(widgetParent, array);
 
     if (array.length > 0) {
-      let gridDeclaration = array.filter((def: ts.VariableDeclaration) => {
+      let formikDeclaration = array.filter((def: ts.VariableDeclaration) => {
         return def.getChildAt(0).getFullText().trim() === "formik";
       });
-
-      if (gridDeclaration && gridDeclaration.length > 0) {
-        return gridDeclaration[0] as ts.VariableDeclaration;
+      let formikPropertyAssigment = formikDeclaration[0].getChildAt(0).parent.getChildAt(2).getChildAt(2).getChildAt(0).getChildAt(1).getChildAt(0).getChildAt(2)
+      
+      if (formikPropertyAssigment) {
+        return formikPropertyAssigment as ts.VariableDeclaration;
       }
     }
 
