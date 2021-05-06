@@ -118,7 +118,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
 
     if (array.length > 0) {
       let gridDeclaration = array.filter((def: ts.VariableDeclaration) => {
-        return def.getChildAt(0).getFullText().trim() === "Grid";
+        return def.getChildAt(0).getFullText().trim() === "formik";
       });
 
       if (gridDeclaration && gridDeclaration.length > 0) {
