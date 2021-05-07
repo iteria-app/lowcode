@@ -59,4 +59,32 @@ export function findVariableDeclarations(parentNode: ts.Node, array: ts.Variable
     }
 }
 
+export function findObjectLiteralExpression(parentNode: ts.Node, array: ts.ObjectLiteralExpression[]) {
+    if(parentNode != undefined){
+        if(ts.isObjectLiteralExpression(parentNode)){
+            array.push(parentNode)
+        }
+        
+        if(parentNode.getChildCount() > 0){
+            var children = parentNode.getChildren()
+            children.forEach((child) => {
+                findObjectLiteralExpression(child, array)
+            });
+        }
+    }
+}
+
+export function findPropertyAssignment(parentNode: ts.Node, array: ts.PropertyAssignment[]) {
+    if(parentNode != undefined){
+        if(parentNode.getChildCount() > 0){
+            var children = parentNode.getChildren()
+            children.forEach((child) => {
+                if(ts.isPropertyAssignment(child)){
+                    array.push(child);
+                }
+            });
+        }
+    }
+}
+
 

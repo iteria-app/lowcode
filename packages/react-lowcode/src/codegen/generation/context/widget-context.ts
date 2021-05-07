@@ -32,7 +32,7 @@ export class WidgetContext{
             console.log('cannot find widget element')
         }
 
-        return null
+        return undefined
     }
 
     isWidgetDeclaration(node: ts.Node){

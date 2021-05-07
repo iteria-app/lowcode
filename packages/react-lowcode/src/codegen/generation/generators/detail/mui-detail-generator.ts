@@ -1,4 +1,4 @@
-import ts, { factory, SourceFile } from "typescript";
+import ts, { factory, ObjectLiteralExpression, SourceFile } from "typescript";
 import { PageComponent } from "../../react-components/react-component-helper";
 import { DetailGenerator } from "./detail-generator-factory";
 import { DetailComponentDefinitionBase } from "../../../definition/detail-definition-core";
@@ -18,9 +18,10 @@ import { WidgetContext } from "../../context/widget-context";
 import {
   createAst,
   replaceElementsToAST,
+  addElementsToAST,
   SourceLineCol,
 } from "../../../../ast";
-import { findVariableDeclarations } from "../../ts/ast";
+import { findVariableDeclarations, findObjectLiteralExpression,findPropertyAssignment } from "../../ts/ast";
 
 export default class MuiDetailGenerator implements DetailGenerator {
   private _imports: ts.ImportDeclaration[] = [];
@@ -45,8 +46,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
 
   insertFormWidget(
     position: SourceLineCol,
-    property: Property,
-    columnIndex?: number
+    property: Property
   ) {
     let alteredSource = "";
     if (this._widgetContext) {
@@ -63,11 +63,12 @@ export default class MuiDetailGenerator implements DetailGenerator {
           let formikDeclarationNode = this.findGridDeclaration(widgetParentNode);
 
           if (formikDeclarationNode) {
-            let gridDeclarationArray = formikDeclarationNode.getChildAt(1) as ts.ArrayLiteralExpression;
+            let propertyAssigmentArray: ts.PropertyAssignment[] = []; 
+            findPropertyAssignment(formikDeclarationNode.getChildAt(1), propertyAssigmentArray);
 
-            if (gridDeclarationArray) {
-              ast = this.addNewField(gridDeclarationArray, property, ast);
-            }
+             if (propertyAssigmentArray) {
+               ast = this.addNewField(formikDeclarationNode, propertyAssigmentArray, property, ast);
+             }
           }
         }
 
@@ -78,18 +79,18 @@ export default class MuiDetailGenerator implements DetailGenerator {
   }
 
   private addNewField(
-    gridDeclarationParent: ts.ArrayLiteralExpression,
+    ole: ObjectLiteralExpression,
+    propertyAssignmentArray: ts.PropertyAssignment[],
     property: Property,
     ast: SourceFile
   ): ts.SourceFile {
-    let newField = this.createTextFieldElement("xxx", "xxx", InputType.text)
 
-    let newElements = [...gridDeclarationParent.elements, newField];
-
+    let newField = this.tryCreateInitialValueForProperty(property)
+    let newElements: ts.PropertyAssignment[] = [...propertyAssignmentArray, newField] as ts.PropertyAssignment[];
     return replaceElementsToAST(
       ast,
-      gridDeclarationParent.pos,
-      factory.createArrayLiteralExpression(newElements)
+      ole.pos,
+      factory.createObjectLiteralExpression(newElements, false)
     );
   }
 
@@ -110,7 +111,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
 
   private findGridDeclaration(
     widgetParent: ts.Node
-  ): ts.VariableDeclaration | undefined {
+  ): ts.ObjectLiteralExpression | undefined {
     let array: ts.VariableDeclaration[] = [];
     findVariableDeclarations(widgetParent, array);
 
@@ -118,10 +119,12 @@ export default class MuiDetailGenerator implements DetailGenerator {
       let formikDeclaration = array.filter((def: ts.VariableDeclaration) => {
         return def.getChildAt(0).getFullText().trim() === "formik";
       });
-      let formikPropertyAssigment = formikDeclaration[0].getChildAt(0).parent.getChildAt(2).getChildAt(2).getChildAt(0).getChildAt(1).getChildAt(0).getChildAt(2)
+
+      let arrayOle: ts.ObjectLiteralExpression[] = [];
+      findObjectLiteralExpression(formikDeclaration[0], arrayOle); 
       
-      if (formikPropertyAssigment) {
-        return formikPropertyAssigment as ts.VariableDeclaration;
+      if (arrayOle) {
+        return arrayOle[1];
       }
     }
 

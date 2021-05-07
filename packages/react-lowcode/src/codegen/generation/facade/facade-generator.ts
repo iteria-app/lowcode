@@ -1,5 +1,9 @@
 import { SourceLineCol } from "../../../ast";
-import { Formatter, TableType, UiFramework } from "../../definition/context-types";
+import {
+  Formatter,
+  TableType,
+  UiFramework,
+} from "../../definition/context-types";
 import { Property } from "../entity";
 import { parseGraphqlTypes, sourceFileEntity } from "../../tests/helper";
 import { graphqlGenTs1 } from "../../tests/typeAlias.example";
@@ -9,42 +13,66 @@ import { WidgetContext } from "../context/widget-context";
 import MuiDataTableGenerator from "../generators/list/mui-datatable-generator";
 import MuiDetailGenerator from "../generators/detail/mui-detail-generator";
 
-export interface FacadeOptions{
-    entityField: Property
-    index? : number,
+export interface FacadeOptions {
+  entityField: Property;
+  index?: number;
 }
 
-export class GeneratorFacade{
+export function insertColumn(
+  tablePosition: SourceLineCol,
+  options: FacadeOptions
+): string {
+  let generationContext = {
+    uiFramework: UiFramework.MaterialUI,
+    formatter: Formatter.None,
+    index: { tableType: TableType.DataTable, height: "400px" },
+  };
+  let appContext = new AppContext(generationContext);
+  let sourceFileContext = new SourceFileContext(
+    appContext,
+    tablePosition.fileName
+  );
+  let widgetContext = new WidgetContext(sourceFileContext);
 
-    insertColumn(tablePosition: SourceLineCol, options: FacadeOptions): string{
-        let generationContext = {uiFramework: UiFramework.MaterialUI, formatter: Formatter.None, index: {tableType: TableType.DataTable, height: "400px"}};
-        let appContext = new AppContext(generationContext)
-        let sourceFileContext = new SourceFileContext(appContext, tablePosition.fileName)
-        let widgetContext = new WidgetContext(sourceFileContext)
+  //TODO: remove entity
+  const myClassFile = parseGraphqlTypes(graphqlGenTs1);
+  const testEntity = sourceFileEntity(myClassFile);
 
+  let generator = new MuiDataTableGenerator(
+    generationContext,
+    testEntity!!,
+    widgetContext
+  );
+  generator.insertColumn(tablePosition, options.entityField, options.index);
 
-        //TODO: remove entity
-        const myClassFile = parseGraphqlTypes(graphqlGenTs1)
-        const testEntity = sourceFileEntity(myClassFile)
+  return "";
+}
 
-        let generator = new MuiDataTableGenerator(generationContext, testEntity!!, widgetContext)
-        generator.insertColumn(tablePosition, options.entityField, options.index)
+export function insertFormWidget(
+  componentPosition: SourceLineCol,
+  options: FacadeOptions
+): string {
+  let generationContext = {
+    uiFramework: UiFramework.MaterialUI,
+    formatter: Formatter.None,
+    index: { tableType: TableType.DataTable, height: "400px" },
+  };
+  let appContext = new AppContext(generationContext);
+  let sourceFileContext = new SourceFileContext(
+    appContext,
+    componentPosition.fileName
+  );
+  let widgetContext = new WidgetContext(sourceFileContext);
 
-        return ''
-    }
+  const myClassFile = parseGraphqlTypes(graphqlGenTs1);
+  const testEntity = sourceFileEntity(myClassFile);
 
-    insertFormWidget(componentPosition: SourceLineCol, options: FacadeOptions): string{
-        let generationContext = {uiFramework: UiFramework.MaterialUI, formatter: Formatter.None, index: {tableType: TableType.DataTable, height: "400px"}};
-        let appContext = new AppContext(generationContext)
-        let sourceFileContext = new SourceFileContext(appContext, componentPosition.fileName)
-        let widgetContext = new WidgetContext(sourceFileContext)
+  let generator = new MuiDetailGenerator(
+    generationContext,
+    testEntity!!,
+    widgetContext
+  );
+  generator.insertFormWidget(componentPosition, options.entityField);
 
-        const myClassFile = parseGraphqlTypes(graphqlGenTs1)
-        const testEntity = sourceFileEntity(myClassFile)
-
-        let generator = new MuiDetailGenerator(generationContext, testEntity!!, widgetContext)
-        generator.insertFormWidget(componentPosition, options.entityField, options.index)
-
-        return '';
-    }
+  return "";
 }

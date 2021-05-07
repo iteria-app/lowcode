@@ -1,6 +1,6 @@
 import { Formatter, TableType, UiFramework } from "../../definition/context-types";
 import { Property } from "../../generation/entity";
-import { GeneratorFacade } from "../../generation/facade/facade-generator";
+import { insertColumn, insertFormWidget } from "../../generation/facade/facade-generator";
 import MuiDetailGenerator from "../../generation/generators/detail/mui-detail-generator";
 import { parseGraphqlTypes, sourceFileEntity } from "../helper";
 import { graphqlGenTs1 } from "../typeAlias.example";
@@ -19,14 +19,10 @@ import { graphqlGenTs1 } from "../typeAlias.example";
 describe("codegen facade", () => {
  
     test(".add column to existing table", () => {
-      let facade = new GeneratorFacade();
-      facade.insertColumn({lineNumber: 15,columnNumber: 73, fileName: 'D:\\Dev\\LowCode\\lowcode-fork\\lowcode\\packages\\react-lowcode\\src\\codegen\\tests\\list\\list-test-file.txt'}, {entityField: getTestProperty('name')[0], index:8})
-
+      insertColumn({lineNumber: 15,columnNumber: 73, fileName: 'D:\\Dev\\LowCode\\lowcode-fork\\lowcode\\packages\\react-lowcode\\src\\codegen\\tests\\list\\list-test-file.txt'}, {entityField: getTestProperty('name')[0], index:8})
     });
 
     test(".add widget to existing detail page", () => {
-      let facade = new GeneratorFacade();
-      facade.insertFormWidget({lineNumber: 33,columnNumber: 19, fileName: 'C:\\Private\\mat-app\\lowcode\\packages\\react-lowcode\\src\\codegen\\tests\\list\\detail-test-file.txt'}, {entityField: getTestProperty('name')[0]})
-
+      insertFormWidget({lineNumber: 33,columnNumber: 19, fileName: 'C:\\Private\\mat-app\\lowcode\\packages\\react-lowcode\\src\\codegen\\tests\\detail\\detail-test-file.txt'}, {entityField: getTestProperty('name')[0]})
     });
 })
