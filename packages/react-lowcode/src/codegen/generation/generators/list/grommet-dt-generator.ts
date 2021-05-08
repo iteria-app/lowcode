@@ -1,17 +1,32 @@
 import ts, { factory } from "typescript"
 import { createFunctionalComponent, createJsxElement, PageComponent, createJsxSelfClosingElement, createJsxAttribute } from '../../react-components/react-component-helper'
-import { Entity, Property } from '../../entity/index'
+import { Entity, getProperties, Property } from '../../entity/index'
 import { TableGenerator } from './table-generator-factory'
 import { TableComponentDefinitionBase } from '../../../definition/table-definition-core'
-import GenerationContext from "../../context"
-import TableGeneratorBase from './table-generator-base'
+import GenerationContext from "../../context/context"
 import { GrommetDtTableComponents } from '../../../definition/grommet/table'
 import { Formatter } from "../../../definition/context-types"
+import { GeneratorHelper } from "../helper"
+import ReactIntlFormatter from "../../react-components/react-intl/intl-formatter"
+import { uniqueImports } from "../../ts/imports"
+import { SourceLineCol } from "../../../../ast"
 
-export default class GrommetDataTableGenerator extends TableGeneratorBase implements TableGenerator 
+export default class GrommetDataTableGenerator implements TableGenerator 
 {
+    private readonly _helper: GeneratorHelper
+    private _imports: ts.ImportDeclaration[] = []
+    private _context: GenerationContext
+    private _entity: Entity
+    private _intlFormatter: ReactIntlFormatter
+
     constructor(generationContext: GenerationContext, entity: Entity) {
-        super(generationContext, entity);
+      this._helper = new GeneratorHelper(generationContext, entity)
+       this._context = generationContext
+       this._entity = entity
+       this._intlFormatter = new ReactIntlFormatter(generationContext, this._imports)
+    }
+    insertColumn(componentPosition: SourceLineCol, property: Property, columnIndex?: number) {
+        throw new Error("Method not implemented.")
     }
 
     getTableDefinition() : TableComponentDefinitionBase {
@@ -20,11 +35,11 @@ export default class GrommetDataTableGenerator extends TableGeneratorBase implem
     
     generateTableComponent(): PageComponent {
         var statements = this.createStatements();
-        var functionalComponent = createFunctionalComponent(this.getComponentName(), [this.createInputParameter()], statements);
+        var functionalComponent = createFunctionalComponent(this._helper.getComponentName(), [this._helper.createInputParameter()], statements);
 
-        this._imports = [...this._imports, ...this.intlFormatter.getImports()]
+        this._imports = [...this._imports, ...this._intlFormatter.getImports()]
         
-        return {functionDeclaration: functionalComponent, imports: this.uniqueImports()};
+        return {functionDeclaration: functionalComponent, imports: uniqueImports(this._imports)};
     }
 
     private createStatements(): ts.Statement[] {
@@ -34,9 +49,9 @@ export default class GrommetDataTableGenerator extends TableGeneratorBase implem
         let columnsDeclaration = this.createColumns(columnsIdentifier);
         var columnAttribute = createJsxAttribute("columns", "columns")
         statements.push(factory.createVariableStatement(undefined, columnsDeclaration))
-        var dataAttribute = createJsxAttribute("data", this.getInputParameterIdentifier())
+        var dataAttribute = createJsxAttribute("data", this._helper.getInputParameterIdentifier())
 
-        var dataGridComponent = this.prepareComponent(this.getTableDefinition().table);
+        var dataGridComponent = this._helper.prepareComponent(this.getTableDefinition().table, this._imports);
         statements.push(factory.createReturnStatement(factory.createParenthesizedExpression(createJsxSelfClosingElement(dataGridComponent.tagName, [columnAttribute, dataAttribute]))));
   
         return statements;
@@ -45,7 +60,7 @@ export default class GrommetDataTableGenerator extends TableGeneratorBase implem
     private createColumns(columnsIdentifier: ts.Identifier):ts.VariableDeclarationList {
         let propertiesColumnDefinitions = Array<ts.ObjectLiteralExpression>();
 
-        this.getProperties().forEach(property => {
+        getProperties(this._entity).forEach(property => {
             propertiesColumnDefinitions.push(this.createColumnDefinition(property));
         });
 
@@ -71,11 +86,11 @@ export default class GrommetDataTableGenerator extends TableGeneratorBase implem
             ),
             factory.createPropertyAssignment(
               factory.createIdentifier("header"),
-              this.getHeaderTitle(property)
+              this._helper.getHeaderTitle(property)
             )
         ];
 
-        if(this.context.formatter === Formatter.Intl){
+        if(this._context.formatter === Formatter.Intl){
             properties.push(factory.createPropertyAssignment(
                 factory.createIdentifier("render"),
                 this.getRender(property)
@@ -96,7 +111,7 @@ export default class GrommetDataTableGenerator extends TableGeneratorBase implem
 
         let formattedChild: ts.Expression
 
-        let formattedTag = this.intlFormatter.tryFormatPropertyUsingTag(property, expression)
+        let formattedTag = this._intlFormatter.tryFormatPropertyUsingTag(property, expression)
 
         if(formattedTag) {
             formattedChild = formattedTag

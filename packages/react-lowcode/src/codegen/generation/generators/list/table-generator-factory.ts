@@ -1,13 +1,15 @@
 import { TableType, UiFramework } from '../../../definition/context-types';
 import { PageComponent } from '../../react-components/react-component-helper'
-import GenerationContext from '../../context'
+import GenerationContext from '../../context/context'
 import {BasicTableGenerator} from './basic-table-generator'
-import MuiDataTableGenerator from './mui-dt-generator'
+import MuiDataTableGenerator from './mui-datatable-generator'
 import GrommetDataTableGenerator from './grommet-dt-generator'
-import { Entity } from '../../entity';
+import { Entity, Property } from '../../entity';
+import { SourceLineCol } from '../../../../ast';
 
 export interface TableGenerator{
-    generateTableComponent(): PageComponent;
+    insertColumn(componentPosition: SourceLineCol, property: Property, columnIndex?: number): any
+    generateTableComponent(): PageComponent
 }
 
 export class TableGeneratorFactory{

@@ -1,10 +1,10 @@
 import { PageComponent } from '../react-components/react-component-helper'
-import GenerationContext from '../context'
-import { TableGenerator, TableGeneratorFactory } from './index/table-generator-factory'
+import GenerationContext from '../context/context'
+import { TableGenerator, TableGeneratorFactory } from './list/table-generator-factory'
 import { DetailGenerator, DetailGeneratorFactory } from './detail/detail-generator-factory'
 import { Entity } from '../entity';
 
-export class ModuleGenerator {
+export class AppGenerator {
     _context: GenerationContext;
     _entity: Entity;
   
@@ -19,8 +19,8 @@ export class ModuleGenerator {
         };
     }
 
-    generateTablePage() {
-        let generator = this.getTableGenerator();
+    generateIndexPage() {
+        let generator = this.getIndexGenerator();
         return this.getTable(generator);
     }
 
@@ -28,7 +28,7 @@ export class ModuleGenerator {
         return generator.generateTableComponent();
     }
 
-    private getTableGenerator(): TableGenerator {
+    private getIndexGenerator(): TableGenerator {
         let generatorFactory = new TableGeneratorFactory(this._context, this._entity);
         return generatorFactory.getTableGenerator();
     }

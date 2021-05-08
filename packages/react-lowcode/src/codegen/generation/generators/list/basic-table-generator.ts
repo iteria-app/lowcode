@@ -1,33 +1,48 @@
 import ts, { factory } from "typescript"
 import { createJsxElement, PageComponent, createFunctionalComponent } from '../../react-components/react-component-helper'
-import { Entity, Property } from '../../entity/index'
+import { Entity, getProperties, Property } from '../../entity/index'
 import { TableGenerator } from './table-generator-factory'
 import { TableComponentDefinition } from '../../../definition/table-definition-core'
 import { MuiTableComponents } from '../../../definition/material-ui/table'
 import { GrommetTableComponents } from '../../../definition/grommet/table'
-import TableGeneratorBase from './table-generator-base'
-import GenerationContext from "../../context"
+import GenerationContext from "../../context/context"
 import { Formatter, UiFramework } from "../../../definition/context-types"
+import { uniqueImports } from "../../ts/imports"
+import { GeneratorHelper } from "../helper"
+import ReactIntlFormatter from "../../react-components/react-intl/intl-formatter"
+import { SourceLineCol } from "../../../../ast"
 
-export class BasicTableGenerator extends TableGeneratorBase  implements TableGenerator
+export class BasicTableGenerator implements TableGenerator
 {
+    private readonly _helper: GeneratorHelper
+    private _imports: ts.ImportDeclaration[] = []
+    private _context: GenerationContext
+    private _entity: Entity
+    private _intlFormatter: ReactIntlFormatter
+
     constructor(generationContext: GenerationContext, entity: Entity) {
-        super(generationContext, entity);
+       this._helper = new GeneratorHelper(generationContext, entity)
+       this._context = generationContext
+       this._entity = entity
+       this._intlFormatter = new ReactIntlFormatter(generationContext, this._imports)
+    }
+    insertColumn(componentPosition: SourceLineCol, property: Property, columnIndex?: number) {
+        throw new Error("Method not implemented.")
     }
 
     generateTableComponent(): PageComponent {
         var statements = this. createStatements()
-        var functionalComponent = createFunctionalComponent(this.getComponentName(), [this.createInputParameter()], statements)
+        var functionalComponent = createFunctionalComponent(this._helper.getComponentName(), [this._helper.createInputParameter()], statements)
 
-        this._imports = [...this._imports, ...this.intlFormatter.getImports()]
+        this._imports = [...this._imports, ...this._intlFormatter.getImports()]
 
-        return {imports: this.uniqueImports(), functionDeclaration: functionalComponent}
+        return {imports: uniqueImports(this._imports), functionDeclaration: functionalComponent}
     }
 
     private createStatements(): ts.Statement[] {
       let statements = new Array<ts.Statement>()
 
-      const tableComponent = this.prepareComponent(this.getTableDefinition().table)
+      const tableComponent = this._helper.prepareComponent(this.getTableDefinition().table, this._imports)
         
       let table = createJsxElement(tableComponent.tagName, [],
           [
@@ -45,10 +60,10 @@ export class BasicTableGenerator extends TableGeneratorBase  implements TableGen
     }
 
     private createHeader(): ts.JsxChild {
-      const headerComponent = this.prepareComponent(this.getTableDefinition().header);
-      const rowComponent = this.prepareComponent(this.getTableDefinition().row)
+      const headerComponent = this._helper.prepareComponent(this.getTableDefinition().header, this._imports);
+      const rowComponent = this._helper.prepareComponent(this.getTableDefinition().row, this._imports)
 
-      let headerRow = createJsxElement(rowComponent.tagName, [], this.getProperties()
+      let headerRow = createJsxElement(rowComponent.tagName, [], getProperties(this._entity)
                       .map((prop) => this.propertyHead(prop, this._entity)))
 
       let tableHeader = createJsxElement(headerComponent.tagName, [], [headerRow])
@@ -57,18 +72,18 @@ export class BasicTableGenerator extends TableGeneratorBase  implements TableGen
     }
 
     private createBodyRow(): ts.JsxElement {
-      const rowComponent = this.prepareComponent(this.getTableDefinition().row)
+      const rowComponent = this._helper.prepareComponent(this.getTableDefinition().row, this._imports)
 
-      let bodyRow = createJsxElement(rowComponent.tagName, [],this.getProperties()
+      let bodyRow = createJsxElement(rowComponent.tagName, [],getProperties(this._entity)
                        ?.map(prop => this.propertyCell(prop, this._entity)))
 
       return bodyRow
     }
 
     getTableDefinition() : TableComponentDefinition {
-        if(this.context.uiFramework === UiFramework.Grommet){
+        if(this._context.uiFramework === UiFramework.Grommet){
             return GrommetTableComponents
-        } else if(this.context.uiFramework === UiFramework.MaterialUI){
+        } else if(this._context.uiFramework === UiFramework.MaterialUI){
             return MuiTableComponents
         } else{
             console.log('Unsupported ui framework for generation basic table')
@@ -77,9 +92,9 @@ export class BasicTableGenerator extends TableGeneratorBase  implements TableGen
     }
 
     private propertyHead(prop: Property, entity: Entity) {
-        let child = this.getHeaderTitleJsxText(prop);
+        let child = this._helper.getHeaderTitleJsxText(prop);
 
-        return createJsxElement(this.prepareComponent(this.getTableDefinition().cell).tagName, 
+        return createJsxElement(this._helper.prepareComponent(this.getTableDefinition().cell, this._imports).tagName, 
                                                       [],
                                                       [child]
         )
@@ -88,7 +103,7 @@ export class BasicTableGenerator extends TableGeneratorBase  implements TableGen
     private propertyCell(prop: Property, entity: Entity) {
         let child: ts.JsxChild;
 
-        if(this.context.formatter === Formatter.Intl) {
+        if(this._context.formatter === Formatter.Intl) {
             child = this.formatCellWithTag(prop)
         }else{
             child = factory.createJsxExpression(
@@ -100,7 +115,7 @@ export class BasicTableGenerator extends TableGeneratorBase  implements TableGen
               )
         }
 
-        return createJsxElement(this.prepareComponent(this.getTableDefinition().cell).tagName, 
+        return createJsxElement(this._helper.prepareComponent(this.getTableDefinition().cell, this._imports).tagName, 
                                                       [],            
                                                       [child])
     }
@@ -111,7 +126,7 @@ export class BasicTableGenerator extends TableGeneratorBase  implements TableGen
           factory.createIdentifier(prop.getName())
        ))
 
-       var formattedChild = this.intlFormatter.tryFormatPropertyUsingTag(prop, propertyAccess)
+       var formattedChild = this._intlFormatter.tryFormatPropertyUsingTag(prop, propertyAccess)
 
        let child: ts.JsxChild
 
@@ -125,13 +140,13 @@ export class BasicTableGenerator extends TableGeneratorBase  implements TableGen
     }
 
     private mapArrayToTableRows(body: ts.ConciseBody) {
-        const bodyComponent = this.prepareComponent(this.getTableDefinition().body);
+        const bodyComponent = this._helper.prepareComponent(this.getTableDefinition().body, this._imports);
 
         return createJsxElement(bodyComponent.tagName, [], 
         [factory.createJsxExpression(undefined,
             factory.createCallExpression(
                 factory.createPropertyAccessExpression(
-                    this.getInputParameterIdentifier(),
+                    this._helper.getInputParameterIdentifier(),
                     factory.createIdentifier("map")
                 ),
                 undefined,
@@ -156,7 +171,7 @@ export class BasicTableGenerator extends TableGeneratorBase  implements TableGen
     }
 
     protected getRowIdentifier() : ts.Identifier {
-        return factory.createIdentifier(this.getEntityName())
+        return factory.createIdentifier(this._helper.getEntityName())
     }
 }
 

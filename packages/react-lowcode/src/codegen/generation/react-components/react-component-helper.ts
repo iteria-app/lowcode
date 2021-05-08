@@ -1,5 +1,5 @@
 import ts, { factory } from "typescript"
-import TypescriptHelper from "../code-generation/ts-helper"
+import { createImportDeclaration } from "../ts/imports"
 
 export function createFunctionalComponent(componentName: string | ts.Identifier | undefined = undefined, params: /* TODO generalize */ts.ParameterDeclaration[], body: ts.Statement[]): ts.FunctionDeclaration {
   return factory.createFunctionDeclaration(
@@ -62,7 +62,7 @@ export interface PageComponent {
 
 export function defineComponent(tagName: string, packageName: string): Component {
   const tagNameIdentifier = factory.createIdentifier(tagName)
-  let importDeclaration = TypescriptHelper.createImportDeclaration(tagName, packageName)
+  let importDeclaration = createImportDeclaration(tagName, packageName)
 
   return {
     tagName: tagNameIdentifier,

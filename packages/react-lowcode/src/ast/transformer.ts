@@ -24,6 +24,24 @@ const addTransformer = <T extends ts.Node, U extends ts.Node | ts.JsxChild>(
   }
 }
 
+const replaceTransformer = <T extends ts.Node, U extends ts.Node>(
+  start: number,
+  newNode: U
+): ts.TransformerFactory<T> => {
+  return context => {
+    const visit: ts.Visitor = node => {
+      const nodeStart = node.pos
+      if (nodeStart === start) {
+        return newNode
+      }
+
+      return ts.visitEachChild(node, child => visit(child), context)
+    }
+
+    return node => ts.visitNode(node, visit)
+  }
+}
+
 const removeTransformer = <T extends ts.Node>(
   start: number
 ): ts.TransformerFactory<T> => {
@@ -56,3 +74,13 @@ export const removeElementFromAst = (ast: ts.SourceFile, start: number) => {
   const result = ts.transform(ast, [removeTransformer(start)])
   return result.transformed[0]
 }
+
+export const replaceElementsToAST = <T extends ts.Node>(
+  ast: ts.SourceFile,
+  start: number,
+  newNode: T
+) => {
+  const result = ts.transform(ast, [replaceTransformer(start, newNode)])
+  return result.transformed[0]
+}
+

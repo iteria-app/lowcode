@@ -8,7 +8,6 @@ import ts, {
 } from "typescript"
 import { TagImport } from "../../../ast/tags"
 import { HookImport } from "../../../ast/hooks"
-//'@typescript/vfs'
 
 export function createAst(
   code: string,
