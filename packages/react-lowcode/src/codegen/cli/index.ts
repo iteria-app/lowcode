@@ -22,66 +22,57 @@ const args = yargs.options({
     'table': { type: 'string', demandOption: true, alias: 't', choices: [TableType.DataTable.toString(), TableType.BasicTable.toString()] },
   }).argv;
 
-class LocalCodegenCli{
-    async generateList(){
-        const sourceFile = createAst('')
-        const myClassFile = parseGraphqlTypes(graphqlGenTs1)
-        const testEntity = sourceFileEntity(myClassFile)
+async function generateList(){
+    const sourceFile = createAst('')
+    const myClassFile = parseGraphqlTypes(graphqlGenTs1)
+    const testEntity = sourceFileEntity(myClassFile)
 
-        let uif : UiFramework = (<any>UiFramework)[args['ui']];
-        let formatter : Formatter = (<any>Formatter)[args['formatter']];
-        let tableType : TableType = (<any>TableType)[args['table']];
-        
-        let generationContext = {uiFramework: uif, formatter: formatter, index: {tableType: tableType, height: "400px"}};
-        let generator = new AppGenerator(generationContext, testEntity!!);
-  
-        const page = generator.generateListPage()
-        
-        const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
-  
-        let sourceCode = printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page.imports, page.functionDeclaration]), sourceFile)
-        
+    let uif : UiFramework = (<any>UiFramework)[args['ui']];
+    let formatter : Formatter = (<any>Formatter)[args['formatter']];
+    let tableType : TableType = (<any>TableType)[args['table']];
+    
+    let generationContext = {uiFramework: uif, formatter: formatter, index: {tableType: tableType, height: "400px"}};
+    let generator = new AppGenerator(generationContext, testEntity!!);
 
-        this.saveFile(sourceCode, args['basePath'], args['fileName'])
-    }
-
-    async generateDetail(){
-        const sourceFile = createAst('')
-        const myClassFile = parseGraphqlTypes(graphqlGenTs1)
-        const testEntity = sourceFileEntity(myClassFile)
-
-        let uif : UiFramework = (<any>UiFramework)[args['ui']];
-        let formatter : Formatter = (<any>Formatter)[args['formatter']];
-        let tableType : TableType = (<any>TableType)[args['table']];
-        
-        let generationContext = {uiFramework: uif, formatter: formatter, index: {tableType: tableType, height: "400px"}};
-        let generator = new AppGenerator(generationContext, testEntity!!);
-  
-        const page = generator.generateDetailPage()
-        
-        const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
-  
-        let sourceCode = printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page.imports, page.functionDeclaration]), sourceFile)
-        
-        this.saveFile(sourceCode, args['basePath'], args['fileName'])
-    }
-
-    async saveFile(sourceCode: string, basePath:string, fileName: string){
-        let filePath = basePath + fileName
-
-        await fs.writeFile(filePath, sourceCode,  function(err) {
-            if (err) {
-                return console.error(err);
-            }
-            console.log("File created!");
-        });
-    }
+    const page = generator.generateListPage()
+    
+    const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
+    let sourceCode = printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page.imports, page.functionDeclaration]), sourceFile)
+    saveFile(sourceCode, args['basePath'], args['fileName'])
 }
 
-const cli = new LocalCodegenCli()
+async function generateDetail(){
+    const sourceFile = createAst('')
+    const myClassFile = parseGraphqlTypes(graphqlGenTs1)
+    const testEntity = sourceFileEntity(myClassFile)
 
-if(args['component'] === LIST_COMPONENT)
-    cli.generateList()
-else if(args['component'] === DETAIL_COMPONENT){
-    cli.generateDetail()
+    let uif : UiFramework = (<any>UiFramework)[args['ui']];
+    let formatter : Formatter = (<any>Formatter)[args['formatter']];
+    let tableType : TableType = (<any>TableType)[args['table']];
+    
+    let generationContext = {uiFramework: uif, formatter: formatter, index: {tableType: tableType, height: "400px"}};
+    let generator = new AppGenerator(generationContext, testEntity!!);
+
+    const page = generator.generateDetailPage()
+    
+    const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
+    let sourceCode = printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page.imports, page.functionDeclaration]), sourceFile)
+    saveFile(sourceCode, args['basePath'], args['fileName'])
+}
+
+async function saveFile(sourceCode: string, basePath:string, fileName: string){
+    let filePath = basePath + fileName
+
+    await fs.writeFile(filePath, sourceCode,  function(err) {
+        if (err) {
+            return console.error(err);
+        }
+        console.log("File created!");
+    });
+}
+
+if (args.component === LIST_COMPONENT)
+    generateList()
+else if(args.component === DETAIL_COMPONENT){
+    generateDetail()
 }
