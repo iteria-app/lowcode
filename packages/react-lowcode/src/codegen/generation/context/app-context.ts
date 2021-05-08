@@ -1,12 +1,12 @@
 import CodegenOptions from "./context";
-import { InjectionContext } from "./injection-context";
+import { InjectionContext, DefaultInjectionContext } from "./injection-context";
 
 export class AppContext{
     _injectionContext: InjectionContext
     _options: CodegenOptions
 
     constructor(options:CodegenOptions){
-        this._injectionContext = new InjectionContext()
+        this._injectionContext = new DefaultInjectionContext()
         this._options = options
     }
     
