@@ -1,7 +1,5 @@
-import { Formatter, TableType, UiFramework } from "../../definition/context-types";
 import { Property } from "../../generation/entity";
-import { insertColumn, insertFormWidget } from "../../generation/facade/facade-generator";
-import MuiDetailGenerator from "../../generation/generators/detail/mui-detail-generator";
+import { insertColumn, insertFormWidget } from "../../insert-facade";
 import { parseGraphqlTypes, sourceFileEntity } from "../helper";
 import { graphqlGenTs1 } from "../typeAlias.example";
 
@@ -16,7 +14,7 @@ import { graphqlGenTs1 } from "../typeAlias.example";
     return property ?? []
 }
 
-describe("codegen facade", () => {
+describe("insert column / widget for field - facade", () => {
  
     test(".add column to existing table", () => {
       insertColumn({lineNumber: 15,columnNumber: 73, fileName: 'D:\\Dev\\LowCode\\lowcode-fork\\lowcode\\packages\\react-lowcode\\src\\codegen\\tests\\list\\list-test-file.txt'}, {entityField: getTestProperty('name')[0], index:8})

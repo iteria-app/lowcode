@@ -1,26 +1,26 @@
-import { SourceLineCol } from "../../../ast";
+import { SourceLineCol } from "../ast";
 import {
   Formatter,
   TableType,
   UiFramework,
-} from "../../definition/context-types";
-import { Property } from "../entity";
-import { parseGraphqlTypes, sourceFileEntity } from "../../tests/helper";
-import { graphqlGenTs1 } from "../../tests/typeAlias.example";
-import { AppContext } from "../context/app-context";
-import { SourceFileContext } from "../context/page-context";
-import { WidgetContext } from "../context/widget-context";
-import MuiDataTableGenerator from "../generators/list/mui-datatable-generator";
-import MuiDetailGenerator from "../generators/detail/mui-detail-generator";
+} from "./definition/context-types";
+import { Property } from "./generation/entity";
+import { parseGraphqlTypes, sourceFileEntity } from "./tests/helper";
+import { graphqlGenTs1 } from "./tests/typeAlias.example";
+import { AppContext } from "./generation/context/app-context";
+import { SourceFileContext } from "./generation/context/page-context";
+import { WidgetContext } from "./generation/context/widget-context";
+import MuiDataTableGenerator from "./generation/generators/list/mui-datatable-generator";
+import MuiDetailGenerator from "./generation/generators/detail/mui-detail-generator";
 
-export interface FacadeOptions {
+export interface InsertOptions {
   entityField: Property;
   index?: number;
 }
 
 export function insertColumn(
   tablePosition: SourceLineCol,
-  options: FacadeOptions
+  options: InsertOptions
 ): string {
   let generationContext = {
     uiFramework: UiFramework.MaterialUI,
@@ -50,7 +50,7 @@ export function insertColumn(
 
 export function insertFormWidget(
   componentPosition: SourceLineCol,
-  options: FacadeOptions
+  options: InsertOptions
 ): string {
   let generationContext = {
     uiFramework: UiFramework.MaterialUI,
