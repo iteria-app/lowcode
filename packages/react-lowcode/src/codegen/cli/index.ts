@@ -10,13 +10,16 @@ import { Formatter, TableType, UiFramework } from "../definition/context-types"
 import { AppGenerator } from "../generation/generators/app-generator"
 import { createAst, parseGraphqlTypes, sourceFileEntity } from "../tests/helper"
 
+const LIST_COMPONENT = 'list'
+const DETAIL_COMPONENT = 'detail'
+
 const args = yargs.options({
     'basePath': { type: 'string', demandOption: true, alias: 'p' },
     'fileName': { type: 'string', demandOption: true, alias: 'f' },
-    'ui': { type: 'string', demandOption: true, alias: 'u' },
-    'formatter': { type: 'string', demandOption: true, alias: 'fr' },
-    'component': { type: 'string', demandOption: true, alias: 'c' },
-    'table': { type: 'string', demandOption: true, alias: 't' },
+    'ui': { type: 'string', demandOption: true, alias: 'u', choices: [UiFramework.MaterialUI.toString(), UiFramework.Grommet.toString()] },
+    'formatter': { type: 'string', demandOption: true, alias: 'fr', choices: [Formatter.Intl.toString(), Formatter.None.toString()] },
+    'component': { type: 'string', demandOption: true, alias: 'c', choices: [LIST_COMPONENT, DETAIL_COMPONENT] },
+    'table': { type: 'string', demandOption: true, alias: 't', choices: [TableType.DataTable.toString(), TableType.BasicTable.toString()] },
   }).argv;
 
 class LocalCodegenCli{
@@ -77,8 +80,8 @@ class LocalCodegenCli{
 
 const cli = new LocalCodegenCli()
 
-if(args['component'] === 'list')
+if(args['component'] === LIST_COMPONENT)
     cli.generateList()
-else if(args['component'] === 'detail'){
+else if(args['component'] === DETAIL_COMPONENT){
     cli.generateDetail()
 }
