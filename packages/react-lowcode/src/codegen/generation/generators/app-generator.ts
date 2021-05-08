@@ -1,7 +1,6 @@
-import { PageComponent } from '../react-components/react-component-helper'
 import GenerationContext from '../context/context'
-import { TableGenerator, TableGeneratorFactory } from './list/table-generator-factory'
-import { DetailGenerator, DetailGeneratorFactory } from './detail/detail-generator-factory'
+import { TableGeneratorFactory } from './list/table-generator-factory'
+import { DetailGeneratorFactory } from './detail/detail-generator-factory'
 import { Entity } from '../entity';
 
 export class AppGenerator {
@@ -20,30 +19,14 @@ export class AppGenerator {
     }
 
     generateListPage() {
-        let generator = this.getListGenerator();
-        return this.getTable(generator);
-    }
-
-    private getTable(generator: TableGenerator): PageComponent {
+        const generatorFactory = new TableGeneratorFactory(this._context, this._entity);
+        const generator = generatorFactory.getTableGenerator();
         return generator.generateTableComponent();
     }
 
-    private getListGenerator(): TableGenerator {
-        let generatorFactory = new TableGeneratorFactory(this._context, this._entity);
-        return generatorFactory.getTableGenerator();
-    }
-
     generateDetailPage() {
-        let generator = this.getDetailGenerator();
-        return this.getDetail(generator);
-    }
-
-    private getDetail(generator: DetailGenerator): PageComponent {
+        const generatorFactory = new DetailGeneratorFactory(this._context, this._entity);
+        const generator = generatorFactory.getDetailGenerator();
         return generator.generateDetailComponent();
-    }
-
-    private getDetailGenerator(): DetailGenerator {
-        let generatorFactory = new DetailGeneratorFactory(this._context, this._entity);
-        return generatorFactory.getDetailGenerator();
     }
 }
