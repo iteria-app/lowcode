@@ -19,8 +19,8 @@ export class AppGenerator {
         };
     }
 
-    generateIndexPage() {
-        let generator = this.getIndexGenerator();
+    generateListPage() {
+        let generator = this.getListGenerator();
         return this.getTable(generator);
     }
 
@@ -28,7 +28,7 @@ export class AppGenerator {
         return generator.generateTableComponent();
     }
 
-    private getIndexGenerator(): TableGenerator {
+    private getListGenerator(): TableGenerator {
         let generatorFactory = new TableGeneratorFactory(this._context, this._entity);
         return generatorFactory.getTableGenerator();
     }

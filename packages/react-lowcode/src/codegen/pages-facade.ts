@@ -35,7 +35,7 @@ export function generatePages(inputSourceCode: string, io: CodeRW & CodeDir, opt
             let context = {uiFramework: UiFramework.MaterialUI, formatter: Formatter.None, index: {tableType: TableType.BasicTable, height: "400px"}};
             
             const generator = new AppGenerator(context, entity)
-            const page = generator.generateIndexPage(/* TODO entity / type name should be input - not in context */)
+            const page = generator.generateListPage(/* TODO entity / type name should be input - not in context */)
             
             const filePath = `src/components/${typeName}.tsx`
             const sourceFile = ts.createSourceFile(

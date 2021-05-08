@@ -32,7 +32,7 @@ class LocalCodegenCli{
         let generationContext = {uiFramework: uif, formatter: formatter, index: {tableType: tableType, height: "400px"}};
         let generator = new AppGenerator(generationContext, testEntity!!);
   
-        const page = generator.generateIndexPage()
+        const page = generator.generateListPage()
         
         const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
   

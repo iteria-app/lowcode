@@ -5,7 +5,7 @@ export default interface CodegenOptions {
     formatter?: Formatter,
     uiFramework?: UiFramework,
     detail?: DetailGenerationContext,
-    index?: IndexGenerationContex
+    index?: ListGenerationContex
     naming?: Naming
 }
 
@@ -13,7 +13,7 @@ interface DetailGenerationContext {
 
 }
 
-interface IndexGenerationContex {
+interface ListGenerationContex {
     tableType?: TableType,
     height?: string
 }
