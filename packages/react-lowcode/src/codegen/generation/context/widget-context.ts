@@ -15,7 +15,7 @@ export class WidgetContext{
         return this._sourceFileContext.getSourceCode();
     }
 
-    findWidgetParentNode(sourceCode:string, position: SourceLineCol): ts.Node  | null | undefined{
+    findWidgetParentNode(sourceCode:string, position: SourceLineCol): ts.Node | undefined {
         let astCode = astFindSource(sourceCode, position)
 
         if(astCode){
@@ -31,8 +31,6 @@ export class WidgetContext{
         }else{
             console.log('cannot find widget element')
         }
-
-        return undefined
     }
 
     isWidgetDeclaration(node: ts.Node){
