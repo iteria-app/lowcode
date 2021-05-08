@@ -90,7 +90,7 @@ export default class GrommetDataTableGenerator implements TableGenerator
             )
         ];
 
-        if(this._context.formatter === Formatter.Intl){
+        if(this._context.formatter === Formatter.ReactIntl){
             properties.push(factory.createPropertyAssignment(
                 factory.createIdentifier("render"),
                 this.getRender(property)

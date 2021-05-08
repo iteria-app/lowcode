@@ -107,7 +107,7 @@ export default class MuiDataTableGenerator implements TableGenerator
     private getUsedFormatter(columnsDefinition:  ts.ArrayLiteralExpression): Formatter {
         return columnsDefinition.elements.length === 0 ? Formatter.None 
                                                        : (columnsDefinition.elements[0] as ts.ObjectLiteralExpression).properties.length > 3 
-                                                          ? Formatter.Intl 
+                                                          ? Formatter.ReactIntl 
                                                           : Formatter.None
     }
 
@@ -149,7 +149,7 @@ export default class MuiDataTableGenerator implements TableGenerator
     private createStatements(): ts.Statement[] {
       let statements = new Array<ts.Statement>()
 
-      if(this._context.formatter === Formatter.Intl){
+      if(this._context.formatter === Formatter.ReactIntl){
         statements.push(this._intlFormatter.getImperativeHook())
       }
 
@@ -272,7 +272,7 @@ export default class MuiDataTableGenerator implements TableGenerator
         )
       ];
 
-      if(formatter === Formatter.Intl){
+      if(formatter === Formatter.ReactIntl){
         properties.push(factory.createPropertyAssignment(
           factory.createIdentifier("valueFormatter"),
           this.getValueFormatter(property)

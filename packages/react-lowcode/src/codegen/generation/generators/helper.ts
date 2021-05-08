@@ -51,7 +51,7 @@ export class GeneratorHelper{
     getHeaderTitle(property: Property): ts.StringLiteral | ts.JsxSelfClosingElement{
         let localizedName;
 
-        if(this._context.formatter === Formatter.Intl){
+        if(this._context.formatter === Formatter.ReactIntl){
           localizedName = this.intlFormatter.localizePropertyNameUsingTag(property, this._entity);
         }else{
           localizedName = stringLiteral(property.getName())
@@ -63,7 +63,7 @@ export class GeneratorHelper{
     getHeaderTitleJsxText(property: Property): ts.JsxText | ts.JsxSelfClosingElement{
         let localizedName;
   
-        if(this._context.formatter === Formatter.Intl){
+        if(this._context.formatter === Formatter.ReactIntl){
           localizedName = this.intlFormatter.localizePropertyNameUsingTag(property, this._entity);
         }else{
           localizedName = jsxText(property.getName())

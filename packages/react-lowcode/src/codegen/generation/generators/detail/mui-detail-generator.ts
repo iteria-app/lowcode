@@ -101,7 +101,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
       ? Formatter.None
       : (columnsDefinition.elements[0] as ts.ObjectLiteralExpression).properties
           .length > 3
-      ? Formatter.Intl
+      ? Formatter.ReactIntl
       : Formatter.None;
   }
   private printSourceCode(sourceFile: SourceFile): string {
@@ -164,7 +164,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
 
   private createStatements(): ts.Statement[] {
     let statements = new Array<ts.Statement>();
-    if (this._context.formatter === Formatter.Intl) {
+    if (this._context.formatter === Formatter.ReactIntl) {
       statements.push(this._intlFormatter.getImperativeHook());
     }
 
@@ -473,7 +473,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
     name: string,
     type: InputType
   ): ts.JsxAttribute {
-    if (this._context.formatter === Formatter.Intl) {
+    if (this._context.formatter === Formatter.ReactIntl) {
       if (type === InputType.date) {
         return this.createDateValueFormattedAttribute(name);
       } else {
@@ -671,7 +671,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
     return assignment;
   }
   private getIntlVariable(): ts.VariableStatement | ts.EmptyStatement {
-    if (this._context.formatter === Formatter.Intl) {
+    if (this._context.formatter === Formatter.ReactIntl) {
       return this.createUseIntlVariable();
     } else {
       return factory.createEmptyStatement();
