@@ -23,6 +23,6 @@ describe("codegen facade", () => {
     });
 
     test(".add widget to existing detail page", () => {
-      insertFormWidget({lineNumber: 33,columnNumber: 19, fileName: 'C:\\Private\\mat-app\\lowcode\\packages\\react-lowcode\\src\\codegen\\tests\\detail\\detail-test-file.txt'}, {entityField: getTestProperty('name')[0]})
+      insertFormWidget({lineNumber: 33,columnNumber: 19, fileName: 'C:\\Private\\mat-app\\lowcode\\packages\\react-lowcode\\src\\codegen\\tests\\detail\\detail-test-file.txt'}, {entityField: getTestProperty('test')[0]})
     });
 })
