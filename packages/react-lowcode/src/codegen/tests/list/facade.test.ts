@@ -19,10 +19,10 @@ import { graphqlGenTs1 } from "../typeAlias.example";
 describe("codegen facade", () => {
  
     test(".add column to existing table", () => {
-      insertColumn({lineNumber: 15,columnNumber: 73, fileName: 'D:\\Dev\\LowCode\\lowcode-fork\\lowcode\\packages\\react-lowcode\\src\\codegen\\tests\\list\\list-test-file.txt'}, {entityField: getTestProperty('name')[0], index:8})
+      insertColumn({lineNumber: 15,columnNumber: 73, fileName: 'src\\codegen\\tests\\list\\list-test-file.txt'}, {entityField: getTestProperty('name')[0], index:8})
     });
 
     test(".add widget to existing detail page", () => {
-      insertFormWidget({lineNumber: 33,columnNumber: 19, fileName: 'C:\\Private\\mat-app\\lowcode\\packages\\react-lowcode\\src\\codegen\\tests\\detail\\detail-test-file.txt'}, {entityField: getTestProperty('test')[0]})
+      insertFormWidget({lineNumber: 33,columnNumber: 19, fileName: 'src\\codegen\\tests\\detail\\detail-test-file.txt'}, {entityField: getTestProperty('test')[0]})
     });
 })

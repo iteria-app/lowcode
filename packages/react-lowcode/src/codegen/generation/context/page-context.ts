@@ -3,6 +3,7 @@ import fs from "fs"
 import { createImportDeclaration, uniqueImports } from "../ts/imports";
 import { AppContext } from "./app-context";
 import { InjectionContext } from "./injection-context";
+import path from 'path'
 
 export class SourceFileContext{
     private _appContext: AppContext;
@@ -31,6 +32,6 @@ export class SourceFileContext{
     }
    
     getSourceCode(): string {
-        return fs.readFileSync(this.path, 'utf-8')
+        return fs.readFileSync(path.resolve(this.path), 'utf-8')
     }    
 }

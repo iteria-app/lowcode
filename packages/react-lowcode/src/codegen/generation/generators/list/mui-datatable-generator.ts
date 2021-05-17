@@ -23,7 +23,7 @@ export default class MuiDataTableGenerator implements TableGenerator
     private _intlFormatter: ReactIntlFormatter
     private _widgetContext: WidgetContext | undefined
 
-    constructor(generationContext: GenerationContext, entity: Entity, widgetContext?: WidgetContext,) {
+    constructor(generationContext: GenerationContext, entity: Entity, widgetContext?: WidgetContext) {
        this._helper = new GeneratorHelper(generationContext, entity)
        this._context = generationContext
        this._entity = entity
