@@ -18,15 +18,12 @@ import { WidgetContext } from "../../context/widget-context";
 import {
   createAst,
   replaceElementsToAST,
-  addElementsToAST,
   SourceLineCol,
 } from "../../../../ast";
 import {
   findVariableDeclarations,
   findObjectLiteralExpression,
   findPropertyAssignment,
-  findGridElement,
-  findGridContainer,
 } from "../../ts/ast";
 
 export default class MuiDetailGenerator implements DetailGenerator {
@@ -88,13 +85,13 @@ export default class MuiDetailGenerator implements DetailGenerator {
         let gridElements: ts.JsxElement[] = [];
         //Add grid with field
         if (widgetParentNode) {
-          findGridElement(widgetParentNode, gridElements);
+          this.findGridElement(widgetParentNode, gridElements);
         }
 
         if (gridElements) {
           if (widgetParentNode) {
             let gridContainers: ts.JsxElement[] = [];
-            findGridContainer(widgetParentNode, gridContainers);
+            this.findGridContainer(widgetParentNode, gridContainers);
             ast = this.addNewGridElement(
               gridElements,
               gridContainers[0],
@@ -109,6 +106,46 @@ export default class MuiDetailGenerator implements DetailGenerator {
       }
     }
   }
+
+  findGridElement(parentNode: ts.Node, array: ts.JsxElement[]) {
+    if (parentNode != undefined) {
+      if (parentNode.getChildCount() > 0) {
+        var children = parentNode.getChildren();
+        children.forEach((child) => {
+          if (ts.isJsxElement(child)) {
+            if (child.getFullText().startsWith("Grid item", 1)) {
+              array.push(child);
+            } else {
+              this.findGridElement(child, array);
+            }
+          } else {
+            this.findGridElement(child, array);
+          }
+        });
+      }
+    }
+  }
+  
+  findGridContainer(parentNode: ts.Node, array: ts.JsxElement[]) {
+    if (parentNode != undefined) {
+      if (parentNode.getChildCount() > 0) {
+        var children = parentNode.getChildren();
+        children.forEach((child) => {
+          if (ts.isJsxElement(child)) {
+            if (child.getFullText().startsWith("Grid container", 1)) {
+              array.push(child);
+            } else {
+              this.findGridContainer(child, array);
+            }
+          } else {
+            this.findGridContainer(child, array);
+          }
+        });
+      }
+    }
+  }
+
+
 
   addNewGridElement(
     gridElements: ts.JsxElement[],
