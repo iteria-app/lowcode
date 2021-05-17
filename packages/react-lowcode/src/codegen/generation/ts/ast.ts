@@ -31,17 +31,6 @@ export interface Symbol {
   isUndefined(): boolean;
 }
 
-export function findWidgetDefinition(code: string, position: SourceLineCol) {
-  const found = astFindSource(code, position);
-
-  if (found) {
-    let before = code.substring(0, found.end);
-    let startOfWidget = before.lastIndexOf("export");
-  } else {
-    console.log("source not found", found);
-  }
-}
-
 export function findVariableDeclarations(
   parentNode: ts.Node,
   array: ts.VariableDeclaration[]
