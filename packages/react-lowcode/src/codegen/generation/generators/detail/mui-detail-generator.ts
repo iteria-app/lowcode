@@ -47,7 +47,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
     );
   }
 
-  insertFormWidget(position: SourceLineCol, property: Property) {
+  insertFormWidget(position: SourceLineCol, property: Property): string {
     //Initial values
     let alteredSource = "";
     if (this._widgetContext) {
@@ -105,6 +105,8 @@ export default class MuiDetailGenerator implements DetailGenerator {
         console.log(alteredSource);
       }
     }
+
+    return alteredSource
   }
 
   findGridElement(parentNode: ts.Node, array: ts.JsxElement[]) {

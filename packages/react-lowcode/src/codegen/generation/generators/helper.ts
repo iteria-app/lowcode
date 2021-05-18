@@ -13,18 +13,15 @@ import { jsxText, stringLiteral } from "../ts/text"
 
 export class GeneratorHelper{
     readonly _context:GenerationContext;
-    readonly _entity: Entity;
     readonly intlFormatter: ReactIntlFormatter;
 
-    constructor(generationContext: GenerationContext, entity: Entity){
+    constructor(generationContext: GenerationContext){
         this._context = generationContext;
-
         this.intlFormatter = new ReactIntlFormatter(this._context, []);
-        this._entity = entity;
     }
     
-    getEntityName(){
-        return camalizeString(this._entity.getName())
+    getEntityName(entity: Entity): string{
+        return camalizeString(entity.getName())
     }
 
     addImportDeclaration(specifier: string, module: string, isNameSpaceImport: boolean = false): ts.ImportDeclaration{
@@ -39,8 +36,8 @@ export class GeneratorHelper{
         return importDeclaration
     }
 
-    getComponentName() {
-        return `${this._entity.getName()}Index`
+    getComponentName(entity: Entity) {
+        return `${entity.getName()}Index`
     }
 
     prepareComponent(component: Component, imports: ts.ImportDeclaration[]): Component {
@@ -48,11 +45,11 @@ export class GeneratorHelper{
         return component;
     }
 
-    getHeaderTitle(property: Property): ts.StringLiteral | ts.JsxSelfClosingElement{
+    getHeaderTitle(entity: Entity, property: Property): ts.StringLiteral | ts.JsxSelfClosingElement{
         let localizedName;
 
         if(this._context.formatter === Formatter.Intl){
-          localizedName = this.intlFormatter.localizePropertyNameUsingTag(property, this._entity);
+          localizedName = this.intlFormatter.localizePropertyNameUsingTag(property, entity);
         }else{
           localizedName = stringLiteral(property.getName())
         }
@@ -60,11 +57,11 @@ export class GeneratorHelper{
         return localizedName;
     }
 
-    getHeaderTitleJsxText(property: Property): ts.JsxText | ts.JsxSelfClosingElement{
+    getHeaderTitleJsxText(entity: Entity, property: Property): ts.JsxText | ts.JsxSelfClosingElement{
         let localizedName;
   
         if(this._context.formatter === Formatter.Intl){
-          localizedName = this.intlFormatter.localizePropertyNameUsingTag(property, this._entity);
+          localizedName = this.intlFormatter.localizePropertyNameUsingTag(property, entity)
         }else{
           localizedName = jsxText(property.getName())
         }
@@ -72,15 +69,15 @@ export class GeneratorHelper{
         return localizedName;
     }
 
-    getInputParameterIdentifier() : ts.Identifier {
-        return identifier(Pluralize.plural(this.getEntityName()))
+    getInputParameterIdentifier(entity: Entity) : ts.Identifier {
+        return identifier(Pluralize.plural(this.getEntityName(entity)))
     }
 
-    localizePropertyNameWithTag(property: Property): ts.JsxSelfClosingElement {
-        return this.intlFormatter.localizePropertyNameUsingTag(property, this._entity)
+    localizePropertyNameWithTag(entity: Entity, property: Property): ts.JsxSelfClosingElement {
+        return this.intlFormatter.localizePropertyNameUsingTag(property, entity)
     }
 
-    createInputParameter(): ts.ParameterDeclaration {
-        return bindingParameter(this.getInputParameterIdentifier())
+    createInputParameter(entity: Entity): ts.ParameterDeclaration {
+        return bindingParameter(this.getInputParameterIdentifier(entity))
     }
 }

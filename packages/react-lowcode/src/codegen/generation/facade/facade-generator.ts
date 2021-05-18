@@ -34,18 +34,13 @@ export function insertColumn(
   );
   let widgetContext = new WidgetContext(sourceFileContext);
 
-  //TODO: remove entity
-  const myClassFile = parseGraphqlTypes(graphqlGenTs1);
-  const testEntity = sourceFileEntity(myClassFile);
-
   let generator = new MuiDataTableGenerator(
     generationContext,
-    testEntity!!,
+    undefined,
     widgetContext
   );
-  generator.insertColumn(tablePosition, options.entityField, options.index);
-
-  return "";
+  
+  return generator.insertColumn(tablePosition, options.entityField, options.index);
 }
 
 export function insertFormWidget(
@@ -72,7 +67,6 @@ export function insertFormWidget(
     testEntity!!,
     widgetContext
   );
-  generator.insertFormWidget(componentPosition, options.entityField);
 
-  return "";
+  return generator.insertFormWidget(componentPosition, options.entityField);
 }

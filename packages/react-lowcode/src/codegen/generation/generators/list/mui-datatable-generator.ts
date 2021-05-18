@@ -19,12 +19,12 @@ export default class MuiDataTableGenerator implements TableGenerator
     private readonly _helper: GeneratorHelper
     private _imports: ts.ImportDeclaration[] = []
     private _context: GenerationContext
-    private _entity: Entity
+    private _entity?: Entity
     private _intlFormatter: ReactIntlFormatter
     private _widgetContext: WidgetContext | undefined
 
-    constructor(generationContext: GenerationContext, entity: Entity, widgetContext?: WidgetContext) {
-       this._helper = new GeneratorHelper(generationContext, entity)
+    constructor(generationContext: GenerationContext, entity?: Entity, widgetContext?: WidgetContext) {
+       this._helper = new GeneratorHelper(generationContext)
        this._context = generationContext
        this._entity = entity
        this._widgetContext = widgetContext
@@ -128,10 +128,11 @@ export default class MuiDataTableGenerator implements TableGenerator
        return undefined
     }
     
-    generateTableComponent(): PageComponent {
+    generateTableComponent(): PageComponent | undefined {
+      if(this._entity){
         var statements = this.createStatements();
-        var functionalComponent = createFunctionalComponent(this._helper.getComponentName(), 
-                                                            [this._helper.createInputParameter()], 
+        var functionalComponent = createFunctionalComponent(this._helper.getComponentName(this._entity), 
+                                                            [this._helper.createInputParameter(this._entity)], 
                                                             statements);
 
         this._imports = [...this._imports, ...this._intlFormatter.getImports()]
@@ -140,6 +141,7 @@ export default class MuiDataTableGenerator implements TableGenerator
         uniqueFileImports.push(createNameSpaceImport('React', 'react'))
         
         return {functionDeclaration: functionalComponent, imports: uniqueFileImports};
+      }else return undefined
     }
 
     getTableDefinition() : TableComponentDefinitionBase {
@@ -159,7 +161,7 @@ export default class MuiDataTableGenerator implements TableGenerator
       var columnsAttribute = createJsxAttribute("columns", "columns")
       statements.push(factory.createVariableStatement(undefined, columnsDeclaration))
 
-      var rowsAttribute = createJsxAttribute("rows", this._helper.getInputParameterIdentifier())
+      var rowsAttribute = createJsxAttribute("rows", this._helper.getInputParameterIdentifier(this._entity!))
 
       let returnStatement = this.createReturnStatement([columnsAttribute, rowsAttribute])
 
@@ -221,7 +223,7 @@ export default class MuiDataTableGenerator implements TableGenerator
     private createColumns(columnsIdentifier: ts.Identifier):ts.VariableDeclarationList {
       let propertiesColumnDefinitions = Array<ts.ObjectLiteralExpression>()
 
-      getProperties(this._entity).forEach(property => {
+      getProperties(this._entity!).forEach(property => {
         propertiesColumnDefinitions.push(this.createColumnDefinition(property, this._context.formatter??Formatter.None))
       });
 

@@ -17,11 +17,11 @@ export class BasicTableGenerator implements TableGenerator
     private readonly _helper: GeneratorHelper
     private _imports: ts.ImportDeclaration[] = []
     private _context: GenerationContext
-    private _entity: Entity
+    private _entity?: Entity
     private _intlFormatter: ReactIntlFormatter
 
-    constructor(generationContext: GenerationContext, entity: Entity) {
-       this._helper = new GeneratorHelper(generationContext, entity)
+    constructor(generationContext: GenerationContext, entity?: Entity) {
+       this._helper = new GeneratorHelper(generationContext)
        this._context = generationContext
        this._entity = entity
        this._intlFormatter = new ReactIntlFormatter(generationContext, this._imports)
@@ -30,13 +30,17 @@ export class BasicTableGenerator implements TableGenerator
         throw new Error("Method not implemented.")
     }
 
-    generateTableComponent(): PageComponent {
+    generateTableComponent(): PageComponent | undefined {
+      if(this._entity){
         var statements = this. createStatements()
-        var functionalComponent = createFunctionalComponent(this._helper.getComponentName(), [this._helper.createInputParameter()], statements)
+        var functionalComponent = createFunctionalComponent(this._helper.getComponentName(this._entity!), [this._helper.createInputParameter(this._entity!)], statements)
 
         this._imports = [...this._imports, ...this._intlFormatter.getImports()]
 
         return {imports: uniqueImports(this._imports), functionDeclaration: functionalComponent}
+      }
+        
+      return undefined
     }
 
     private createStatements(): ts.Statement[] {
@@ -63,8 +67,8 @@ export class BasicTableGenerator implements TableGenerator
       const headerComponent = this._helper.prepareComponent(this.getTableDefinition().header, this._imports);
       const rowComponent = this._helper.prepareComponent(this.getTableDefinition().row, this._imports)
 
-      let headerRow = createJsxElement(rowComponent.tagName, [], getProperties(this._entity)
-                      .map((prop) => this.propertyHead(prop, this._entity)))
+      let headerRow = createJsxElement(rowComponent.tagName, [], getProperties(this._entity!)
+                      .map((prop) => this.propertyHead(prop, this._entity!)))
 
       let tableHeader = createJsxElement(headerComponent.tagName, [], [headerRow])
 
@@ -74,8 +78,8 @@ export class BasicTableGenerator implements TableGenerator
     private createBodyRow(): ts.JsxElement {
       const rowComponent = this._helper.prepareComponent(this.getTableDefinition().row, this._imports)
 
-      let bodyRow = createJsxElement(rowComponent.tagName, [],getProperties(this._entity)
-                       ?.map(prop => this.propertyCell(prop, this._entity)))
+      let bodyRow = createJsxElement(rowComponent.tagName, [],getProperties(this._entity!)
+                       ?.map(prop => this.propertyCell(prop, this._entity!)))
 
       return bodyRow
     }
@@ -92,7 +96,7 @@ export class BasicTableGenerator implements TableGenerator
     }
 
     private propertyHead(prop: Property, entity: Entity) {
-        let child = this._helper.getHeaderTitleJsxText(prop);
+        let child = this._helper.getHeaderTitleJsxText(this._entity!, prop);
 
         return createJsxElement(this._helper.prepareComponent(this.getTableDefinition().cell, this._imports).tagName, 
                                                       [],
@@ -146,7 +150,7 @@ export class BasicTableGenerator implements TableGenerator
         [factory.createJsxExpression(undefined,
             factory.createCallExpression(
                 factory.createPropertyAccessExpression(
-                    this._helper.getInputParameterIdentifier(),
+                    this._helper.getInputParameterIdentifier(this._entity!),
                     factory.createIdentifier("map")
                 ),
                 undefined,
@@ -171,7 +175,7 @@ export class BasicTableGenerator implements TableGenerator
     }
 
     protected getRowIdentifier() : ts.Identifier {
-        return factory.createIdentifier(this._helper.getEntityName())
+        return factory.createIdentifier(this._helper.getEntityName(this._entity!))
     }
 }
 

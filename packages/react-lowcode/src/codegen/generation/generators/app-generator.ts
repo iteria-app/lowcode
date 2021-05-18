@@ -24,7 +24,7 @@ export class AppGenerator {
         return this.getTable(generator);
     }
 
-    private getTable(generator: TableGenerator): PageComponent {
+    private getTable(generator: TableGenerator): PageComponent | undefined {
         return generator.generateTableComponent();
     }
 
