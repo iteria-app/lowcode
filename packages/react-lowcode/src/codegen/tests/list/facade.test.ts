@@ -1,7 +1,5 @@
-import { Formatter, TableType, UiFramework } from "../../definition/context-types";
 import { Property } from "../../generation/entity";
 import { insertColumn, insertFormWidget } from "../../generation/facade/facade-generator";
-import MuiDetailGenerator from "../../generation/generators/detail/mui-detail-generator";
 import { parseGraphqlTypes, sourceFileEntity } from "../helper";
 import { graphqlGenTs1 } from "../typeAlias.example";
 
