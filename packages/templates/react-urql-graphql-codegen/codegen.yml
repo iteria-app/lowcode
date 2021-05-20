@@ -1,0 +1,9 @@
+overwrite: true
+schema: "https://iteria-app-example01.herokuapp.com/v1/graphql"
+documents: "src/**/*.graphql"
+generates:
+  src/generated.ts:
+    plugins:
+      - "typescript"
+      - "typescript-operations"
+      - "typescript-urql"

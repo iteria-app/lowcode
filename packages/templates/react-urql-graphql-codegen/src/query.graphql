@@ -1,0 +1,12 @@
+query generated($search: String!) {
+  customers(where: { name: { _ilike: $search } }, order_by: { name: asc }) {
+    id
+    email
+    name
+    phone
+    address
+    avatarUrl
+    createdAt
+    updatedAt
+  }
+}
