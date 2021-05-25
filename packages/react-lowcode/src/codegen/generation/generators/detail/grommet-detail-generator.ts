@@ -22,7 +22,7 @@ export default class GrommetDetailGenerator
   private _intlFormatter: ReactIntlFormatter
 
   constructor(generationContext: GenerationContext, entity: Entity) {
-    this._helper = new GeneratorHelper(generationContext, entity)
+    this._helper = new GeneratorHelper(generationContext)
     this._context = generationContext
     this._entity = entity
     this._intlFormatter = new ReactIntlFormatter(generationContext, this._imports)

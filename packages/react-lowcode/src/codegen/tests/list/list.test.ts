@@ -46,7 +46,7 @@ describe("table generation", () => {
       const testEntity = sourceFileEntity(myClassFile)
 
       let generationContext = {uiFramework: UiFramework.MaterialUI, formatter: Formatter.None, index: {tableType: TableType.BasicTable, height: "400px"}};
-      let generator = new AppGenerator(generationContext, testEntity!!);
+      let generator = new AppGenerator(generationContext, testEntity!);
 
       const page = generator.generateIndexPage()
       
@@ -60,7 +60,7 @@ describe("table generation", () => {
       // TODO https://github.com/vvakame/typescript-formatter/blob/master/lib/formatter.ts
       const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
 
-      console.log('generated:', printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page.imports, page.functionDeclaration]), sourceFile))
+      console.log('generated:', printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page!.imports, page!.functionDeclaration]), sourceFile))
   });
 
   test(".mui table generation with formatting", () => {
@@ -83,7 +83,7 @@ describe("table generation", () => {
     // TODO https://github.com/vvakame/typescript-formatter/blob/master/lib/formatter.ts
     const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
 
-    console.log('generated:', printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page.imports, page.functionDeclaration]), sourceFile))
+    console.log('generated:', printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page!.imports, page!.functionDeclaration]), sourceFile))
 });
 
 test(".grommet table generation without formatting", () => {
@@ -106,7 +106,7 @@ test(".grommet table generation without formatting", () => {
   // TODO https://github.com/vvakame/typescript-formatter/blob/master/lib/formatter.ts
   const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
 
-  console.log('generated:', printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page.imports, page.functionDeclaration]), sourceFile))
+  console.log('generated:', printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page!.imports, page!.functionDeclaration]), sourceFile))
   });
 
   test(".grommet table generation with formatting", () => {
@@ -129,7 +129,7 @@ test(".grommet table generation without formatting", () => {
   // TODO https://github.com/vvakame/typescript-formatter/blob/master/lib/formatter.ts
   const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
 
-  console.log('generated:', printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page.imports, page.functionDeclaration]), sourceFile))
+  console.log('generated:', printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page!.imports, page!.functionDeclaration]), sourceFile))
   });
 
   test(".mui data table generation without formatting", () => {
@@ -144,7 +144,7 @@ test(".grommet table generation without formatting", () => {
       
       const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
 
-      console.log('generated:', printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page.imports, page.functionDeclaration]), sourceFile))
+      console.log('generated:', printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page!.imports, page!.functionDeclaration]), sourceFile))
   });
 
   test(".mui data table generation with formatting", () => {
@@ -159,7 +159,7 @@ test(".grommet table generation without formatting", () => {
       
       const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
 
-      console.log('generated:', printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page.imports, page.functionDeclaration]), sourceFile))
+      console.log('generated:', printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page!.imports, page!.functionDeclaration]), sourceFile))
   });
 
   test(".grommet data table generation without formatting", () => {
@@ -174,7 +174,7 @@ test(".grommet table generation without formatting", () => {
       
       const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
 
-      console.log('generated:', printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page.imports, page.functionDeclaration]), sourceFile))
+      console.log('generated:', printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page!.imports, page!.functionDeclaration]), sourceFile))
   });
 
   test(".grommet data table generation with formatting", () => {
@@ -189,7 +189,7 @@ test(".grommet table generation without formatting", () => {
     
     const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
 
-    console.log('generated:', printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page.imports, page.functionDeclaration]), sourceFile))
+    console.log('generated:', printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page!.imports, page!.functionDeclaration]), sourceFile))
 });
 })
 

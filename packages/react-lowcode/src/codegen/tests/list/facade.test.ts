@@ -3,7 +3,7 @@ import { insertColumn, insertFormWidget } from "../../generation/facade/facade-g
 import { parseGraphqlTypes, sourceFileEntity } from "../helper";
 import { graphqlGenTs1 } from "../typeAlias.example";
 
-  export function getTestProperty(name: string): Property[] {
+export function getTestProperty(name: string): Property[] {
     const myClassFile = parseGraphqlTypes(graphqlGenTs1)
     const testEntity = sourceFileEntity(myClassFile)
     
@@ -15,7 +15,6 @@ import { graphqlGenTs1 } from "../typeAlias.example";
 }
 
 describe("codegen facade", () => {
- 
     test(".add column to existing table", () => {
       insertColumn({lineNumber: 15,columnNumber: 73, fileName: 'src\\codegen\\tests\\list\\list-test-file.txt'}, {entityField: getTestProperty('name')[0], index:8})
     });
