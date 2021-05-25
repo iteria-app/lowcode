@@ -109,38 +109,38 @@ export default class MuiDetailGenerator implements DetailGenerator {
     return alteredSource
   }
 
-  findGridElement(parentNode: ts.Node, array: ts.JsxElement[]) {
+  findGridElement(parentNode: ts.Node, foundedElements: ts.JsxElement[]) {
     if (parentNode != undefined) {
       if (parentNode.getChildCount() > 0) {
         var children = parentNode.getChildren();
         children.forEach((child) => {
           if (ts.isJsxElement(child)) {
             if (child.getFullText().startsWith("Grid item", 1)) {
-              array.push(child);
+              foundedElements.push(child);
             } else {
-              this.findGridElement(child, array);
+              this.findGridElement(child, foundedElements);
             }
           } else {
-            this.findGridElement(child, array);
+            this.findGridElement(child, foundedElements);
           }
         });
       }
     }
   }
   
-  findGridContainer(parentNode: ts.Node, array: ts.JsxElement[]) {
+  findGridContainer(parentNode: ts.Node, foundedElements: ts.JsxElement[]) {
     if (parentNode != undefined) {
       if (parentNode.getChildCount() > 0) {
         var children = parentNode.getChildren();
         children.forEach((child) => {
           if (ts.isJsxElement(child)) {
             if (child.getFullText().startsWith("Grid container", 1)) {
-              array.push(child);
+              foundedElements.push(child);
             } else {
-              this.findGridContainer(child, array);
+              this.findGridContainer(child, foundedElements);
             }
           } else {
-            this.findGridContainer(child, array);
+            this.findGridContainer(child, foundedElements);
           }
         });
       }

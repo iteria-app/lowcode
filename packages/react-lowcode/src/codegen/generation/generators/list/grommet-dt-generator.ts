@@ -73,7 +73,7 @@ export default class GrommetDataTableGenerator implements TableGenerator
                             ast:SourceFile,
                             columnIndex?: number): ts.SourceFile{
         
-          let newColumnsDefinition = this.getNewColumnsDeclaration(columnDeclarationParent, 
+          let newColumnsDefinition = this.newColumnsDeclaration(columnDeclarationParent, 
                                                                    property, 
                                                                    columnIndex)
          
@@ -99,7 +99,7 @@ export default class GrommetDataTableGenerator implements TableGenerator
          return undefined
       }
 
-    private getNewColumnsDeclaration(columnDeclarationParent: ts.ArrayLiteralExpression, 
+    private newColumnsDeclaration(columnDeclarationParent: ts.ArrayLiteralExpression, 
         property: Property,
         columnIndex?: number): ts.Expression[]{
         let newElements: ts.Expression[] = []
@@ -148,13 +148,13 @@ export default class GrommetDataTableGenerator implements TableGenerator
         statements.push(factory.createReturnStatement(factory.createParenthesizedExpression(createJsxSelfClosingElement(dataGridComponent.tagName, [columnAttribute, dataAttribute]))));
   
         return statements;
-      }
+    }
   
     private createColumns(columnsIdentifier: ts.Identifier):ts.VariableDeclarationList {
         let propertiesColumnDefinitions = Array<ts.ObjectLiteralExpression>();
 
         getProperties(this._entity!).forEach(property => {
-            propertiesColumnDefinitions.push(this.createColumnDefinition(property, this._context.formatter??Formatter.None));
+            propertiesColumnDefinitions.push(this.createColumnDefinition(property, this._context.formatter));
         });
 
         return factory.createVariableDeclarationList(
@@ -171,7 +171,7 @@ export default class GrommetDataTableGenerator implements TableGenerator
         )
     }
 
-    private createColumnDefinition(property: Property, formatter: Formatter): ts.ObjectLiteralExpression {
+    private createColumnDefinition(property: Property, formatter: Formatter | undefined): ts.ObjectLiteralExpression {
         let properties : ts.ObjectLiteralElementLike[] =  [
             factory.createPropertyAssignment(
               factory.createIdentifier("property"),
@@ -183,12 +183,15 @@ export default class GrommetDataTableGenerator implements TableGenerator
             )
         ];
 
-        if(formatter === Formatter.Intl){
-            properties.push(factory.createPropertyAssignment(
-                factory.createIdentifier("render"),
-                this.getRender(property)
-            ))
+        if(formatter){
+            if(formatter === Formatter.Intl){
+              properties.push(factory.createPropertyAssignment(
+                  factory.createIdentifier("render"),
+                  this.getRender(property)
+              ))
+            } 
         }
+        
 
         return factory.createObjectLiteralExpression(properties,false)
     }
