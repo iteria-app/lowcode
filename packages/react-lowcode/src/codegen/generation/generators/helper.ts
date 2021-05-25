@@ -37,7 +37,7 @@ export class GeneratorHelper{
     }
 
     getComponentName(entity: Entity) {
-        return `${entity.getName()}Index`
+        return `${entity.getName()}Table`
     }
 
     prepareComponent(component: Component, imports: ts.ImportDeclaration[]): Component {

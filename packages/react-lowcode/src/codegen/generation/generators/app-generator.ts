@@ -19,9 +19,13 @@ export class AppGenerator {
         };
     }
 
-    generateIndexPage() {
+    generateIndexPage(): PageComponent | undefined {
         let generator = this.getIndexGenerator();
         return this.getTable(generator);
+    }
+
+    generateWrapperIndexPage(): PageComponent | undefined {
+        return undefined
     }
 
     private getTable(generator: TableGenerator): PageComponent | undefined {

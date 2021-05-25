@@ -178,6 +178,21 @@ test(".grommet table generation without formatting", () => {
   });
 
   test(".grommet data table generation with formatting", () => {
+      const sourceFile = createAst('')
+      const myClassFile = parseGraphqlTypes(graphqlGenTs1)
+      const testEntity = sourceFileEntity(myClassFile)
+
+      let generationContext = {uiFramework: UiFramework.Grommet, formatter: Formatter.Intl, index: {tableType: TableType.DataTable, height: "400px"}};
+      let generator = new AppGenerator(generationContext, testEntity!!);
+
+      const page = generator.generateIndexPage()
+    
+      const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
+
+      console.log('generated:', printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page!.imports, page!.functionDeclaration]), sourceFile))
+  });
+
+  test(".index wrapper page generating", () => {
     const sourceFile = createAst('')
     const myClassFile = parseGraphqlTypes(graphqlGenTs1)
     const testEntity = sourceFileEntity(myClassFile)
@@ -185,11 +200,13 @@ test(".grommet table generation without formatting", () => {
     let generationContext = {uiFramework: UiFramework.Grommet, formatter: Formatter.Intl, index: {tableType: TableType.DataTable, height: "400px"}};
     let generator = new AppGenerator(generationContext, testEntity!!);
 
-    const page = generator.generateIndexPage()
-    
+    const page = generator.generateWrapperIndexPage()
+  
     const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
 
-    console.log('generated:', printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page!.imports, page!.functionDeclaration]), sourceFile))
+    let prindedSource = printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page!.imports, page!.functionDeclaration]), sourceFile)
+
+    expect(prindedSource).toContain('<CustomerTable customers={data?.customers} />')
 });
 })
 
