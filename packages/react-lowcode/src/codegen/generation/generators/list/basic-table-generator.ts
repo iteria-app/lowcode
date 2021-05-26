@@ -135,7 +135,7 @@ export class BasicTableGenerator implements TableGenerator
        let child: ts.JsxChild
 
        if(formattedChild){
-        child = propertyAccess
+        child = formattedChild
        } else{
            child = propertyAccess
        }
