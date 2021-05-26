@@ -9,9 +9,8 @@ import {
   fetchExchange
 } from 'urql';
 
-
 const client = createClient({
-  url: 'https://iteria-app-example01.herokuapp.com/v1/graphql',
+  url: process.env.REACT_APP_SCHEMA_ENDPOINT as string,
   exchanges: [debugExchange, cacheExchange, fetchExchange]
 });
 

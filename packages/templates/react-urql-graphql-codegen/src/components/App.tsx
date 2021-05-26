@@ -5,7 +5,7 @@ import ListPlaceholder from './ListPlaceholder'
 
 function App() {
   const [result] = useGeneratedQuery({
-    variables: { search: "%%" }
+    variables: {}
   })
 
   const { fetching, error, data } = result

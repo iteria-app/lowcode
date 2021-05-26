@@ -1,12 +1,12 @@
-query generated($search: String!) {
-  customers(where: { name: { _ilike: $search } }, order_by: { name: asc }) {
+query generated {
+  customers(order_by: { name: asc }) {
+    updatedAt
+    phone
+    name
     id
     email
-    name
-    phone
-    address
-    avatarUrl
     createdAt
-    updatedAt
+    avatarUrl
+    address
   }
 }
