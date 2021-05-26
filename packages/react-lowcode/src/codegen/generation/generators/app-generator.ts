@@ -24,7 +24,7 @@ export class AppGenerator {
         return this.getTable(generator);
     }
 
-    generateWrapperIndexPage(): PageComponent | undefined {
+    generateWrapperListPage(template: string): PageComponent | undefined {
         return undefined
     }
 

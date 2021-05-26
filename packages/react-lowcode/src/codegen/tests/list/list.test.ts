@@ -188,11 +188,12 @@ test(".grommet table generation without formatting", () => {
       const page = generator.generateIndexPage()
     
       const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
-
-      console.log('generated:', printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page!.imports, page!.functionDeclaration]), sourceFile))
+      let generatedCode = printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page!.imports, page!.functionDeclaration]), sourceFile)
+    
+      console.log('generated:', generatedCode)
   });
 
-  test(".index wrapper page generating", () => {
+  test(".list wrapper page generating", () => {
     const sourceFile = createAst('')
     const myClassFile = parseGraphqlTypes(graphqlGenTs1)
     const testEntity = sourceFileEntity(myClassFile)
@@ -200,7 +201,7 @@ test(".grommet table generation without formatting", () => {
     let generationContext = {uiFramework: UiFramework.Grommet, formatter: Formatter.Intl, index: {tableType: TableType.DataTable, height: "400px"}};
     let generator = new AppGenerator(generationContext, testEntity!!);
 
-    const page = generator.generateWrapperIndexPage()
+    const page = generator.generateWrapperListPage('test')
   
     const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
 

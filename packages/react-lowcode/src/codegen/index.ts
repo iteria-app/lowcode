@@ -47,7 +47,7 @@ export function generatePages(inputSourceCode: string, io: CodeRW & CodeDir, opt
                 true,
                 ts.ScriptKind.TSX
             )
-            const pageSouceCode = printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page!.imports, page!.functionDeclaration]), sourceFile)
+            const pageSouceCode = printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page.imports, page.functionDeclaration]), sourceFile)
             io.writeFile(filePath, pageSouceCode)
         }
     })
