@@ -1,5 +1,5 @@
 overwrite: true
-schema: "https://iteria-app-example01.herokuapp.com/v1/graphql"
+schema: '${REACT_APP_SCHEMA_ENDPOINT:?error with env variable}'
 documents: "src/**/*.graphql"
 generates:
   src/generated.ts:
