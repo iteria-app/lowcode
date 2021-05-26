@@ -2,10 +2,11 @@ import ts, { factory } from "typescript"
 import { graphqlGenTs1 } from "../typeAlias.example"
 import { Formatter, TableType, UiFramework } from '../../definition/context-types'
 import { AppGenerator } from '../../generation/generators/app-generator'
-
 import {generatePages} from '../../index'
 import { CodeDir, CodeRW } from "../../../io"
 import { createAst, parseGraphqlTypes, sourceFileEntity } from "../helper"
+import path from 'path'
+import fs from "fs"
 
 class testDemoWriter implements CodeRW, CodeDir {
   private _sourceCodeString: string = ''
@@ -37,7 +38,6 @@ describe("table generation", () => {
     generatePages(graphqlGenTs1, testWriter, options)
 
     console.log('generated:' + testWriter.getSourceString())
-
   });
 
   test(".mui table generation without formatting", () => {
@@ -48,7 +48,7 @@ describe("table generation", () => {
       let generationContext = {uiFramework: UiFramework.MaterialUI, formatter: Formatter.None, index: {tableType: TableType.BasicTable, height: "400px"}};
       let generator = new AppGenerator(generationContext, testEntity!);
 
-      const page = generator.generateIndexPage()
+      const page = generator.generateListComponent()
       
       /*ts.transform(sourceFile, [
           (context) => (node) => {
@@ -71,7 +71,7 @@ describe("table generation", () => {
     let generationContext = {uiFramework: UiFramework.MaterialUI, formatter: Formatter.Intl, index: {tableType: TableType.BasicTable, height: "400px"}};
     let generator = new AppGenerator(generationContext, testEntity!!);
 
-    const page = generator.generateIndexPage()
+    const page = generator.generateListComponent()
     
     /*ts.transform(sourceFile, [
         (context) => (node) => {
@@ -94,7 +94,7 @@ test(".grommet table generation without formatting", () => {
   let generationContext = {uiFramework: UiFramework.Grommet, formatter: Formatter.None, index: {tableType: TableType.BasicTable, height: "400px"}};
   let generator = new AppGenerator(generationContext, testEntity!!);
 
-  const page = generator.generateIndexPage()
+  const page = generator.generateListComponent()
   
   /*ts.transform(sourceFile, [
       (context) => (node) => {
@@ -117,7 +117,7 @@ test(".grommet table generation without formatting", () => {
   let generationContext = {uiFramework: UiFramework.Grommet, formatter: Formatter.Intl, index: {tableType: TableType.BasicTable, height: "400px"}};
   let generator = new AppGenerator(generationContext, testEntity!!);
 
-  const page = generator.generateIndexPage()
+  const page = generator.generateListComponent()
 
   /*ts.transform(sourceFile, [
       (context) => (node) => {
@@ -140,7 +140,7 @@ test(".grommet table generation without formatting", () => {
       let generationContext = {uiFramework: UiFramework.MaterialUI, formatter: Formatter.None, index: {tableType: TableType.DataTable, height: "400px"}};
       let generator = new AppGenerator(generationContext, testEntity!!);
 
-      const page = generator.generateIndexPage()
+      const page = generator.generateListComponent()
       
       const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
 
@@ -155,7 +155,7 @@ test(".grommet table generation without formatting", () => {
       let generationContext = {uiFramework: UiFramework.MaterialUI, formatter: Formatter.Intl, index: {tableType: TableType.DataTable, height: "400px"}};
       let generator = new AppGenerator(generationContext, testEntity!!);
 
-      const page = generator.generateIndexPage()
+      const page = generator.generateListComponent()
       
       const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
 
@@ -170,7 +170,7 @@ test(".grommet table generation without formatting", () => {
       let generationContext = {uiFramework: UiFramework.Grommet, formatter: Formatter.None, index: {tableType: TableType.DataTable, height: "400px"}};
       let generator = new AppGenerator(generationContext, testEntity!!);
 
-      const page = generator.generateIndexPage()
+      const page = generator.generateListComponent()
       
       const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
 
@@ -185,7 +185,7 @@ test(".grommet table generation without formatting", () => {
       let generationContext = {uiFramework: UiFramework.Grommet, formatter: Formatter.Intl, index: {tableType: TableType.DataTable, height: "400px"}};
       let generator = new AppGenerator(generationContext, testEntity!!);
 
-      const page = generator.generateIndexPage()
+      const page = generator.generateListComponent()
     
       const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
       let generatedCode = printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page!.imports, page!.functionDeclaration]), sourceFile)
@@ -201,7 +201,9 @@ test(".grommet table generation without formatting", () => {
     let generationContext = {uiFramework: UiFramework.Grommet, formatter: Formatter.Intl, index: {tableType: TableType.DataTable, height: "400px"}};
     let generator = new AppGenerator(generationContext, testEntity!!);
 
-    const page = generator.generateWrapperListPage('test')
+    const templatePath = 'template-path'//TODO: put here real template path when template will be done
+    const template = fs.readFileSync(path.resolve(templatePath), 'utf-8')
+    const page = generator.generateListComponentWrapper('test')
   
     const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
 

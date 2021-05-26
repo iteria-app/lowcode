@@ -19,12 +19,12 @@ export class AppGenerator {
         };
     }
 
-    generateIndexPage(): PageComponent | undefined {
+    generateListComponent(): PageComponent | undefined {
         let generator = this.getIndexGenerator();
         return this.getTable(generator);
     }
 
-    generateWrapperListPage(template: string): PageComponent | undefined {
+    generateListComponentWrapper(template: string): PageComponent | undefined {
         return undefined
     }
 

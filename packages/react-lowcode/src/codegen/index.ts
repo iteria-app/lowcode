@@ -37,7 +37,7 @@ export function generatePages(inputSourceCode: string, io: CodeRW & CodeDir, opt
             let context = {uiFramework: UiFramework.MaterialUI, formatter: Formatter.None, index: {tableType: TableType.BasicTable, height: "400px"}};
             
             const generator = new AppGenerator(context, entity)
-            const page = generator.generateIndexPage(/* TODO entity / type name should be input - not in context */)
+            const page = generator.generateListComponent(/* TODO entity / type name should be input - not in context */)
             
             const filePath = `src/components/${typeName}.tsx`
             const sourceFile = ts.createSourceFile(
@@ -49,6 +49,24 @@ export function generatePages(inputSourceCode: string, io: CodeRW & CodeDir, opt
             )
             const pageSouceCode = printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page!.imports, page!.functionDeclaration]), sourceFile)
             io.writeFile(filePath, pageSouceCode)
+
+            //generate list wrapper
+            const indexWrapperTemplatePath = 'path-to-template'//TODO: put here real template path when template will be done
+            let template = ''
+            io.readFile(indexWrapperTemplatePath).then((source => {if(source) template = source;}))
+
+            const listWrapper = generator.generateListComponentWrapper(template)
+            const listWrapperFilePath = `src/components/${typeName}Wrapper.tsx`//TODO: dont like the word wrapper, rename later to something else
+            const sourceFileWrapperSourceFile = ts.createSourceFile(
+                listWrapperFilePath,
+                '',
+                ts.ScriptTarget.ESNext,
+                true,
+                ts.ScriptKind.TSX
+            )
+
+            const wrapperPageSourceCode = printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...listWrapper!.imports, listWrapper!.functionDeclaration]), sourceFileWrapperSourceFile)
+            io.writeFile(listWrapperFilePath, wrapperPageSourceCode)
         }
     })
 }
