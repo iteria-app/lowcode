@@ -21,7 +21,7 @@ export class BasicTableGenerator implements TableGenerator
     private _intlFormatter: ReactIntlFormatter
 
     constructor(generationContext: GenerationContext, entity?: Entity) {
-       this._helper = new GeneratorHelper(generationContext)
+       this._helper = new GeneratorHelper(generationContext, this._imports)
        this._context = generationContext
        this._entity = entity
        this._intlFormatter = new ReactIntlFormatter(generationContext, this._imports)
@@ -135,7 +135,7 @@ export class BasicTableGenerator implements TableGenerator
        let child: ts.JsxChild
 
        if(formattedChild){
-        child = propertyAccess
+        child = formattedChild
        } else{
            child = propertyAccess
        }

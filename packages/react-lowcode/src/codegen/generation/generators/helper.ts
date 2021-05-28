@@ -11,13 +11,15 @@ import { createImportDeclaration, createNameSpaceImport } from "../ts/imports"
 import { bindingParameter } from "../ts/parameters"
 import { jsxText, stringLiteral } from "../ts/text"
 
-export class GeneratorHelper{
-    readonly _context:GenerationContext;
+export class GeneratorHelper {
+    readonly _context: GenerationContext;
+    readonly _imports: ts.ImportDeclaration[];
     readonly intlFormatter: ReactIntlFormatter;
 
-    constructor(generationContext: GenerationContext){
+    constructor(generationContext: GenerationContext, imports: ts.ImportDeclaration[]) {
         this._context = generationContext;
-        this.intlFormatter = new ReactIntlFormatter(this._context, []);
+        this._imports = imports;
+        this.intlFormatter = new ReactIntlFormatter(this._context, this._imports);
     }
     
     getEntityName(entity: Entity): string{

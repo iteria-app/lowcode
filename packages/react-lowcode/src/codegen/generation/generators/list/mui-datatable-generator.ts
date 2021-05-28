@@ -24,7 +24,7 @@ export default class MuiDataTableGenerator implements TableGenerator
     private _widgetContext: WidgetContext | undefined
 
     constructor(generationContext: GenerationContext, entity?: Entity, widgetContext?: WidgetContext) {
-       this._helper = new GeneratorHelper(generationContext)
+       this._helper = new GeneratorHelper(generationContext, this._imports)
        this._context = generationContext
        this._entity = entity
        this._widgetContext = widgetContext
