@@ -89,7 +89,7 @@ export default class ReactIntlFormatter {
   }
 
   localizePropertyNameUsingTag(prop: Property, entity?: Entity): ts.JsxSelfClosingElement {
-    let messageId: ts.StringLiteral = factory.createStringLiteral(entity? entity.getName() : '' + "." + prop.getName())
+    let messageId: ts.StringLiteral = factory.createStringLiteral((entity ? entity.getName() : '') + "." + prop.getName())
     let messageDefaultValue: ts.StringLiteral = factory.createStringLiteral(prop.getName())
 
     return this.localizeMessage(messageId, messageDefaultValue, undefined)
