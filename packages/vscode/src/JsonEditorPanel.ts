@@ -15,6 +15,7 @@ import * as prettierCss from 'prettier/src/language-css'
 import * as prettierJs from 'prettier/src/language-js'
 import * as prettierHtml from 'prettier/src/language-html'
 import * as prettierDoc from 'prettier/src/document/doc-printer'
+// import { TranslationSheet } from "wysiwyg"
 
 export class JsonEditorPanel {
   public static currentPanel: JsonEditorPanel | undefined;
@@ -63,11 +64,13 @@ export class JsonEditorPanel {
               this._currentEditor.document.getText().length
             )
           );
-          let html = parse5.serialize(JSON.parse(message.json));
+          // console.log(JSON.parse(message.json))
+          // let html = parse5.serialize(JSON.parse(message.json));
           //TODO dynamicky: Match every script using regex, this will return an array
           // cycle the matched array and paste the text between them (index based)
-          html = html.replace(/<script[^>]*>.*?<\/script>/g,'<script>'+this.scriptTextSave[0]+'</script>')
-          editBuilder.replace(range, html);
+          // html = html.replace(/<script[^>]*>.*?<\/script>/g,'<script>'+this.scriptTextSave[0]+'</script>')
+          editBuilder.replace(range, message.json);
+          this.createFiles(this._currentEditor.document.uri.fsPath,"",message.json)
         });
       }
     });
@@ -151,7 +154,7 @@ export class JsonEditorPanel {
     //ast.tokens = []
     const locStart = parser.parsers.svelte.locStart;
     const locEnd = parser.parsers.svelte.locEnd;
-
+    console.log("doFormat: ", input)
     let options = prettierOpts.normalize({
       tabWidth: 2,
       parser: 'svelte' as any,
@@ -166,6 +169,7 @@ export class JsonEditorPanel {
     })
     
     const sveltePrint = parser.printers['svelte-ast'].print
+    console.log("Svelte: ", sveltePrint)
     //const svelteEmbed = parser.printers['svelte-ast'].embed
     function printFn(fastPath) {
       const current = fastPath.getValue()
@@ -212,12 +216,13 @@ export class JsonEditorPanel {
 
   private getJson(): string {
     let json: string = "";
-    let documentFragment: any = "";
+    // let documentFragment: any = "";
     if (this._currentEditor) {
       json = this._currentEditor.document.getText();
-      this.doFormat(json);
-      //documentFragment = parse5.parseFragment(json);
-      //json = this.filterNodes(documentFragment);
+      // this.doFormat(json);
+      // documentFragment = parse5.parseFragment(json);
+      // console.log(documentFragment)
+      // json = this.filterNodes(documentFragment.childNodes);
     }
     json = JSON.stringify(json);
     return json;
@@ -289,7 +294,6 @@ export class JsonEditorPanel {
         </head>
         <body>
             <div id="jsoneditor"></div>
-
             <script src="${mainScriptUri}"></script>
         </body>
         </html>

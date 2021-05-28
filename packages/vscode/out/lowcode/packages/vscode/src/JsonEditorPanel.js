@@ -14,7 +14,6 @@ const prettierCss = require("prettier/src/language-css");
 const prettierJs = require("prettier/src/language-js");
 const prettierHtml = require("prettier/src/language-html");
 const prettierDoc = require("prettier/src/document/doc-printer");
-// import { TranslationSheet } from "wysiwyg"
 class JsonEditorPanel {
     constructor(extensionPath, column, theme) {
         this.scriptTextSave = [];
@@ -34,7 +33,7 @@ class JsonEditorPanel {
             if (this._currentEditor) {
                 this._currentEditor.edit((editBuilder) => {
                     const range = new vscode.Range(this._currentEditor.document.positionAt(0), this._currentEditor.document.positionAt(this._currentEditor.document.getText().length));
-                    // console.log(JSON.parse(message.json))
+                    console.log(JSON.parse(message.json));
                     // let html = parse5.serialize(JSON.parse(message.json));
                     //TODO dynamicky: Match every script using regex, this will return an array
                     // cycle the matched array and paste the text between them (index based)
@@ -217,6 +216,7 @@ class JsonEditorPanel {
             <script src="${scriptUri}"></script>
         </head>
         <body>
+            <TranslationSheet translations={{"en":{"budget":"BUDGET","message2":"MESSAGE 2"},"sk":{"budget":"ROZPOCET","message2":"hlaska 2"}}}/>
             <div id="jsoneditor"></div>
             <script src="${mainScriptUri}"></script>
         </body>
