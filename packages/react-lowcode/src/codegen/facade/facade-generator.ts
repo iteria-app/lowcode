@@ -1,17 +1,17 @@
-import { SourceLineCol } from "../../../ast";
+import { SourceLineCol } from "../../ast";
 import {
   Formatter,
   TableType,
   UiFramework,
-} from "../../definition/context-types";
-import { Property } from "../entity";
-import { parseGraphqlTypes, sourceFileEntity } from "../../tests/helper";
-import { graphqlGenTs1 } from "../../tests/typeAlias.example";
-import { AppContext } from "../context/app-context";
-import { SourceFileContext } from "../context/page-context";
-import { WidgetContext } from "../context/widget-context";
-import MuiDataTableGenerator from "../generators/list/mui-datatable-generator";
-import MuiDetailGenerator from "../generators/detail/mui-detail-generator";
+} from "../definition/context-types";
+import { Property } from "../generation/entity";
+import { parseGraphqlTypes, sourceFileEntity } from "../tests/helper";
+import { graphqlGenTs1 } from "../tests/typeAlias.example";
+import { AppContext } from "../generation/context/app-context";
+import { PageContext } from "../generation/context/page-context";
+import { WidgetContext } from "../generation/context/widget-context";
+import MuiDataTableGenerator from "../generation/generators/list/mui-datatable-generator";
+import MuiDetailGenerator from "../generation/generators/detail/mui-detail-generator";
 
 export interface FacadeOptions {
   entityField: Property;
@@ -19,6 +19,7 @@ export interface FacadeOptions {
 }
 
 export function insertColumn(
+  sourceCode: string,
   tablePosition: SourceLineCol,
   options: FacadeOptions
 ): string {
@@ -28,9 +29,9 @@ export function insertColumn(
     index: { tableType: TableType.DataTable, height: "400px" },
   };
   let appContext = new AppContext(generationContext);
-  let sourceFileContext = new SourceFileContext(
+  let sourceFileContext = new PageContext(
     appContext,
-    tablePosition.fileName
+    sourceCode
   );
   let widgetContext = new WidgetContext(sourceFileContext);
 
@@ -44,6 +45,7 @@ export function insertColumn(
 }
 
 export function insertFormWidget(
+  sourceCode: string,
   componentPosition: SourceLineCol,
   options: FacadeOptions
 ): string {
@@ -53,9 +55,9 @@ export function insertFormWidget(
     index: { tableType: TableType.DataTable, height: "400px" },
   };
   let appContext = new AppContext(generationContext);
-  let sourceFileContext = new SourceFileContext(
+  let sourceFileContext = new PageContext(
     appContext,
-    componentPosition.fileName
+    sourceCode
   );
   let widgetContext = new WidgetContext(sourceFileContext);
 

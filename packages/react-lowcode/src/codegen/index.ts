@@ -6,6 +6,9 @@ import ts, { factory } from "typescript"
 import { Project } from "ts-morph"
 import { HookImport } from '../ast/hooks'
 import { TagImport } from '../ast/tags'
+import { FacadeOptions } from './facade/facade-generator'
+import { SourceLineCol } from '../ast'
+import { Property } from './generation/entity'
 
 interface CodegenOptions {
     // whitelisted entity names
@@ -55,7 +58,7 @@ export function generatePages(inputSourceCode: string, io: CodeRW & CodeDir, opt
             let template = ''
             io.readFile(indexWrapperTemplatePath).then((source => {if(source) template = source;}))
 
-            const listWrapper = generator.generateListComponentWrapper(template)
+            const listWrapper = generator.generateListComponentPage(template)
             const listWrapperFilePath = `src/components/${typeName}Wrapper.tsx`//TODO: dont like the word wrapper, rename later to something else
             const sourceFileWrapperSourceFile = ts.createSourceFile(
                 listWrapperFilePath,
@@ -69,6 +72,32 @@ export function generatePages(inputSourceCode: string, io: CodeRW & CodeDir, opt
             io.writeFile(listWrapperFilePath, wrapperPageSourceCode)
         }
     })
+}
+
+export function addColumn(typesSourceCode: string, 
+                          io: CodeRW, 
+                          sourceLine:SourceLineCol, 
+                          options?: FacadeOptions){
+    const project = new Project({})
+    const myClassFile = project.createSourceFile("src/types.ts", typesSourceCode)
+
+    const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
+    const typeAlias = myClassFile.getTypeAlias('Customer')
+    const props = typeAlias?.getType()?.getProperties() ?? []
+    if (typeAlias) {
+        const entity = {
+            getName: () => 'Customer',
+            getType: () => typeAlias,
+            properties: props.map((prop) => ({
+                getName: () => prop.getName(),
+                getType: () => prop.getTypeAtLocation(myClassFile),
+                getTypeText: () => prop.getDeclarations()[0].getText()
+            }))
+        }
+
+        const property: Property = 
+    }
+
 }
 
 interface ThemeCodegen {

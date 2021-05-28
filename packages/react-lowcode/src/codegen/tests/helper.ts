@@ -1,6 +1,7 @@
 
 import { Project, SourceFile } from "ts-morph"
 import ts from "typescript"
+import { Property } from "../generation/entity"
 
 export function createAst(
     code:string,
@@ -33,6 +34,17 @@ export function createAst(
       }
     }
   }
+
+  export function getTestProperty(typesSourceCode: string,  name: string): Property[] {
+    const myClassFile = parseGraphqlTypes(typesSourceCode)
+    const testEntity = sourceFileEntity(myClassFile)
+    
+    let property = testEntity?.properties.filter(((prop)=> { 
+      return prop.getName().toLowerCase() === name 
+    }))
+
+    return property ?? []
+}
 
   export function parseGraphqlTypes(sourceCode: string) {
     // initialize

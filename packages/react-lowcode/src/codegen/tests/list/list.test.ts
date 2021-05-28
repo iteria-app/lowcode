@@ -203,7 +203,7 @@ test(".grommet table generation without formatting", () => {
 
     const templatePath = 'template-path'//TODO: put here real template path when template will be done
     const template = fs.readFileSync(path.resolve(templatePath), 'utf-8')
-    const page = generator.generateListComponentWrapper('test')
+    const page = generator.generateListComponentPage('test')
   
     const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
 

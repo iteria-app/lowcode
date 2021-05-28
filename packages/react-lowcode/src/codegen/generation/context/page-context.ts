@@ -1,18 +1,16 @@
 import ts from "typescript";
-import fs from "fs"
 import { createImportDeclaration, uniqueImports } from "../ts/imports";
 import { AppContext } from "./app-context";
 import { InjectionContext } from "./injection-context";
-import path from 'path'
 
-export class SourceFileContext{
+export class PageContext{
     private _appContext: AppContext;
     private _imports: ts.ImportDeclaration[] = [];
-    private _path : string;
+    private _filePath : string;
  
-    constructor(appContext: AppContext, path: string){
+    constructor(appContext: AppContext, filePath: string){
         this._appContext = appContext;
-        this._path = path;
+        this._filePath = filePath;
     }
 
     public get InjectionContext() : InjectionContext {
@@ -27,11 +25,14 @@ export class SourceFileContext{
         this._imports.push(createImportDeclaration(identifier, pck))
     }
 
-    public get path() : string {
-        return this._path;
+    public get source() : string {
+        return this.source;
     }
    
     getSourceCode(): string {
-        return fs.readFileSync(path.resolve(this.path), 'utf-8')
+        let fileContent = ''
+        this._appContext._io.readFile(this._filePath).then(content=> fileContent = content ?? '')
+
+        return fileContent
     }    
 }
