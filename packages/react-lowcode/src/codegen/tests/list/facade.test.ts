@@ -1,5 +1,5 @@
 import { Property } from "../../generation/entity";
-import { insertColumn, insertFormWidget } from "../../generation/facade/facade-generator";
+import { insertColumn, insertColumnGrommet, insertFormWidget } from "../../generation/facade/facade-generator";
 import { parseGraphqlTypes, sourceFileEntity } from "../helper";
 import { graphqlGenTs1 } from "../typeAlias.example";
 
@@ -21,5 +21,9 @@ describe("codegen facade", () => {
 
     test(".add widget to existing detail page", () => {
       insertFormWidget({lineNumber: 33,columnNumber: 19, fileName: 'src\\codegen\\tests\\detail\\detail-test-file.txt'}, {entityField: getTestProperty('test')[0]})
+    });
+
+    test(".add column to existing table Grommet", () => {
+      insertColumnGrommet({lineNumber: 13, columnNumber: 17, fileName: 'src\\codegen\\tests\\list\\list-grommet-test-file.txt'}, { entityField: getTestProperty('testdate')[0], index: 1 })
     });
 })
