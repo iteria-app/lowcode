@@ -74,31 +74,31 @@ export function generatePages(inputSourceCode: string, io: CodeRW & CodeDir, opt
     })
 }
 
-export function addColumn(typesSourceCode: string, 
-                          io: CodeRW, 
-                          sourceLine:SourceLineCol, 
-                          options?: FacadeOptions){
-    const project = new Project({})
-    const myClassFile = project.createSourceFile("src/types.ts", typesSourceCode)
+// export function addColumn(typesSourceCode: string, 
+//                           io: CodeRW, 
+//                           sourceLine:SourceLineCol, 
+//                           options?: FacadeOptions){
+//     const project = new Project({})
+//     const myClassFile = project.createSourceFile("src/types.ts", typesSourceCode)
 
-    const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
-    const typeAlias = myClassFile.getTypeAlias('Customer')
-    const props = typeAlias?.getType()?.getProperties() ?? []
-    if (typeAlias) {
-        const entity = {
-            getName: () => 'Customer',
-            getType: () => typeAlias,
-            properties: props.map((prop) => ({
-                getName: () => prop.getName(),
-                getType: () => prop.getTypeAtLocation(myClassFile),
-                getTypeText: () => prop.getDeclarations()[0].getText()
-            }))
-        }
+//     const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
+//     const typeAlias = myClassFile.getTypeAlias('Customer')
+//     const props = typeAlias?.getType()?.getProperties() ?? []
+//     if (typeAlias) {
+//         const entity = {
+//             getName: () => 'Customer',
+//             getType: () => typeAlias,
+//             properties: props.map((prop) => ({
+//                 getName: () => prop.getName(),
+//                 getType: () => prop.getTypeAtLocation(myClassFile),
+//                 getTypeText: () => prop.getDeclarations()[0].getText()
+//             }))
+//         }
 
-        const property: Property = 
-    }
+//         const property: Property = 
+//     }
 
-}
+// }
 
 interface ThemeCodegen {
     providerTag(...children: ts.JsxChild[]): any
