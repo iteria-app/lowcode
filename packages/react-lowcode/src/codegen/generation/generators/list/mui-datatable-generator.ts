@@ -37,6 +37,7 @@ export default class MuiDataTableGenerator implements TableGenerator
       let alteredSource = ''
       if(this._widgetContext){
         let sourceCode = this._widgetContext.getSourceCodeString(position)
+        
         let ast = createAst(sourceCode)
 
         if(ast){
@@ -59,7 +60,6 @@ export default class MuiDataTableGenerator implements TableGenerator
           }
 
           alteredSource = this.printSourceCode(ast)
-          console.log(alteredSource)
         }
       }
 

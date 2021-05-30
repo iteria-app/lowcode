@@ -13,6 +13,8 @@ import { WidgetContext } from "../generation/context/widget-context";
 import MuiDataTableGenerator from "../generation/generators/list/mui-datatable-generator";
 import MuiDetailGenerator from "../generation/generators/detail/mui-detail-generator";
 import GrommetDataTableGenerator from "../generation/generators/list/grommet-dt-generator";
+import { CodeRW } from "../../io";
+import { CodegenRw } from "../io/codegenRw";
 
 export interface FacadeOptions {
   entityField: Property;
@@ -20,19 +22,19 @@ export interface FacadeOptions {
 }
 
 export function insertColumn(
-  sourceCode: string,
   tablePosition: SourceLineCol,
-  options: FacadeOptions
+  options: FacadeOptions,
+  io: CodeRW
 ): string {
   let generationContext = {
     uiFramework: UiFramework.MaterialUI,
     formatter: Formatter.None,
     index: { tableType: TableType.DataTable, height: "400px" },
   };
-  let appContext = new AppContext(generationContext);
+  let appContext = new AppContext(generationContext, io);
   let sourceFileContext = new PageContext(
     appContext,
-    sourceCode
+    tablePosition.fileName
   );
   let widgetContext = new WidgetContext(sourceFileContext);
 
@@ -47,14 +49,15 @@ export function insertColumn(
 
 export function insertColumnGrommet(
   tablePosition: SourceLineCol,
-  options: FacadeOptions
+  options: FacadeOptions,
+  io: CodeRW
 ): string {
   let generationContext = {
     uiFramework: UiFramework.Grommet,
     formatter: Formatter.None,
     index: { tableType: TableType.DataTable, height: "400px" },
   };
-  let appContext = new AppContext(generationContext);
+  let appContext = new AppContext(generationContext, io);
   let sourceFileContext = new PageContext(
     appContext,
     tablePosition.fileName
@@ -71,19 +74,19 @@ export function insertColumnGrommet(
 }
 
 export function insertFormWidget(
-  sourceCode: string,
   componentPosition: SourceLineCol,
-  options: FacadeOptions
+  options: FacadeOptions,
+  io: CodegenRw
 ): string {
   let generationContext = {
     uiFramework: UiFramework.MaterialUI,
     formatter: Formatter.None,
     index: { tableType: TableType.DataTable, height: "400px" },
   };
-  let appContext = new AppContext(generationContext);
+  let appContext = new AppContext(generationContext, io);
   let sourceFileContext = new PageContext(
     appContext,
-    sourceCode
+    componentPosition.fileName
   );
   let widgetContext = new WidgetContext(sourceFileContext);
 

@@ -25,13 +25,13 @@ export class PageContext{
         this._imports.push(createImportDeclaration(identifier, pck))
     }
 
-    public get source() : string {
-        return this.source;
+    public get filePath() : string {
+        return this._filePath;
     }
    
     getSourceCode(): string {
         let fileContent = ''
-        this._appContext._io.readFile(this._filePath).then(content=> fileContent = content ?? '')
+        this._appContext._io.readFile(this._filePath).then(data=> {if(data)fileContent = data})
 
         return fileContent
     }    

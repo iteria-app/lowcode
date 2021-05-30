@@ -35,7 +35,7 @@ export function createAst(
     }
   }
 
-  export function getTestProperty(typesSourceCode: string,  name: string): Property[] {
+  export function getEntityProperty(typesSourceCode: string,  name: string): Property[] {
     const myClassFile = parseGraphqlTypes(typesSourceCode)
     const testEntity = sourceFileEntity(myClassFile)
     

@@ -4,7 +4,8 @@ import { CodeRW } from '../../io'
 
 export class CodegenRw implements CodeRW{
     readFile(path: string, encoding?: string): Promise<string | undefined> {
-        return Promise.resolve(fs.readFileSync(pathResolver.resolve(path), encoding ?? 'utf-8'))
+        const fileContent = fs.readFileSync(pathResolver.resolve(path), encoding ?? 'utf-8')
+        return Promise.resolve(fileContent)
     }
     writeFile(path: string, data: string): Promise<void> {
         return Promise.resolve(fs.writeFileSync(path, data))

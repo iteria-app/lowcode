@@ -6,15 +6,21 @@ import ts, { factory } from "typescript"
 import { Project } from "ts-morph"
 import { HookImport } from '../ast/hooks'
 import { TagImport } from '../ast/tags'
-import { FacadeOptions } from './facade/facade-generator'
+import { FacadeOptions, insertColumn, insertFormWidget } from './facade/facade-generator'
 import { SourceLineCol } from '../ast'
 import { Property } from './generation/entity'
+import { getEntityProperty } from './tests/helper'
 
 interface CodegenOptions {
     // whitelisted entity names
     readonly names: string[]
     // default is MaterialUI
     uiFramework?: UiFramework
+}
+
+interface InsertOptions {
+    property: string
+    index?: number
 }
 
 // generates CRUD React pages (master-detail, eg. orders list, order detail form) from typescript
@@ -74,31 +80,31 @@ export function generatePages(inputSourceCode: string, io: CodeRW & CodeDir, opt
     })
 }
 
-// export function addColumn(typesSourceCode: string, 
-//                           io: CodeRW, 
-//                           sourceLine:SourceLineCol, 
-//                           options?: FacadeOptions){
-//     const project = new Project({})
-//     const myClassFile = project.createSourceFile("src/types.ts", typesSourceCode)
+export function addColumn(typesSourceCode: string, 
+                          io: CodeRW, 
+                          sourceLine:SourceLineCol, 
+                          options: InsertOptions){
 
-//     const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
-//     const typeAlias = myClassFile.getTypeAlias('Customer')
-//     const props = typeAlias?.getType()?.getProperties() ?? []
-//     if (typeAlias) {
-//         const entity = {
-//             getName: () => 'Customer',
-//             getType: () => typeAlias,
-//             properties: props.map((prop) => ({
-//                 getName: () => prop.getName(),
-//                 getType: () => prop.getTypeAtLocation(myClassFile),
-//                 getTypeText: () => prop.getDeclarations()[0].getText()
-//             }))
-//         }
+    const property: Property = getEntityProperty(typesSourceCode, options.property)[0]
 
-//         const property: Property = 
-//     }
+    if(property){
+        const generatedPageSource = insertColumn(sourceLine, {entityField: property, index: options.index}, io)
+        io.writeFile(sourceLine.fileName, generatedPageSource)
+    }
+}
 
-// }
+export function addFormInput(typesSourceCode: string, 
+    io: CodeRW, 
+    sourceLine:SourceLineCol, 
+    options: InsertOptions){
+
+    const property: Property = getEntityProperty(typesSourceCode, options.property)[0]
+
+    if(property){
+        const generatedPageSource = insertFormWidget(sourceLine, {entityField: property, index: options.index}, io)
+        io.writeFile(sourceLine.fileName, generatedPageSource)
+    }
+}
 
 interface ThemeCodegen {
     providerTag(...children: ts.JsxChild[]): any

@@ -12,7 +12,7 @@ export class WidgetContext{
     }
 
     getSourceCodeString(position: SourceLineCol): string{
-        return this._pageContext.source;
+        return this._pageContext.getSourceCode();
     }
 
     findWidgetParentNode(sourceCode:string, position: SourceLineCol): ts.Node  | null | undefined{
