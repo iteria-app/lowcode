@@ -9,14 +9,20 @@ import { CodegenRw } from "../../io/codegenRw";
 
 describe("codegen facade", () => {
     test(".add column to existing table", () => {
-      insertColumn({lineNumber: 15,columnNumber: 73, fileName: 'src\\codegen\\tests\\list\\list-test-file.txt'}, {entityField: getEntityProperty(graphqlGenTs1, 'name')[0], index:8}, new CodegenRw())
+      insertColumn({lineNumber: 15,columnNumber: 73, fileName: 'src\\codegen\\tests\\list\\list-test-file.txt'}, {entityField: getEntityProperty(graphqlGenTs1, 'testdate')[0], index:8}, new CodegenRw()).then(
+        (data) => console.log(data)
+      )
     });
 
     test(".add widget to existing detail page", () => {
-      insertFormWidget({lineNumber: 33,columnNumber: 19, fileName: 'src\\codegen\\tests\\detail\\detail-test-file.txt'}, {entityField: getEntityProperty(graphqlGenTs1,'test')[0]}, new CodegenRw())
+      insertFormWidget({lineNumber: 33,columnNumber: 19, fileName: 'src\\codegen\\tests\\detail\\detail-test-file.txt'}, {entityField: getEntityProperty(graphqlGenTs1,'test')[0]}, new CodegenRw()).then(
+        (data) => console.log(data)
+      )
     });
 
     test(".add column to existing table Grommet", () => {
-      insertColumnGrommet({lineNumber: 13, columnNumber: 17, fileName: 'src\\codegen\\tests\\list\\list-grommet-test-file.txt'}, { entityField: getEntityProperty(graphqlGenTs1, 'testdate')[0], index: 1 }, new CodegenRw())
+      insertColumnGrommet({lineNumber: 13, columnNumber: 17, fileName: 'src\\codegen\\tests\\list\\list-grommet-test-file.txt'}, { entityField: getEntityProperty(graphqlGenTs1, 'testdate')[0], index: 1 }, new CodegenRw()).then(
+        (data) => console.log(data)
+      )
     });
 })

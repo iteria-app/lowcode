@@ -21,11 +21,11 @@ export interface FacadeOptions {
   index?: number;
 }
 
-export function insertColumn(
+export async function insertColumn(
   tablePosition: SourceLineCol,
   options: FacadeOptions,
   io: CodeRW
-): string {
+): Promise<string> {
   let generationContext = {
     uiFramework: UiFramework.MaterialUI,
     formatter: Formatter.None,
@@ -44,14 +44,14 @@ export function insertColumn(
     widgetContext
   );
   
-  return generator.insertColumn(tablePosition, options.entityField, options.index);
+  return await generator.insertColumn(tablePosition, options.entityField, options.index);
 }
 
-export function insertColumnGrommet(
+export async function insertColumnGrommet(
   tablePosition: SourceLineCol,
   options: FacadeOptions,
   io: CodeRW
-): string {
+): Promise<string> {
   let generationContext = {
     uiFramework: UiFramework.Grommet,
     formatter: Formatter.None,
@@ -70,14 +70,14 @@ export function insertColumnGrommet(
     widgetContext
   );
   
-  return generator.insertColumn(tablePosition, options.entityField, options.index);
+  return await generator.insertColumn(tablePosition, options.entityField, options.index);
 }
 
-export function insertFormWidget(
+export async function insertFormWidget(
   componentPosition: SourceLineCol,
   options: FacadeOptions,
   io: CodegenRw
-): string {
+): Promise<string> {
   let generationContext = {
     uiFramework: UiFramework.MaterialUI,
     formatter: Formatter.None,
@@ -99,5 +99,5 @@ export function insertFormWidget(
     widgetContext
   );
 
-  return generator.insertFormWidget(componentPosition, options.entityField);
+  return await generator.insertFormWidget(componentPosition, options.entityField);
 }

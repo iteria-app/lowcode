@@ -11,8 +11,8 @@ export class WidgetContext{
         this._pageContext = sourceFileContext;
     }
 
-    getSourceCodeString(position: SourceLineCol): string{
-        return this._pageContext.getSourceCode();
+    async getSourceCodeString(position: SourceLineCol): Promise<string>{
+        return await this._pageContext.getSourceCode();
     }
 
     findWidgetParentNode(sourceCode:string, position: SourceLineCol): ts.Node  | null | undefined{

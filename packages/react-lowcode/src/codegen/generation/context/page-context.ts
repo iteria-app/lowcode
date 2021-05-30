@@ -29,9 +29,9 @@ export class PageContext{
         return this._filePath;
     }
    
-    getSourceCode(): string {
+    async getSourceCode(): Promise<string> {
         let fileContent = ''
-        this._appContext._io.readFile(this._filePath).then(data=> {if(data)fileContent = data})
+        await this._appContext._io.readFile(this._filePath).then(data=> {if(data)fileContent = data})
 
         return fileContent
     }    

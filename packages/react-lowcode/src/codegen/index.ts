@@ -80,7 +80,7 @@ export function generatePages(inputSourceCode: string, io: CodeRW & CodeDir, opt
     })
 }
 
-export function addColumn(typesSourceCode: string, 
+export async function addColumn(typesSourceCode: string, 
                           io: CodeRW, 
                           sourceLine:SourceLineCol, 
                           options: InsertOptions){
@@ -88,12 +88,12 @@ export function addColumn(typesSourceCode: string,
     const property: Property = getEntityProperty(typesSourceCode, options.property)[0]
 
     if(property){
-        const generatedPageSource = insertColumn(sourceLine, {entityField: property, index: options.index}, io)
+        const generatedPageSource = await insertColumn(sourceLine, {entityField: property, index: options.index}, io)
         io.writeFile(sourceLine.fileName, generatedPageSource)
     }
 }
 
-export function addFormInput(typesSourceCode: string, 
+export async function addFormInput(typesSourceCode: string, 
     io: CodeRW, 
     sourceLine:SourceLineCol, 
     options: InsertOptions){
@@ -101,7 +101,7 @@ export function addFormInput(typesSourceCode: string,
     const property: Property = getEntityProperty(typesSourceCode, options.property)[0]
 
     if(property){
-        const generatedPageSource = insertFormWidget(sourceLine, {entityField: property, index: options.index}, io)
+        const generatedPageSource = await insertFormWidget(sourceLine, {entityField: property, index: options.index}, io)
         io.writeFile(sourceLine.fileName, generatedPageSource)
     }
 }

@@ -47,11 +47,11 @@ export default class MuiDetailGenerator implements DetailGenerator {
     );
   }
 
-  insertFormWidget(position: SourceLineCol, property: Property): string {
+  async insertFormWidget(position: SourceLineCol, property: Property): Promise<string> {
     //Initial values
     let alteredSource = "";
     if (this._widgetContext) {
-      let sourceCode = this._widgetContext.getSourceCodeString(position);
+      let sourceCode = await this._widgetContext.getSourceCodeString(position);
       let ast = createAst(sourceCode);
 
       if (ast) {
