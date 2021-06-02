@@ -1,4 +1,4 @@
-import { getEntityProperty, parseGraphqlTypes, sourceFileEntity } from "../helper";
+import sourceFileEntity, { getEntityProperty, parseGraphqlTypes } from "../helper";
 import { graphqlGenTs1 } from "../typeAlias.example";
 import { insertColumn, insertColumnToBasicTableGrommet, insertColumnToBasicTableMui, insertColumnToDataTableGrommet, insertFormWidget } from "../../facade/facade-generator";
 import { CodegenRw } from "../../io/codegenRw";
