@@ -1,7 +1,7 @@
 import { useIntl,FormattedMessage } from "react-intl";
 import { GridColParams,DataGrid } from "@material-ui/data-grid";
 import * as React from "react";
-export default function CustomerIndex({ customers }) {
+export default function CustomerList({ customers }) {
     const intl = useIntl();
     const columns = [
         { field: "avatarUrl", flex: 1, type: "string", valueFormatter: ({ value }) => value, renderHeader: (params: GridColParams) => (<FormattedMessage id="Customer.avatarUrl" defaultMessage="avatarUrl"/>) },

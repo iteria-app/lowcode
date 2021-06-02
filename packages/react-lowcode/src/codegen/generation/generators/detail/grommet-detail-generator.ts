@@ -67,7 +67,7 @@ export default class GrommetDetailGenerator
   }
   private createStatements(): ts.Statement[] {
     let statements = new Array<ts.Statement>();
-    if (this._context.formatter === Formatter.Intl) {
+    if (this._context.formatter === Formatter.ReactIntl) {
       statements.push(this._intlFormatter.getImperativeHook());
     }
 

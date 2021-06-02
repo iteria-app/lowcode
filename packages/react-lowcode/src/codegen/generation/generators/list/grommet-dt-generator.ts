@@ -192,8 +192,7 @@ export default class GrommetDataTableGenerator implements TableGenerator
               ))
             } 
         }
-        
-
+  
         return factory.createObjectLiteralExpression(properties,false)
     }
 

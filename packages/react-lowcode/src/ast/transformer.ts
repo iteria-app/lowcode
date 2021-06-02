@@ -1,5 +1,9 @@
 import ts from "typescript"
-import { wrapNodesWithFragment } from "../routes/factory"
+import { isTopMostElementInReturnedLayout } from "../remove"
+import {
+  createEmptySpanElement,
+  wrapNodesWithFragment,
+} from "../routes/factory"
 
 const addTransformer = <T extends ts.Node, U extends ts.Node | ts.JsxChild>(
   start: number,
@@ -44,7 +48,11 @@ const removeTransformer = <T extends ts.Node>(
   return context => {
     const visit: ts.Visitor = node => {
       const nodeStart = node.pos
-      if (nodeStart === start) return
+      if (nodeStart === start) {
+        if (isTopMostElementInReturnedLayout(node)) {
+          return createEmptySpanElement()
+        } else return
+      }
 
       return ts.visitEachChild(node, child => visit(child), context)
     }

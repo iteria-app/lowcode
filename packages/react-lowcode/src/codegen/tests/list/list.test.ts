@@ -68,11 +68,11 @@ describe("table generation", () => {
     const myClassFile = parseGraphqlTypes(graphqlGenTs1)
     const testEntity = sourceFileEntity(myClassFile)
 
-    let generationContext = {uiFramework: UiFramework.MaterialUI, formatter: Formatter.Intl, index: {tableType: TableType.BasicTable, height: "400px"}};
+    let generationContext = {uiFramework: UiFramework.MaterialUI, formatter: Formatter.ReactIntl, index: {tableType: TableType.BasicTable, height: "400px"}};
     let generator = new AppGenerator(generationContext, testEntity!!);
 
     const page = generator.generateListComponent()
-    
+
     /*ts.transform(sourceFile, [
         (context) => (node) => {
           return ts.visitNode(node, n => {
@@ -114,7 +114,7 @@ test(".grommet table generation without formatting", () => {
   const myClassFile = parseGraphqlTypes(graphqlGenTs1)
   const testEntity = sourceFileEntity(myClassFile)
 
-  let generationContext = {uiFramework: UiFramework.Grommet, formatter: Formatter.Intl, index: {tableType: TableType.BasicTable, height: "400px"}};
+  let generationContext = {uiFramework: UiFramework.Grommet, formatter: Formatter.ReactIntl, index: {tableType: TableType.BasicTable, height: "400px"}};
   let generator = new AppGenerator(generationContext, testEntity!!);
 
   const page = generator.generateListComponent()
@@ -152,7 +152,7 @@ test(".grommet table generation without formatting", () => {
       const myClassFile = parseGraphqlTypes(graphqlGenTs1)
       const testEntity = sourceFileEntity(myClassFile)
 
-      let generationContext = {uiFramework: UiFramework.MaterialUI, formatter: Formatter.Intl, index: {tableType: TableType.DataTable, height: "400px"}};
+      let generationContext = {uiFramework: UiFramework.MaterialUI, formatter: Formatter.ReactIntl, index: {tableType: TableType.DataTable, height: "400px"}};
       let generator = new AppGenerator(generationContext, testEntity!!);
 
       const page = generator.generateListComponent()
@@ -198,7 +198,7 @@ test(".grommet table generation without formatting", () => {
     const myClassFile = parseGraphqlTypes(graphqlGenTs1)
     const testEntity = sourceFileEntity(myClassFile)
 
-    let generationContext = {uiFramework: UiFramework.Grommet, formatter: Formatter.Intl, index: {tableType: TableType.DataTable, height: "400px"}};
+    let generationContext = {uiFramework: UiFramework.Grommet, formatter: Formatter.ReactIntl, index: {tableType: TableType.DataTable, height: "400px"}};
     let generator = new AppGenerator(generationContext, testEntity!!);
 
     const templatePath = 'template-path'//TODO: put here real template path when template will be done
