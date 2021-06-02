@@ -4,7 +4,7 @@ import { Formatter, TableType, UiFramework } from '../../definition/context-type
 import { AppGenerator } from '../../generation/generators/app-generator'
 import {generatePages} from '../../index'
 import { CodeDir, CodeRW } from "../../../io"
-import { createAst, parseGraphqlTypes, sourceFileEntity } from "../helper"
+import sourceFileEntity, { createAst, parseGraphqlTypes } from "../helper"
 import path from 'path'
 import fs from "fs"
 

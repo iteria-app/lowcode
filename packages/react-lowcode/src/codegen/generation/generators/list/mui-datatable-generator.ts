@@ -7,12 +7,13 @@ import GenerationContext from "../../context/context"
 import { MuiDtTableComponents, muiDataGrid } from '../../../definition/material-ui/table'
 import { TableComponentDefinitionBase } from '../../../definition/table-definition-core'
 import { Formatter } from "../../../definition/context-types"
-import { createNameSpaceImport, uniqueImports } from "../../ts/imports"
+import { createNameSpaceImport, uniqueImports } from "../../../ast/imports"
 import { GeneratorHelper } from "../helper"
 import ReactIntlFormatter from "../../react-components/react-intl/intl-formatter"
 import { WidgetContext } from "../../context/widget-context"
 import { createAst, replaceElementsToAST, SourceLineCol } from "../../../../ast"
-import { findVariableDeclarations } from "../../ts/ast"
+import { findVariableDeclarations } from "../../../ast/ast"
+import { findWidgetParentNode } from "../../../ast/widgetDeclaration"
 
 export default class MuiDataTableGenerator implements TableGenerator 
 {
@@ -41,7 +42,7 @@ export default class MuiDataTableGenerator implements TableGenerator
         let ast = createAst(sourceCode)
 
         if(ast){
-          let widgetParentNode = this._widgetContext.findWidgetParentNode(sourceCode, position)
+          let widgetParentNode = findWidgetParentNode(sourceCode, position)
 
           if(widgetParentNode)
           {

@@ -6,10 +6,10 @@ import GenerationContext from "../context/context"
 import { Entity, Property } from "../entity"
 import { Component } from "../react-components/react-component-helper"
 import ReactIntlFormatter from "../react-components/react-intl/intl-formatter"
-import { identifier } from "../ts/identifier"
-import { createImportDeclaration, createNameSpaceImport } from "../ts/imports"
-import { bindingParameter } from "../ts/parameters"
-import { jsxText, stringLiteral } from "../ts/text"
+import { identifier } from "../../ast/identifier"
+import { createImportDeclaration, createNameSpaceImport } from "../../ast/imports"
+import { bindingParameter } from "../../ast/parameters"
+import { jsxText, stringLiteral } from "../../ast/text"
 
 export class GeneratorHelper {
     readonly _context: GenerationContext;

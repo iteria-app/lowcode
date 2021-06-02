@@ -5,7 +5,7 @@ import {
 import { DetailComponentDefinitionBase } from "../../../definition/detail-definition-core";
 import { Formatter } from "../../../definition/context-types";
 import { Entity, getProperties, Property } from "../../entity";
-import { createImportDeclaration, createNameSpaceImport, uniqueImports } from "../../ts/imports";
+import { createImportDeclaration, createNameSpaceImport, uniqueImports } from "../../../ast/imports";
 import { GeneratorHelper } from "../helper";
 import ReactIntlFormatter from "../../react-components/react-intl/intl-formatter";
 import { GrommetDetailComponents } from "../../../definition/grommet/detail";

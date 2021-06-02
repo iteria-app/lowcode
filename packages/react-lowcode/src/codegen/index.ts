@@ -10,6 +10,7 @@ import { FacadeOptions, insertColumn, insertFormWidget } from './facade/facade-g
 import { SourceLineCol } from '../ast'
 import { Property } from './generation/entity'
 import { getEntityProperty } from './tests/helper'
+import { isDataTableWidget } from './ast/widgetDeclaration'
 
 interface CodegenOptions {
     // whitelisted entity names
@@ -80,17 +81,27 @@ export function generatePages(inputSourceCode: string, io: CodeRW & CodeDir, opt
     })
 }
 
+export function isSelectedDataTable(sourceCode:string, position: SourceLineCol){
+    return isDataTableWidget(sourceCode, position)
+}
+
 export async function addColumn(typesSourceCode: string, 
-                          io: CodeRW, 
-                          sourceLine:SourceLineCol, 
-                          options: InsertOptions){
+                                io: CodeRW, 
+                                sourceLine:SourceLineCol, 
+                                options: InsertOptions): Promise<string | undefined>{
 
     const property: Property = getEntityProperty(typesSourceCode, options.property)[0]
 
+    let generatedSource = undefined
     if(property){
-        const generatedPageSource = await insertColumn(sourceLine, {entityField: property, index: options.index}, io)
-        io.writeFile(sourceLine.fileName, generatedPageSource)
+        const generatedPageSource = await insertColumn(sourceLine, 
+            {entityField: property, index: options.index}, 
+            io)
+
+        generatedSource =generatedPageSource
     }
+
+    return generatedSource
 }
 
 export async function addFormInput(typesSourceCode: string, 

@@ -7,7 +7,7 @@ import { MuiTableComponents } from '../../../definition/material-ui/table'
 import { GrommetTableComponents } from '../../../definition/grommet/table'
 import GenerationContext from "../../context/context"
 import { Formatter, UiFramework } from "../../../definition/context-types"
-import { uniqueImports } from "../../ts/imports"
+import { uniqueImports } from "../../../ast/imports"
 import { GeneratorHelper } from "../helper"
 import ReactIntlFormatter from "../../react-components/react-intl/intl-formatter"
 import { SourceLineCol } from "../../../../ast"

@@ -8,7 +8,7 @@ import ts, {factory} from 'typescript'
 import { graphqlGenTs1 } from "../tests/typeAlias.example"
 import { Formatter, TableType, UiFramework } from "../definition/context-types"
 import { AppGenerator } from "../generation/generators/app-generator"
-import { createAst, parseGraphqlTypes, sourceFileEntity } from "../tests/helper"
+import sourceFileEntity, { createAst, parseGraphqlTypes } from "../tests/helper"
 
 const args = yargs.options({
     'basePath': { type: 'string', demandOption: true, alias: 'p' },
@@ -32,11 +32,11 @@ class LocalCodegenCli{
         let generationContext = {uiFramework: uif, formatter: formatter, index: {tableType: tableType, height: "400px"}};
         let generator = new AppGenerator(generationContext, testEntity!!);
   
-        const page = generator.generateIndexPage()
+        const page = generator.generateListComponent()
         
         const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
   
-        let sourceCode = printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page.imports, page.functionDeclaration]), sourceFile)
+        let sourceCode = printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page!.imports, page!.functionDeclaration]), sourceFile)
         
 
         this.saveFile(sourceCode, args['basePath'], args['fileName'])

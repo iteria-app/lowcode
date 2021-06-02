@@ -5,7 +5,7 @@ import {
   UiFramework,
 } from "../definition/context-types";
 import { Property } from "../generation/entity";
-import { parseGraphqlTypes, sourceFileEntity } from "../tests/helper";
+import sourceFileEntity, { parseGraphqlTypes } from "../tests/helper";
 import { graphqlGenTs1 } from "../tests/typeAlias.example";
 import { AppContext } from "../generation/context/app-context";
 import { PageContext } from "../generation/context/page-context";
@@ -95,7 +95,7 @@ export async function insertFormWidget(
 
   let generator = new MuiDetailGenerator(
     generationContext,
-    testEntity!!,
+    testEntity!,
     widgetContext
   );
 

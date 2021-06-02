@@ -1,4 +1,4 @@
-import { astFindSource, SourceLineCol } from "../../../ast";
+import { astFindSource, SourceLineCol } from "../../ast";
 import ts, { factory } from "typescript";
 
 export interface Node {

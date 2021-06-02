@@ -18,7 +18,7 @@ export function createAst(
     )
   }
   
-  export function sourceFileEntity(myClassFile: SourceFile) {
+  export default function sourceFileEntity(myClassFile: SourceFile) {
     const typeName = "Customer"
     const typeAlias = myClassFile.getTypeAlias(typeName)
     const props = typeAlias?.getType()?.getProperties() ?? []

@@ -1,5 +1,5 @@
 import ts from "typescript";
-import { createImportDeclaration, uniqueImports } from "../ts/imports";
+import { createImportDeclaration, uniqueImports } from "../../ast/imports";
 import { AppContext } from "./app-context";
 import { InjectionContext } from "./injection-context";
 

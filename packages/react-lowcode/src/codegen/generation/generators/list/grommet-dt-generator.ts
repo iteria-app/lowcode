@@ -8,10 +8,11 @@ import { GrommetDtTableComponents } from '../../../definition/grommet/table'
 import { Formatter } from "../../../definition/context-types"
 import { GeneratorHelper } from "../helper"
 import ReactIntlFormatter from "../../react-components/react-intl/intl-formatter"
-import { uniqueImports } from "../../ts/imports"
+import { uniqueImports } from "../../../ast/imports"
 import { createAst, replaceElementsToAST, SourceLineCol } from "../../../../ast"
-import { findVariableDeclarations } from "../../ts/ast"
+import { findVariableDeclarations } from "../../../ast/ast"
 import { WidgetContext } from "../../context/widget-context"
+import { findWidgetParentNode } from "../../../ast/widgetDeclaration"
 
 export default class GrommetDataTableGenerator implements TableGenerator 
 {
@@ -37,7 +38,7 @@ export default class GrommetDataTableGenerator implements TableGenerator
           let ast = createAst(sourceCode)
   
           if(ast){
-            let widgetParentNode = this._widgetContext.findWidgetParentNode(sourceCode, position)
+            let widgetParentNode = findWidgetParentNode(sourceCode, position)
   
             if(widgetParentNode)
             {

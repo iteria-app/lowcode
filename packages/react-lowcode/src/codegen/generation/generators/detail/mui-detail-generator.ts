@@ -11,7 +11,7 @@ import {
   createImportDeclaration,
   createNameSpaceImport,
   uniqueImports,
-} from "../../ts/imports";
+} from "../../../ast/imports";
 import ReactIntlFormatter from "../../react-components/react-intl/intl-formatter";
 import { InputType } from "./input-types";
 import { WidgetContext } from "../../context/widget-context";
@@ -24,7 +24,8 @@ import {
   findVariableDeclarations,
   findObjectLiteralExpression,
   findPropertyAssignment,
-} from "../../ts/ast";
+} from "../../../ast/ast";
+import { findWidgetParentNode } from "../../../ast/widgetDeclaration";
 
 export default class MuiDetailGenerator implements DetailGenerator {
   private _imports: ts.ImportDeclaration[] = [];
@@ -55,7 +56,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
       let ast = createAst(sourceCode);
 
       if (ast) {
-        let widgetParentNode = this._widgetContext.findWidgetParentNode(
+        let widgetParentNode = findWidgetParentNode(
           sourceCode,
           position
         );
