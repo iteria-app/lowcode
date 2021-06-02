@@ -12,6 +12,7 @@ import { GeneratorHelper } from "../helper"
 import ReactIntlFormatter from "../../react-components/react-intl/intl-formatter"
 import { createAst, replaceElementsToAST, SourceLineCol } from "../../../../ast"
 import { WidgetContext } from "../../context/widget-context"
+import { findWidgetParentNode } from "../../../ast/widgetDeclaration"
 
 export class BasicTableGenerator implements TableGenerator
 {
@@ -42,7 +43,7 @@ export class BasicTableGenerator implements TableGenerator
             if (ast) {
                 this._context.formatter = this.findUsedFormatter(ast);
 
-                let widgetParentNode = this._widgetContext.findWidgetParentNode(sourceCode, position);
+                let widgetParentNode = findWidgetParentNode(sourceCode, position);
 
                 if (widgetParentNode) {
                     const tableDefinition = this.getTableDefinition();
