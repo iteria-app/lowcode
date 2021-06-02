@@ -9,12 +9,12 @@ export class AppContext{
     _io: CodeRW
 
     constructor(options:CodegenOptions, io?: CodeRW){
-        this._injectionContext = new InjectionContext()
+        this._injectionContext = this.injectionContext
         this._options = options
         this._io = io ?? new CodegenRw()
     }
     
-    public get InjectionContext() : InjectionContext {
+    public get injectionContext() : InjectionContext {
         return this._injectionContext;
     }
 }

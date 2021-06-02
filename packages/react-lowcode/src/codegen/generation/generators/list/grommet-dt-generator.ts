@@ -185,7 +185,7 @@ export default class GrommetDataTableGenerator implements TableGenerator
         ];
 
         if(formatter){
-            if(formatter === Formatter.Intl){
+            if(formatter === Formatter.ReactIntl){
               properties.push(factory.createPropertyAssignment(
                   factory.createIdentifier("render"),
                   this.getRender(property)
@@ -199,7 +199,7 @@ export default class GrommetDataTableGenerator implements TableGenerator
     private getUsedFormatter(columnsDefinition:  ts.ArrayLiteralExpression): Formatter {
         return columnsDefinition.elements.length === 0 ? Formatter.None 
                                                        : (columnsDefinition.elements[0] as ts.ObjectLiteralExpression).properties.length > 2 
-                                                          ? Formatter.Intl 
+                                                          ? Formatter.ReactIntl 
                                                           : Formatter.None
     }
 
