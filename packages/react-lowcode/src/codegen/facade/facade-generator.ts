@@ -4,7 +4,7 @@ import {
   TableType,
   UiFramework,
 } from "../definition/context-types";
-import { Property } from "../generation/entity";
+import { Entity, Property } from "../generation/entity";
 import sourceFileEntity, { parseGraphqlTypes } from "../tests/helper";
 import { graphqlGenTs1 } from "../tests/typeAlias.example";
 import { AppContext } from "../generation/context/app-context";
@@ -15,8 +15,10 @@ import MuiDetailGenerator from "../generation/generators/detail/mui-detail-gener
 import GrommetDataTableGenerator from "../generation/generators/list/grommet-dt-generator";
 import { CodeRW } from "../../io";
 import { CodegenRw } from "../io/codegenRw";
+import { BasicTableGenerator } from "../generation/generators/list/basic-table-generator";
 
 export interface FacadeOptions {
+  entity?: Entity,
   entityField: Property;
   index?: number;
 }
@@ -47,7 +49,7 @@ export async function insertColumn(
   return await generator.insertColumn(tablePosition, options.entityField, options.index);
 }
 
-export async function insertColumnGrommet(
+export async function insertColumnToDataTableGrommet(
   tablePosition: SourceLineCol,
   options: FacadeOptions,
   io: CodeRW
@@ -67,6 +69,58 @@ export async function insertColumnGrommet(
   let generator = new GrommetDataTableGenerator(
     generationContext,
     undefined,
+    widgetContext
+  );
+  
+  return await generator.insertColumn(tablePosition, options.entityField, options.index);
+}
+
+export async function insertColumnToBasicTableMui(
+  tablePosition: SourceLineCol,
+  options: FacadeOptions,
+  io: CodeRW
+): Promise<string> {
+  let generationContext = {
+    uiFramework: UiFramework.MaterialUI,
+    formatter: Formatter.None,
+    index: { tableType: TableType.BasicTable, height: "400px" },
+  };
+  let appContext = new AppContext(generationContext, io);
+  let sourceFileContext = new PageContext(
+    appContext,
+    tablePosition.fileName
+  );
+  let widgetContext = new WidgetContext(sourceFileContext);
+
+  let generator = new BasicTableGenerator(
+    generationContext,
+    options.entity,
+    widgetContext
+  );
+  
+  return await generator.insertColumn(tablePosition, options.entityField, options.index);
+}
+
+export async function insertColumnToBasicTableGrommet(
+  tablePosition: SourceLineCol,
+  options: FacadeOptions,
+  io: CodeRW
+): Promise<string> {
+  let generationContext = {
+    uiFramework: UiFramework.Grommet,
+    formatter: Formatter.None,
+    index: { tableType: TableType.BasicTable, height: "400px" },
+  };
+  let appContext = new AppContext(generationContext, io);
+  let sourceFileContext = new PageContext(
+    appContext,
+    tablePosition.fileName
+  );
+  let widgetContext = new WidgetContext(sourceFileContext);
+
+  let generator = new BasicTableGenerator(
+    generationContext,
+    options.entity,
     widgetContext
   );
   

@@ -1,0 +1,13 @@
+import { DataTable } from "grommet";
+    export default function CustomerTable({ customers }) {
+        const columns = [
+            { property: "avatarUrl", header: "avatarUrl" },
+            { property: "createdAt", header: "createdAt" },
+            { property: "email", header: "email" },
+            { property: "id", header: "id" },
+            { property: "name", header: "name" },
+            { property: "phone", header: "phone" },
+            { property: "updatedAt", header: "updatedAt" }
+        ];
+        return (<DataTable columns={columns} data={customers}/>);
+    }

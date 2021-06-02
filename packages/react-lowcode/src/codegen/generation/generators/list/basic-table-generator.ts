@@ -1,4 +1,4 @@
-import ts, { factory } from "typescript"
+import ts, { factory, SourceFile } from "typescript"
 import { createJsxElement, PageComponent, createFunctionalComponent } from '../../react-components/react-component-helper'
 import { Entity, getProperties, Property } from '../../entity/index'
 import { TableGenerator } from './table-generator-factory'
@@ -10,7 +10,8 @@ import { Formatter, UiFramework } from "../../../definition/context-types"
 import { uniqueImports } from "../../../ast/imports"
 import { GeneratorHelper } from "../helper"
 import ReactIntlFormatter from "../../react-components/react-intl/intl-formatter"
-import { SourceLineCol } from "../../../../ast"
+import { createAst, replaceElementsToAST, SourceLineCol } from "../../../../ast"
+import { WidgetContext } from "../../context/widget-context"
 
 export class BasicTableGenerator implements TableGenerator
 {
@@ -19,15 +20,80 @@ export class BasicTableGenerator implements TableGenerator
     private _context: GenerationContext
     private _entity?: Entity
     private _intlFormatter: ReactIntlFormatter
+    private _widgetContext: WidgetContext | undefined
 
-    constructor(generationContext: GenerationContext, entity?: Entity) {
+    constructor(generationContext: GenerationContext, entity?: Entity, widgetContext?: WidgetContext) {
        this._helper = new GeneratorHelper(generationContext, this._imports)
        this._context = generationContext
        this._entity = entity
+       this._widgetContext = widgetContext
        this._intlFormatter = new ReactIntlFormatter(generationContext, this._imports)
     }
-    insertColumn(componentPosition: SourceLineCol, property: Property, columnIndex?: number) {
-        throw new Error("Method not implemented.")
+
+    async insertColumn(position: SourceLineCol,
+        property: Property,
+        columnIndex?: number): Promise<string> {
+
+        let alteredSource = ''
+        if (this._widgetContext) {
+            let sourceCode = await this._widgetContext.getSourceCodeString(position);
+            let ast = createAst(sourceCode);
+
+            if (ast) {
+                this._context.formatter = this.findUsedFormatter(ast);
+
+                let widgetParentNode = this._widgetContext.findWidgetParentNode(sourceCode, position);
+
+                if (widgetParentNode) {
+                    const tableDefinition = this.getTableDefinition();
+
+                    const table = this.findElementByName(widgetParentNode, tableDefinition.table.tagName.text);
+                    if (table) {
+                        const tableHead = this.findElementByName(table, tableDefinition.header.tagName.text);
+                        const tableBody = this.findElementByName(table, tableDefinition.body.tagName.text);
+
+                        if (tableHead && tableBody) {
+                            const tableHeadRow = this.findElementByName(tableHead, tableDefinition.row.tagName.text);
+                            const tableBodyRow = this.findElementByName(tableBody, tableDefinition.row.tagName.text);
+
+                            if (tableHeadRow && tableBodyRow) {
+                                let headColumns: ts.JsxElement[] = [];
+                                let bodyColumns: ts.JsxElement[] = [];
+
+                                this.findElementsByName(tableHeadRow, tableDefinition.cell.tagName.text, headColumns);
+                                this.findElementsByName(tableBodyRow, tableDefinition.cell.tagName.text, bodyColumns);
+
+                                if (!this.tableBodyColumnExists(bodyColumns, property)) {
+                                    const addHeaderColumn = this.propertyHead(property, this._entity!);
+                                    const addBodyColumn = this.propertyCell(property, this._entity!);
+
+                                    if (columnIndex && columnIndex > 0 && columnIndex < headColumns.length + 1) {
+                                        headColumns = [...headColumns.slice(0, columnIndex - 1), ...[addHeaderColumn], ...headColumns.slice(columnIndex - 1)];
+                                        bodyColumns = [...bodyColumns.slice(0, columnIndex - 1), ...[addBodyColumn], ...bodyColumns.slice(columnIndex - 1)];
+                                    } else {
+                                        headColumns.push(addHeaderColumn);
+                                        bodyColumns.push(addBodyColumn);
+                                    }
+
+                                    const rowComponent = this._helper.prepareComponent(this.getTableDefinition().row, this._imports);
+                                    const headerRow = createJsxElement(rowComponent.tagName, [], headColumns);
+                                    const bodyRow = createJsxElement(rowComponent.tagName, [], bodyColumns);
+
+                                    ast = replaceElementsToAST(ast, tableHeadRow.pos, headerRow);
+                                    ast = replaceElementsToAST(ast, tableBodyRow.pos, bodyRow);
+
+                                    alteredSource = this.printSourceCode(ast);
+                                    console.log(alteredSource);
+                                    return alteredSource;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return alteredSource;
     }
 
     generateTableComponent(): PageComponent | undefined {
@@ -176,6 +242,87 @@ export class BasicTableGenerator implements TableGenerator
 
     protected getRowIdentifier() : ts.Identifier {
         return factory.createIdentifier(this._helper.getEntityName(this._entity!))
+    }
+
+    private printSourceCode(sourceFile: SourceFile): string {
+        const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
+        return printer.printFile(sourceFile)
+    }
+
+    private findElementByName(node: ts.Node, name: string): ts.Node | undefined {
+        if (node.kind === ts.SyntaxKind.JsxElement) {
+            if (ts.isJsxElement(node)) {
+                if (ts.isIdentifier(node.openingElement.tagName)) {
+                    if (node.openingElement.tagName.escapedText === name) {
+                        return node;
+                    }
+                }
+            }
+        }
+
+        return node.forEachChild((child) => {
+            return this.findElementByName(child, name);
+        });
+    }
+
+    private findElementsByName(node: ts.Node, name: string, output: ts.JsxElement[]): void {
+        if (node.kind === ts.SyntaxKind.JsxElement) {
+            if (ts.isJsxElement(node)) {
+                if (ts.isIdentifier(node.openingElement.tagName)) {
+                    if (node.openingElement.tagName.escapedText === name) {
+                        output.push(node);
+                    }
+                }
+            }
+        }
+
+        node.forEachChild((child) => {
+            this.findElementsByName(child, name, output);
+        });
+    }
+
+    private findUsedFormatter(node: ts.Node | ts.SourceFile): Formatter {
+        let result: Formatter | undefined;
+
+        if (ts.isImportDeclaration(node)) {
+            if (ts.isStringLiteral(node.moduleSpecifier)) {
+                if (node.moduleSpecifier.text === 'react-intl') {
+                    result = Formatter.Intl;
+                }
+            }
+        }
+
+        if(!result) {
+            result = node.forEachChild((child) => {
+                return this.findUsedFormatter(child);
+            });
+        }
+
+        return result !== undefined ? result : Formatter.None;
+    }
+
+    private findTableBodyColumnIds(nodes: ts.Node[] | ts.JsxElement[], output: string[]): void {
+        nodes.forEach(node => {
+            if (ts.isJsxExpression(node)) {
+                if(node.expression) {
+                    if(ts.isPropertyAccessExpression(node.expression)) {
+                        if(ts.isIdentifier(node.expression.name)) {
+                            output.push(node.expression.name.escapedText.toString());
+                        } 
+                    }
+                }
+            }
+
+            node.forEachChild((child) => {
+                this.findTableBodyColumnIds([child], output);
+            });
+        });
+    }
+
+    private tableBodyColumnExists(tableBodyColumns: ts.JsxElement[], property: Property) {
+        const existsColumnIds: string[] = [];
+        this.findTableBodyColumnIds(tableBodyColumns, existsColumnIds);
+        return existsColumnIds.indexOf(property.getName()) > -1;
     }
 }
 
