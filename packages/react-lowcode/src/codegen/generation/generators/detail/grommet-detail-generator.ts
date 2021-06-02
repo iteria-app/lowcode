@@ -5,7 +5,7 @@ import {
 import { DetailComponentDefinitionBase } from "../../../definition/detail-definition-core";
 import { Formatter } from "../../../definition/context-types";
 import { Entity, getProperties, Property } from "../../entity";
-import { createImportDeclaration, createNameSpaceImport, uniqueImports } from "../../ts/imports";
+import { createImportDeclaration, createNameSpaceImport, uniqueImports } from "../../../ast/imports";
 import { GeneratorHelper } from "../helper";
 import ReactIntlFormatter from "../../react-components/react-intl/intl-formatter";
 import { GrommetDetailComponents } from "../../../definition/grommet/detail";
@@ -22,7 +22,7 @@ export default class GrommetDetailGenerator
   private _intlFormatter: ReactIntlFormatter
 
   constructor(generationContext: GenerationContext, entity: Entity) {
-    this._helper = new GeneratorHelper(generationContext, entity)
+    this._helper = new GeneratorHelper(generationContext, this._imports)
     this._context = generationContext
     this._entity = entity
     this._intlFormatter = new ReactIntlFormatter(generationContext, this._imports)

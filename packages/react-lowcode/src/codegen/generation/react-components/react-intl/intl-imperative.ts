@@ -1,7 +1,7 @@
 import ts, { factory, textChangeRangeIsUnchanged } from "typescript"
-import { defineHook } from '../../ts/hooks'
-import { createImportDeclaration } from "../../ts/imports";
-import { createVariableStatement } from "../../ts/variables";
+import { defineHook } from '../../../ast/hooks'
+import { createImportDeclaration } from "../../../ast/imports";
+import { createVariableStatement } from "../../../ast/variables";
 
 
 export enum IntlFormatingImperativeMethods {

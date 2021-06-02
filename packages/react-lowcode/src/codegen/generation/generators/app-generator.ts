@@ -1,6 +1,7 @@
+import { PageComponent } from '../react-components/react-component-helper'
 import GenerationContext from '../context/context'
-import { TableGeneratorFactory } from './list/table-generator-factory'
-import { DetailGeneratorFactory } from './detail/detail-generator-factory'
+import { TableGenerator, TableGeneratorFactory } from './list/table-generator-factory'
+import { DetailGenerator, DetailGeneratorFactory } from './detail/detail-generator-factory'
 import { Entity } from '../entity';
 
 export class AppGenerator {
@@ -18,15 +19,35 @@ export class AppGenerator {
         };
     }
 
-    generateListPage() {
-        const generatorFactory = new TableGeneratorFactory(this._context, this._entity);
-        const generator = generatorFactory.getTableGenerator();
+    generateListComponent(): PageComponent | undefined {
+        let generator = this.getIndexGenerator();
+        return this.getTable(generator);
+    }
+
+    generateListComponentPage(template: string): PageComponent | undefined {
+        return undefined
+    }
+
+    private getTable(generator: TableGenerator): PageComponent | undefined {
         return generator.generateTableComponent();
     }
 
+    private getIndexGenerator(): TableGenerator {
+        let generatorFactory = new TableGeneratorFactory(this._context, this._entity);
+        return generatorFactory.getTableGenerator();
+    }
+
     generateDetailPage() {
-        const generatorFactory = new DetailGeneratorFactory(this._context, this._entity);
-        const generator = generatorFactory.getDetailGenerator();
+        let generator = this.getDetailGenerator();
+        return this.getDetail(generator);
+    }
+
+    private getDetail(generator: DetailGenerator): PageComponent {
         return generator.generateDetailComponent();
+    }
+
+    private getDetailGenerator(): DetailGenerator {
+        let generatorFactory = new DetailGeneratorFactory(this._context, this._entity);
+        return generatorFactory.getDetailGenerator();
     }
 }

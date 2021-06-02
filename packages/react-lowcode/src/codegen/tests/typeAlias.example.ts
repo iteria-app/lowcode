@@ -22,6 +22,7 @@ export type Customer = {
   name: Scalars['String'];
   phone?: Maybe<Scalars['String']>;
   updatedAt: Scalars['timestamptz'];
+  testDate: Scalars['timestamptz'];
 };
 
 export type Customer_Aggregate = {
