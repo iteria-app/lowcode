@@ -54,3 +54,14 @@ export const wrapNodesWithFragment = <T extends ts.Node | ts.JsxChild>(
     [node as ts.JsxChild, ...(newNodes as Array<ts.JsxChild>)],
     factory.createJsxJsxClosingFragment()
   )
+
+export const createEmptySpanElement = () =>
+  factory.createJsxElement(
+    factory.createJsxOpeningElement(
+      factory.createIdentifier("span"),
+      undefined,
+      factory.createJsxAttributes([])
+    ),
+    [],
+    factory.createJsxClosingElement(factory.createIdentifier("span"))
+  )

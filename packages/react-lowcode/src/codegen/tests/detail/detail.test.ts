@@ -11,7 +11,7 @@ import sourceFileEntity, { createAst, parseGraphqlTypes } from "../helper"
       const myClassFile = parseGraphqlTypes(graphqlGenTs1)
       const testEntity = sourceFileEntity(myClassFile)
 
-      let generationContext = {formatter: Formatter.Intl, uiFramework: UiFramework.MaterialUI, tableType: TableType.BasicTable, entity: testEntity!!};
+      let generationContext = {formatter: Formatter.ReactIntl, uiFramework: UiFramework.MaterialUI, tableType: TableType.BasicTable, entity: testEntity!!};
       let generator = new AppGenerator(generationContext , testEntity!!);
 
       const page = generator.generateDetailPage()

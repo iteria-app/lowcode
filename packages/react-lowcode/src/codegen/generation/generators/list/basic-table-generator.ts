@@ -174,7 +174,7 @@ export class BasicTableGenerator implements TableGenerator
     private propertyCell(prop: Property, entity: Entity) {
         let child: ts.JsxChild;
 
-        if(this._context.formatter === Formatter.Intl) {
+        if(this._context.formatter === Formatter.ReactIntl) {
             child = this.formatCellWithTag(prop)
         }else{
             child = factory.createJsxExpression(

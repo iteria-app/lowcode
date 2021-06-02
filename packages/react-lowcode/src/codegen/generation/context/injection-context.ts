@@ -1,17 +1,15 @@
 import { CodegenNaming, Naming } from "../interfaces/naming";
 
-export class InjectionContext{
+export class DefaultInjectionContext implements InjectionContext {
+
+    constructor(public naming = new CodegenNaming()) {
+
+    }
+
+}
+
+export interface InjectionContext{
     
-    constructor(){
-        this._naming = new CodegenNaming()
-    }
+    readonly naming : Naming
 
-    private _naming : Naming
-
-    public get naming() : Naming {
-        return this._naming;
-    }
-    private set value(naming : Naming) {
-        this._naming = naming;
-    }
 }

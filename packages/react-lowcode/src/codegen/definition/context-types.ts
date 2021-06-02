@@ -11,5 +11,5 @@ export enum UiFramework {
 
 export enum Formatter {
    None,
-   Intl
+   ReactIntl
 }

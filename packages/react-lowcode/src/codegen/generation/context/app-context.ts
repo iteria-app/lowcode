@@ -1,7 +1,7 @@
 import { CodeDir, CodeRW } from "../../../io";
 import { CodegenRw } from "../../io/codegenRw";
 import CodegenOptions from "./context";
-import { InjectionContext } from "./injection-context";
+import { InjectionContext, DefaultInjectionContext } from "./injection-context";
 
 export class AppContext{
     _injectionContext: InjectionContext
