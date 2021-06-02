@@ -8,7 +8,7 @@ import ts, {factory} from 'typescript'
 import { graphqlGenTs1 } from "../tests/typeAlias.example"
 import { Formatter, TableType, UiFramework } from "../definition/context-types"
 import { AppGenerator } from "../generation/generators/app-generator"
-import sourceFileEntity, { createAst, parseGraphqlTypes } from "../tests/helper"
+import { sourceFileEntity, createAst, parseGraphqlTypes } from "../tests/helper"
 
 const args = yargs.options({
     'basePath': { type: 'string', demandOption: true, alias: 'p' },

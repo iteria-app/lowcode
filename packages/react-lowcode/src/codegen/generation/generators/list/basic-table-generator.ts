@@ -288,7 +288,7 @@ export class BasicTableGenerator implements TableGenerator
         if (ts.isImportDeclaration(node)) {
             if (ts.isStringLiteral(node.moduleSpecifier)) {
                 if (node.moduleSpecifier.text === 'react-intl') {
-                    result = Formatter.Intl;
+                    result = Formatter.ReactIntl;
                 }
             }
         }
