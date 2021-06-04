@@ -1,5 +1,5 @@
 import { Property } from "../../generation/entity";
-import sourceFileEntity, { parseGraphqlTypes } from "../helper";
+import { sourceFileEntity, parseGraphqlTypes } from "../helper";
 import { graphqlGenTs1 } from "../typeAlias.example";
 
   function getTestEntity(name: string): Property[] {

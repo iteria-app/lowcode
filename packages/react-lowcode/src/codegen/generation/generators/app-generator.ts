@@ -24,7 +24,7 @@ export class AppGenerator {
         return this.getTable(generator);
     }
 
-    generateListComponentPage(template: string): PageComponent | undefined {
+    generateListPage(template: string): PageComponent | undefined {
         return undefined
     }
 

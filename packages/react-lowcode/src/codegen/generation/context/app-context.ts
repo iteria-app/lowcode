@@ -1,4 +1,4 @@
-import { CodeDir, CodeRW } from "../../../io";
+import { CodeRW } from "../../../io";
 import { CodegenRw } from "../../io/codegenRw";
 import CodegenOptions from "./context";
 import { InjectionContext, DefaultInjectionContext } from "./injection-context";
@@ -10,6 +10,7 @@ export class AppContext{
 
     constructor(options:CodegenOptions, io?: CodeRW){
         this._injectionContext = this.injectionContext
+
         this._options = options
         this._io = io ?? new CodegenRw()
     }
