@@ -1,0 +1,38 @@
+import { Table, TableHeader, TableRow, TableCell, TableBody } from "grommet";
+import { FormattedMessage, FormattedDate } from "react-intl";
+export default function CustomerTable({ customers }) {
+  return (
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableCell>
+            <FormattedMessage
+              id="Customer.avatarUrl"
+              defaultMessage="avatarUrl"
+            >
+              {message => <h2>{message}</h2>}
+            </FormattedMessage>
+          </TableCell>
+          <TableCell>
+            <FormattedMessage
+              id="Customer.updatedAt"
+              defaultMessage="updatedAt"
+            >
+              {message => <h2>{message}</h2>}
+            </FormattedMessage>
+          </TableCell>          
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {customers.map((customer) => (
+          <TableRow>
+            <TableCell>{customer.avatarUrl}</TableCell>
+            <TableCell>
+              <FormattedDate value={customer.updatedAt} />
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  );
+}

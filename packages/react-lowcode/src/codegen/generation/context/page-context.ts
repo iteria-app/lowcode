@@ -14,7 +14,7 @@ export class PageContext{
     }
 
     public get InjectionContext() : InjectionContext {
-        return this._appContext.InjectionContext;
+        return this._appContext.injectionContext;
     }
 
     getImports(): ts.ImportDeclaration[]{

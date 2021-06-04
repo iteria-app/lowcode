@@ -2,9 +2,6 @@ import { sourceFileEntity, getEntityProperty, parseGraphqlTypes } from "../helpe
 import { graphqlGenTs1 } from "../typeAlias.example";
 import { insertColumn, insertColumnToBasicTableGrommet, insertColumnToBasicTableMui, insertColumnToDataTableGrommet, insertFormWidget } from "../../facade/facade-generator";
 import { CodegenRw } from "../../io/codegenRw";
-import { SourceLineCol } from "../../../ast";
-import { isDataTableWidget } from "../../ast/widgetDeclaration";
-
 
 describe("codegen facade", () => {
 
@@ -67,5 +64,14 @@ describe("codegen facade", () => {
       insertColumnToBasicTableGrommet({lineNumber: 14, columnNumber: 11, fileName: 'src\\codegen\\tests\\list\\files\\basic-table-grommet-with-formatter-test-file.txt'}, {entity: testEntity!!, entityField: getEntityProperty(graphqlGenTs1, 'testdate')[0], index: 2 }, new CodegenRw()).then(
         (data) => console.log(data)
       )
-    });     
+    });  
+    
+    test(".add column to existing basic table with formatter (Grommet) without self closing tag FormattedMessage", () => {
+      const myClassFile = parseGraphqlTypes(graphqlGenTs1)
+      const testEntity = sourceFileEntity(myClassFile)
+      
+      insertColumnToBasicTableGrommet({lineNumber: 8, columnNumber: 11, fileName: 'src\\codegen\\tests\\list\\files\\basic-table-grommet-with-formatter-2-test-file.txt'}, {entity: testEntity!!, entityField: getEntityProperty(graphqlGenTs1, 'testdate')[0], index: 2 }, new CodegenRw()).then(
+        (data) => console.log(data)
+      )
+    });  
 })

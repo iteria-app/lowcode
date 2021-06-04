@@ -1,4 +1,4 @@
-import ts, { factory, SourceFile } from "typescript"
+import ts, { factory, ImportDeclaration, ImportSpecifier, SourceFile } from "typescript"
 import { createJsxElement, PageComponent, createFunctionalComponent } from '../../react-components/react-component-helper'
 import { Entity, getProperties, Property } from '../../entity/index'
 import { TableGenerator } from './table-generator-factory'
@@ -41,8 +41,6 @@ export class BasicTableGenerator implements TableGenerator
             let ast = createAst(sourceCode);
 
             if (ast) {
-                this._context.formatter = this.findUsedFormatter(ast);
-
                 let widgetParentNode = findWidgetParentNode(sourceCode, position);
 
                 if (widgetParentNode) {
@@ -58,6 +56,8 @@ export class BasicTableGenerator implements TableGenerator
                             const tableBodyRow = this.findElementByName(tableBody, tableDefinition.row.tagName.text);
 
                             if (tableHeadRow && tableBodyRow) {
+                                this._context.formatter = this.findUsedFormatter(ast);
+
                                 let headColumns: ts.JsxElement[] = [];
                                 let bodyColumns: ts.JsxElement[] = [];
 
@@ -282,24 +282,68 @@ export class BasicTableGenerator implements TableGenerator
         });
     }
 
-    private findUsedFormatter(node: ts.Node | ts.SourceFile): Formatter {
-        let result: Formatter | undefined;
+    private findUsedFormatter(node: ts.Node): Formatter {
+        var result = Formatter.None;
 
-        if (ts.isImportDeclaration(node)) {
-            if (ts.isStringLiteral(node.moduleSpecifier)) {
-                if (node.moduleSpecifier.text === 'react-intl') {
+        var reactIntlImport = this.find<ImportDeclaration>(node.getSourceFile(), (node) => {
+            if (ts.isImportDeclaration(node)) {
+                if (ts.isStringLiteral(node.moduleSpecifier)) {
+                    if (node.moduleSpecifier.text === 'react-intl') {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        });
+
+        if(reactIntlImport) {
+            var importSpecifier = this.find<ImportSpecifier>(reactIntlImport, (node) => {
+                if(ts.isImportSpecifier(node)) {
+                    if(node.name.escapedText === 'FormattedMessage') {
+                        return true;
+                    }
+                }
+                return false;
+            });
+
+            if(importSpecifier) {
+                var formattedMessageElementName = importSpecifier.propertyName?.escapedText || importSpecifier.name.escapedText;
+
+                var formattedMessageElement = this.find(node, (node) => {
+                    if (ts.isJsxSelfClosingElement(node)) {
+                        if (ts.isIdentifier(node.tagName)) {
+                            if (node.tagName.escapedText === formattedMessageElementName) {
+                                return true;
+                            }
+                        }
+                    } else if(ts.isJsxElement(node)) {
+                        if (ts.isIdentifier(node.openingElement.tagName)) {
+                            if (node.openingElement.tagName.escapedText === formattedMessageElementName) {
+                                return true;
+                            }
+                        }
+                     
+                    }
+                    return false;
+                });
+
+                if(formattedMessageElement) {
                     result = Formatter.ReactIntl;
                 }
             }
         }
 
-        if(!result) {
-            result = node.forEachChild((child) => {
-                return this.findUsedFormatter(child);
-            });
-        }
+        return result;
+    }
 
-        return result !== undefined ? result : Formatter.None;
+    private find<T>(node: ts.Node, check: (node: ts.Node) => boolean): T | undefined {
+        if(check(node)) {
+            return node as unknown as T;
+        };
+
+        return node.forEachChild((child) => {
+            return this.find<T>(child, check);
+        });
     }
 
     private findTableBodyColumnIds(nodes: ts.Node[] | ts.JsxElement[], output: string[]): void {
