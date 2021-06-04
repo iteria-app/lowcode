@@ -1,4 +1,4 @@
-import { Hook } from "../../../ast/hooks"
+import { Hook } from "../../ast/hooks"
 import { createImportDeclaration } from "./imports"
 
 

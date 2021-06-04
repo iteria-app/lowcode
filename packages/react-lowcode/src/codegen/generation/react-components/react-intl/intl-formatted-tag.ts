@@ -1,5 +1,5 @@
 import ts, { factory } from "typescript"
-import { createImportDeclaration } from "../../ts/imports";
+import { createImportDeclaration } from "../../../ast/imports";
 import { defineComponent, createJsxSelfClosingElement, Component } from '../react-component-helper'
 
 export enum IntlFormatingTags {

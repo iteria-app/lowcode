@@ -1,0 +1,65 @@
+import {
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody
+} from '@material-ui/core';
+import { FormattedMessage, FormattedDate } from 'react-intl';
+export default function CustomerTable({ customers }) {
+  return (
+    <Table>
+      <TableHead>
+        <TableRow>
+          <TableCell>
+            <FormattedMessage
+              id="Customer.avatarUrl"
+              defaultMessage="avatarUrl"
+            />
+          </TableCell>
+          <TableCell>
+            <FormattedMessage
+              id="Customer.createdAt"
+              defaultMessage="createdAt"
+            />
+          </TableCell>
+          <TableCell>
+            <FormattedMessage id="Customer.email" defaultMessage="email" />
+          </TableCell>
+          <TableCell>
+            <FormattedMessage id="Customer.id" defaultMessage="id" />
+          </TableCell>
+          <TableCell>
+            <FormattedMessage id="Customer.name" defaultMessage="name" />
+          </TableCell>
+          <TableCell>
+            <FormattedMessage id="Customer.phone" defaultMessage="phone" />
+          </TableCell>
+          <TableCell>
+            <FormattedMessage
+              id="Customer.updatedAt"
+              defaultMessage="updatedAt"
+            />
+          </TableCell>
+        </TableRow>
+      </TableHead>
+      <TableBody>
+        {customers.map(customer => (
+          <TableRow>
+            <TableCell>{customer.avatarUrl}</TableCell>
+            <TableCell>
+              <FormattedDate value={customer.createdAt} />
+            </TableCell>
+            <TableCell>{customer.email}</TableCell>
+            <TableCell>{customer.id}</TableCell>
+            <TableCell>{customer.name}</TableCell>
+            <TableCell>{customer.phone}</TableCell>
+            <TableCell>
+              <FormattedDate value={customer.updatedAt} />
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  );
+}

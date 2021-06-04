@@ -4,7 +4,7 @@ import ts, { factory } from "typescript"
 import { graphqlGenTs1 } from "../typeAlias.example"
 import { UiFramework, TableType, Formatter } from '../../definition/context-types'
 import { AppGenerator } from '../../generation/generators/app-generator'
-import { createAst, parseGraphqlTypes, sourceFileEntity } from "../helper"
+import { sourceFileEntity, createAst, parseGraphqlTypes } from "../helper"
 
   test(".mui formik generation", () => {
       const sourceFile = createAst('')
