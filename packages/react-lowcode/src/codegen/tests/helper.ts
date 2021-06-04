@@ -25,7 +25,7 @@ export function createAst(
       return {
         getName: () => typeName,
         getType: () => typeAlias,
-        properties: props.map((prop) => ({
+        properties: props.map((prop: { getName: () => any; getTypeAtLocation: (arg0: any) => any; getDeclarations: () => { getText: () => any }[] }) => ({
           getName: () => prop.getName(),
           getType: () => prop.getTypeAtLocation(myClassFile),
           getTypeText: () => prop.getDeclarations()[0].getText()
@@ -38,7 +38,7 @@ export function createAst(
     const myClassFile = parseGraphqlTypes(typesSourceCode)
     const testEntity = sourceFileEntity(myClassFile)
     
-    let property = testEntity?.properties.filter(((prop)=> { 
+    let property = testEntity?.properties.filter(((prop: { getName: () => string })=> { 
       return prop.getName().toLowerCase() === name 
     }))
 

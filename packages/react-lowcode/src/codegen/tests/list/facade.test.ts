@@ -1,12 +1,18 @@
 import { sourceFileEntity, getEntityProperty, parseGraphqlTypes } from "../helper";
 import { graphqlGenTs1 } from "../typeAlias.example";
-import { insertColumn, insertColumnToBasicTableGrommet, insertColumnToBasicTableMui, insertColumnToDataTableGrommet, insertFormWidget } from "../../facade/facade-generator";
+import { deleteColumn, insertColumn, insertColumnToBasicTableGrommet, insertColumnToBasicTableMui, insertColumnToDataTableGrommet, insertFormWidget } from "../../facade/facade-generator";
 import { CodegenRw } from "../../io/codegenRw";
 
 describe("codegen facade", () => {
 
     test(".add column to existing table", () => {
       insertColumn({lineNumber: 15,columnNumber: 73, fileName: 'src\\codegen\\tests\\list\\list-test-file.txt'}, {entityField: getEntityProperty(graphqlGenTs1, 'testdate')[0], index:8}, new CodegenRw()).then(
+        (data) => console.log(data)
+      )
+    });
+
+    test(".delete column from existing table", () => {
+      deleteColumn({lineNumber: 15,columnNumber: 73, fileName: 'src\\codegen\\tests\\list\\list-test-file.txt'}, { entityField:getEntityProperty(graphqlGenTs1, 'testdate')[0], index:5}, new CodegenRw()).then(
         (data) => console.log(data)
       )
     });

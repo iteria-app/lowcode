@@ -11,7 +11,7 @@ import { createNameSpaceImport, uniqueImports } from "../../../ast/imports"
 import { GeneratorHelper } from "../helper"
 import ReactIntlFormatter from "../../react-components/react-intl/intl-formatter"
 import { WidgetContext } from "../../context/widget-context"
-import { createAst, replaceElementsToAST, SourceLineCol } from "../../../../ast"
+import { createAst, removeElementFromAst, replaceElementsToAST, SourceLineCol } from "../../../../ast"
 import { findVariableDeclarations } from "../../../ast/ast"
 import { findWidgetParentNode } from "../../../ast/widgetDeclaration"
 
@@ -56,6 +56,37 @@ export default class MuiDataTableGenerator implements TableGenerator
                                         property, 
                                         ast, 
                                         columnIndex)
+              }
+            }
+          }
+
+          alteredSource = this.printSourceCode(ast)
+        }
+      }
+
+      return alteredSource
+    }
+
+    async deleteColumn(position: SourceLineCol,
+      columnIndex: number): Promise<string> {
+      let alteredSource = '';
+
+      if (this._widgetContext) {
+        let sourceCode = await this._widgetContext.getSourceCodeString(position)
+
+        let ast = createAst(sourceCode)
+
+        if (ast) {
+          let widgetParentNode = findWidgetParentNode(sourceCode, position)
+
+          if (widgetParentNode) {
+            let columnsDeclarationNode = this.findColumnsDeclaration(widgetParentNode)
+
+            if (columnsDeclarationNode) {
+              let columnDeclarationArray = columnsDeclarationNode.getChildAt(2) as ts.ArrayLiteralExpression
+
+              if (columnDeclarationArray && columnDeclarationArray.elements[columnIndex]) {
+                ast = removeElementFromAst(ast, columnDeclarationArray.elements[columnIndex].pos);
               }
             }
           }

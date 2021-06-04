@@ -49,6 +49,32 @@ export async function insertColumn(
   return await generator.insertColumn(tablePosition, options.entityField, options.index);
 }
 
+export async function deleteColumn(
+  tablePosition: SourceLineCol,
+  options: FacadeOptions,
+  io: CodeRW
+): Promise<string> {
+  let generationContext = {
+    uiFramework: UiFramework.MaterialUI,
+    formatter: Formatter.None,
+    index: { tableType: TableType.DataTable, height: "400px" },
+  };
+  let appContext = new AppContext(generationContext, io);
+  let sourceFileContext = new PageContext(
+    appContext,
+    tablePosition.fileName
+  );
+  let widgetContext = new WidgetContext(sourceFileContext);
+
+  let generator = new MuiDataTableGenerator(
+    generationContext,
+    undefined,
+    widgetContext
+  );
+  
+  return await generator.deleteColumn(tablePosition, options.index!);
+}
+
 export async function insertColumnToDataTableGrommet(
   tablePosition: SourceLineCol,
   options: FacadeOptions,
