@@ -89,16 +89,15 @@ export async function addColumn(typesSourceCode: string,
                                 io: CodeRW, 
                                 sourceLine:SourceLineCol, 
                                 options: InsertOptions): Promise<string | undefined>{
-
+                                    
     const property: Property = getEntityProperty(typesSourceCode, options.property)[0]
 
     let generatedSource = undefined
+
     if(property){
-        const generatedPageSource = await insertColumn(sourceLine, 
+        generatedSource = await insertColumn(sourceLine, 
             {entityField: property, index: options.index}, 
             io)
-
-        generatedSource =generatedPageSource
     }
 
     return generatedSource
@@ -112,6 +111,7 @@ export async function addFormInput(typesSourceCode: string,
     const property: Property = getEntityProperty(typesSourceCode, options.property)[0]
 
     if(property){
+
         const generatedPageSource = await insertFormWidget(sourceLine, {entityField: property, index: options.index}, io)
         io.writeFile(sourceLine.fileName, generatedPageSource)
     }

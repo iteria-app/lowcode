@@ -2,8 +2,6 @@ import sourceFileEntity, { getEntityProperty, parseGraphqlTypes } from "../helpe
 import { graphqlGenTs1 } from "../typeAlias.example";
 import { insertColumn, insertColumnToBasicTableGrommet, insertColumnToBasicTableMui, insertColumnToDataTableGrommet, insertFormWidget } from "../../facade/facade-generator";
 import { CodegenRw } from "../../io/codegenRw";
-import { SourceLineCol } from "../../../ast";
-import { isDataTableWidget } from "../../ast/widgetDeclaration";
 
 describe("codegen facade", () => {
 
@@ -67,24 +65,4 @@ describe("codegen facade", () => {
         (data) => console.log(data)
       )
     });  
-    
-    test(".is data table widget", () => {
-      const file = `import { useIntl,FormattedMessage } from "react-intl";
-      import { GridColParams,DataGrid } from "@material-ui/data-grid";
-      export default function CustomerTable({ customers }) {
-          const intl = useIntl();
-          const columns = [
-              { field: "avatarUrl", flex: 1, type: "string", valueFormatter: ({ value }) => value, renderHeader: (params: GridColParams) => (<FormattedMessage id="Customer" defaultMessage="avatarUrl"/>) },
-              { field: "createdAt", flex: 1, type: "date", valueFormatter: ({ value }) => intl.formatDate(value), renderHeader: (params: GridColParams) => (<FormattedMessage id="Customer" defaultMessage="createdAt"/>) },
-              { field: "email", flex: 1, type: "string", valueFormatter: ({ value }) => value, renderHeader: (params: GridColParams) => (<FormattedMessage id="Customer" defaultMessage="email"/>) },
-              { field: "id", flex: 1, type: "string", valueFormatter: ({ value }) => value, renderHeader: (params: GridColParams) => (<FormattedMessage id="Customer" defaultMessage="id"/>) },
-              { field: "name", flex: 1, type: "string", valueFormatter: ({ value }) => value, renderHeader: (params: GridColParams) => (<FormattedMessage id="Customer" defaultMessage="name"/>) },
-          ];
-          return (<div style={{ height: "400px", width: "100%" }}><DataGrid columns={columns} rows={customers}/></div>);
-      }`
-
-      const source : SourceLineCol = {columnNumber:61, lineNumber: 11, fileName:'test'}
-      
-      isDataTableWidget(file, source)
-    }); 
 })
