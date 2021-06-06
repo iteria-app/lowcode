@@ -6,7 +6,7 @@ import ts, { factory } from "typescript"
 import { Project } from "ts-morph"
 import { HookImport } from '../ast/hooks'
 import { TagImport } from '../ast/tags'
-import { FacadeOptions, insertColumn, insertFormWidget } from './facade/facade-generator'
+import { insertColumn, insertFormWidget, deleteColumn as removeColumn, FacadeOptions } from './facade/facade-generator'
 import { SourceLineCol } from '../ast'
 import { Property } from './generation/entity'
 import { getEntityProperty } from './tests/helper'
@@ -22,6 +22,10 @@ interface CodegenOptions {
 interface InsertOptions {
     property: string
     index?: number
+}
+
+interface DeleteOptions {
+    index: number
 }
 
 // generates CRUD React pages (master-detail, eg. orders list, order detail form) from typescript
@@ -98,6 +102,16 @@ export async function addColumn(typesSourceCode: string,
             {entityField: property, index: options.index}, 
             io)
     }
+
+    return generatedSource
+}
+
+export async function deleteColumn(typesSourceCode: string, 
+    io: CodeRW, 
+    sourceLine:SourceLineCol, 
+    options: DeleteOptions): Promise<string | undefined> {
+
+    let generatedSource = await removeColumn(sourceLine, options as FacadeOptions, io);
 
     return generatedSource
 }

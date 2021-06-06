@@ -1,6 +1,6 @@
 import fs from 'fs'
 import path from 'path'
-import { addColumn, addFormInput } from '../..';
+import { addColumn, addFormInput, deleteColumn } from '../..';
 import { SourceLineCol } from '../../../ast';
 import { isDataTableWidget } from '../../ast/widgetDeclaration';
 import { CodegenRw } from '../../io/codegenRw';
@@ -26,5 +26,14 @@ describe(".api tests", () => {
         const source : SourceLineCol = {lineNumber: 37, columnNumber:17, fileName:filePath}
 
         addFormInput(graphqlGenTs1, new CodegenRw(), source, {property: 'testdate'})
+    });
+
+    test(".delete column", () => {
+        const filePath = 'src\\codegen\\tests\\list\\list-test-file.txt'
+        const source: SourceLineCol = { columnNumber: 73, lineNumber: 15, fileName: filePath }
+
+        deleteColumn(graphqlGenTs1, new CodegenRw(), source, { index: 1 }).then(
+            (data) => console.log(data)
+        );
     });
 });
