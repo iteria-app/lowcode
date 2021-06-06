@@ -30,9 +30,9 @@ describe(".api tests", () => {
 
     test(".delete column", () => {
         const filePath = 'src\\codegen\\tests\\list\\list-test-file.txt'
-        const source: SourceLineCol = { columnNumber: 73, lineNumber: 15, fileName: filePath }
+        const source: SourceLineCol = { lineNumber: 10, columnNumber: 61, fileName: filePath }
 
-        deleteColumn(graphqlGenTs1, new CodegenRw(), source, { index: 1 }).then(
+        deleteColumn(new CodegenRw(), source, { index: 4 }).then(
             (data) => console.log(data)
         );
     });
