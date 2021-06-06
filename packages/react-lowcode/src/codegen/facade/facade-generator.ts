@@ -144,12 +144,9 @@ export async function insertFormWidget(
   );
   let widgetContext = new WidgetContext(sourceFileContext);
 
-  const myClassFile = parseGraphqlTypes(graphqlGenTs1);
-  const testEntity = sourceFileEntity(myClassFile);
-
   let generator = new MuiDetailGenerator(
     generationContext,
-    testEntity!,
+    undefined,
     widgetContext
   );
 

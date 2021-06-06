@@ -91,7 +91,6 @@ export async function addColumn(typesSourceCode: string,
                                 options: InsertOptions): Promise<string | undefined>{
                                     
     const property: Property = getEntityProperty(typesSourceCode, options.property)[0]
-
     let generatedSource = undefined
 
     if(property){
@@ -104,17 +103,21 @@ export async function addColumn(typesSourceCode: string,
 }
 
 export async function addFormInput(typesSourceCode: string, 
-    io: CodeRW, 
-    sourceLine:SourceLineCol, 
-    options: InsertOptions){
+                                   io: CodeRW, 
+                                   sourceLine:SourceLineCol, 
+                                   options: InsertOptions): Promise<string | undefined>{
 
     const property: Property = getEntityProperty(typesSourceCode, options.property)[0]
+    let generatedSource = undefined
 
     if(property){
 
-        const generatedPageSource = await insertFormWidget(sourceLine, {entityField: property, index: options.index}, io)
-        io.writeFile(sourceLine.fileName, generatedPageSource)
+        generatedSource = await insertFormWidget(sourceLine, 
+            {entityField: property, index: options.index}, 
+            io)
     }
+
+    return generatedSource
 }
 
 interface ThemeCodegen {
