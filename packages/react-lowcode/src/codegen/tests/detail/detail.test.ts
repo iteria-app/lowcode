@@ -18,7 +18,7 @@ import { sourceFileEntity, createAst, parseGraphqlTypes } from "../helper"
       
       const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
 
-      console.log('generated:', printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page.imports, page.functionDeclaration]), sourceFile))
+      console.log('generated:', printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page!.imports, page!.functionDeclaration]), sourceFile))
   });
 
   test(".grommet formik generation", () => {
@@ -33,5 +33,5 @@ import { sourceFileEntity, createAst, parseGraphqlTypes } from "../helper"
     
     const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
 
-    console.log('generated:', printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page.imports, page.functionDeclaration]), sourceFile))
+    console.log('generated:', printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page!.imports, page!.functionDeclaration]), sourceFile))
 });

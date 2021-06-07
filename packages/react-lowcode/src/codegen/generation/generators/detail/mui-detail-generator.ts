@@ -30,13 +30,13 @@ import { findWidgetParentNode } from "../../../ast/widgetDeclaration";
 export default class MuiDetailGenerator implements DetailGenerator {
   private _imports: ts.ImportDeclaration[] = [];
   private _context: GenerationContext;
-  private _entity: Entity;
+  private _entity?: Entity;
   private _widgetContext: WidgetContext | undefined;
   private _intlFormatter: ReactIntlFormatter;
 
   constructor(
     generationContext: GenerationContext,
-    entity: Entity,
+    entity?: Entity,
     widgetContext?: WidgetContext
   ) {
     this._context = generationContext;
@@ -231,31 +231,34 @@ export default class MuiDetailGenerator implements DetailGenerator {
     return MuiDetailComponents;
   }
 
-  generateDetailComponent(): PageComponent {
-    var statements = this.createStatements();
+  generateDetailComponent(): PageComponent | undefined {
+    if(this._entity)
+    {
+      var statements = this.createStatements();
 
-    var functionalComponent = this.createConstFunction(
-      "FormikComponent",
-      statements
-    );
+      var functionalComponent = this.createConstFunction(
+        "FormikComponent",
+        statements
+      );
 
-    this._imports = [...this._imports, ...this._intlFormatter.getImports()];
+      this._imports = [...this._imports, ...this._intlFormatter.getImports()];
 
-    var uniqueFileImports = uniqueImports(this._imports);
-    uniqueFileImports.push(createNameSpaceImport("React", "react"));
-    uniqueFileImports.push(
-      createImportDeclaration(
-        "TextField, Avatar, Card, CardHeader, CardContent, Grid",
-        "@material-ui/core"
-      )
-    );
-    uniqueFileImports.push(createImportDeclaration("useFormik", "formik"));
-    uniqueFileImports.push(createImportDeclaration("Customer", "./Customer"));
+      var uniqueFileImports = uniqueImports(this._imports);
+      uniqueFileImports.push(createNameSpaceImport("React", "react"));
+      uniqueFileImports.push(
+        createImportDeclaration(
+          "TextField, Avatar, Card, CardHeader, CardContent, Grid",
+          "@material-ui/core"
+        )
+      );
+      uniqueFileImports.push(createImportDeclaration("useFormik", "formik"));
+      uniqueFileImports.push(createImportDeclaration("Customer", "./Customer"));
 
-    return {
-      functionDeclaration: functionalComponent,
-      imports: uniqueFileImports,
-    };
+      return {
+        functionDeclaration: functionalComponent,
+        imports: uniqueFileImports,
+      };
+    }else return undefined
   }
 
   private createStatements(): ts.Statement[] {
@@ -281,7 +284,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
   private createInputsForEntity(): ts.JsxChild[] {
     let inputs: ts.JsxChild[] = [];
 
-    getProperties(this._entity).forEach((property) => {
+    getProperties(this._entity!).forEach((property) => {
       let propertyInput = this.tryCreateInputForProperty(property);
 
       if (propertyInput) {
@@ -732,7 +735,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
   private creteInitialValuesForEntity() {
     let inputs: ts.PropertyAssignment[] = [];
 
-    getProperties(this._entity).forEach((property) => {
+    getProperties(this._entity!).forEach((property) => {
       let propertyInput = this.tryCreateInitialValueForProperty(property);
 
       if (propertyInput) {
