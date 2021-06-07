@@ -33,8 +33,8 @@ export function isDataTableWidget(sourceCode:string, position: SourceLineCol): b
         }else{
             let dataGridNode = astCode.getChildAt(1) as ts.JsxSelfClosingElement
 
-            if(dataGridNode)//todo(mch): very very uglu, need to be refactored to be more generic
-                isDataTableDeclaration = dataGridNode.getChildAt(0).getChildAt(1).getText() === 'DataGrid'
+            if(dataGridNode && dataGridNode.getChildAt(0)?.getChildAt(1)?.getText() === 'DataGrid')//todo(mch): very very uglu, need to be refactored to be more generic
+                isDataTableDeclaration = true
         }
     }
 
