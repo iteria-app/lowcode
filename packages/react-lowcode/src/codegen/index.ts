@@ -11,7 +11,7 @@ import { SourceLineCol } from '../ast'
 import { Property } from './generation/entity'
 import { getEntityProperty } from './tests/helper'
 import { isDataTableWidget } from './ast/widgetDeclaration'
-import { CodegenOptions, DeleteOptions, InsertOptions } from './interfaces'
+import { CodegenOptions, ColumnSourcePositionOptions, ColumnSourcePositionResult, DeleteOptions, InsertOptions } from './interfaces'
 
 
 // generates CRUD React pages (master-detail, eg. orders list, order detail form) from typescript
@@ -117,6 +117,13 @@ export async function addFormInput(typesSourceCode: string,
     }
 
     return generatedSource
+}
+
+export async function getColumnSourcePosition(io: CodeRW, 
+                                              sourceCode:SourceLineCol,
+                                              options: ColumnSourcePositionOptions): Promise<ColumnSourcePositionResult | undefined>{
+
+    return 
 }
 
 interface ThemeCodegen {
