@@ -42,7 +42,7 @@ export class AppGenerator {
         return this.getDetail(generator);
     }
 
-    private getDetail(generator: DetailGenerator): PageComponent {
+    private getDetail(generator: DetailGenerator): PageComponent | undefined {
         return generator.generateDetailComponent();
     }
 

@@ -58,7 +58,7 @@ class LocalCodegenCli{
         
         const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
   
-        let sourceCode = printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page.imports, page.functionDeclaration]), sourceFile)
+        let sourceCode = printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page!.imports, page!.functionDeclaration]), sourceFile)
         
         this.saveFile(sourceCode, args['basePath'], args['fileName'])
     }
