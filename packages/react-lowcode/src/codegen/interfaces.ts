@@ -23,6 +23,6 @@ export interface ColumnSourcePositionOptions{
 
 export interface ColumnSourcePositionResult {
     columnPosition: SourceLineCol,
-    valuePosition: SourceLineCol,
-    headerPosition: SourceLineCol
+    valuePosition?: SourceLineCol,
+    headerPosition?: SourceLineCol
 }

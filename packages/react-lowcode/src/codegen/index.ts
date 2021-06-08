@@ -6,7 +6,12 @@ import ts, { factory } from "typescript"
 import { Project } from "ts-morph"
 import { HookImport } from '../ast/hooks'
 import { TagImport } from '../ast/tags'
-import { insertColumn, insertFormWidget, deleteColumn as removeColumn } from './facade/facadeApi'
+import { 
+    insertColumn, 
+    insertFormWidget, 
+    deleteColumn as fDeleteColumn, 
+    getColumnSourcePosition as fGetColumnSourcePosition 
+} from './facade/facadeApi'
 import { SourceLineCol } from '../ast'
 import { Property } from './generation/entity'
 import { getEntityProperty } from './tests/helper'
@@ -96,7 +101,7 @@ export async function deleteColumn(io: CodeRW,
                                    sourceCode:SourceLineCol, 
                                    options: DeleteOptions): Promise<string | undefined> {
 
-    let generatedSource = await removeColumn(sourceCode, options, io);
+    let generatedSource = await fDeleteColumn(sourceCode, options, io);
 
     return generatedSource
 }
@@ -121,9 +126,9 @@ export async function addFormInput(typesSourceCode: string,
 
 export async function getColumnSourcePosition(io: CodeRW, 
                                               sourceCode:SourceLineCol,
-                                              options: ColumnSourcePositionOptions): Promise<ColumnSourcePositionResult | undefined>{
+                                              options: ColumnSourcePositionOptions): Promise<ColumnSourcePositionResult | undefined> {
 
-    return 
+    return await fGetColumnSourcePosition(sourceCode, options, io);
 }
 
 interface ThemeCodegen {
