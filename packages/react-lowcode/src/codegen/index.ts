@@ -76,12 +76,12 @@ export function generatePages(inputSourceCode: string, io: CodeRW & CodeDir, opt
     })
 }
 
-export function isSelectedDataTable(sourceCode:string, position: SourceLineCol){
-    return isDataTableWidget(sourceCode, position)
+export function isSelectedDataTable(sourceCode:string, tablePosition: SourceLineCol){
+    return isDataTableWidget(sourceCode, tablePosition)
 }
 
-export function isSelectedFormWidget(sourceCode:string, position: SourceLineCol){
-    return isFormWidget(sourceCode, position)
+export function isSelectedFormWidget(sourceCode:string, formPosition: SourceLineCol){
+    return isFormWidget(sourceCode, formPosition)
 }
 
 export async function addColumn(typesSourceCode: string, 

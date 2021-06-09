@@ -33,17 +33,17 @@ export default class MuiDataTableGenerator implements TableGenerator
        this._intlFormatter = new ReactIntlFormatter(generationContext, this._imports)
     }
   
-    async insertColumn(position: SourceLineCol, 
-                 property: Property, 
-                 columnIndex?: number): Promise<string> {
+    async insertColumn(tablePosition: SourceLineCol, 
+                       property: Property, 
+                       columnIndex?: number): Promise<string> {
       let alteredSource = ''
       if(this._widgetContext){
-        let sourceCode = await this._widgetContext.getSourceCodeString(position)
+        let sourceCode = await this._widgetContext.getSourceCodeString(tablePosition)
         
         let ast = createAst(sourceCode)
 
         if(ast){
-          let widgetParentNode = findWidgetParentNode(sourceCode, position)
+          let widgetParentNode = findWidgetParentNode(sourceCode, tablePosition)
 
           if(widgetParentNode)
           {
@@ -68,17 +68,17 @@ export default class MuiDataTableGenerator implements TableGenerator
       return alteredSource
     }
 
-    async deleteColumn(position: SourceLineCol,
-      columnIndex: number): Promise<string> {
-      let alteredSource = '';
+    async deleteColumn(tablePosition: SourceLineCol,
+                       columnIndex: number): Promise<string> {
+                       let alteredSource = '';
 
       if (this._widgetContext) {
-        let sourceCode = await this._widgetContext.getSourceCodeString(position)
+        let sourceCode = await this._widgetContext.getSourceCodeString(tablePosition)
 
         let ast = createAst(sourceCode)
 
         if (ast) {
-          let widgetParentNode = findWidgetParentNode(sourceCode, position)
+          let widgetParentNode = findWidgetParentNode(sourceCode, tablePosition)
 
           if (widgetParentNode) {
             let columnsDeclarationNode = this.findColumnsDeclaration(widgetParentNode)
@@ -86,7 +86,7 @@ export default class MuiDataTableGenerator implements TableGenerator
             if (columnsDeclarationNode) {
               let columnDeclarationArray = columnsDeclarationNode.getChildAt(2) as ts.ArrayLiteralExpression
 
-              if (columnDeclarationArray && columnDeclarationArray.elements[columnIndex]) {
+              if (columnDeclarationArray?.elements[columnIndex]) {
                 ast = removeElementFromAst(ast, columnDeclarationArray.elements[columnIndex].pos);
               }
             }
@@ -99,17 +99,17 @@ export default class MuiDataTableGenerator implements TableGenerator
       return alteredSource
     }
 
-    async getColumnSourcePosition(position: SourceLineCol,
+    async getColumnSourcePosition(tablePosition: SourceLineCol,
                                   columnIndex: number): Promise<ColumnSourcePositionResult | undefined> {
       let result: ColumnSourcePositionResult | undefined;
 
       if (this._widgetContext) {
-        let sourceCode = await this._widgetContext.getSourceCodeString(position)
+        let sourceCode = await this._widgetContext.getSourceCodeString(tablePosition)
 
         let ast = createAst(sourceCode)
 
         if (ast) {
-          let widgetParentNode = findWidgetParentNode(sourceCode, position)
+          let widgetParentNode = findWidgetParentNode(sourceCode, tablePosition)
 
           if (widgetParentNode) {
             let columnsDeclarationNode = this.findColumnsDeclaration(widgetParentNode)
@@ -117,7 +117,7 @@ export default class MuiDataTableGenerator implements TableGenerator
             if (columnsDeclarationNode) {
               let columnDeclarationArray = columnsDeclarationNode.getChildAt(2) as ts.ArrayLiteralExpression
 
-              if (columnDeclarationArray && columnDeclarationArray.elements[columnIndex]) {
+              if (columnDeclarationArray?.elements[columnIndex]) {
                 let renderHeaderPosition, valueFormatterPosition;
                 const columnPosition = ast.getLineAndCharacterOfPosition(columnDeclarationArray.elements[columnIndex].getStart());
 
@@ -149,17 +149,17 @@ export default class MuiDataTableGenerator implements TableGenerator
 
                 result = {
                   columnPosition: {
-                    fileName: position.fileName,
+                    fileName: tablePosition.fileName,
                     columnNumber: columnPosition.character + 1,
                     lineNumber: columnPosition.line + 1
                   },
                   headerPosition: renderHeaderPosition ? {
-                    fileName: position.fileName,
+                    fileName: tablePosition.fileName,
                     columnNumber: renderHeaderPosition.character + 1,
                     lineNumber: renderHeaderPosition.line + 1
                   } : undefined,
                   valuePosition: valueFormatterPosition ? {
-                    fileName: position.fileName,
+                    fileName: tablePosition.fileName,
                     columnNumber: valueFormatterPosition.character + 1,
                     lineNumber: valueFormatterPosition.line + 1
                   } : undefined

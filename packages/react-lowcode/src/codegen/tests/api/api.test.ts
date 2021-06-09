@@ -7,35 +7,35 @@ import { graphqlGenTs1 } from '../typeAlias.example';
 
 describe(".api tests", () => {
     test(".is data table widget", () => {
-        const file = fs.readFileSync(path.resolve('src\\codegen\\tests\\list\\files\\is-datatable-test-file.txt'),'utf-8') 
+        const file = fs.readFileSync(path.resolve('src/codegen/tests/list/files/is-datatable-test-file.txt'),'utf-8') 
   
         const source : SourceLineCol = {lineNumber: 12, columnNumber:17, fileName:'test'}
         isSelectedDataTable(file, source)
     }); 
 
     test(".is form widget", () => {
-        const file = fs.readFileSync(path.resolve('src\\codegen\\tests\\detail\\detail-test-file.txt'),'utf-8') 
+        const file = fs.readFileSync(path.resolve('src/codegen/tests/detail/detail-test-file.txt'),'utf-8') 
   
-        const source : SourceLineCol = {lineNumber: 34, columnNumber:17, fileName:'test'}
+        const source : SourceLineCol = {lineNumber: 34, columnNumber:15, fileName:'test'}
         isSelectedFormWidget(file, source)
     }); 
 
     test(".add column", () => {
-        const filePath = 'src\\codegen\\tests\\list\\files\\is-datatable-test-file.txt'
+        const filePath = 'src/codegen/tests/list/files/is-datatable-test-file.txt'
         const source : SourceLineCol = {lineNumber: 12, columnNumber:17, fileName:filePath}
 
         addColumn(graphqlGenTs1, new CodegenRw(), source, {property: 'testdate'}).then(generated => console.log(generated))
     });
 
     test(".add form input", () => {
-        const filePath = 'src\\codegen\\tests\\detail\\detail-test-file.txt'
+        const filePath = 'src/codegen/tests/detail/detail-test-file.txt'
         const source : SourceLineCol = {lineNumber: 37, columnNumber:17, fileName:filePath}
 
         addFormInput(graphqlGenTs1, new CodegenRw(), source, {property: 'testdate'})
     });
 
     test(".delete column", () => {
-        const filePath = 'src\\codegen\\tests\\list\\list-test-file.txt'
+        const filePath = 'src/codegen/tests/list/list-test-file.txt'
         const source: SourceLineCol = { lineNumber: 10, columnNumber: 61, fileName: filePath }
 
         deleteColumn(new CodegenRw(), source, { index: 4 }).then(
@@ -44,7 +44,7 @@ describe(".api tests", () => {
     });
 
     test(".get column position (MUI DataTable with formatter)", async () => {
-        const filePath = 'src\\codegen\\tests\\list\\files\\data-table-mui-with-formatter-test-file.txt'
+        const filePath = 'src/codegen/tests/list/files/data-table-mui-with-formatter-test-file.txt'
         const source: SourceLineCol = { lineNumber: 16, columnNumber: 77, fileName: filePath }
         const result = await getColumnSourcePosition(new CodegenRw(), source, { index: 7 });
 

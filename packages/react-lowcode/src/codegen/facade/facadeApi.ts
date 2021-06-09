@@ -147,7 +147,7 @@ export async function insertColumnToBasicTableGrommet(
 }
 
 export async function insertFormWidget(
-  componentPosition: SourceLineCol,
+  formPosition: SourceLineCol,
   options: FacadeInsertOptions,
   io: CodegenRw
 ): Promise<string> {
@@ -159,7 +159,7 @@ export async function insertFormWidget(
   let appContext = new AppContext(generationContext, io);
   let sourceFileContext = new PageContext(
     appContext,
-    componentPosition.fileName
+    formPosition.fileName
   );
   let widgetContext = new WidgetContext(sourceFileContext);
 
@@ -169,7 +169,7 @@ export async function insertFormWidget(
     widgetContext
   );
 
-  return await generator.insertFormWidget(componentPosition, options.entityField);
+  return await generator.insertFormWidget(formPosition, options.entityField);
 }
 
 export async function getColumnSourcePosition(
