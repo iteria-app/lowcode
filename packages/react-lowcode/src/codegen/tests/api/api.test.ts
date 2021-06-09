@@ -1,6 +1,6 @@
 import fs from 'fs'
 import path from 'path'
-import { addColumn, addFormInput, deleteColumn } from '../..';
+import { addColumn, addFormInput, deleteColumn, getColumnSourcePosition } from '../..';
 import { SourceLineCol } from '../../../ast';
 import { isDataTableWidget, isFormWidget } from '../../ast/widgetDeclaration';
 import { CodegenRw } from '../../io/codegenRw';
@@ -43,4 +43,28 @@ describe(".api tests", () => {
             (data) => console.log(data)
         );
     });
+
+    test(".get column position (MUI DataTable with formatter)", async () => {
+        const filePath = 'src\\codegen\\tests\\list\\files\\data-table-mui-with-formatter-test-file.txt'
+        const source: SourceLineCol = { lineNumber: 16, columnNumber: 77, fileName: filePath }
+        const result = await getColumnSourcePosition(new CodegenRw(), source, { index: 7 });
+
+        expect(result).toStrictEqual({
+            columnPosition: {
+                fileName: filePath,
+                columnNumber: 13,
+                lineNumber: 14
+              },
+              headerPosition: {
+                fileName: filePath,
+                columnNumber: 113,
+                lineNumber: 14
+              },
+              valuePosition: {
+                fileName: filePath,
+                columnNumber: 58,
+                lineNumber: 14
+              }
+        })
+    }); 
 });

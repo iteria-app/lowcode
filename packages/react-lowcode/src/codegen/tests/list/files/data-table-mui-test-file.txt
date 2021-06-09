@@ -1,0 +1,15 @@
+import { DataGrid } from "@material-ui/data-grid";
+    import * as React from "react";
+    export default function CustomerTable({ customers }) {
+        const columns = [
+            { field: "address", flex: 1, type: "string", headerName: "address" },
+            { field: "avatarUrl", flex: 1, type: "string", headerName: "avatarUrl" },
+            { field: "createdAt", flex: 1, type: "date", headerName: "createdAt" },
+            { field: "email", flex: 1, type: "string", headerName: "email" },
+            { field: "id", flex: 1, type: "string", headerName: "id" },
+            { field: "name", flex: 1, type: "string", headerName: "name" },
+            { field: "phone", flex: 1, type: "string", headerName: "phone" },
+            { field: "updatedAt", flex: 1, type: "date", headerName: "updatedAt" }
+        ];
+        return (<div style={{ height: "400px", width: "100%" }}>            <DataGrid columns={columns} rows={customers}/>          </div>);
+    }
