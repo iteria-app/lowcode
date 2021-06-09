@@ -2,7 +2,7 @@ import fs from 'fs'
 import path from 'path'
 import { addColumn, addFormInput, deleteColumn } from '../..';
 import { SourceLineCol } from '../../../ast';
-import { isDataTableWidget } from '../../ast/widgetDeclaration';
+import { isDataTableWidget, isFormWidget } from '../../ast/widgetDeclaration';
 import { CodegenRw } from '../../io/codegenRw';
 import { graphqlGenTs1 } from '../typeAlias.example';
 
@@ -12,7 +12,14 @@ describe(".api tests", () => {
   
         const source : SourceLineCol = {lineNumber: 12, columnNumber:17, fileName:'test'}
         isDataTableWidget(file, source)
-      }); 
+    }); 
+
+    test(".is form widget", () => {
+        const file = fs.readFileSync(path.resolve('src\\codegen\\tests\\detail\\detail-test-file.txt'),'utf-8') 
+  
+        const source : SourceLineCol = {lineNumber: 34, columnNumber:17, fileName:'test'}
+        isFormWidget(file, source)
+    }); 
 
     test(".add column", () => {
         const filePath = 'src\\codegen\\tests\\list\\files\\is-datatable-test-file.txt'

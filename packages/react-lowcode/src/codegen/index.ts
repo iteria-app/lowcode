@@ -11,7 +11,7 @@ import { SourceLineCol } from '../ast'
 import { Property } from './generation/entity'
 import { getEntityProperty } from './tests/helper'
 import { isDataTableWidget } from './ast/widgetDeclaration'
-import { CodegenOptions, ColumnSourcePositionOptions, ColumnSourcePositionResult, DeleteOptions, InsertOptions } from './interfaces'
+import { CodegenOptions, ColumnSourcePositionOptions, ColumnSourcePositionResult, DeleteOptions, InsertOptions, WidgetProperties } from './interfaces'
 
 
 // generates CRUD React pages (master-detail, eg. orders list, order detail form) from typescript
@@ -99,6 +99,22 @@ export async function deleteColumn(io: CodeRW,
     let generatedSource = await removeColumn(sourceCode, options, io);
 
     return generatedSource
+}
+
+export async function getFormWidgetProperties(io: CodeRW, 
+                                              sourceCode:SourceLineCol): Promise<WidgetProperties>{
+    //dummy promise
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+        }, 300);
+      });
+}
+
+export async function setFormWidgetProperties(io: CodeRW, 
+                                              sourceCode:SourceLineCol,
+                                              properties: WidgetProperties): Promise<string | undefined>{
+
+    return
 }
 
 export async function addFormInput(typesSourceCode: string, 

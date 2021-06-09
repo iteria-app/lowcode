@@ -26,3 +26,13 @@ export interface ColumnSourcePositionResult {
     valuePosition: SourceLineCol,
     headerPosition: SourceLineCol
 }
+
+export interface WidgetProperty {
+    name: string,
+    value?: string,
+    isWithoutValue: boolean
+}
+
+export interface WidgetProperties {
+    properties: WidgetProperty[]
+}
