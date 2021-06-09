@@ -1,8 +1,7 @@
 import fs from 'fs'
 import path from 'path'
-import { addColumn, addFormInput, deleteColumn, getColumnSourcePosition } from '../..';
+import { addColumn, addFormInput, deleteColumn, getColumnSourcePosition, isSelectedDataTable, isSelectedFormWidget } from '../..';
 import { SourceLineCol } from '../../../ast';
-import { isDataTableWidget, isFormWidget } from '../../ast/widgetDeclaration';
 import { CodegenRw } from '../../io/codegenRw';
 import { graphqlGenTs1 } from '../typeAlias.example';
 
@@ -11,14 +10,14 @@ describe(".api tests", () => {
         const file = fs.readFileSync(path.resolve('src\\codegen\\tests\\list\\files\\is-datatable-test-file.txt'),'utf-8') 
   
         const source : SourceLineCol = {lineNumber: 12, columnNumber:17, fileName:'test'}
-        isDataTableWidget(file, source)
+        isSelectedDataTable(file, source)
     }); 
 
     test(".is form widget", () => {
         const file = fs.readFileSync(path.resolve('src\\codegen\\tests\\detail\\detail-test-file.txt'),'utf-8') 
   
         const source : SourceLineCol = {lineNumber: 34, columnNumber:17, fileName:'test'}
-        isFormWidget(file, source)
+        isSelectedFormWidget(file, source)
     }); 
 
     test(".add column", () => {

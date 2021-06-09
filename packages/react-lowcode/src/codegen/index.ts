@@ -15,7 +15,7 @@ import {
 import { SourceLineCol } from '../ast'
 import { Property } from './generation/entity'
 import { getEntityProperty } from './tests/helper'
-import { isDataTableWidget } from './ast/widgetDeclaration'
+import { isDataTableWidget, isFormWidget } from './ast/widgetDeclaration'
 import { CodegenOptions, ColumnSourcePositionOptions, ColumnSourcePositionResult, DeleteOptions, InsertOptions, WidgetProperties } from './interfaces'
 
 
@@ -78,6 +78,10 @@ export function generatePages(inputSourceCode: string, io: CodeRW & CodeDir, opt
 
 export function isSelectedDataTable(sourceCode:string, position: SourceLineCol){
     return isDataTableWidget(sourceCode, position)
+}
+
+export function isSelectedFormWidget(sourceCode:string, position: SourceLineCol){
+    return isFormWidget(sourceCode, position)
 }
 
 export async function addColumn(typesSourceCode: string, 
