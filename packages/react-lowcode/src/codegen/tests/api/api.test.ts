@@ -10,14 +10,16 @@ describe(".api tests", () => {
         const file = fs.readFileSync(path.resolve('src/codegen/tests/list/files/is-datatable-test-file.txt'),'utf-8') 
   
         const source : SourceLineCol = {lineNumber: 12, columnNumber:17, fileName:'test'}
-        isSelectedDataTable(file, source)
+        const isSelected = isSelectedDataTable(file, source)
+        expect(isSelected).toBe(true)
     }); 
 
     test(".is form widget", () => {
         const file = fs.readFileSync(path.resolve('src/codegen/tests/detail/detail-test-file.txt'),'utf-8') 
   
         const source : SourceLineCol = {lineNumber: 34, columnNumber:15, fileName:'test'}
-        isSelectedFormWidget(file, source)
+        const isSelected = isSelectedFormWidget(file, source)
+        expect(isSelected).toBe(true)
     }); 
 
     test(".add column", () => {
