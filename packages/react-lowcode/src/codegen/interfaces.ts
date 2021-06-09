@@ -1,3 +1,4 @@
+import { SourceLineCol } from "../ast";
 import { UiFramework } from "./definition/context-types";
 
 export interface CodegenOptions {
@@ -14,4 +15,24 @@ export interface InsertOptions {
 
 export interface DeleteOptions {
     index: number
+}
+
+export interface ColumnSourcePositionOptions{
+    index: number
+}
+
+export interface ColumnSourcePositionResult {
+    columnPosition: SourceLineCol,
+    valuePosition?: SourceLineCol,
+    headerPosition?: SourceLineCol
+}
+
+export interface WidgetProperty {
+    name: string,
+    value?: string,
+    isWithoutValue: boolean
+}
+
+export interface WidgetProperties {
+    properties: WidgetProperty[]
 }

@@ -1,4 +1,4 @@
-import ts, { factory, NodeArray, SourceFile } from "typescript"
+import ts, { factory, SourceFile, PropertyAssignment, Node } from "typescript"
 import { getPropertyType, PropertyType } from '../../graphql/typeAlias'
 import { createFunctionalComponent, PageComponent, createJsxSelfClosingElement, createJsxAttribute } from '../../react-components/react-component-helper'
 import { Entity, getProperties, Property } from '../../entity/index'
@@ -11,9 +11,10 @@ import { createNameSpaceImport, uniqueImports } from "../../../ast/imports"
 import { GeneratorHelper } from "../helper"
 import ReactIntlFormatter from "../../react-components/react-intl/intl-formatter"
 import { WidgetContext } from "../../context/widget-context"
-import { createAst, removeElementFromAst, replaceElementsToAST, SourceLineCol } from "../../../../ast"
+import { createAst, find, removeElementFromAst, replaceElementsToAST, SourceLineCol } from "../../../../ast"
 import { findVariableDeclarations } from "../../../ast/ast"
 import { findWidgetParentNode } from "../../../ast/widgetDeclaration"
+import { ColumnSourcePositionResult } from "../../../interfaces"
 
 export default class MuiDataTableGenerator implements TableGenerator 
 {
@@ -32,17 +33,17 @@ export default class MuiDataTableGenerator implements TableGenerator
        this._intlFormatter = new ReactIntlFormatter(generationContext, this._imports)
     }
   
-    async insertColumn(position: SourceLineCol, 
-                 property: Property, 
-                 columnIndex?: number): Promise<string> {
+    async insertColumn(tablePosition: SourceLineCol, 
+                       property: Property, 
+                       columnIndex?: number): Promise<string> {
       let alteredSource = ''
       if(this._widgetContext){
-        let sourceCode = await this._widgetContext.getSourceCodeString(position)
+        let sourceCode = await this._widgetContext.getSourceCodeString(tablePosition)
         
         let ast = createAst(sourceCode)
 
         if(ast){
-          let widgetParentNode = findWidgetParentNode(sourceCode, position)
+          let widgetParentNode = findWidgetParentNode(sourceCode, tablePosition)
 
           if(widgetParentNode)
           {
@@ -67,17 +68,17 @@ export default class MuiDataTableGenerator implements TableGenerator
       return alteredSource
     }
 
-    async deleteColumn(position: SourceLineCol,
-      columnIndex: number): Promise<string> {
-      let alteredSource = '';
+    async deleteColumn(tablePosition: SourceLineCol,
+                       columnIndex: number): Promise<string> {
+                       let alteredSource = '';
 
       if (this._widgetContext) {
-        let sourceCode = await this._widgetContext.getSourceCodeString(position)
+        let sourceCode = await this._widgetContext.getSourceCodeString(tablePosition)
 
         let ast = createAst(sourceCode)
 
         if (ast) {
-          let widgetParentNode = findWidgetParentNode(sourceCode, position)
+          let widgetParentNode = findWidgetParentNode(sourceCode, tablePosition)
 
           if (widgetParentNode) {
             let columnsDeclarationNode = this.findColumnsDeclaration(widgetParentNode)
@@ -85,7 +86,7 @@ export default class MuiDataTableGenerator implements TableGenerator
             if (columnsDeclarationNode) {
               let columnDeclarationArray = columnsDeclarationNode.getChildAt(2) as ts.ArrayLiteralExpression
 
-              if (columnDeclarationArray && columnDeclarationArray.elements[columnIndex]) {
+              if (columnDeclarationArray?.elements[columnIndex]) {
                 ast = removeElementFromAst(ast, columnDeclarationArray.elements[columnIndex].pos);
               }
             }
@@ -96,6 +97,80 @@ export default class MuiDataTableGenerator implements TableGenerator
       }
 
       return alteredSource
+    }
+
+    async getColumnSourcePosition(tablePosition: SourceLineCol,
+                                  columnIndex: number): Promise<ColumnSourcePositionResult | undefined> {
+      let result: ColumnSourcePositionResult | undefined;
+
+      if (this._widgetContext) {
+        let sourceCode = await this._widgetContext.getSourceCodeString(tablePosition)
+
+        let ast = createAst(sourceCode)
+
+        if (ast) {
+          let widgetParentNode = findWidgetParentNode(sourceCode, tablePosition)
+
+          if (widgetParentNode) {
+            let columnsDeclarationNode = this.findColumnsDeclaration(widgetParentNode)
+
+            if (columnsDeclarationNode) {
+              let columnDeclarationArray = columnsDeclarationNode.getChildAt(2) as ts.ArrayLiteralExpression
+
+              if (columnDeclarationArray?.elements[columnIndex]) {
+                let renderHeaderPosition, valueFormatterPosition;
+                const columnPosition = ast.getLineAndCharacterOfPosition(columnDeclarationArray.elements[columnIndex].getStart());
+
+                const renderHeader = find<PropertyAssignment>(columnDeclarationArray.elements[columnIndex], (node: Node) => {
+                  if(ts.isPropertyAssignment(node)) {
+                    if(ts.isIdentifier(node.name)) {
+                      return node.name.escapedText === 'renderHeader';
+                    }
+                  }
+                  return false;
+                });
+                
+                const valueFormatter = find<PropertyAssignment>(columnDeclarationArray.elements[columnIndex], (node: Node) => {
+                  if(ts.isPropertyAssignment(node)) {
+                    if(ts.isIdentifier(node.name)) {
+                      return node.name.escapedText === 'valueFormatter';
+                    }
+                  }
+                  return false;
+                });
+
+                if(renderHeader){
+                  renderHeaderPosition = ast.getLineAndCharacterOfPosition(renderHeader.getStart());
+                }
+
+                if(valueFormatter) {
+                  valueFormatterPosition = ast.getLineAndCharacterOfPosition(valueFormatter.getStart());
+                }
+
+                result = {
+                  columnPosition: {
+                    fileName: tablePosition.fileName,
+                    columnNumber: columnPosition.character + 1,
+                    lineNumber: columnPosition.line + 1
+                  },
+                  headerPosition: renderHeaderPosition ? {
+                    fileName: tablePosition.fileName,
+                    columnNumber: renderHeaderPosition.character + 1,
+                    lineNumber: renderHeaderPosition.line + 1
+                  } : undefined,
+                  valuePosition: valueFormatterPosition ? {
+                    fileName: tablePosition.fileName,
+                    columnNumber: valueFormatterPosition.character + 1,
+                    lineNumber: valueFormatterPosition.line + 1
+                  } : undefined
+                };
+              }
+            }
+          }
+        }
+      }
+
+      return result;
     }
 
     private printSourceCode(sourceFile: SourceFile): string{

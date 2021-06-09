@@ -14,6 +14,7 @@ import { CodeRW } from "../../io";
 import { CodegenRw } from "../io/codegenRw";
 import { BasicTableGenerator } from "../generation/generators/list/basic-table-generator";
 import { FacadeDeleteOptions, FacadeInsertOptions } from "./interfaces";
+import { ColumnSourcePositionResult } from "../interfaces";
 
 export async function insertColumn(
   tablePosition: SourceLineCol,
@@ -146,7 +147,7 @@ export async function insertColumnToBasicTableGrommet(
 }
 
 export async function insertFormWidget(
-  componentPosition: SourceLineCol,
+  formPosition: SourceLineCol,
   options: FacadeInsertOptions,
   io: CodegenRw
 ): Promise<string> {
@@ -158,7 +159,7 @@ export async function insertFormWidget(
   let appContext = new AppContext(generationContext, io);
   let sourceFileContext = new PageContext(
     appContext,
-    componentPosition.fileName
+    formPosition.fileName
   );
   let widgetContext = new WidgetContext(sourceFileContext);
 
@@ -168,5 +169,31 @@ export async function insertFormWidget(
     widgetContext
   );
 
-  return await generator.insertFormWidget(componentPosition, options.entityField);
+  return await generator.insertFormWidget(formPosition, options.entityField);
+}
+
+export async function getColumnSourcePosition(
+  tablePosition: SourceLineCol,
+  options: FacadeDeleteOptions,
+  io: CodeRW
+): Promise<ColumnSourcePositionResult | undefined> {
+  let generationContext = {
+    uiFramework: UiFramework.MaterialUI,
+    formatter: Formatter.None,
+    index: { tableType: TableType.DataTable, height: "400px" },
+  };
+  let appContext = new AppContext(generationContext, io);
+  let sourceFileContext = new PageContext(
+    appContext,
+    tablePosition.fileName
+  );
+  let widgetContext = new WidgetContext(sourceFileContext);
+
+  let generator = new MuiDataTableGenerator(
+    generationContext,
+    undefined,
+    widgetContext
+  );
+  
+  return await generator.getColumnSourcePosition(tablePosition, options.index!);
 }

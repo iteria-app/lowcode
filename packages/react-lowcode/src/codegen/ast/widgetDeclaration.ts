@@ -21,7 +21,7 @@ export function findWidgetParentNode(sourceCode:string, position: SourceLineCol)
     return undefined
 }
 
-export function isDataTableWidget(sourceCode:string, position: SourceLineCol): boolean{
+export function isDataTableWidget(sourceCode:string, position: SourceLineCol): boolean {
     let isDataTableDeclaration = false
     let astCode = astFindSource(sourceCode, position)
 
@@ -41,6 +41,25 @@ export function isDataTableWidget(sourceCode:string, position: SourceLineCol): b
     return isDataTableDeclaration
 }
 
+export function isFormWidget(sourceCode: string, position: SourceLineCol): boolean {
+    let isFormWidget = false
+    let astCode = astFindSource(sourceCode, position)
+
+    if(astCode){
+        const variableDeclaration = findParentVariableDeclaration(astCode)
+
+        if(variableDeclaration){
+            const identifier = findIdentifier(variableDeclaration)
+
+            if(identifier){
+                isFormWidget = identifier.getText() === 'FormikComponent'
+            }
+        }
+    }
+
+    return isFormWidget
+}
+
 function findIdentifier(root: ts.Node): ts.Identifier | undefined{
     let identifier = undefined
     root.getChildren().forEach(child => {
@@ -50,6 +69,23 @@ function findIdentifier(root: ts.Node): ts.Identifier | undefined{
     });
 
     return identifier
+}
+
+function findParentVariableDeclaration(root: ts.Node): ts.VariableDeclaration | undefined {
+    let declaration: ts.VariableDeclaration | undefined = undefined
+
+    let parentNode = root.parent
+
+    while(parentNode){
+        if(ts.isVariableDeclaration(parentNode)){
+            declaration = parentNode
+            break
+        }
+
+        parentNode = parentNode.parent
+    }
+
+    return declaration
 }
 
 function isWidgetDeclaration(node: ts.Node){

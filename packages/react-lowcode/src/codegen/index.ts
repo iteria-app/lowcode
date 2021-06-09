@@ -6,12 +6,17 @@ import ts, { factory } from "typescript"
 import { Project } from "ts-morph"
 import { HookImport } from '../ast/hooks'
 import { TagImport } from '../ast/tags'
-import { insertColumn, insertFormWidget, deleteColumn as removeColumn } from './facade/facadeApi'
+import { 
+    insertColumn, 
+    insertFormWidget, 
+    deleteColumn as fDeleteColumn, 
+    getColumnSourcePosition as fGetColumnSourcePosition 
+} from './facade/facadeApi'
 import { SourceLineCol } from '../ast'
 import { Property } from './generation/entity'
 import { getEntityProperty } from './tests/helper'
-import { isDataTableWidget } from './ast/widgetDeclaration'
-import { CodegenOptions, DeleteOptions, InsertOptions } from './interfaces'
+import { isDataTableWidget, isFormWidget } from './ast/widgetDeclaration'
+import { CodegenOptions, ColumnSourcePositionOptions, ColumnSourcePositionResult, DeleteOptions, InsertOptions, WidgetProperties } from './interfaces'
 
 
 // generates CRUD React pages (master-detail, eg. orders list, order detail form) from typescript
@@ -71,8 +76,12 @@ export function generatePages(inputSourceCode: string, io: CodeRW & CodeDir, opt
     })
 }
 
-export function isSelectedDataTable(sourceCode:string, position: SourceLineCol){
-    return isDataTableWidget(sourceCode, position)
+export function isSelectedDataTable(sourceCode:string, tablePosition: SourceLineCol){
+    return isDataTableWidget(sourceCode, tablePosition)
+}
+
+export function isSelectedFormWidget(sourceCode:string, formPosition: SourceLineCol){
+    return isFormWidget(sourceCode, formPosition)
 }
 
 export async function addColumn(typesSourceCode: string, 
@@ -96,9 +105,25 @@ export async function deleteColumn(io: CodeRW,
                                    sourceCode:SourceLineCol, 
                                    options: DeleteOptions): Promise<string | undefined> {
 
-    let generatedSource = await removeColumn(sourceCode, options, io);
+    let generatedSource = await fDeleteColumn(sourceCode, options, io);
 
     return generatedSource
+}
+
+export async function getFormWidgetProperties(io: CodeRW, 
+                                              sourceCode:SourceLineCol): Promise<WidgetProperties>{
+    //dummy promise
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+        }, 300);
+      });
+}
+
+export async function setFormWidgetProperties(io: CodeRW, 
+                                              sourceCode:SourceLineCol,
+                                              properties: WidgetProperties): Promise<string | undefined>{
+
+    return
 }
 
 export async function addFormInput(typesSourceCode: string, 
@@ -117,6 +142,13 @@ export async function addFormInput(typesSourceCode: string,
     }
 
     return generatedSource
+}
+
+export async function getColumnSourcePosition(io: CodeRW, 
+                                              sourceCode:SourceLineCol,
+                                              options: ColumnSourcePositionOptions): Promise<ColumnSourcePositionResult | undefined> {
+
+    return await fGetColumnSourcePosition(sourceCode, options, io);
 }
 
 interface ThemeCodegen {
