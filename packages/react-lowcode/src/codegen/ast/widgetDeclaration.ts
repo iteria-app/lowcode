@@ -52,7 +52,7 @@ export function isFormWidget(sourceCode: string, position: SourceLineCol): boole
             const identifier = findIdentifier(variableDeclaration)
 
             if(identifier){
-                isFormWidget = identifier.getText() === 'FormikComponent'
+                isFormWidget = identifier.getText().startsWith('Generated')
             }
         }
     }

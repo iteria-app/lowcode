@@ -237,7 +237,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
       var statements = this.createStatements();
 
       var functionalComponent = this.createConstFunction(
-        "FormikComponent",
+        "GeneratedFormikComponent",
         statements
       );
 
@@ -350,7 +350,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
         ),
         factory.createJsxAttribute(
           factory.createIdentifier("label"),
-          factory.createStringLiteral(text)
+          factory.createStringLiteral(name)
         ),
         this.getTextValueAttribute(name, InputType.text),
         factory.createJsxAttribute(
