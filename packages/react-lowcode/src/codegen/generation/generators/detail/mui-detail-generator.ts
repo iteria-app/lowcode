@@ -1,4 +1,4 @@
-import ts, { factory, Node, ObjectLiteralExpression, SourceFile } from "typescript";
+import ts, { factory, Node, ObjectLiteralExpression, SourceFile, SyntaxKind } from "typescript";
 import { PageComponent } from "../../react-components/react-component-helper";
 import { DetailGenerator } from "./detail-generator-factory";
 import { DetailComponentDefinitionBase } from "../../../definition/detail-definition-core";
@@ -50,7 +50,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
     );
   }
 
-  async getFormWidgetProperties(position: SourceLineCol) : Promise<WidgetProperties> {
+  async getFormWidgetProperties(position: SourceLineCol): Promise<WidgetProperties> {
     const result: WidgetProperties = {
       properties: []
     };
@@ -64,27 +64,41 @@ export default class MuiDetailGenerator implements DetailGenerator {
           sourceCode,
           position
         );
-    
-        if(widgetParentNode) {
+
+        if (widgetParentNode) {
           const pos = ast.getPositionOfLineAndCharacter(position.lineNumber - 1, position.columnNumber - 1);
           const element = find<Node>(widgetParentNode, (node: Node) => {
             return node.pos === pos;
           });
 
-          if(element) {
-            if(ts.isJsxOpeningElement(element) || ts.isJsxSelfClosingElement(element)) {
+          if (element) {
+            if (ts.isJsxOpeningElement(element) || ts.isJsxSelfClosingElement(element)) {
               element.attributes.properties.forEach(prop => {
-                if(ts.isJsxAttribute(prop)){
-                  if(prop.initializer) {
-                    if(ts.isStringLiteral(prop.initializer)) {
+                if (ts.isJsxAttribute(prop)) {
+                  const propName = prop.name.escapedText.toString();
+
+                  if (prop.initializer) {
+                    if (ts.isStringLiteral(prop.initializer)) {
                       result.properties.push({
-                        name: prop.name.escapedText.toString(),
+                        name: propName,
                         value: prop.initializer.text
                       });
                     }
+                    else if(ts.isJsxExpression(prop.initializer)) {
+                      if(prop.initializer.expression) {
+                        if(ts.isNumericLiteral(prop.initializer.expression) 
+                        || prop.initializer.expression.kind === SyntaxKind.TrueKeyword
+                        || prop.initializer.expression.kind === SyntaxKind.FalseKeyword) {
+                          result.properties.push({
+                            name: propName,
+                            value: prop.initializer.expression.getText()
+                          });
+                        }
+                      }
+                    }
                   } else {
                     result.properties.push({
-                      name: prop.name.escapedText.toString(),
+                      name: propName,
                       value: 'true'
                     });
                   }

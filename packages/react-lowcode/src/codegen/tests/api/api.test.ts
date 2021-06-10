@@ -74,23 +74,37 @@ describe(".api tests", () => {
         const source: SourceLineCol = { lineNumber: 80, columnNumber: 19, fileName: filePath }
         const result = await getFormWidgetProperties(new CodegenRw(), source);
 
-        var l = result.properties.length;
-        // expect(result).toStrictEqual({
-        //     columnPosition: {
-        //         fileName: filePath,
-        //         columnNumber: 13,
-        //         lineNumber: 14
-        //       },
-        //       headerPosition: {
-        //         fileName: filePath,
-        //         columnNumber: 113,
-        //         lineNumber: 14
-        //       },
-        //       valuePosition: {
-        //         fileName: filePath,
-        //         columnNumber: 58,
-        //         lineNumber: 14
-        //       }
-        // })
+        expect(result.properties).toStrictEqual(
+            [
+                {
+                    name: "fullWidth",
+                    value: "true"
+                },
+                {
+                    name: "required",
+                    value: "true"
+                },
+                {
+                    name: "disabled",
+                    value: "false"
+                },
+                {
+                    name: "rows",
+                    value: "10"
+                },
+                {
+                    name: "id",
+                    value: "updatedAt"
+                },
+                {
+                    name: "type",
+                    value: "date"
+                },
+                {
+                    name: "label",
+                    value: "updatedAt"
+                }
+            ]
+        );
     });  
 });
