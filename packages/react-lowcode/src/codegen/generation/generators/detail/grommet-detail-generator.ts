@@ -35,7 +35,7 @@ export default class GrommetDetailGenerator
     var statements = this.createStatements();
 
     var functionalComponent = this.createConstFunction(
-      "FormikComponent",
+      "GeneratedFormikComponent",
       statements
     );
 
