@@ -17,7 +17,7 @@ describe(".api tests", () => {
     test(".is form widget", () => {
         const file = fs.readFileSync(path.resolve('src/codegen/tests/detail/detail-test-file.txt'),'utf-8') 
   
-        const source : SourceLineCol = {lineNumber: 34, columnNumber:15, fileName:'test'}
+        const source : SourceLineCol = {lineNumber: 69, columnNumber:17, fileName:'test'}
         const isSelected = isSelectedFormWidget(file, source)
         expect(isSelected).toBe(true)
     }); 
@@ -31,9 +31,9 @@ describe(".api tests", () => {
 
     test(".add form input", () => {
         const filePath = 'src/codegen/tests/detail/detail-test-file.txt'
-        const source : SourceLineCol = {lineNumber: 37, columnNumber:17, fileName:filePath}
+        const source : SourceLineCol = {lineNumber: 69, columnNumber:17, fileName:filePath}
 
-        addFormInput(graphqlGenTs1, new CodegenRw(), source, {property: 'testdate'})
+        addFormInput(graphqlGenTs1, new CodegenRw(), source, {property: 'test2'}).then(generated => console.log(generated))
     });
 
     test(".delete column", () => {
