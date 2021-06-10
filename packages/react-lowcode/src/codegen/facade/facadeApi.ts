@@ -222,3 +222,29 @@ export async function getFormWidgetProperties(
 
   return await generator.getFormWidgetProperties(position);
 }
+
+export async function setFormWidgetProperties(
+  position: SourceLineCol,
+  io: CodegenRw,
+  properties: WidgetProperties
+): Promise<string | undefined> {
+  let generationContext = {
+    uiFramework: UiFramework.MaterialUI,
+    formatter: Formatter.None,
+    index: { tableType: TableType.DataTable, height: "400px" },
+  };
+  let appContext = new AppContext(generationContext, io);
+  let sourceFileContext = new PageContext(
+    appContext,
+    position.fileName
+  );
+  let widgetContext = new WidgetContext(sourceFileContext);
+
+  let generator = new MuiDetailGenerator(
+    generationContext,
+    undefined,
+    widgetContext
+  );
+
+  return await generator.setFormWidgetProperties(position, properties);
+}

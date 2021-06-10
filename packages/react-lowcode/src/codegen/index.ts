@@ -11,7 +11,8 @@ import {
     insertFormWidget, 
     deleteColumn as fDeleteColumn, 
     getColumnSourcePosition as fGetColumnSourcePosition,
-    getFormWidgetProperties as fGetFormWidgetProperties
+    getFormWidgetProperties as fGetFormWidgetProperties,
+    setFormWidgetProperties as fSetFormWidgetProperties
 } from './facade/facadeApi'
 import { SourceLineCol } from '../ast'
 import { Property } from './generation/entity'
@@ -120,7 +121,7 @@ export async function setFormWidgetProperties(io: CodeRW,
                                               sourceCode:SourceLineCol,
                                               properties: WidgetProperties): Promise<string | undefined>{
 
-    return
+    return await fSetFormWidgetProperties(sourceCode, io, properties);
 }
 
 export async function addFormInput(typesSourceCode: string, 

@@ -1,4 +1,4 @@
-import ts, { factory, Node, ObjectLiteralExpression, SourceFile, SyntaxKind } from "typescript";
+import ts, { factory, JsxAttribute, Node, ObjectLiteralExpression, SourceFile, SyntaxKind } from "typescript";
 import { PageComponent } from "../../react-components/react-component-helper";
 import { DetailGenerator } from "./detail-generator-factory";
 import { DetailComponentDefinitionBase } from "../../../definition/detail-definition-core";
@@ -18,6 +18,7 @@ import { WidgetContext } from "../../context/widget-context";
 import {
   createAst,
   find,
+  removeElementFromAst,
   replaceElementsToAST,
   SourceLineCol,
 } from "../../../../ast";
@@ -104,6 +105,77 @@ export default class MuiDetailGenerator implements DetailGenerator {
                   }
                 }
               });
+            }
+          }
+        }
+      }
+    }
+
+    return result;
+  }
+
+  async setFormWidgetProperties(position: SourceLineCol, widgetProperties: WidgetProperties): Promise<string | undefined> {
+    let result: string | undefined;
+
+    if (this._widgetContext) {
+      const sourceCode = await this._widgetContext.getSourceCodeString(position);
+      let ast = createAst(sourceCode);
+
+      if (ast) {
+        const widgetParentNode = findWidgetParentNode(
+          sourceCode,
+          position
+        );
+
+        if (widgetParentNode) {
+          const pos = ast.getPositionOfLineAndCharacter(position.lineNumber - 1, position.columnNumber - 1);
+          const element = find<Node>(widgetParentNode, (node: Node) => {
+            return node.pos === pos;
+          });
+
+          if (element) {
+            if (ts.isJsxOpeningElement(element) || ts.isJsxSelfClosingElement(element)) {
+              element.attributes.properties.forEach(prop => {
+                if (ast && ts.isJsxAttribute(prop)) {
+                  const propName = prop.name.escapedText.toString();
+                  const inputProp = widgetProperties.properties.find(l => l.name === propName);
+
+                  if(inputProp) {
+                    if (prop.initializer) {
+                      if (ts.isStringLiteral(prop.initializer)) {
+                        ast = replaceElementsToAST(ast, prop.pos, factory.updateJsxAttribute(prop, prop.name, factory.createStringLiteral(inputProp.value)));
+                      }
+                      else if(ts.isJsxExpression(prop.initializer)) {
+                        if(prop.initializer.expression) {
+                          if(prop.initializer.expression.kind === SyntaxKind.TrueKeyword || prop.initializer.expression.kind === SyntaxKind.FalseKeyword) {
+                            const booleanValue = factory.createJsxExpression(
+                              undefined,
+                              inputProp.value.toLowerCase() === 'true' ? factory.createTrue() : factory.createFalse()
+                            )
+      
+                            ast = replaceElementsToAST(ast, prop.pos, factory.updateJsxAttribute(prop, prop.name, booleanValue));
+                          }
+
+                          if(ts.isNumericLiteral(prop.initializer.expression)) {
+                            const numericValue = factory.createJsxExpression(
+                              undefined,
+                              factory.createNumericLiteral(inputProp.value)
+                            );
+
+                            ast = replaceElementsToAST(ast, prop.pos, factory.updateJsxAttribute(prop, prop.name, numericValue));
+                          }
+                        }
+                      }
+                    } else {
+                      // if(inputProp.value.toLowerCase() === 'false') {
+                      //   ast = removeElementFromAst(ast, prop.pos);
+                      // }
+                    }
+                  }
+                }
+              });
+
+              result = this.printSourceCode(ast);
             }
           }
         }
