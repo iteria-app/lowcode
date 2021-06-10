@@ -29,8 +29,7 @@ export interface ColumnSourcePositionResult {
 
 export interface WidgetProperty {
     name: string,
-    value?: string,
-    isWithoutValue: boolean
+    value: string
 }
 
 export interface WidgetProperties {

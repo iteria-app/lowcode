@@ -10,7 +10,8 @@ import {
     insertColumn, 
     insertFormWidget, 
     deleteColumn as fDeleteColumn, 
-    getColumnSourcePosition as fGetColumnSourcePosition 
+    getColumnSourcePosition as fGetColumnSourcePosition,
+    getFormWidgetProperties as fGetFormWidgetProperties
 } from './facade/facadeApi'
 import { SourceLineCol } from '../ast'
 import { Property } from './generation/entity'
@@ -112,11 +113,7 @@ export async function deleteColumn(io: CodeRW,
 
 export async function getFormWidgetProperties(io: CodeRW, 
                                               sourceCode:SourceLineCol): Promise<WidgetProperties>{
-    //dummy promise
-    return new Promise((resolve, reject) => {
-        setTimeout(() => {
-        }, 300);
-      });
+    return await fGetFormWidgetProperties(sourceCode, io);
 }
 
 export async function setFormWidgetProperties(io: CodeRW, 

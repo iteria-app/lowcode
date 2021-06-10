@@ -1,4 +1,4 @@
-import ts, { factory, ObjectLiteralExpression, SourceFile } from "typescript";
+import ts, { factory, Node, ObjectLiteralExpression, SourceFile } from "typescript";
 import { PageComponent } from "../../react-components/react-component-helper";
 import { DetailGenerator } from "./detail-generator-factory";
 import { DetailComponentDefinitionBase } from "../../../definition/detail-definition-core";
@@ -17,6 +17,7 @@ import { InputType } from "./input-types";
 import { WidgetContext } from "../../context/widget-context";
 import {
   createAst,
+  find,
   replaceElementsToAST,
   SourceLineCol,
 } from "../../../../ast";
@@ -26,6 +27,7 @@ import {
   findPropertyAssignment,
 } from "../../../ast/ast";
 import { findWidgetParentNode } from "../../../ast/widgetDeclaration";
+import { WidgetProperties } from "../../../interfaces";
 
 export default class MuiDetailGenerator implements DetailGenerator {
   private _imports: ts.ImportDeclaration[] = [];
@@ -46,6 +48,55 @@ export default class MuiDetailGenerator implements DetailGenerator {
       generationContext,
       this._imports
     );
+  }
+
+  async getFormWidgetProperties(position: SourceLineCol) : Promise<WidgetProperties> {
+    const result: WidgetProperties = {
+      properties: []
+    };
+
+    if (this._widgetContext) {
+      const sourceCode = await this._widgetContext.getSourceCodeString(position);
+      const ast = createAst(sourceCode);
+
+      if (ast) {
+        const widgetParentNode = findWidgetParentNode(
+          sourceCode,
+          position
+        );
+    
+        if(widgetParentNode) {
+          const pos = ast.getPositionOfLineAndCharacter(position.lineNumber - 1, position.columnNumber - 1);
+          const element = find<Node>(widgetParentNode, (node: Node) => {
+            return node.pos === pos;
+          });
+
+          if(element) {
+            if(ts.isJsxOpeningElement(element) || ts.isJsxSelfClosingElement(element)) {
+              element.attributes.properties.forEach(prop => {
+                if(ts.isJsxAttribute(prop)){
+                  if(prop.initializer) {
+                    if(ts.isStringLiteral(prop.initializer)) {
+                      result.properties.push({
+                        name: prop.name.escapedText.toString(),
+                        value: prop.initializer.text
+                      });
+                    }
+                  } else {
+                    result.properties.push({
+                      name: prop.name.escapedText.toString(),
+                      value: 'true'
+                    });
+                  }
+                }
+              });
+            }
+          }
+        }
+      }
+    }
+
+    return result;
   }
 
   async insertFormWidget(position: SourceLineCol, property: Property): Promise<string> {

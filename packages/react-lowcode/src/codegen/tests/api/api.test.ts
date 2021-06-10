@@ -1,6 +1,6 @@
 import fs from 'fs'
 import path from 'path'
-import { addColumn, addFormInput, deleteColumn, getColumnSourcePosition, isSelectedDataTable, isSelectedFormWidget } from '../..';
+import { addColumn, addFormInput, deleteColumn, getColumnSourcePosition, getFormWidgetProperties, isSelectedDataTable, isSelectedFormWidget } from '../..';
 import { SourceLineCol } from '../../../ast';
 import { CodegenRw } from '../../io/codegenRw';
 import { graphqlGenTs1 } from '../typeAlias.example';
@@ -68,4 +68,29 @@ describe(".api tests", () => {
               }
         })
     }); 
+
+    test(".get Widget Fields (MUI TextField)", async () => {
+        const filePath = 'src/codegen/tests/detail/detail-test-file.txt'
+        const source: SourceLineCol = { lineNumber: 80, columnNumber: 19, fileName: filePath }
+        const result = await getFormWidgetProperties(new CodegenRw(), source);
+
+        var l = result.properties.length;
+        // expect(result).toStrictEqual({
+        //     columnPosition: {
+        //         fileName: filePath,
+        //         columnNumber: 13,
+        //         lineNumber: 14
+        //       },
+        //       headerPosition: {
+        //         fileName: filePath,
+        //         columnNumber: 113,
+        //         lineNumber: 14
+        //       },
+        //       valuePosition: {
+        //         fileName: filePath,
+        //         columnNumber: 58,
+        //         lineNumber: 14
+        //       }
+        // })
+    });  
 });
