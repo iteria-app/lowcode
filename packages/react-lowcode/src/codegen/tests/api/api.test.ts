@@ -54,17 +54,20 @@ describe(".api tests", () => {
             columnPosition: {
                 fileName: filePath,
                 columnNumber: 13,
-                lineNumber: 14
+                lineNumber: 14,
+                length: 215
               },
               headerPosition: {
                 fileName: filePath,
                 columnNumber: 113,
-                lineNumber: 14
+                lineNumber: 14,
+                length: 113
               },
               valuePosition: {
                 fileName: filePath,
                 columnNumber: 58,
-                lineNumber: 14
+                lineNumber: 14,
+                length: 53
               }
         })
     }); 

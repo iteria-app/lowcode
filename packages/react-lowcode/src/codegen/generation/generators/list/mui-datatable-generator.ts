@@ -151,17 +151,20 @@ export default class MuiDataTableGenerator implements TableGenerator
                   columnPosition: {
                     fileName: tablePosition.fileName,
                     columnNumber: columnPosition.character + 1,
-                    lineNumber: columnPosition.line + 1
+                    lineNumber: columnPosition.line + 1,
+                    length: columnDeclarationArray.elements[columnIndex].getText().length
                   },
-                  headerPosition: renderHeaderPosition ? {
+                  headerPosition: renderHeader && renderHeaderPosition ? {
                     fileName: tablePosition.fileName,
                     columnNumber: renderHeaderPosition.character + 1,
-                    lineNumber: renderHeaderPosition.line + 1
+                    lineNumber: renderHeaderPosition.line + 1,
+                    length: renderHeader.getText().length
                   } : undefined,
-                  valuePosition: valueFormatterPosition ? {
+                  valuePosition: valueFormatter && valueFormatterPosition ? {
                     fileName: tablePosition.fileName,
                     columnNumber: valueFormatterPosition.character + 1,
-                    lineNumber: valueFormatterPosition.line + 1
+                    lineNumber: valueFormatterPosition.line + 1,
+                    length: valueFormatter.getText().length
                   } : undefined
                 };
               }
