@@ -1,4 +1,4 @@
-import ts, { Node } from "typescript"
+import ts, { Node, SourceFile } from "typescript"
 import { createAst } from "./factory"
 
 export interface SourceLineCol {
@@ -102,7 +102,7 @@ export const getAstAndNodeFromSource = (
   return { node, ast }
 }
 
-export const find = <T>(node: Node, check: (node: Node) => boolean): T | undefined => {
+export const find = <T>(node: Node | SourceFile, check: (node: Node) => boolean): T | undefined => {
   if(check(node)) {
       return node as unknown as T;
   };

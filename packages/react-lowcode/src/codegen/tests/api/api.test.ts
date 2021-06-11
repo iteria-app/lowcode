@@ -149,4 +149,27 @@ describe(".api tests", () => {
 
         console.log(result);
     });  
+
+    test(".set Widget Fields (MUI TextField) (return undefined if no property has been changed)", async () => {
+        const properties =             [
+            {
+                name: "disabled",
+                value: "false"
+            },
+            {
+                name: "rows",
+                value: "10"
+            },
+            {
+                name: "id",
+                value: "updatedAt"
+            }
+        ];
+
+        const filePath = 'src/codegen/tests/detail/detail-test-file.txt'
+        const source: SourceLineCol = { lineNumber: 80, columnNumber: 19, fileName: filePath }
+        const result = await setFormWidgetProperties(new CodegenRw(), source, { properties: properties });
+
+        expect(result).toBe(undefined);
+    });  
 });

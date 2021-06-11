@@ -1,4 +1,4 @@
-import ts, { factory, JsxAttribute, Node, ObjectLiteralExpression, SourceFile, SyntaxKind } from "typescript";
+import ts, { factory, JsxAttributeLike, Node, ObjectLiteralExpression, SourceFile, SyntaxKind } from "typescript";
 import { PageComponent } from "../../react-components/react-component-helper";
 import { DetailGenerator } from "./detail-generator-factory";
 import { DetailComponentDefinitionBase } from "../../../definition/detail-definition-core";
@@ -61,51 +61,44 @@ export default class MuiDetailGenerator implements DetailGenerator {
       const ast = createAst(sourceCode);
 
       if (ast) {
-        const widgetParentNode = findWidgetParentNode(
-          sourceCode,
-          position
-        );
+        const pos = ast.getPositionOfLineAndCharacter(position.lineNumber - 1, position.columnNumber - 1);
+        const element = find<Node>(ast, (node: Node) => {
+          return node.pos === pos;
+        });
 
-        if (widgetParentNode) {
-          const pos = ast.getPositionOfLineAndCharacter(position.lineNumber - 1, position.columnNumber - 1);
-          const element = find<Node>(widgetParentNode, (node: Node) => {
-            return node.pos === pos;
-          });
+        if (element) {
+          if (ts.isJsxOpeningElement(element) || ts.isJsxSelfClosingElement(element)) {
+            element.attributes.properties.forEach(prop => {
+              if (ts.isJsxAttribute(prop)) {
+                const propName = prop.name.escapedText.toString();
 
-          if (element) {
-            if (ts.isJsxOpeningElement(element) || ts.isJsxSelfClosingElement(element)) {
-              element.attributes.properties.forEach(prop => {
-                if (ts.isJsxAttribute(prop)) {
-                  const propName = prop.name.escapedText.toString();
-
-                  if (prop.initializer) {
-                    if (ts.isStringLiteral(prop.initializer)) {
-                      result.properties.push({
-                        name: propName,
-                        value: prop.initializer.text
-                      });
-                    }
-                    else if(ts.isJsxExpression(prop.initializer)) {
-                      if(prop.initializer.expression) {
-                        if(ts.isNumericLiteral(prop.initializer.expression) 
-                        || prop.initializer.expression.kind === SyntaxKind.TrueKeyword
-                        || prop.initializer.expression.kind === SyntaxKind.FalseKeyword) {
-                          result.properties.push({
-                            name: propName,
-                            value: prop.initializer.expression.getText()
-                          });
-                        }
-                      }
-                    }
-                  } else {
+                if (prop.initializer) {
+                  if (ts.isStringLiteral(prop.initializer)) {
                     result.properties.push({
                       name: propName,
-                      value: 'true'
+                      value: prop.initializer.text
                     });
                   }
+                  else if (ts.isJsxExpression(prop.initializer)) {
+                    if (prop.initializer.expression) {
+                      if (ts.isNumericLiteral(prop.initializer.expression)
+                        || prop.initializer.expression.kind === SyntaxKind.TrueKeyword
+                        || prop.initializer.expression.kind === SyntaxKind.FalseKeyword) {
+                        result.properties.push({
+                          name: propName,
+                          value: prop.initializer.expression.getText()
+                        });
+                      }
+                    }
+                  }
+                } else {
+                  result.properties.push({
+                    name: propName,
+                    value: 'true'
+                  });
                 }
-              });
-            }
+              }
+            });
           }
         }
       }
@@ -122,59 +115,71 @@ export default class MuiDetailGenerator implements DetailGenerator {
       let ast = createAst(sourceCode);
 
       if (ast) {
-        const widgetParentNode = findWidgetParentNode(
-          sourceCode,
-          position
-        );
+        const pos = ast.getPositionOfLineAndCharacter(position.lineNumber - 1, position.columnNumber - 1);
+        const element = find<Node>(ast, (node: Node) => {
+          return node.pos === pos;
+        });
 
-        if (widgetParentNode) {
-          const pos = ast.getPositionOfLineAndCharacter(position.lineNumber - 1, position.columnNumber - 1);
-          const element = find<Node>(widgetParentNode, (node: Node) => {
-            return node.pos === pos;
-          });
+        if (element) {
+          if (ts.isJsxOpeningElement(element) || ts.isJsxSelfClosingElement(element)) {
+            let astChanged = false;
 
-          if (element) {
-            if (ts.isJsxOpeningElement(element) || ts.isJsxSelfClosingElement(element)) {
-              element.attributes.properties.forEach(prop => {
-                if (ast && ts.isJsxAttribute(prop)) {
-                  const propName = prop.name.escapedText.toString();
-                  const inputProp = widgetProperties.properties.find(l => l.name === propName);
+            const newProps = element.attributes.properties.map(prop => {
+              let newProp: JsxAttributeLike | undefined = prop;
 
-                  if(inputProp) {
-                    if (prop.initializer) {
-                      if (ts.isStringLiteral(prop.initializer)) {
-                        ast = replaceElementsToAST(ast, prop.pos, factory.updateJsxAttribute(prop, prop.name, factory.createStringLiteral(inputProp.value)));
+              if (ts.isJsxAttribute(prop)) {
+                const propName = prop.name.escapedText.toString();
+                const inputProp = widgetProperties.properties.find(l => l.name === propName);
+
+                if (inputProp) {
+                  if (prop.initializer) {
+                    if (ts.isStringLiteral(prop.initializer)) {
+                      if(inputProp.value !== prop.initializer.text) {
+                        newProp = factory.updateJsxAttribute(prop, prop.name, factory.createStringLiteral(inputProp.value));
+                        astChanged = true;
                       }
-                      else if(ts.isJsxExpression(prop.initializer)) {
-                        if(prop.initializer.expression) {
-                          if(prop.initializer.expression.kind === SyntaxKind.TrueKeyword || prop.initializer.expression.kind === SyntaxKind.FalseKeyword) {
+                    }
+                    else if (ts.isJsxExpression(prop.initializer)) {
+                      if (prop.initializer.expression) {
+                        if (prop.initializer.expression.kind === SyntaxKind.TrueKeyword || prop.initializer.expression.kind === SyntaxKind.FalseKeyword) {
+                          if(inputProp.value !== prop.initializer.expression.getText()) {
                             const booleanValue = factory.createJsxExpression(
                               undefined,
                               inputProp.value.toLowerCase() === 'true' ? factory.createTrue() : factory.createFalse()
                             )
-      
-                            ast = replaceElementsToAST(ast, prop.pos, factory.updateJsxAttribute(prop, prop.name, booleanValue));
+  
+                            newProp = factory.updateJsxAttribute(prop, prop.name, booleanValue);
+                            astChanged = true;
                           }
+                        }
 
-                          if(ts.isNumericLiteral(prop.initializer.expression)) {
+                        if (ts.isNumericLiteral(prop.initializer.expression)) {
+                          if (inputProp.value !== prop.initializer.expression.getText()) {
                             const numericValue = factory.createJsxExpression(
                               undefined,
                               factory.createNumericLiteral(inputProp.value)
                             );
 
-                            ast = replaceElementsToAST(ast, prop.pos, factory.updateJsxAttribute(prop, prop.name, numericValue));
+                            newProp = factory.updateJsxAttribute(prop, prop.name, numericValue);
+                            astChanged = true;
                           }
                         }
                       }
-                    } else {
-                      // if(inputProp.value.toLowerCase() === 'false') {
-                      //   ast = removeElementFromAst(ast, prop.pos);
-                      // }
+                    }
+                  } else {
+                    if(inputProp.value.toLowerCase() == 'false') {
+                      newProp = undefined;
+                      astChanged = true;
                     }
                   }
                 }
-              });
+              }
 
+              return newProp;
+            });
+
+            if(astChanged) {
+              ast = replaceElementsToAST(ast, element.attributes.pos, factory.createJsxAttributes(newProps.filter(l => l !== undefined) as ts.JsxAttributeLike[]));
               result = this.printSourceCode(ast);
             }
           }
