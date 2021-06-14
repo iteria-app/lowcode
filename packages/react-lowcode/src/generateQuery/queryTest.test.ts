@@ -5,10 +5,7 @@ import { getScenario } from './scenaria'
 
 describe("codegen queryTest", () => {
     test(".test query string", () => {
-        const queryString = generateNewIntrospectonQuery(getScenario('1'));
-        
-        console.log('Tested', queryString, ' ')  
-        
+        const queryString = generateNewIntrospectonQuery(getScenario('1'));        
     });
 
     
