@@ -94,6 +94,7 @@
         "vsce": "^1.75.0"
     },
     "dependencies": {
+        "@iteria-app/wysiwyg": "^1.2.9",
         "prettier": "git+https://github.com/prettier/prettier.git#2.0.5",
         "svelte": "^3.24.1"
     }

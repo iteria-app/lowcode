@@ -15,13 +15,13 @@ import * as prettierCss from 'prettier/src/language-css'
 import * as prettierJs from 'prettier/src/language-js'
 import * as prettierHtml from 'prettier/src/language-html'
 import * as prettierDoc from 'prettier/src/document/doc-printer'
-// import { TranslationSheet } from "wysiwyg"
 
 export class JsonEditorPanel {
   public static currentPanel: JsonEditorPanel | undefined;
   scriptTextSave : Array<any> = [];
   scriptNodeSave : any = {};
   private static readonly viewType: string = "jsonEditor";
+  private oldMessage : string;
   //private static readonly extensionPrefix: string = 'vscode-json-editor';
 
   private readonly _panel: vscode.WebviewPanel;
@@ -56,22 +56,32 @@ export class JsonEditorPanel {
     this._panel.onDidDispose(() => this.dispose(), null, this._disposables);
 
     this._panel.webview.onDidReceiveMessage((message) => {
-      if (this._currentEditor) {
-        this._currentEditor.edit((editBuilder) => {
-          const range: vscode.Range = new vscode.Range(
-            this._currentEditor.document.positionAt(0),
-            this._currentEditor.document.positionAt(
-              this._currentEditor.document.getText().length
-            )
-          );
-          // console.log(JSON.parse(message.json))
-          // let html = parse5.serialize(JSON.parse(message.json));
-          //TODO dynamicky: Match every script using regex, this will return an array
-          // cycle the matched array and paste the text between them (index based)
-          // html = html.replace(/<script[^>]*>.*?<\/script>/g,'<script>'+this.scriptTextSave[0]+'</script>')
-          editBuilder.replace(range, message.json);
-          this.createFiles(this._currentEditor.document.uri.fsPath,"",message.json)
-        });
+        if (this._currentEditor) {
+          if (message.json) {
+          this._currentEditor.edit((editBuilder) => {
+            const range: vscode.Range = new vscode.Range(
+              this._currentEditor.document.positionAt(0),
+              this._currentEditor.document.positionAt(
+                this._currentEditor.document.getText().length
+                )
+                );
+                // console.log(JSON.parse(message.json))
+                // let html = parse5.serialize(JSON.parse(message.json));
+                //TODO dynamicky: Match every script using regex, this will return an array
+                // cycle the matched array and paste the text between them (index based)
+                // html = html.replace(/<script[^>]*>.*?<\/script>/g,'<script>'+this.scriptTextSave[0]+'</script>')
+                this.oldMessage = message.json
+                editBuilder.replace(range, message.json);
+                // this.createFiles(this._currentEditor.document.uri.fsPath,"",message.json)
+              });
+          }
+          else {
+            if (this.oldMessage) {
+              this.createFiles(this._currentEditor.document.uri.fsPath,"",this.oldMessage)
+              vscode.workspace.saveAll()
+              this.oldMessage = undefined
+            }
+        }
       }
     });
 
@@ -121,6 +131,14 @@ export class JsonEditorPanel {
         x.dispose();
       }
     }
+  }
+
+  private setDataForEditor(): string {
+    const data = this.getJson()
+    const oldjson = data.replace(/(\r\n|\n|\r)/gm, "");
+    let newJson = JSON.parse(oldjson)
+    newJson = JSON.parse(newJson)
+    return JSON.stringify(newJson)
   }
 
   private filterNodes(documentFragment: any) {
@@ -221,7 +239,6 @@ export class JsonEditorPanel {
       json = this._currentEditor.document.getText();
       // this.doFormat(json);
       // documentFragment = parse5.parseFragment(json);
-      // console.log(documentFragment)
       // json = this.filterNodes(documentFragment.childNodes);
     }
     json = JSON.stringify(json);
@@ -255,27 +272,34 @@ export class JsonEditorPanel {
     this._panel.webview.postMessage({ json: json });
   }
 
-  private getHtmlForWebview(extensionPath: string, theme: string): string {
+  private getHtmlForWebview(extensionPath: string, theme: string): string {  
+    const scriptPathOnDisk = vscode.Uri.file(
+      path.join(extensionPath, "jsoneditor", "index.umd.js")
+    );
+    const scriptUri = scriptPathOnDisk.with({ scheme: "vscode-resource" });
+    
+    const resetCssPathOnDisk = vscode.Uri.file(
+      path.join(extensionPath, "jsoneditor", "reset.css")
+    );
+    const resetCssUri = resetCssPathOnDisk.with({scheme: "vscode-resource"})
+
+    const cssPathOnDisk = vscode.Uri.file(
+      path.join(extensionPath, "jsoneditor", "index.css")
+    );
+    const cssUri = cssPathOnDisk.with({ scheme: "vscode-resource" });
+
+    const cssDarkPathOnDisk = vscode.Uri.file(
+      path.join(extensionPath, "jsoneditor", "index.css")
+    );
+    const cssDarkUri = cssDarkPathOnDisk.with({ scheme: "vscode-resource" });
+    
     const mainScriptPathOnDisk = vscode.Uri.file(
       path.join(extensionPath, "jsoneditor", "main.js")
     );
     const mainScriptUri = mainScriptPathOnDisk.with({
       scheme: "vscode-resource",
     });
-    const scriptPathOnDisk = vscode.Uri.file(
-      path.join(extensionPath, "jsoneditor", "jsoneditor.min.js")
-    );
-    const scriptUri = scriptPathOnDisk.with({ scheme: "vscode-resource" });
 
-    const cssPathOnDisk = vscode.Uri.file(
-      path.join(extensionPath, "jsoneditor", "jsoneditor.min.css")
-    );
-    const cssUri = cssPathOnDisk.with({ scheme: "vscode-resource" });
-
-    const cssDarkPathOnDisk = vscode.Uri.file(
-      path.join(extensionPath, "jsoneditor", "jsoneditor.dark.min.css")
-    );
-    const cssDarkUri = cssDarkPathOnDisk.with({ scheme: "vscode-resource" });
     const darkTheme: string =
       theme === "dark"
         ? `<link href="${cssDarkUri}" rel="stylesheet" type="text/css">`
@@ -287,14 +311,14 @@ export class JsonEditorPanel {
         <head>
             <!-- when using the mode "code", it's important to specify charset utf-8 -->
             <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
-
             <link href="${cssUri}" rel="stylesheet" type="text/css">
+            <link href="${resetCssUri}" rel="stylesheet" type="text/css">
             ${darkTheme}
             <script src="${scriptUri}"></script>
         </head>
         <body>
-            <div id="jsoneditor"></div>
-            <script src="${mainScriptUri}"></script>
+          <div id="style-box" data-editor='${this.setDataForEditor()}'></div>
+          <script src="${mainScriptUri}"></script>
         </body>
         </html>
         `;
