@@ -32,7 +32,8 @@ window.addEventListener('message', event => {
     newEditor.addEventListener('change', async (e) => {
     const jsonString = JSON.stringify(e.detail, null, 2);
         vscode.postMessage({
-            json: jsonString
+            json: jsonString,
+            objjson: e.detail
         });
     })
 
@@ -44,8 +45,6 @@ window.addEventListener('message', event => {
 const parseJsonData = (eventJson) => {
     const oldjson = eventJson.replace(/(\r\n|\n|\r)/gm, "");
     let json = JSON.parse(oldjson)
-    json = JSON.parse(json)
-
     return json
 }
 

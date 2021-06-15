@@ -24,6 +24,7 @@ export function activate(context: vscode.ExtensionContext): void {
             JsonEditorPanel.CreateOrShow(context.extensionPath);
         }
     });
+
     context.subscriptions.push(startCommand);
 }
 

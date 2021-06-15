@@ -20,7 +20,8 @@
     ],
     "activationEvents": [
         "onLanguage:json",
-        "onCommand:vscode-json-editor.start"
+        "onCommand:vscode-json-editor.start",
+        "onView:jsonEditor"
     ],
     "main": "./out/src/extension",
     "repository": {
@@ -28,6 +29,26 @@
         "url": "https://github.com/gregchamblin/vscode-json-editor.git"
     },
     "contributes": {
+        "viewsContainers": {
+            "activitybar": [
+                {
+                "id": "jsonEditor-view",
+                "title": "JsonEditor",
+                "icon": "resources/icon.svg"
+                }
+            ]
+        },
+        "views": {
+            "jsonEditor-view": [
+                {
+                "type": "webview",
+                "id": "jsonEditor",
+                "name": "JsonEditor",
+                "icon": "resources/icon.svg",
+                "contextualTitle": "JsonEditor"
+                }
+            ]
+        },
         "commands": [
             {
                 "command": "vscode-json-editor.start",

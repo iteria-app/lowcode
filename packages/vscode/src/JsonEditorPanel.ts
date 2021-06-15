@@ -38,7 +38,7 @@ export class JsonEditorPanel {
     this._currentEditor = vscode.window.activeTextEditor;
     this._panel = vscode.window.createWebviewPanel(
       JsonEditorPanel.viewType,
-      "JSON Tree Editor",
+      "jsonEditor",
       column,
       {
         enableScripts: true,
@@ -56,45 +56,72 @@ export class JsonEditorPanel {
     this._panel.onDidDispose(() => this.dispose(), null, this._disposables);
 
     this._panel.webview.onDidReceiveMessage((message) => {
-        if (this._currentEditor) {
-          if (message.json) {
-          this._currentEditor.edit((editBuilder) => {
-            const range: vscode.Range = new vscode.Range(
-              this._currentEditor.document.positionAt(0),
-              this._currentEditor.document.positionAt(
-                this._currentEditor.document.getText().length
-                )
-                );
-                // console.log(JSON.parse(message.json))
-                // let html = parse5.serialize(JSON.parse(message.json));
-                //TODO dynamicky: Match every script using regex, this will return an array
-                // cycle the matched array and paste the text between them (index based)
-                // html = html.replace(/<script[^>]*>.*?<\/script>/g,'<script>'+this.scriptTextSave[0]+'</script>')
-                this.oldMessage = message.json
-                editBuilder.replace(range, message.json);
-                // this.createFiles(this._currentEditor.document.uri.fsPath,"",message.json)
-              });
-          }
-          else {
-            if (this.oldMessage) {
-              this.createFiles(this._currentEditor.document.uri.fsPath,"",this.oldMessage)
-              vscode.workspace.saveAll()
-              this.oldMessage = undefined
+        const json = message.objjson
+        const openFiles = vscode.workspace.textDocuments
+        if (message.json) {
+          openFiles.forEach(element => {
+            let data = fs.readFileSync(element.fileName)
+            if (data.toString() !== "") {
+              const jsonData = JSON.parse(data.toString())
+              const key = Object.keys(jsonData)[0]
+              const value = json[key]
+              const diff = this.getDiffOfJsons(value, jsonData[key])
+              if (Object.keys(diff).length !== 0) {
+                for (let diffKey in diff) {
+                  if (diff[diffKey] == undefined) {
+                    delete value.diffKey
+                  }
+                  else 
+                    value[diffKey] = diff[diffKey]
+                }
+                let finalObject = {}
+                finalObject[key] = value          
+                this.createFiles(element.fileName, "", JSON.stringify(finalObject, undefined, 2))
+              }
             }
+          });
         }
-      }
+      //   if (this._currentEditor) {
+      //     if (message.json) {
+      //     this._currentEditor.edit((editBuilder) => {
+      //       const range: vscode.Range = new vscode.Range(
+      //         this._currentEditor.document.positionAt(0),
+      //         this._currentEditor.document.positionAt(
+      //           this._currentEditor.document.getText().length
+      //           )
+      //           );
+      //           // console.log(JSON.parse(message.json))
+      //           // let html = parse5.serialize(JSON.parse(message.json));
+      //           //TODO dynamicky: Match every script using regex, this will return an array
+      //           // cycle the matched array and paste the text between them (index based)
+      //           // html = html.replace(/<script[^>]*>.*?<\/script>/g,'<script>'+this.scriptTextSave[0]+'</script>')
+      //           this.oldMessage = message.json
+      //           editBuilder.replace(range, message.json);
+      //           // this.createFiles(this._currentEditor.document.uri.fsPath,"",message.json)
+      //         });
+      //     }
+      //     else {
+      //       if (this.oldMessage) {
+      //         this.createFiles(this._currentEditor.document.uri.fsPath,"",this.oldMessage)
+      //         vscode.workspace.saveAll()
+      //         this.oldMessage = undefined
+      //       }
+      //   }
+      // }
     });
 
     vscode.window.onDidChangeActiveTextEditor(() =>
       this.onActiveEditorChanged()
     );
-    vscode.workspace.onDidSaveTextDocument(() => this.onDocumentChanged());
+    vscode.workspace.onDidSaveTextDocument(() => this.onActiveEditorChanged());
     vscode.window.onDidChangeActiveColorTheme(() =>
       this.colorThemeKindChange(theme)
     );
 
     this.colorThemeKindChange(theme);
     this.onActiveEditorChanged();
+
+    vscode.workspace.onDidCloseTextDocument(() => this.onActiveEditorChanged());
   }
 
   // tslint:disable-next-line:function-name
@@ -118,6 +145,27 @@ export class JsonEditorPanel {
         theme
       );
     }
+  }
+
+  private getDiffOfJsons(obj1: Object, obj2: Object) : Object{
+    let result = {}
+    for (let key in obj1) {
+      if (key in obj2) {
+        if (obj2[key] !== obj1[key]) {
+          result[key] = obj1[key]
+        }
+      } else {
+        result[key] = obj1[key] 
+      }
+    }
+    if (Object.keys(obj2).length > Object.keys(obj1).length) {
+      for (let key in obj2) {
+        if (!(key in obj1)) {
+          result[key] = undefined
+        }
+      }
+    }
+    return result
   }
 
   public dispose(): void {
@@ -260,15 +308,27 @@ export class JsonEditorPanel {
   }
 
   private onActiveEditorChanged(): void {
-    if (vscode.window.activeTextEditor) {
-      this._currentEditor = vscode.window.activeTextEditor;
-      const json: string = this.getJson();
+    if (vscode.workspace.textDocuments.length !== 0) {
+      const openFiles = vscode.workspace.textDocuments
+      let finalObject : Object = {}
+      openFiles.forEach(element => {
+        let data = fs.readFileSync(element.fileName)
+        const jsonData = JSON.parse(data.toString())
+        finalObject = {...finalObject, ...jsonData}
+        // fs.readFile(element.fileName, (err : Error, text: Buffer) => {
+        //   const data : string = text.toString()
+        //   finalObject = {...finalObject, ...JSON.parse(data)}
+        // })
+      });
+      // this._currentEditor = vscode.window.activeTextEditor;
+      const json : string = JSON.stringify(finalObject)
       this._panel.webview.postMessage({ json: json });
     }
   }
 
   private onDocumentChanged(): void {
     const json: string = this.getJson();
+    console.log("fromChangedDocument: ", json)
     this._panel.webview.postMessage({ json: json });
   }
 
