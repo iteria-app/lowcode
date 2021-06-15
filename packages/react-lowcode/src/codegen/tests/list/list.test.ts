@@ -210,7 +210,47 @@ test(".grommet table generation without formatting", () => {
     let prindedSource = printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page!.imports, page!.functionDeclaration]), sourceFile)
 
     expect(prindedSource).toContain('<CustomerTable customers={data?.customers} />')
-});
+  });
+
+  describe("Generate page for list component", () => {
+    test("mui data table generation with formatting", () => {
+      const sourceFile = createAst('')
+      const myClassFile = parseGraphqlTypes(graphqlGenTs1)
+      const testEntity = sourceFileEntity(myClassFile)
+      const template = `
+import { useGeneratedQuery } from '../generated'
+import Fetching from './Fetching'
+import Error from './Error'
+import ListPlaceholder from './ListPlaceholder'
+
+function App() {
+  const [result] = useGeneratedQuery({
+    variables: {}
+  })
+
+  const { fetching, error, data } = result
+  if (fetching) return <Fetching />;
+  if (error) return <Error error={error} />;
+
+  return (
+    <ListPlaceholder customers={data?.customers} />
+  );
+}
+
+export default App;
+      `;
+
+      let generationContext = {uiFramework: UiFramework.MaterialUI, formatter: Formatter.ReactIntl, index: {tableType: TableType.DataTable, height: "400px"}};
+      let generator = new AppGenerator(generationContext, testEntity!!);
+  
+      const page = generator.generateListPage(template)
+    
+      const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
+      let generatedCode = printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page!.imports, page!.functionDeclaration]), sourceFile)
+    
+      console.log('generated:', generatedCode)
+    });
+  });
 })
 
 

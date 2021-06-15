@@ -110,6 +110,10 @@ export class BasicTableGenerator implements TableGenerator
       return undefined
     }
 
+    generateTablePage(template: string): PageComponent | undefined {
+        throw new Error("Not implemented");
+      }
+
     private createStatements(): ts.Statement[] {
       let statements = new Array<ts.Statement>()
 

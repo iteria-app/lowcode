@@ -1,4 +1,4 @@
-import ts, { factory, SourceFile, PropertyAssignment, Node } from "typescript"
+import ts, { factory, SourceFile, PropertyAssignment, Node, ImportDeclaration, FunctionDeclaration } from "typescript"
 import { getPropertyType, PropertyType } from '../../graphql/typeAlias'
 import { createFunctionalComponent, PageComponent, createJsxSelfClosingElement, createJsxAttribute } from '../../react-components/react-component-helper'
 import { Entity, getProperties, Property } from '../../entity/index'
@@ -7,14 +7,15 @@ import GenerationContext from "../../context/context"
 import { MuiDtTableComponents, muiDataGrid } from '../../../definition/material-ui/table'
 import { TableComponentDefinitionBase } from '../../../definition/table-definition-core'
 import { Formatter } from "../../../definition/context-types"
-import { createNameSpaceImport, uniqueImports } from "../../../ast/imports"
+import { createImportDeclaration, createNameSpaceImport, uniqueImports } from "../../../ast/imports"
 import { GeneratorHelper } from "../helper"
 import ReactIntlFormatter from "../../react-components/react-intl/intl-formatter"
 import { WidgetContext } from "../../context/widget-context"
-import { createAst, find, removeElementFromAst, replaceElementsToAST, SourceLineCol } from "../../../../ast"
+import { createAst, find, findAllByCondition, removeElementFromAst, replaceElementsToAST, SourceLineCol } from "../../../../ast"
 import { findVariableDeclarations } from "../../../ast/ast"
 import { findWidgetParentNode } from "../../../ast/widgetDeclaration"
 import { ColumnSourcePositionResult } from "../../../interfaces"
+import { ParenthesizedExpression } from "typescript"
 
 export default class MuiDataTableGenerator implements TableGenerator 
 {
@@ -252,6 +253,63 @@ export default class MuiDataTableGenerator implements TableGenerator
         
         return {functionDeclaration: functionalComponent, imports: uniqueFileImports};
       }else return undefined
+    }
+
+    generateTablePage(template: string): PageComponent | undefined {
+      let result: PageComponent | undefined;
+
+      if (this._entity) {
+        let ast = createAst(template);
+
+        if (ast) {
+          const templateParenthesizedExpression = find<ParenthesizedExpression>(ast, (node: Node) => {
+            return ts.isParenthesizedExpression(node);
+          });
+
+          if (templateParenthesizedExpression) {
+            const tableComponentName = this._helper.getComponentName(this._entity);
+            const inputParameterIdentifier = this._helper.getInputParameterIdentifier(this._entity);
+
+            const parenthesizedExpression = factory.createParenthesizedExpression(factory.createJsxSelfClosingElement(
+              factory.createIdentifier(tableComponentName),
+              undefined,
+              factory.createJsxAttributes([factory.createJsxAttribute(
+                inputParameterIdentifier,
+                factory.createJsxExpression(
+                  undefined,
+                  factory.createPropertyAccessChain(
+                    factory.createIdentifier("data"),
+                    factory.createToken(ts.SyntaxKind.QuestionDotToken),
+                    inputParameterIdentifier
+                  )
+                )
+              )])
+            ));
+
+            ast = replaceElementsToAST(ast, templateParenthesizedExpression.pos, parenthesizedExpression);
+
+            const functionDeclaration = find<FunctionDeclaration>(ast, (node: Node) => {
+              return ts.isFunctionDeclaration(node);
+            });
+
+            if(functionDeclaration) {
+              const importDeclarations: ImportDeclaration[] = [];
+              findAllByCondition<ImportDeclaration>(ast, importDeclarations, (node: Node) => {
+                return ts.isImportDeclaration(node);
+              });
+              importDeclarations.push(createImportDeclaration(tableComponentName, './' + tableComponentName));
+
+              result = {
+                functionDeclaration: functionDeclaration,
+                imports: uniqueImports(importDeclarations)
+              };
+            }
+          }
+
+        }
+      }
+
+      return result;
     }
 
     getTableDefinition() : TableComponentDefinitionBase {

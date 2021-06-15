@@ -111,3 +111,13 @@ export const find = <T>(node: Node | SourceFile, check: (node: Node) => boolean)
       return find<T>(child, check);
   });
 }
+
+export const findAllByCondition = <T>(node: Node | SourceFile, output: T[], check: (node: Node) => boolean): void => {
+  if(check(node)) {
+    output.push(node as unknown as T);
+  };
+
+  return node.forEachChild((child) => {
+      return findAllByCondition<T>(child, output, check);
+  });
+}
