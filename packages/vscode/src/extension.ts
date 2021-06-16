@@ -12,9 +12,3 @@ export function activate(context: vscode.ExtensionContext): void {
         vscode.window.registerWebviewViewProvider("jsonEditor", sideBar)
     );
 }
-
-// // Returns true if an editor is already opened for the given resource
-// function isOpened(resource) {
-//     const openedPaths = vscode.window.visibleTextEditors.map(editor => editor.document.uri.path);
-//     return openedPaths.includes(resource.path);
-// }

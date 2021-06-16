@@ -11,6 +11,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       this.onActiveEditorChanged()
     }
     );
+
     vscode.workspace.onDidSaveTextDocument(() => this.onActiveEditorChanged());
     vscode.workspace.onDidCloseTextDocument(() => this.onActiveEditorChanged());
   }
@@ -32,32 +33,34 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 
     webviewView.webview.onDidReceiveMessage(async (data) => {
       const json = data.objjson
-        const openFiles = vscode.workspace.textDocuments
-        if (data.json) {
-          openFiles.forEach(element => {
-            let data = fs.readFileSync(element.fileName)
-            if (data.toString() !== "") {
-              const jsonData = JSON.parse(data.toString())
-              const fileNameWE = path.basename(element.fileName)
-              const extension = path.extname(element.fileName)
-              const fileName = path.basename(fileNameWE, extension)
-              const value = json[fileName]
-              const diff = this.getDiffOfJsons(value, jsonData)
-              if (Object.keys(diff).length !== 0) {
-                for (let diffKey in diff) {
-                  if (diff[diffKey] == undefined) {
-                    delete value.diffKey
-                  }
-                  else 
-                    value[diffKey] = diff[diffKey]
+      const openFiles = vscode.workspace.textDocuments
+      if (data.json) {
+        openFiles.forEach(element => {
+          if (element.languageId === 'json') {
+          let data = fs.readFileSync(element.fileName)
+          if (data.toString() !== "") {
+            const jsonData = JSON.parse(data.toString())
+            const fileNameWE = path.basename(element.fileName)
+            const extension = path.extname(element.fileName)
+            const fileName = path.basename(fileNameWE, extension)
+            const value = json[fileName]
+            const diff = this.getDiffOfJsons(value, jsonData)
+            if (Object.keys(diff).length !== 0) {
+              for (let diffKey in diff) {
+                if (diff[diffKey] == undefined) {
+                  delete value.diffKey
                 }
-                let finalObject = {}
-                finalObject = value   
-                this.createFiles(element.fileName, "", JSON.stringify(finalObject, undefined, 2))
+                else 
+                  value[diffKey] = diff[diffKey]
               }
+              let finalObject = {}
+              finalObject = value   
+              this.createFiles(element.fileName, "", JSON.stringify(finalObject, undefined, 2))
             }
-          });
+          }
         }
+      });
+    }
   });
     webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
   }
@@ -76,7 +79,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
   }
 
 
-  private getDiffOfJsons(obj1: Object, obj2: Object) : Object{
+  private getDiffOfJsons(obj1: Object, obj2: Object) : Object {
     let result = {}
     for (let key in obj1) {
       if (key in obj2) {
@@ -103,16 +106,20 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       let finalObject : Object = {}
       let buildObject = {}
       openFiles.forEach(element => {
-        let data = fs.readFileSync(element.fileName)
-        const fileNameWE = path.basename(element.fileName)
-        const extension = path.extname(element.fileName)
-        const fileName = path.basename(fileNameWE, extension)
-        buildObject[fileName] = JSON.parse(data.toString())
-        finalObject = {...finalObject, ...buildObject}
+        if (element.languageId == 'json') {
+          let data = fs.readFileSync(element.fileName)
+          const fileNameWE = path.basename(element.fileName)
+          const extension = path.extname(element.fileName)
+          const fileName = path.basename(fileNameWE, extension)
+          buildObject[fileName] = JSON.parse(data.toString())
+          finalObject = {...finalObject, ...buildObject}
+        }
       });
-      const json : string = JSON.stringify(finalObject)
-      if (this._view)
-        this._view.webview.postMessage({ json: json });
+      if (Object.keys(finalObject).length !==0) {
+        const json : string = JSON.stringify(finalObject)
+        if (this._view)
+          this._view.webview.postMessage({ json: json });
+      }
     }
   }
 
@@ -122,15 +129,19 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       let finalObject : Object = {}
       let buildObject : Object = {}
       openFiles.forEach(element => {
-        let data = fs.readFileSync(element.fileName)
-        const fileNameWE = path.basename(element.fileName)
-        const extension = path.extname(element.fileName)
-        const fileName = path.basename(fileNameWE, extension)
-        buildObject[fileName] = JSON.parse(data.toString())
-        finalObject = {...finalObject, ...buildObject}
+        if (element.languageId === 'json') {
+          let data = fs.readFileSync(element.fileName)
+          const fileNameWE = path.basename(element.fileName)
+          const extension = path.extname(element.fileName)
+          const fileName = path.basename(fileNameWE, extension)
+          buildObject[fileName] = JSON.parse(data.toString())
+          finalObject = {...finalObject, ...buildObject}
+        }
       });
-      const json : string = JSON.stringify(finalObject)
-      return json
+      if (Object.keys(finalObject).length !== 0) {
+        const json : string = JSON.stringify(finalObject)
+        return json
+      }
     }
     return "{}"
   }
