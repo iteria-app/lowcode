@@ -32,20 +32,20 @@
         "viewsContainers": {
             "activitybar": [
                 {
-                "id": "jsonEditor-view",
-                "title": "JsonEditor",
-                "icon": "resources/icon.svg"
+                    "id": "jsonEditor-view",
+                    "title": "JsonEditor",
+                    "icon": "resources/json-dark.svg"
                 }
             ]
         },
         "views": {
             "jsonEditor-view": [
                 {
-                "type": "webview",
-                "id": "jsonEditor",
-                "name": "JsonEditor",
-                "icon": "resources/icon.svg",
-                "contextualTitle": "JsonEditor"
+                    "type": "webview",
+                    "id": "jsonEditor",
+                    "name": "JsonEditor",
+                    "icon": "resources/json-dark.svg",
+                    "contextualTitle": "JsonEditor"
                 }
             ]
         },
@@ -116,6 +116,7 @@
     },
     "dependencies": {
         "@iteria-app/wysiwyg": "^1.2.9",
+        "path": "^0.12.7",
         "prettier": "git+https://github.com/prettier/prettier.git#2.0.5",
         "svelte": "^3.24.1"
     }

@@ -8,10 +8,7 @@ const data = container.getAttribute('data-editor')
 // create the editor
 const editor = document.createElement('translation-sheet')
 editor.setAttribute('id', 'translation')
-console.log(data)
-console.log(JSON.parse(data))
 editor.translations = JSON.parse(data)
-
 container.appendChild(editor)
 
 
@@ -19,7 +16,6 @@ container.appendChild(editor)
 window.addEventListener('message', event => {
     const message = event.data.json; // The JSON data our extension sent
     const json = parseJsonData(message)
-
     const getOldEditor = document.getElementById('translation')
     // refresh data attribute
     container.setAttribute('data-editor', JSON.stringify(json))
