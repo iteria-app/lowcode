@@ -62,18 +62,22 @@ export function generatePages(inputSourceCode: string, io: CodeRW & CodeDir, opt
             let template = ''
             io.readFile(indexWrapperTemplatePath).then((source => {if(source) template = source;}))
 
-            const listWrapper = generator.generateListPage(template)
-            const listWrapperFilePath = `src/components/${typeName}Wrapper.tsx`//TODO: dont like the word wrapper, rename later to something else
-            const sourceFileWrapperSourceFile = ts.createSourceFile(
-                listWrapperFilePath,
-                '',
-                ts.ScriptTarget.ESNext,
-                true,
-                ts.ScriptKind.TSX
-            )
+            const listWrapper = generator.generateListPage(template);
 
-            const wrapperPageSourceCode = printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...listWrapper!.imports, listWrapper!.functionDeclaration]), sourceFileWrapperSourceFile)
-            io.writeFile(listWrapperFilePath, wrapperPageSourceCode)
+            if(listWrapper) {
+                const listWrapperFilePath = `src/components/${typeName}Wrapper.tsx`//TODO: dont like the word wrapper, rename later to something else
+                const sourceFileWrapperSourceFile = ts.createSourceFile(
+                    listWrapperFilePath,
+                    listWrapper,
+                    ts.ScriptTarget.ESNext,
+                    true,
+                    ts.ScriptKind.TSX
+                )
+    
+                // TODO:PC: Need print here? or only: io.writeFile(listWrapperFilePath, listWrapper)
+                const wrapperPageSourceCode = printer.printFile(sourceFileWrapperSourceFile);
+                io.writeFile(listWrapperFilePath, wrapperPageSourceCode)
+            }
         }
     })
 }

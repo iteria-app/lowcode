@@ -110,7 +110,7 @@ export class BasicTableGenerator implements TableGenerator
       return undefined
     }
 
-    generateTablePage(template: string): PageComponent | undefined {
+    generateTablePage(template: string): string | undefined {
         throw new Error("Not implemented");
       }
 

@@ -255,8 +255,8 @@ export default class MuiDataTableGenerator implements TableGenerator
       }else return undefined
     }
 
-    generateTablePage(template: string): PageComponent | undefined {
-      let result: PageComponent | undefined;
+    generateTablePage(template: string): string | undefined {
+      let result: string | undefined;
 
       if (this._entity) {
         let ast = createAst(template);
@@ -287,25 +287,8 @@ export default class MuiDataTableGenerator implements TableGenerator
             ));
 
             ast = replaceElementsToAST(ast, templateParenthesizedExpression.pos, parenthesizedExpression);
-
-            const functionDeclaration = find<FunctionDeclaration>(ast, (node: Node) => {
-              return ts.isFunctionDeclaration(node);
-            });
-
-            if(functionDeclaration) {
-              const importDeclarations: ImportDeclaration[] = [];
-              findAllByCondition<ImportDeclaration>(ast, importDeclarations, (node: Node) => {
-                return ts.isImportDeclaration(node);
-              });
-              importDeclarations.push(createImportDeclaration(tableComponentName, './' + tableComponentName));
-
-              result = {
-                functionDeclaration: functionDeclaration,
-                imports: uniqueImports(importDeclarations)
-              };
-            }
+            result = this.printSourceCode(ast);
           }
-
         }
       }
 
