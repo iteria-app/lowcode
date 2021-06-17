@@ -193,28 +193,8 @@ test(".grommet table generation without formatting", () => {
       console.log('generated:', generatedCode)
   });
 
-  test(".list wrapper page generating", () => {
-    const sourceFile = createAst('')
-    const myClassFile = parseGraphqlTypes(graphqlGenTs1)
-    const testEntity = sourceFileEntity(myClassFile)
-
-    let generationContext = {uiFramework: UiFramework.Grommet, formatter: Formatter.ReactIntl, index: {tableType: TableType.DataTable, height: "400px"}};
-    let generator = new AppGenerator(generationContext, testEntity!!);
-
-    const templatePath = 'template-path'//TODO: put here real template path when template will be done
-    const template = fs.readFileSync(path.resolve(templatePath), 'utf-8')
-    const page = generator.generateListPage('test')
-  
-    // const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
-
-    // let prindedSource = printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page!.imports, page!.functionDeclaration]), sourceFile)
-
-    // expect(prindedSource).toContain('<CustomerTable customers={data?.customers} />')
-  });
-
   describe("Generate page for list component", () => {
     test("mui data table generation with formatting", () => {
-      const sourceFile = createAst('')
       const myClassFile = parseGraphqlTypes(graphqlGenTs1)
       const testEntity = sourceFileEntity(myClassFile)
       const template = `
@@ -244,7 +224,12 @@ export default App;
       let generator = new AppGenerator(generationContext, testEntity!!);
   
       const generatedCode = generator.generateListPage(template);  
-      console.log('generated:', generatedCode)
+
+      expect(generatedCode).toContain('import { CustomerTable } from "./CustomerTable";');
+      expect(generatedCode).toContain('<CustomerTable customers={data?.customers}/>');
+      
+      expect(generatedCode).not.toContain("import ListPlaceholder from './ListPlaceholder'");
+      expect(generatedCode).not.toContain("<ListPlaceholder customers={data?.customers} />");
     });
   });
 })

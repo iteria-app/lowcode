@@ -1,4 +1,4 @@
-import ts, { factory, SourceFile, PropertyAssignment, Node, ImportDeclaration, FunctionDeclaration } from "typescript"
+import ts, { factory, SourceFile, PropertyAssignment, Node, ImportDeclaration, Identifier, NodeArray, Statement } from "typescript"
 import { getPropertyType, PropertyType } from '../../graphql/typeAlias'
 import { createFunctionalComponent, PageComponent, createJsxSelfClosingElement, createJsxAttribute } from '../../react-components/react-component-helper'
 import { Entity, getProperties, Property } from '../../entity/index'
@@ -11,11 +11,10 @@ import { createImportDeclaration, createNameSpaceImport, uniqueImports } from ".
 import { GeneratorHelper } from "../helper"
 import ReactIntlFormatter from "../../react-components/react-intl/intl-formatter"
 import { WidgetContext } from "../../context/widget-context"
-import { createAst, find, findAllByCondition, removeElementFromAst, replaceElementsToAST, SourceLineCol } from "../../../../ast"
+import { createAst, find, removeElementFromAst, replaceElementsToAST, SourceLineCol } from "../../../../ast"
 import { findVariableDeclarations } from "../../../ast/ast"
 import { findWidgetParentNode } from "../../../ast/widgetDeclaration"
 import { ColumnSourcePositionResult } from "../../../interfaces"
-import { ParenthesizedExpression } from "typescript"
 
 export default class MuiDataTableGenerator implements TableGenerator 
 {
@@ -262,33 +261,56 @@ export default class MuiDataTableGenerator implements TableGenerator
         let ast = createAst(template);
 
         if (ast) {
-          const templateParenthesizedExpression = find<ParenthesizedExpression>(ast, (node: Node) => {
-            return ts.isParenthesizedExpression(node);
-          });
+          const tableComponentName = this._helper.getComponentName(this._entity);
+          const inputParameterIdentifier = this._helper.getInputParameterIdentifier(this._entity);
 
-          if (templateParenthesizedExpression) {
-            const tableComponentName = this._helper.getComponentName(this._entity);
-            const inputParameterIdentifier = this._helper.getInputParameterIdentifier(this._entity);
-
-            const parenthesizedExpression = factory.createParenthesizedExpression(factory.createJsxSelfClosingElement(
-              factory.createIdentifier(tableComponentName),
-              undefined,
-              factory.createJsxAttributes([factory.createJsxAttribute(
-                inputParameterIdentifier,
-                factory.createJsxExpression(
-                  undefined,
-                  factory.createPropertyAccessChain(
-                    factory.createIdentifier("data"),
-                    factory.createToken(ts.SyntaxKind.QuestionDotToken),
-                    inputParameterIdentifier
-                  )
+          const tableComponentElement = factory.createJsxSelfClosingElement(
+            factory.createIdentifier(tableComponentName),
+            undefined,
+            factory.createJsxAttributes([factory.createJsxAttribute(
+              inputParameterIdentifier,
+              factory.createJsxExpression(
+                undefined,
+                factory.createPropertyAccessChain(
+                  factory.createIdentifier("data"),
+                  factory.createToken(ts.SyntaxKind.QuestionDotToken),
+                  inputParameterIdentifier
                 )
-              )])
-            ));
+              )
+            )])
+          );
 
-            ast = replaceElementsToAST(ast, templateParenthesizedExpression.pos, parenthesizedExpression);
-            result = this.printSourceCode(ast);
-          }
+          const transformer = <T extends ts.Node>(): ts.TransformerFactory<T> => {
+            return context => {
+              const visit: ts.Visitor = node => {
+                if(ts.isImportDeclaration(node)) {
+                  if(node.importClause) {
+                    // TODO:PC: Check namedBindings???
+                    if(node.importClause.name) {
+                      if(node.importClause.name.escapedText === 'ListPlaceholder') {
+                        return createImportDeclaration(tableComponentName, './' + tableComponentName);
+                      }
+                    }
+                  }
+                } else {
+                  if (ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) {
+                    if(ts.isIdentifier(node.tagName)) {
+                      if(node.tagName.escapedText === 'ListPlaceholder') {
+                        return tableComponentElement;
+                      }
+                    }
+                  }
+                }
+
+                return ts.visitEachChild(node, child => visit(child), context)
+              }
+          
+              return node => ts.visitNode(node, visit)
+            }
+          } 
+
+          const transformResult = ts.transform(ast, [transformer()]);
+          result = this.printSourceCode(transformResult.transformed[0]);
         }
       }
 
