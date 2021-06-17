@@ -52,7 +52,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
   }
 
   async getFormWidgetProperties(position: SourceLineCol): Promise<WidgetProperties> {
-    const result: WidgetProperties = {
+    let result: WidgetProperties = {
       properties: []
     };
 
@@ -61,46 +61,56 @@ export default class MuiDetailGenerator implements DetailGenerator {
       const ast = createAst(sourceCode);
 
       if (ast) {
-        const pos = ast.getPositionOfLineAndCharacter(position.lineNumber - 1, position.columnNumber - 1);
-        const element = find<Node>(ast, (node: Node) => {
-          return node.pos === pos;
-        });
+        result = this.getFormWidgetPropertiesFromAst(ast, position);
+      }
+    }
 
-        if (element) {
-          if (ts.isJsxOpeningElement(element) || ts.isJsxSelfClosingElement(element)) {
-            element.attributes.properties.forEach(prop => {
-              if (ts.isJsxAttribute(prop)) {
-                const propName = prop.name.escapedText.toString();
+    return result;
+  }
 
-                if (prop.initializer) {
-                  if (ts.isStringLiteral(prop.initializer)) {
+  getFormWidgetPropertiesFromAst(ast: ts.SourceFile, position: SourceLineCol): WidgetProperties {
+    const result: WidgetProperties = {
+      properties: []
+    };
+
+    const pos = ast.getPositionOfLineAndCharacter(position.lineNumber - 1, position.columnNumber - 1);
+    const element = find<Node>(ast, (node: Node) => {
+      return node.pos === pos;
+    });
+
+    if (element) {
+      if (ts.isJsxOpeningElement(element) || ts.isJsxSelfClosingElement(element)) {
+        element.attributes.properties.forEach(prop => {
+          if (ts.isJsxAttribute(prop)) {
+            const propName = prop.name.escapedText.toString();
+
+            if (prop.initializer) {
+              if (ts.isStringLiteral(prop.initializer)) {
+                result.properties.push({
+                  name: propName,
+                  value: prop.initializer.text
+                });
+              }
+              else if (ts.isJsxExpression(prop.initializer)) {
+                if (prop.initializer.expression) {
+                  if (ts.isNumericLiteral(prop.initializer.expression)
+                    || prop.initializer.expression.kind === SyntaxKind.TrueKeyword
+                    || prop.initializer.expression.kind === SyntaxKind.FalseKeyword) {
                     result.properties.push({
                       name: propName,
-                      value: prop.initializer.text
+                      value: prop.initializer.expression.getText()
                     });
                   }
-                  else if (ts.isJsxExpression(prop.initializer)) {
-                    if (prop.initializer.expression) {
-                      if (ts.isNumericLiteral(prop.initializer.expression)
-                        || prop.initializer.expression.kind === SyntaxKind.TrueKeyword
-                        || prop.initializer.expression.kind === SyntaxKind.FalseKeyword) {
-                        result.properties.push({
-                          name: propName,
-                          value: prop.initializer.expression.getText()
-                        });
-                      }
-                    }
-                  }
-                } else {
-                  result.properties.push({
-                    name: propName,
-                    value: 'true'
-                  });
                 }
               }
-            });
+            } else {
+              result.properties.push({
+                name: propName,
+                value: 'true'
+              });
+            }
           }
-        }
+        });
       }
     }
 

@@ -1,8 +1,12 @@
 import fs from 'fs'
 import path from 'path'
+import { ts } from 'ts-morph';
+import { SyntaxKind } from 'typescript';
 import { addColumn, addFormInput, deleteColumn, getColumnSourcePosition, getFormWidgetProperties, isSelectedDataTable, isSelectedFormWidget, setFormWidgetProperties } from '../..';
-import { SourceLineCol } from '../../../ast';
+import { find, SourceLineCol } from '../../../ast';
+import MuiDetailGenerator from '../../generation/generators/detail/mui-detail-generator';
 import { CodegenRw } from '../../io/codegenRw';
+import { createAst } from '../helper';
 import { graphqlGenTs1 } from '../typeAlias.example';
 
 describe(".api tests", () => {
@@ -143,11 +147,60 @@ describe(".api tests", () => {
             }
         ];
 
+        const expectedProperties =                     [
+            {
+                name: "required",
+                value: "false"
+            },
+            {
+                name: "disabled",
+                value: "true"
+            },
+            {
+                name: "rows",
+                value: "5"
+            },
+            {
+                name: "id",
+                value: "updatedAtTime"
+            },
+            {
+                name: "type",
+                value: "time"
+            },
+            {
+                name: "label",
+                value: "updatedAtTime"
+            }
+        ];
+
         const filePath = 'src/codegen/tests/detail/detail-test-file.txt'
         const source: SourceLineCol = { lineNumber: 80, columnNumber: 19, fileName: filePath }
         const result = await setFormWidgetProperties(new CodegenRw(), source, { properties: properties });
 
-        console.log(result);
+        expect(result).not.toBe(undefined);
+
+        if(result) {
+            const resultAst = createAst(result);
+            var updatedAtNode = find<ts.Node>(resultAst, (node: ts.Node) => {
+                if (ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) {
+                    const idProperty = node.attributes.properties.find(p => p.kind === SyntaxKind.JsxAttribute && p.name.text === 'id');
+                    if(idProperty && ts.isJsxAttribute(idProperty) && idProperty.initializer && ts.isStringLiteral(idProperty.initializer)) {
+                        return idProperty.initializer.text === 'updatedAtTime';
+                    }
+                }
+                return false;
+            });
+    
+            expect(updatedAtNode).not.toBe(undefined);
+
+            if(updatedAtNode) {
+                const position = resultAst.getLineAndCharacterOfPosition(updatedAtNode.getStart());
+                const newProperties = new MuiDetailGenerator({}).getFormWidgetPropertiesFromAst(resultAst, { lineNumber: position.line + 1, columnNumber: position.character + 1, fileName: '' });
+
+                expect(newProperties.properties).toStrictEqual(expectedProperties);
+            }
+        }
     });  
 
     test(".set Widget Fields (MUI TextField) (return undefined if no property has been changed)", async () => {
