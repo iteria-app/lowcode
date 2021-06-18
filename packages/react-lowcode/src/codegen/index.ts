@@ -95,7 +95,7 @@ export async function addColumn(typesSourceCode: string,
                                 sourceCode:SourceLineCol, 
                                 options: InsertOptions): Promise<string | undefined>{
                                     
-    const property: Property = getEntityProperty(typesSourceCode, options.property)[0]
+    const property: Property = getEntityProperty(typesSourceCode, options.property, options.entity)[0]
     let generatedSource = undefined
 
     if(property){
@@ -133,7 +133,7 @@ export async function addFormInput(typesSourceCode: string,
                                    sourceLine:SourceLineCol, 
                                    options: InsertOptions): Promise<string | undefined>{
 
-    const property: Property = getEntityProperty(typesSourceCode, options.property)[0]
+    const property: Property = getEntityProperty(typesSourceCode, options.property, options.entity)[0]
     let generatedSource = undefined
 
     if(property){

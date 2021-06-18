@@ -9,6 +9,7 @@ export interface CodegenOptions {
 }
 
 export interface InsertOptions {
+    entity: string
     property: string
     index?: number
 }
