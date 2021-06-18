@@ -136,10 +136,6 @@ export default class GrommetDataTableGenerator implements TableGenerator
       return undefined
     }
 
-    generateTablePage(template: string): string | undefined {
-      throw new Error("Not implemented");
-    }
-
     private createStatements(): ts.Statement[] {
         let statements = new Array<ts.Statement>();
   
