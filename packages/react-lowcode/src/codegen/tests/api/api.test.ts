@@ -3,7 +3,7 @@ import path from 'path'
 import { ts } from 'ts-morph';
 import { SyntaxKind } from 'typescript';
 import { addColumn, addFormInput, deleteColumn, getColumnSourcePosition, getFormWidgetProperties, isSelectedDataTable, isSelectedFormWidget, setFormWidgetProperties } from '../..';
-import { find, SourceLineCol } from '../../../ast';
+import { findByCondition, SourceLineCol } from '../../../ast';
 import MuiDetailGenerator from '../../generation/generators/detail/mui-detail-generator';
 import { CodegenRw } from '../../io/codegenRw';
 import { createAst } from '../helper';
@@ -182,7 +182,7 @@ describe(".api tests", () => {
 
         if(result) {
             const resultAst = createAst(result);
-            var updatedAtNode = find<ts.Node>(resultAst, (node: ts.Node) => {
+            var updatedAtNode = findByCondition<ts.Node>(resultAst, (node: ts.Node) => {
                 if (ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) {
                     const idProperty = node.attributes.properties.find(p => p.kind === SyntaxKind.JsxAttribute && p.name.text === 'id');
                     if(idProperty && ts.isJsxAttribute(idProperty) && idProperty.initializer && ts.isStringLiteral(idProperty.initializer)) {

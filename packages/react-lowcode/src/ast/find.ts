@@ -102,22 +102,22 @@ export const getAstAndNodeFromSource = (
   return { node, ast }
 }
 
-export const find = <T>(node: Node | SourceFile, check: (node: Node) => boolean): T | undefined => {
-  if(check(node)) {
+export const findByCondition = <T>(node: Node | SourceFile, condition: (node: Node) => boolean): T | undefined => {
+  if(condition(node)) {
       return node as unknown as T;
   };
 
   return node.forEachChild((child) => {
-      return find<T>(child, check);
+      return findByCondition<T>(child, condition);
   });
 }
 
-export const findAllByCondition = <T>(node: Node | SourceFile, output: T[], check: (node: Node) => boolean): void => {
-  if(check(node)) {
+export const findAllByCondition = <T>(node: Node | SourceFile, output: T[], condition: (node: Node) => boolean): void => {
+  if(condition(node)) {
     output.push(node as unknown as T);
   };
 
   return node.forEachChild((child) => {
-      return findAllByCondition<T>(child, output, check);
+      return findAllByCondition<T>(child, output, condition);
   });
 }

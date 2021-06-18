@@ -19,6 +19,7 @@ import { Property } from './generation/entity'
 import { getEntityProperty } from './tests/helper'
 import { isDataTableWidget, isFormWidget } from './ast/widgetDeclaration'
 import { CodegenOptions, ColumnSourcePositionOptions, ColumnSourcePositionResult, DeleteOptions, InsertOptions, WidgetProperties } from './interfaces'
+import TemplateResolver from './generation/generators/template/template-resolver'
 
 
 // generates CRUD React pages (master-detail, eg. orders list, order detail form) from typescript
@@ -62,7 +63,8 @@ export function generatePages(inputSourceCode: string, io: CodeRW & CodeDir, opt
             let template = ''
             io.readFile(indexWrapperTemplatePath).then((source => {if(source) template = source;}))
 
-            const listWrapper = generator.generateListPage(template);
+            const templateResolver = new TemplateResolver(entity);
+            const listWrapper = templateResolver.generateListPage(template);
 
             if(listWrapper) {
                 const listWrapperFilePath = `src/components/${typeName}Wrapper.tsx`//TODO: dont like the word wrapper, rename later to something else

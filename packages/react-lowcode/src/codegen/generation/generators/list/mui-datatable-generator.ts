@@ -11,7 +11,7 @@ import { createImportDeclaration, createNameSpaceImport, uniqueImports } from ".
 import { GeneratorHelper } from "../helper"
 import ReactIntlFormatter from "../../react-components/react-intl/intl-formatter"
 import { WidgetContext } from "../../context/widget-context"
-import { createAst, find, removeElementFromAst, replaceElementsToAST, SourceLineCol } from "../../../../ast"
+import { createAst, findByCondition, removeElementFromAst, replaceElementsToAST, SourceLineCol } from "../../../../ast"
 import { findVariableDeclarations } from "../../../ast/ast"
 import { findWidgetParentNode } from "../../../ast/widgetDeclaration"
 import { ColumnSourcePositionResult } from "../../../interfaces"
@@ -121,7 +121,7 @@ export default class MuiDataTableGenerator implements TableGenerator
                 let renderHeaderPosition, valueFormatterPosition;
                 const columnPosition = ast.getLineAndCharacterOfPosition(columnDeclarationArray.elements[columnIndex].getStart());
 
-                const renderHeader = find<PropertyAssignment>(columnDeclarationArray.elements[columnIndex], (node: Node) => {
+                const renderHeader = findByCondition<PropertyAssignment>(columnDeclarationArray.elements[columnIndex], (node: Node) => {
                   if(ts.isPropertyAssignment(node)) {
                     if(ts.isIdentifier(node.name)) {
                       return node.name.escapedText === 'renderHeader';
@@ -130,7 +130,7 @@ export default class MuiDataTableGenerator implements TableGenerator
                   return false;
                 });
                 
-                const valueFormatter = find<PropertyAssignment>(columnDeclarationArray.elements[columnIndex], (node: Node) => {
+                const valueFormatter = findByCondition<PropertyAssignment>(columnDeclarationArray.elements[columnIndex], (node: Node) => {
                   if(ts.isPropertyAssignment(node)) {
                     if(ts.isIdentifier(node.name)) {
                       return node.name.escapedText === 'valueFormatter';
