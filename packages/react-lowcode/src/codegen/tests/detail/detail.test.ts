@@ -4,7 +4,7 @@ import ts, { factory } from "typescript"
 import { graphqlGenTs1 } from "../typeAlias.example"
 import { UiFramework, TableType, Formatter } from '../../definition/context-types'
 import { AppGenerator } from '../../generation/generators/app-generator'
-import { createAst, parseGraphqlTypes, sourceFileEntity } from "../helper"
+import { sourceFileEntity, createAst, parseGraphqlTypes } from "../helper"
 
   test(".mui formik generation", () => {
       const sourceFile = createAst('')
@@ -18,7 +18,7 @@ import { createAst, parseGraphqlTypes, sourceFileEntity } from "../helper"
       
       const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
 
-      console.log('generated:', printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page.imports, page.functionDeclaration]), sourceFile))
+      console.log('generated:', printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page!.imports, page!.functionDeclaration]), sourceFile))
   });
 
   test(".grommet formik generation", () => {
@@ -33,5 +33,5 @@ import { createAst, parseGraphqlTypes, sourceFileEntity } from "../helper"
     
     const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
 
-    console.log('generated:', printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page.imports, page.functionDeclaration]), sourceFile))
+    console.log('generated:', printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page!.imports, page!.functionDeclaration]), sourceFile))
 });

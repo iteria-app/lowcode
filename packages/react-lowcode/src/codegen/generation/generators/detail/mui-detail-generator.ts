@@ -11,28 +11,32 @@ import {
   createImportDeclaration,
   createNameSpaceImport,
   uniqueImports,
-} from "../../ts/imports";
+} from "../../../ast/imports";
 import ReactIntlFormatter from "../../react-components/react-intl/intl-formatter";
 import { InputType } from "./input-types";
 import { WidgetContext } from "../../context/widget-context";
 import {
   createAst,
   replaceElementsToAST,
-  addElementsToAST,
   SourceLineCol,
 } from "../../../../ast";
-import { findVariableDeclarations, findObjectLiteralExpression,findPropertyAssignment } from "../../ts/ast";
+import {
+  findVariableDeclarations,
+  findObjectLiteralExpression,
+  findPropertyAssignment,
+} from "../../../ast/ast";
+import { findWidgetParentNode } from "../../../ast/widgetDeclaration";
 
 export default class MuiDetailGenerator implements DetailGenerator {
   private _imports: ts.ImportDeclaration[] = [];
   private _context: GenerationContext;
-  private _entity: Entity;
+  private _entity?: Entity;
   private _widgetContext: WidgetContext | undefined;
   private _intlFormatter: ReactIntlFormatter;
 
   constructor(
     generationContext: GenerationContext,
-    entity: Entity,
+    entity?: Entity,
     widgetContext?: WidgetContext
   ) {
     this._context = generationContext;
@@ -44,31 +48,57 @@ export default class MuiDetailGenerator implements DetailGenerator {
     );
   }
 
-  insertFormWidget(
-    position: SourceLineCol,
-    property: Property
-  ) {
+  async insertFormWidget(position: SourceLineCol, property: Property): Promise<string> {
+    //Initial values
     let alteredSource = "";
     if (this._widgetContext) {
-      let sourceCode = this._widgetContext.getSourceCodeString(position);
+      let sourceCode = await this._widgetContext.getSourceCodeString(position);
       let ast = createAst(sourceCode);
 
       if (ast) {
-        let widgetParentNode = this._widgetContext.findWidgetParentNode(
+        let widgetParentNode = findWidgetParentNode(
           sourceCode,
           position
         );
 
         if (widgetParentNode) {
-          let formikDeclarationNode = this.findGridDeclaration(widgetParentNode);
+          let formikDeclarationNode =
+            this.findGridDeclaration(widgetParentNode);
 
           if (formikDeclarationNode) {
-            let propertyAssigmentArray: ts.PropertyAssignment[] = []; 
-            findPropertyAssignment(formikDeclarationNode.getChildAt(1), propertyAssigmentArray);
+            let propertyAssigmentArray: ts.PropertyAssignment[] = [];
+            findPropertyAssignment(
+              formikDeclarationNode.getChildAt(1),
+              propertyAssigmentArray
+            );
 
-             if (propertyAssigmentArray) {
-               ast = this.addNewField(formikDeclarationNode, propertyAssigmentArray, property, ast);
-             }
+            if (propertyAssigmentArray) {
+              ast = this.addNewField(
+                formikDeclarationNode,
+                propertyAssigmentArray,
+                property,
+                ast
+              );
+            }
+          }
+        }
+
+        let gridElements: ts.JsxElement[] = [];
+        //Add grid with field
+        if (widgetParentNode) {
+          this.findGridElement(widgetParentNode, gridElements);
+        }
+
+        if (gridElements) {
+          if (widgetParentNode) {
+            let gridContainers: ts.JsxElement[] = [];
+            this.findGridContainer(widgetParentNode, gridContainers);
+            ast = this.addNewGridElement(
+              gridElements,
+              gridContainers[0],
+              property,
+              ast
+            );
           }
         }
 
@@ -76,6 +106,70 @@ export default class MuiDetailGenerator implements DetailGenerator {
         console.log(alteredSource);
       }
     }
+
+    return alteredSource
+  }
+
+  findGridElement(parentNode: ts.Node, foundedElements: ts.JsxElement[]) {
+    if (parentNode != undefined) {
+      if (parentNode.getChildCount() > 0) {
+        var children = parentNode.getChildren();
+        children.forEach((child) => {
+          if (ts.isJsxElement(child)) {
+            if (child.getFullText().startsWith("Grid item", 1)) {
+              foundedElements.push(child);
+            } else {
+              this.findGridElement(child, foundedElements);
+            }
+          } else {
+            this.findGridElement(child, foundedElements);
+          }
+        });
+      }
+    }
+  }
+  
+  findGridContainer(parentNode: ts.Node, foundedElements: ts.JsxElement[]) {
+    if (parentNode != undefined) {
+      if (parentNode.getChildCount() > 0) {
+        var children = parentNode.getChildren();
+        children.forEach((child) => {
+          if (ts.isJsxElement(child)) {
+            if (child.getFullText().startsWith("Grid container", 1)) {
+              foundedElements.push(child);
+            } else {
+              this.findGridContainer(child, foundedElements);
+            }
+          } else {
+            this.findGridContainer(child, foundedElements);
+          }
+        });
+      }
+    }
+  }
+
+
+
+  addNewGridElement(
+    gridElements: ts.JsxElement[],
+    gridContainer: ts.JsxElement,
+    property: Property,
+    ast: ts.SourceFile
+  ): ts.SourceFile {
+    let newField = this.createTextFieldElement(
+      property.getName(),
+      property.getTypeText(),
+      InputType.text
+    );
+    let newElements: ts.JsxElement[] = [
+      ...gridElements,
+      newField,
+    ] as ts.JsxElement[];
+    return replaceElementsToAST(
+      ast,
+      gridContainer.pos,
+      this.createGridContainer(newElements)
+    );
   }
 
   private addNewField(
@@ -84,9 +178,11 @@ export default class MuiDetailGenerator implements DetailGenerator {
     property: Property,
     ast: SourceFile
   ): ts.SourceFile {
-
-    let newField = this.tryCreateInitialValueForProperty(property)
-    let newElements: ts.PropertyAssignment[] = [...propertyAssignmentArray, newField] as ts.PropertyAssignment[];
+    let newField = this.tryCreateInitialValueForProperty(property);
+    let newElements: ts.PropertyAssignment[] = [
+      ...propertyAssignmentArray,
+      newField,
+    ] as ts.PropertyAssignment[];
     return replaceElementsToAST(
       ast,
       ole.pos,
@@ -121,8 +217,8 @@ export default class MuiDetailGenerator implements DetailGenerator {
       });
 
       let arrayOle: ts.ObjectLiteralExpression[] = [];
-      findObjectLiteralExpression(formikDeclaration[0], arrayOle); 
-      
+      findObjectLiteralExpression(formikDeclaration[0], arrayOle);
+
       if (arrayOle) {
         return arrayOle[1];
       }
@@ -135,31 +231,34 @@ export default class MuiDetailGenerator implements DetailGenerator {
     return MuiDetailComponents;
   }
 
-  generateDetailComponent(): PageComponent {
-    var statements = this.createStatements();
+  generateDetailComponent(): PageComponent | undefined {
+    if(this._entity)
+    {
+      var statements = this.createStatements();
 
-    var functionalComponent = this.createConstFunction(
-      "FormikComponent",
-      statements
-    );
+      var functionalComponent = this.createConstFunction(
+        "GeneratedFormikComponent",
+        statements
+      );
 
-    this._imports = [...this._imports, ...this._intlFormatter.getImports()];
+      this._imports = [...this._imports, ...this._intlFormatter.getImports()];
 
-    var uniqueFileImports = uniqueImports(this._imports);
-    uniqueFileImports.push(createNameSpaceImport("React", "react"));
-    uniqueFileImports.push(
-      createImportDeclaration(
-        "TextField, Avatar, Card, CardHeader, CardContent, Grid",
-        "@material-ui/core"
-      )
-    );
-    uniqueFileImports.push(createImportDeclaration("useFormik", "formik"));
-    uniqueFileImports.push(createImportDeclaration("Customer", "./Customer"));
+      var uniqueFileImports = uniqueImports(this._imports);
+      uniqueFileImports.push(createNameSpaceImport("React", "react"));
+      uniqueFileImports.push(
+        createImportDeclaration(
+          "TextField, Avatar, Card, CardHeader, CardContent, Grid",
+          "@material-ui/core"
+        )
+      );
+      uniqueFileImports.push(createImportDeclaration("useFormik", "formik"));
+      uniqueFileImports.push(createImportDeclaration("Customer", "./Customer"));
 
-    return {
-      functionDeclaration: functionalComponent,
-      imports: uniqueFileImports,
-    };
+      return {
+        functionDeclaration: functionalComponent,
+        imports: uniqueFileImports,
+      };
+    }else return undefined
   }
 
   private createStatements(): ts.Statement[] {
@@ -185,7 +284,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
   private createInputsForEntity(): ts.JsxChild[] {
     let inputs: ts.JsxChild[] = [];
 
-    getProperties(this._entity).forEach((property) => {
+    getProperties(this._entity!).forEach((property) => {
       let propertyInput = this.tryCreateInputForProperty(property);
 
       if (propertyInput) {
@@ -251,7 +350,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
         ),
         factory.createJsxAttribute(
           factory.createIdentifier("label"),
-          factory.createStringLiteral(text)
+          factory.createStringLiteral(name)
         ),
         this.getTextValueAttribute(name, InputType.text),
         factory.createJsxAttribute(
@@ -498,29 +597,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
             undefined,
             factory.createJsxAttributes([])
           ),
-          [
-            factory.createJsxElement(
-              factory.createJsxOpeningElement(
-                factory.createIdentifier("Grid"),
-                undefined,
-                factory.createJsxAttributes([
-                  factory.createJsxAttribute(
-                    factory.createIdentifier("container"),
-                    undefined
-                  ),
-                  factory.createJsxAttribute(
-                    factory.createIdentifier("spacing"),
-                    factory.createJsxExpression(
-                      undefined,
-                      factory.createNumericLiteral("3")
-                    )
-                  ),
-                ])
-              ),
-              elements,
-              factory.createJsxClosingElement(factory.createIdentifier("Grid"))
-            ),
-          ],
+          [this.createGridContainer(elements)],
           factory.createJsxClosingElement(
             factory.createIdentifier("CardContent")
           )
@@ -530,6 +607,29 @@ export default class MuiDetailGenerator implements DetailGenerator {
     );
   }
 
+  private createGridContainer(elements: ts.JsxChild[]): ts.JsxElement {
+    return factory.createJsxElement(
+      factory.createJsxOpeningElement(
+        factory.createIdentifier("Grid"),
+        undefined,
+        factory.createJsxAttributes([
+          factory.createJsxAttribute(
+            factory.createIdentifier("container"),
+            undefined
+          ),
+          factory.createJsxAttribute(
+            factory.createIdentifier("spacing"),
+            factory.createJsxExpression(
+              undefined,
+              factory.createNumericLiteral("3")
+            )
+          ),
+        ])
+      ),
+      elements,
+      factory.createJsxClosingElement(factory.createIdentifier("Grid"))
+    );
+  }
   private createDateValueFormattedAttribute(name: string): ts.JsxAttribute {
     return factory.createJsxAttribute(
       factory.createIdentifier("value"),
@@ -635,7 +735,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
   private creteInitialValuesForEntity() {
     let inputs: ts.PropertyAssignment[] = [];
 
-    getProperties(this._entity).forEach((property) => {
+    getProperties(this._entity!).forEach((property) => {
       let propertyInput = this.tryCreateInitialValueForProperty(property);
 
       if (propertyInput) {

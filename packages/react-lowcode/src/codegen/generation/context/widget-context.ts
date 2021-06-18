@@ -1,21 +1,21 @@
 import ts, { factory } from "typescript";
 import { astFindSource, SourceLineCol } from "../../../ast";
 import { Hook } from "../../../ast/hooks";
-import { SourceFileContext } from "./page-context";
+import { PageContext } from "./page-context";
 
 export class WidgetContext{
-    _sourceFileContext: SourceFileContext
+    _pageContext: PageContext
     _hooks: Hook[] = []
     
-    constructor(sourceFileContext: SourceFileContext){
-        this._sourceFileContext = sourceFileContext;
+    constructor(sourceFileContext: PageContext){
+        this._pageContext = sourceFileContext;
     }
 
-    getSourceCodeString(position: SourceLineCol): string{
-        return this._sourceFileContext.getSourceCode();
+    async getSourceCodeString(position: SourceLineCol): Promise<string>{
+        return await this._pageContext.getSourceCode();
     }
 
-    findWidgetParentNode(sourceCode:string, position: SourceLineCol): ts.Node  | null | undefined{
+    findWidgetParentNode(sourceCode:string, position: SourceLineCol): ts.Node | undefined {
         let astCode = astFindSource(sourceCode, position)
 
         if(astCode){
@@ -31,8 +31,6 @@ export class WidgetContext{
         }else{
             console.log('cannot find widget element')
         }
-
-        return undefined
     }
 
     isWidgetDeclaration(node: ts.Node){

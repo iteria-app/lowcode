@@ -1,0 +1,31 @@
+import { Table, TableHeader, TableRow, TableCell, TableBody } from "grommet";
+export default function CustomerTable({ customers }) {
+  return (
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableCell>avatarUrl</TableCell>
+          <TableCell>createdAt</TableCell>
+          <TableCell>email</TableCell>
+          <TableCell>id</TableCell>
+          <TableCell>name</TableCell>
+          <TableCell>phone</TableCell>
+          <TableCell>updatedAt</TableCell>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {customers.map((customer) => (
+          <TableRow>
+            <TableCell>{customer.avatarUrl}</TableCell>
+            <TableCell>{customer.createdAt}</TableCell>
+            <TableCell>{customer.email}</TableCell>
+            <TableCell>{customer.id}</TableCell>
+            <TableCell>{customer.name}</TableCell>
+            <TableCell>{customer.phone}</TableCell>
+            <TableCell>{customer.updatedAt}</TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  );
+}

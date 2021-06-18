@@ -1,21 +1,20 @@
 import ts from "typescript";
-import fs from "fs"
-import { createImportDeclaration, uniqueImports } from "../ts/imports";
+import { createImportDeclaration, uniqueImports } from "../../ast/imports";
 import { AppContext } from "./app-context";
 import { InjectionContext } from "./injection-context";
 
-export class SourceFileContext{
+export class PageContext{
     private _appContext: AppContext;
     private _imports: ts.ImportDeclaration[] = [];
-    private _path : string;
+    private _filePath : string;
  
-    constructor(appContext: AppContext, path: string){
+    constructor(appContext: AppContext, filePath: string){
         this._appContext = appContext;
-        this._path = path;
+        this._filePath = filePath;
     }
 
     public get InjectionContext() : InjectionContext {
-        return this._appContext.InjectionContext;
+        return this._appContext.injectionContext;
     }
 
     getImports(): ts.ImportDeclaration[]{
@@ -26,11 +25,14 @@ export class SourceFileContext{
         this._imports.push(createImportDeclaration(identifier, pck))
     }
 
-    public get path() : string {
-        return this._path;
+    public get filePath() : string {
+        return this._filePath;
     }
    
-    getSourceCode(): string {
-        return fs.readFileSync(this.path, 'utf-8')
+    async getSourceCode(): Promise<string> {
+        let fileContent = ''
+        await this._appContext._io.readFile(this._filePath).then(data=> {if(data)fileContent = data})
+
+        return fileContent
     }    
 }

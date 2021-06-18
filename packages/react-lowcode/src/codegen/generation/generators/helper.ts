@@ -6,25 +6,24 @@ import GenerationContext from "../context/context"
 import { Entity, Property } from "../entity"
 import { Component } from "../react-components/react-component-helper"
 import ReactIntlFormatter from "../react-components/react-intl/intl-formatter"
-import { identifier } from "../ts/identifier"
-import { createImportDeclaration, createNameSpaceImport } from "../ts/imports"
-import { bindingParameter } from "../ts/parameters"
-import { jsxText, stringLiteral } from "../ts/text"
+import { identifier } from "../../ast/identifier"
+import { createImportDeclaration, createNameSpaceImport } from "../../ast/imports"
+import { bindingParameter } from "../../ast/parameters"
+import { jsxText, stringLiteral } from "../../ast/text"
 
-export class GeneratorHelper{
-    readonly _context:GenerationContext;
-    readonly _entity: Entity;
+export class GeneratorHelper {
+    readonly _context: GenerationContext;
+    readonly _imports: ts.ImportDeclaration[];
     readonly intlFormatter: ReactIntlFormatter;
 
-    constructor(generationContext: GenerationContext, entity: Entity){
+    constructor(generationContext: GenerationContext, imports: ts.ImportDeclaration[]) {
         this._context = generationContext;
-
-        this.intlFormatter = new ReactIntlFormatter(this._context, []);
-        this._entity = entity;
+        this._imports = imports;
+        this.intlFormatter = new ReactIntlFormatter(this._context, this._imports);
     }
     
-    getEntityName(){
-        return camalizeString(this._entity.getName())
+    getEntityName(entity: Entity): string{
+        return camalizeString(entity.getName())
     }
 
     addImportDeclaration(specifier: string, module: string, isNameSpaceImport: boolean = false): ts.ImportDeclaration{
@@ -39,8 +38,8 @@ export class GeneratorHelper{
         return importDeclaration
     }
 
-    getComponentName() {
-        return `${this._entity.getName()}List`
+    getComponentName(entity: Entity) {
+        return `${entity.getName()}Table`
     }
 
     prepareComponent(component: Component, imports: ts.ImportDeclaration[]): Component {
@@ -48,11 +47,11 @@ export class GeneratorHelper{
         return component;
     }
 
-    getHeaderTitle(property: Property): ts.StringLiteral | ts.JsxSelfClosingElement{
+    getHeaderTitle(entity: Entity, property: Property): ts.StringLiteral | ts.JsxSelfClosingElement{
         let localizedName;
 
         if(this._context.formatter === Formatter.ReactIntl){
-          localizedName = this.intlFormatter.localizePropertyNameUsingTag(property, this._entity);
+          localizedName = this.intlFormatter.localizePropertyNameUsingTag(property, entity);
         }else{
           localizedName = stringLiteral(property.getName())
         }
@@ -60,11 +59,11 @@ export class GeneratorHelper{
         return localizedName;
     }
 
-    getHeaderTitleJsxText(property: Property): ts.JsxText | ts.JsxSelfClosingElement{
+    getHeaderTitleJsxText(entity: Entity, property: Property): ts.JsxText | ts.JsxSelfClosingElement{
         let localizedName;
   
         if(this._context.formatter === Formatter.ReactIntl){
-          localizedName = this.intlFormatter.localizePropertyNameUsingTag(property, this._entity);
+          localizedName = this.intlFormatter.localizePropertyNameUsingTag(property, entity)
         }else{
           localizedName = jsxText(property.getName())
         }
@@ -72,15 +71,15 @@ export class GeneratorHelper{
         return localizedName;
     }
 
-    getInputParameterIdentifier() : ts.Identifier {
-        return identifier(Pluralize.plural(this.getEntityName()))
+    getInputParameterIdentifier(entity: Entity) : ts.Identifier {
+        return identifier(Pluralize.plural(this.getEntityName(entity)))
     }
 
-    localizePropertyNameWithTag(property: Property): ts.JsxSelfClosingElement {
-        return this.intlFormatter.localizePropertyNameUsingTag(property, this._entity)
+    localizePropertyNameWithTag(entity: Entity, property: Property): ts.JsxSelfClosingElement {
+        return this.intlFormatter.localizePropertyNameUsingTag(property, entity)
     }
 
-    createInputParameter(): ts.ParameterDeclaration {
-        return bindingParameter(this.getInputParameterIdentifier())
+    createInputParameter(entity: Entity): ts.ParameterDeclaration {
+        return bindingParameter(this.getInputParameterIdentifier(entity))
     }
 }

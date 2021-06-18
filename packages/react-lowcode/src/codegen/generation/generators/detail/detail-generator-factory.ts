@@ -6,7 +6,7 @@ import MuiDataDetailGenerator from './mui-detail-generator'
 import { Entity } from '../../entity';
 
 export interface DetailGenerator{
-    generateDetailComponent(): PageComponent;
+    generateDetailComponent(): PageComponent | undefined;
 }
 
 export class DetailGeneratorFactory{
