@@ -65,7 +65,7 @@ export function generatePages(inputSourceCode: string, io: CodeRW & CodeDir, opt
             const listWrapper = generator.generateListPage(template);
 
             if(listWrapper) {
-                const listWrapperFilePath = `src/components/${typeName}Wrapper.tsx`//TODO: dont like the word wrapper, rename later to something else
+                const listWrapperFilePath = `src/components/${typeName}Page.tsx`
                 const sourceFileWrapperSourceFile = ts.createSourceFile(
                     listWrapperFilePath,
                     listWrapper,
