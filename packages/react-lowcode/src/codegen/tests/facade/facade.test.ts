@@ -7,7 +7,24 @@ import { FacadeInsertOptions } from "../../facade/interfaces";
 import { TestListHelper } from "../list/list-helper";
 
 describe("codegen facade tests", () => {
-  test(".add column (MUI DataTable) (ReactIntl)", async () => {
+  // TODO:PC: add tests for add column:
+  // - undefined position / defined position
+  // - without formatter / with formatter
+  // - BasicTable / DataTable
+
+  test(".add column (UiFramework.MaterialUI) (TableType.DataTable) (Formatter.None) (undefined position)", async () => {
+    // TODO:PC: implement!!
+  });
+
+  test(".add column (UiFramework.MaterialUI) (TableType.DataTable) (Formatter.None) (defined position)", async () => {
+    // TODO:PC: implement!!
+  });
+
+  test(".add column (UiFramework.MaterialUI) (TableType.DataTable) (Formatter.ReactIntl) (undefined position)", async () => {
+    // TODO:PC: implement!!
+  });
+
+  test(".add column (UiFramework.MaterialUI) (TableType.DataTable) (Formatter.ReactIntl) (defined position)", async () => {
     const tablePosition: SourceLineCol = {
       lineNumber: 15,
       columnNumber: 73,
@@ -19,7 +36,7 @@ describe("codegen facade tests", () => {
     };
 
     // TODO:PC: in result is: <FormattedMessage id=".testdate" defaultMessage="testdate"/> 
-    // id should be: customer.testdate
+    // id should be: customer.testdate (missing entity or entityName!!!)
     // need to create a test for check this
     const result = await insertColumn(tablePosition, options, new CodegenRw());
     const position = TestListHelper.getMuiDataTablePosition(result);
@@ -34,6 +51,133 @@ describe("codegen facade tests", () => {
       'email'
     ]);
   });
+
+  test(".add column (UiFramework.MaterialUI) (TableType.BasicTable) (Formatter.None) (undefined position)", async() => {
+    const myClassFile = parseGraphqlTypes(graphqlGenTs1);
+    const testEntity = sourceFileEntity(myClassFile);
+    const entityName = testEntity?.getName().toLowerCase();
+
+    const tablePosition: SourceLineCol = {
+      lineNumber: 14, 
+      columnNumber: 11, 
+      fileName: 'src/codegen/tests/facade/files/mui/basic-table/none/add-column.txt'
+    };
+
+    const options: FacadeInsertOptions = {
+      entity: testEntity!!, 
+      entityField: getEntityProperty(graphqlGenTs1, 'testdate')[0]
+    };
+
+    const result = await insertColumnToBasicTableMui(tablePosition, options, new CodegenRw());
+    const headercolumnValues = TestListHelper.getMuiBasicTableHeaderColumnValues(result);
+    const bodycolumnValues = TestListHelper.getMuiBasicTableBodyColumnValues(result);
+
+    expect(headercolumnValues).toStrictEqual([
+      'avatarUrl',
+      'createdAt',
+      'email',
+      'id',
+      'name',
+      'phone',
+      'updatedAt',
+      'testdate'
+    ]);
+
+    expect(bodycolumnValues).toStrictEqual([
+      `${entityName}.avatarUrl`,
+      `${entityName}.createdAt`,
+      `${entityName}.email`,
+      `${entityName}.id`,
+      `${entityName}.name`,
+      `${entityName}.phone`,
+      `${entityName}.updatedAt`,
+      `${entityName}.testdate`
+    ]);
+  });   
+
+  test(".add column (UiFramework.MaterialUI) (TableType.BasicTable) (Formatter.None) (defined position)", async() => {
+    const myClassFile = parseGraphqlTypes(graphqlGenTs1);
+    const testEntity = sourceFileEntity(myClassFile);
+    const entityName = testEntity?.getName().toLowerCase();
+
+    const tablePosition: SourceLineCol = {
+      lineNumber: 14, 
+      columnNumber: 11, 
+      fileName: 'src/codegen/tests/facade/files/mui/basic-table/none/add-column.txt'
+    };
+
+    const options: FacadeInsertOptions = {
+      entity: testEntity!!, 
+      entityField: getEntityProperty(graphqlGenTs1, 'testdate')[0], 
+      index: 1
+    };
+
+    const result = await insertColumnToBasicTableMui(tablePosition, options, new CodegenRw());
+    const headercolumnValues = TestListHelper.getMuiBasicTableHeaderColumnValues(result);
+    const bodycolumnValues = TestListHelper.getMuiBasicTableBodyColumnValues(result);
+
+    expect(headercolumnValues).toStrictEqual([
+      'testdate',
+      'avatarUrl',
+      'createdAt',
+      'email',
+      'id',
+      'name',
+      'phone',
+      'updatedAt'
+    ]);
+
+    expect(bodycolumnValues).toStrictEqual([
+      `${entityName}.testdate`,
+      `${entityName}.avatarUrl`,
+      `${entityName}.createdAt`,
+      `${entityName}.email`,
+      `${entityName}.id`,
+      `${entityName}.name`,
+      `${entityName}.phone`,
+      `${entityName}.updatedAt`
+    ]);
+  });   
+
+  test(".add column (UiFramework.MaterialUI) (TableType.BasicTable) (Formatter.ReactIntl) (undefined position)", () => {
+    const myClassFile = parseGraphqlTypes(graphqlGenTs1)
+    const testEntity = sourceFileEntity(myClassFile)
+    const tablePosition: SourceLineCol = {
+      lineNumber: 14, 
+      columnNumber: 11, 
+      fileName: 'src/codegen/tests/list/files/basic-table-mui-with-formatter-test-file.txt'
+    };
+    const options: FacadeInsertOptions = {
+      entity: testEntity!!, 
+      entityField: getEntityProperty(graphqlGenTs1, 'testdate')[0], 
+    };
+
+    insertColumnToBasicTableMui(tablePosition, options, new CodegenRw()).then(
+      (data) => console.log(data)
+    )
+  });   
+
+  test(".add column (UiFramework.MaterialUI) (TableType.BasicTable) (Formatter.ReactIntl) (defined position)", () => {
+    const myClassFile = parseGraphqlTypes(graphqlGenTs1)
+    const testEntity = sourceFileEntity(myClassFile)
+    const tablePosition: SourceLineCol = {
+      lineNumber: 14, 
+      columnNumber: 11, 
+      fileName: 'src/codegen/tests/list/files/basic-table-mui-with-formatter-test-file.txt'
+    };
+    const options: FacadeInsertOptions = {
+      entity: testEntity!!, 
+      entityField: getEntityProperty(graphqlGenTs1, 'testdate')[0], 
+      index: 2
+    };
+
+    insertColumnToBasicTableMui(tablePosition, options, new CodegenRw()).then(
+      (data) => console.log(data)
+    )
+  });   
+
+
+
 
     test(".delete column from existing table", () => {
       deleteColumn({lineNumber: 15,columnNumber: 73, fileName: 'src/codegen/tests/list/list-test-file.txt'}, { index:5 }, new CodegenRw()).then(
@@ -59,24 +203,6 @@ describe("codegen facade tests", () => {
         (data) => console.log(data)
       )
     });
-
-    test(".add column to existing basic table (MUI)", () => {
-      const myClassFile = parseGraphqlTypes(graphqlGenTs1)
-      const testEntity = sourceFileEntity(myClassFile)
-      
-      insertColumnToBasicTableMui({lineNumber: 14, columnNumber: 11, fileName: 'src/codegen/tests/list/files/basic-table-mui-test-file.txt'}, {entity: testEntity!!, entityField: getEntityProperty(graphqlGenTs1, 'testdate')[0], index: 2 }, new CodegenRw()).then(
-        (data) => console.log(data)
-      )
-    });   
-
-    test(".add column to existing basic table with formatter (MUI)", () => {
-      const myClassFile = parseGraphqlTypes(graphqlGenTs1)
-      const testEntity = sourceFileEntity(myClassFile)
-      
-      insertColumnToBasicTableMui({lineNumber: 14, columnNumber: 11, fileName: 'src/codegen/tests/list/files/basic-table-mui-with-formatter-test-file.txt'}, {entity: testEntity!!, entityField: getEntityProperty(graphqlGenTs1, 'testdate')[0], index: 2 }, new CodegenRw()).then(
-        (data) => console.log(data)
-      )
-    });   
 
     test(".add column to existing basic table (Grommet)", () => {
       const myClassFile = parseGraphqlTypes(graphqlGenTs1)

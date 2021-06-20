@@ -79,7 +79,10 @@ describe(".api tests", () => {
             const filePath = 'src/codegen/tests/detail/detail-test-file.txt';
             const source : SourceLineCol = {lineNumber: 69, columnNumber:17, fileName:filePath};
     
-            addFormInput(graphqlGenTs1, new CodegenRw(), source, {property: 'test2'}); //.then(generated => console.log(generated));
+            // TODO:PC: Expected result: 
+            // - added property "test2" to initialValues
+            // - added TextField with id: test2
+            addFormInput(graphqlGenTs1, new CodegenRw(), source, {property: 'test2'}).then(generated => console.log(generated));
         });
     
         test(".delete column (MUI DataTable)", async () => {

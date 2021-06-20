@@ -1,6 +1,7 @@
 import ts from "typescript";
 import { findByCondition, SourceLineCol } from "../../../ast";
 import { Formatter, TableType, UiFramework } from "../../definition/context-types";
+import { MuiTableComponents } from "../../definition/material-ui/table";
 import { AppContext } from "../../generation/context/app-context";
 import { PageContext } from "../../generation/context/page-context";
 import { WidgetContext } from "../../generation/context/widget-context";
@@ -47,26 +48,26 @@ export class TestListHelper {
 
     static getMuiDataTablePosition = (sourceCode: string): SourceLineCol => {
         let result: SourceLineCol = {
-            lineNumber: 0, 
+            lineNumber: 0,
             columnNumber: 0,
             fileName: ''
         };
-        
+
         const ast = createAst(sourceCode);
         const dataGridElement = findByCondition<ts.JsxSelfClosingElement>(ast, (node) => {
-            if(ts.isJsxSelfClosingElement(node)) {
-                if(ts.isIdentifier(node.tagName)) {
+            if (ts.isJsxSelfClosingElement(node)) {
+                if (ts.isIdentifier(node.tagName)) {
                     return node.tagName.escapedText === 'DataGrid';
                 }
             }
             return false;
         });
 
-        if(dataGridElement) {
+        if (dataGridElement) {
             const position = ast.getLineAndCharacterOfPosition(dataGridElement.getStart());
 
             result = {
-                lineNumber: position.line + 1, 
+                lineNumber: position.line + 1,
                 columnNumber: position.character + 1,
                 fileName: ''
             };
@@ -102,5 +103,101 @@ export class TestListHelper {
         }
 
         return result;
+    }
+
+    static getMuiBasicTableHeaderColumnValues = (sourceCode: string): string[] => {
+        const result: string[] = [];
+
+        const tableDefinition = MuiTableComponents;
+        const ast = createAst(sourceCode);
+        const table = TestListHelper.findJsxElementByName(ast, tableDefinition.table.tagName.text);
+
+        if (table) {
+            const tableHead = TestListHelper.findJsxElementByName(table, tableDefinition.header.tagName.text);
+
+            if(tableHead) {
+                const tableHeadRow = TestListHelper.findJsxElementByName(tableHead, tableDefinition.row.tagName.text);
+
+                if(tableHeadRow) {
+                    const headColumns: ts.JsxElement[] = [];
+                    TestListHelper.findJsxElementsByName(tableHeadRow, tableDefinition.cell.tagName.text, headColumns);
+                    
+                    headColumns.forEach(item => {
+                        if(ts.isJsxOpeningElement(item.openingElement) && ts.isJsxClosingElement(item.closingElement)) {
+                            if(item.children.length === 1) {
+                                if(ts.isJsxText(item.children[0])) {
+                                    result.push(item.children[0].text);
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+        }
+
+        return result;
+    }
+
+    static getMuiBasicTableBodyColumnValues = (sourceCode: string): string[] => {
+        const result: string[] = [];
+
+        const tableDefinition = MuiTableComponents;
+        const ast = createAst(sourceCode);
+        const table = TestListHelper.findJsxElementByName(ast, tableDefinition.table.tagName.text);
+
+        if (table) {
+            const tableBody = TestListHelper.findJsxElementByName(table, tableDefinition.body.tagName.text);
+
+            if(tableBody) {
+                const tableBodyRow = TestListHelper.findJsxElementByName(tableBody, tableDefinition.row.tagName.text);
+
+                if(tableBodyRow) {
+                    const headColumns: ts.JsxElement[] = [];
+                    TestListHelper.findJsxElementsByName(tableBodyRow, tableDefinition.cell.tagName.text, headColumns);
+                    
+                    headColumns.forEach(item => {
+                        if(ts.isJsxOpeningElement(item.openingElement) && ts.isJsxClosingElement(item.closingElement)) {
+                            if(item.children.length === 1) {
+                                if(ts.isJsxExpression(item.children[0]) && item.children[0].expression) {
+                                    if(ts.isPropertyAccessExpression(item.children[0].expression)) {
+                                        result.push(item.children[0].expression.getText());
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+        }
+
+        return result;
+    }
+
+    private static findJsxElementByName(node: ts.Node, name: string): ts.Node | undefined {
+        if (ts.isJsxElement(node)) {
+            if (ts.isIdentifier(node.openingElement.tagName)) {
+                if (node.openingElement.tagName.escapedText === name) {
+                    return node;
+                }
+            }
+        }
+
+        return node.forEachChild((child) => {
+            return this.findJsxElementByName(child, name);
+        });
+    }
+
+    private static findJsxElementsByName(node: ts.Node, name: string, output: ts.JsxElement[]): void {
+        if (ts.isJsxElement(node)) {
+            if (ts.isIdentifier(node.openingElement.tagName)) {
+                if (node.openingElement.tagName.escapedText === name) {
+                    output.push(node);
+                }
+            }
+        }
+
+        node.forEachChild((child) => {
+            this.findJsxElementsByName(child, name, output);
+        });
     }
 }
