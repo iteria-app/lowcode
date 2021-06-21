@@ -18,7 +18,6 @@ import { WidgetContext } from "../../context/widget-context";
 import {
   createAst,
   findByCondition,
-  removeElementFromAst,
   replaceElementsToAST,
   SourceLineCol,
 } from "../../../../ast";
@@ -27,7 +26,7 @@ import {
   findObjectLiteralExpression,
   findPropertyAssignment,
 } from "../../../ast/ast";
-import { findWidgetParentNode } from "../../../ast/widgetDeclaration";
+import { findWidgetParentNode, getWidgetProperties } from "../../../ast/widgetDeclaration";
 import { WidgetProperties } from "../../../interfaces";
 
 export default class MuiDetailGenerator implements DetailGenerator {
@@ -79,38 +78,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
     });
 
     if (element) {
-      if (ts.isJsxOpeningElement(element) || ts.isJsxSelfClosingElement(element)) {
-        element.attributes.properties.forEach(prop => {
-          if (ts.isJsxAttribute(prop)) {
-            const propName = prop.name.escapedText.toString();
-
-            if (prop.initializer) {
-              if (ts.isStringLiteral(prop.initializer)) {
-                result.properties = [...result.properties, {
-                  name: propName,
-                  value: prop.initializer.text
-                }];
-              } else if (ts.isJsxExpression(prop.initializer)) {
-                if (prop.initializer.expression) {
-                  if (ts.isNumericLiteral(prop.initializer.expression)
-                    || prop.initializer.expression.kind === SyntaxKind.TrueKeyword
-                    || prop.initializer.expression.kind === SyntaxKind.FalseKeyword) {
-                    result.properties = [...result.properties, {
-                      name: propName,
-                      value: prop.initializer.expression.getText()
-                    }];
-                  }
-                }
-              }
-            } else {
-              result.properties = [...result.properties, {
-                name: propName,
-                value: 'true'
-              }];
-            }
-          }
-        });
-      }
+      result.properties = getWidgetProperties(element);
     }
 
     return result;
