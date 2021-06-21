@@ -58,7 +58,7 @@ describe(".api tests", () => {
         test(".add column (MUI DataTable)", async () => {
             const filePath = 'src/codegen/tests/list/files/is-datatable-test-file.txt';
             const source : SourceLineCol = {lineNumber: 12, columnNumber:17, fileName:filePath};
-            const result = await addColumn(graphqlGenTs1, new CodegenRw(), source, {property: 'testdate'});
+            const result = await addColumn(graphqlGenTs1, new CodegenRw(), source, {property: 'testdate', entity: 'Customer'});
     
             expect(result).not.toBe(undefined);
     
@@ -83,7 +83,7 @@ describe(".api tests", () => {
             // TODO:PC: Expected result: 
             // - added property "test2" to initialValues
             // - added TextField with id: test2
-            addFormInput(graphqlGenTs1, new CodegenRw(), source, {property: 'test2'}).then(generated => console.log(generated));
+            addFormInput(graphqlGenTs1, new CodegenRw(), source, {property: 'test2', entity: 'Customer'}).then(generated => console.log(generated));
         });
     
         test(".delete column (MUI DataTable)", async () => {
