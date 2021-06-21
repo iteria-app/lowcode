@@ -10,7 +10,6 @@ import { SourceLineCol } from '../../../../ast';
 export interface TableGenerator{
     insertColumn(componentPosition: SourceLineCol, property: Property, columnIndex?: number): any;
     generateTableComponent(): PageComponent | undefined;
-    generateTablePage(template: string): string | undefined;
 }
 
 export class TableGeneratorFactory{

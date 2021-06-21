@@ -17,7 +17,7 @@ import { InputType } from "./input-types";
 import { WidgetContext } from "../../context/widget-context";
 import {
   createAst,
-  find,
+  findByCondition,
   removeElementFromAst,
   replaceElementsToAST,
   SourceLineCol,
@@ -74,7 +74,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
     };
 
     const pos = ast.getPositionOfLineAndCharacter(position.lineNumber - 1, position.columnNumber - 1);
-    const element = find<Node>(ast, (node: Node) => {
+    const element = findByCondition<Node>(ast, (node: Node) => {
       return node.pos === pos;
     });
 
@@ -126,7 +126,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
 
       if (ast) {
         const pos = ast.getPositionOfLineAndCharacter(position.lineNumber - 1, position.columnNumber - 1);
-        const element = find<Node>(ast, (node: Node) => {
+        const element = findByCondition<Node>(ast, (node: Node) => {
           return node.pos === pos;
         });
 
@@ -255,7 +255,6 @@ export default class MuiDetailGenerator implements DetailGenerator {
         }
 
         alteredSource = this.printSourceCode(ast);
-        console.log(alteredSource);
       }
     }
 

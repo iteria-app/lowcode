@@ -192,46 +192,6 @@ test(".grommet table generation without formatting", () => {
     
       console.log('generated:', generatedCode)
   });
-
-  describe("Generate page for list component", () => {
-    test("mui data table generation with formatting", () => {
-      const myClassFile = parseGraphqlTypes(graphqlGenTs1)
-      const testEntity = sourceFileEntity(myClassFile)
-      const template = `
-import { useGeneratedQuery } from '../generated'
-import Fetching from './Fetching'
-import Error from './Error'
-import ListPlaceholder from './ListPlaceholder'
-
-function App() {
-  const [result] = useGeneratedQuery({
-    variables: {}
-  })
-
-  const { fetching, error, data } = result
-  if (fetching) return <Fetching />;
-  if (error) return <Error error={error} />;
-
-  return (
-    <ListPlaceholder customers={data?.customers} />
-  );
-}
-
-export default App;
-      `;
-
-      let generationContext = {uiFramework: UiFramework.MaterialUI, formatter: Formatter.ReactIntl, index: {tableType: TableType.DataTable, height: "400px"}};
-      let generator = new AppGenerator(generationContext, testEntity!!);
-  
-      const generatedCode = generator.generateListPage(template);  
-
-      expect(generatedCode).toContain('import { CustomerTable } from "./CustomerTable";');
-      expect(generatedCode).toContain('<CustomerTable customers={data?.customers}/>');
-      
-      expect(generatedCode).not.toContain("import ListPlaceholder from './ListPlaceholder'");
-      expect(generatedCode).not.toContain("<ListPlaceholder customers={data?.customers} />");
-    });
-  });
 })
 
 
