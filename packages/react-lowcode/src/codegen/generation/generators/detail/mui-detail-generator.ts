@@ -86,28 +86,27 @@ export default class MuiDetailGenerator implements DetailGenerator {
 
             if (prop.initializer) {
               if (ts.isStringLiteral(prop.initializer)) {
-                result.properties.push({
+                result.properties = [...result.properties, {
                   name: propName,
                   value: prop.initializer.text
-                });
-              }
-              else if (ts.isJsxExpression(prop.initializer)) {
+                }];
+              } else if (ts.isJsxExpression(prop.initializer)) {
                 if (prop.initializer.expression) {
                   if (ts.isNumericLiteral(prop.initializer.expression)
                     || prop.initializer.expression.kind === SyntaxKind.TrueKeyword
                     || prop.initializer.expression.kind === SyntaxKind.FalseKeyword) {
-                    result.properties.push({
+                    result.properties = [...result.properties, {
                       name: propName,
                       value: prop.initializer.expression.getText()
-                    });
+                    }];
                   }
                 }
               }
             } else {
-              result.properties.push({
+              result.properties = [...result.properties, {
                 name: propName,
                 value: 'true'
-              });
+              }];
             }
           }
         });
@@ -148,8 +147,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
                         newProp = factory.updateJsxAttribute(prop, prop.name, factory.createStringLiteral(inputProp.value));
                         astChanged = true;
                       }
-                    }
-                    else if (ts.isJsxExpression(prop.initializer)) {
+                    } else if (ts.isJsxExpression(prop.initializer)) {
                       if (prop.initializer.expression) {
                         if (prop.initializer.expression.kind === SyntaxKind.TrueKeyword || prop.initializer.expression.kind === SyntaxKind.FalseKeyword) {
                           if(inputProp.value !== prop.initializer.expression.getText()) {
@@ -268,7 +266,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
         children.forEach((child) => {
           if (ts.isJsxElement(child)) {
             if (child.getFullText().startsWith("Grid item", 1)) {
-              foundedElements.push(child);
+              foundedElements = [...foundedElements, child];
             } else {
               this.findGridElement(child, foundedElements);
             }
@@ -287,7 +285,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
         children.forEach((child) => {
           if (ts.isJsxElement(child)) {
             if (child.getFullText().startsWith("Grid container", 1)) {
-              foundedElements.push(child);
+              foundedElements = [...foundedElements, child];
             } else {
               this.findGridContainer(child, foundedElements);
             }
@@ -409,7 +407,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
         functionDeclaration: functionalComponent,
         imports: uniqueFileImports,
       };
-    }else return undefined
+    } else return undefined
   }
 
   private createStatements(): ts.Statement[] {

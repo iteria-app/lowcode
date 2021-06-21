@@ -1,5 +1,5 @@
 import { astFindSource, SourceLineCol } from "../../ast";
-import ts, { factory } from "typescript";
+import ts, { factory, SourceFile } from "typescript";
 
 export interface Node {
   getText(includeJsDocComments?: boolean): string;
@@ -81,4 +81,9 @@ export function findPropertyAssignment(
       });
     }
   }
+}
+
+export function printSourceCode(sourceFile: SourceFile): string {
+  const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
+  return printer.printFile(sourceFile)
 }

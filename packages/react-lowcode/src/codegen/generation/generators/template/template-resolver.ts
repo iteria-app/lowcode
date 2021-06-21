@@ -1,4 +1,5 @@
-import ts, { factory, SourceFile } from "typescript";
+import ts, { factory } from "typescript";
+import { printSourceCode } from "../../../ast/ast";
 import { createImportDeclaration } from "../../../ast/imports";
 import { createAst } from "../../code-generation/createSourceFile";
 import { Entity } from "../../entity";
@@ -67,15 +68,10 @@ export default class TemplateResolver {
                 }
 
                 const transformResult = ts.transform(ast, [transformer()]);
-                result = this.printSourceCode(transformResult.transformed[0]);
+                result = printSourceCode(transformResult.transformed[0]);
             }
         }
 
         return result;
-    }
-
-    private printSourceCode(sourceFile: SourceFile): string {
-        const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
-        return printer.printFile(sourceFile)
     }
 }
