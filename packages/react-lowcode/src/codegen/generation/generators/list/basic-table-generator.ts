@@ -84,7 +84,6 @@ export class BasicTableGenerator implements TableGenerator
                                     ast = replaceElementsToAST(ast, tableBodyRow.pos, bodyRow);
 
                                     alteredSource = this.printSourceCode(ast);
-                                    console.log(alteredSource);
                                     return alteredSource;
                                 }
                             }

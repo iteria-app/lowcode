@@ -44,10 +44,16 @@ export function uniqueImports(imports:ts.ImportDeclaration[]): ts.ImportDeclarat
             value.importClause?.namedBindings.forEachChild(importSpecifier => {
                 let specifier  = (<any>importSpecifier).name.escapedText
                 
-                if(!uniqueImports.has(specifier)){
+                if(!uniqueImports.has(specifier)) {
                     uniqueImports.set(specifier, module);
                 }
             });
+        } else if(value.importClause?.name) {
+          let specifier = value.importClause.name.escapedText.toString();
+                
+          if(!uniqueImports.has(specifier)) {
+              uniqueImports.set(specifier, module);
+          }
         }
     });
 

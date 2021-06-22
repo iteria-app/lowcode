@@ -10,13 +10,16 @@ import {
     insertColumn, 
     insertFormWidget, 
     deleteColumn as fDeleteColumn, 
-    getColumnSourcePosition as fGetColumnSourcePosition 
+    getColumnSourcePosition as fGetColumnSourcePosition,
+    getFormWidgetProperties as fGetFormWidgetProperties,
+    setFormWidgetProperties as fSetFormWidgetProperties
 } from './facade/facadeApi'
 import { SourceLineCol } from '../ast'
 import { Property } from './generation/entity'
 import { getEntityProperty } from './tests/helper'
 import { isDataTableWidget, isFormWidget } from './ast/widgetDeclaration'
 import { CodegenOptions, ColumnSourcePositionOptions, ColumnSourcePositionResult, DeleteOptions, InsertOptions, WidgetProperties } from './interfaces'
+import TemplateResolver from './generation/generators/template/template-resolver'
 
 
 // generates CRUD React pages (master-detail, eg. orders list, order detail form) from typescript
@@ -60,18 +63,23 @@ export function generatePages(inputSourceCode: string, io: CodeRW & CodeDir, opt
             let template = ''
             io.readFile(indexWrapperTemplatePath).then((source => {if(source) template = source;}))
 
-            const listWrapper = generator.generateListPage(template)
-            const listWrapperFilePath = `src/components/${typeName}Wrapper.tsx`//TODO: dont like the word wrapper, rename later to something else
-            const sourceFileWrapperSourceFile = ts.createSourceFile(
-                listWrapperFilePath,
-                '',
-                ts.ScriptTarget.ESNext,
-                true,
-                ts.ScriptKind.TSX
-            )
+            const templateResolver = new TemplateResolver(entity);
+            const listWrapper = templateResolver.generateListPage(template);
 
-            const wrapperPageSourceCode = printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...listWrapper!.imports, listWrapper!.functionDeclaration]), sourceFileWrapperSourceFile)
-            io.writeFile(listWrapperFilePath, wrapperPageSourceCode)
+            if(listWrapper) {
+                const listWrapperFilePath = `src/components/${typeName}Page.tsx`
+                const sourceFileWrapperSourceFile = ts.createSourceFile(
+                    listWrapperFilePath,
+                    listWrapper,
+                    ts.ScriptTarget.ESNext,
+                    true,
+                    ts.ScriptKind.TSX
+                )
+    
+                // TODO:PC: Need print here? or only: io.writeFile(listWrapperFilePath, listWrapper)
+                const wrapperPageSourceCode = printer.printFile(sourceFileWrapperSourceFile);
+                io.writeFile(listWrapperFilePath, wrapperPageSourceCode)
+            }
         }
     })
 }
@@ -112,18 +120,14 @@ export async function deleteColumn(io: CodeRW,
 
 export async function getFormWidgetProperties(io: CodeRW, 
                                               sourceCode:SourceLineCol): Promise<WidgetProperties>{
-    //dummy promise
-    return new Promise((resolve, reject) => {
-        setTimeout(() => {
-        }, 300);
-      });
+    return await fGetFormWidgetProperties(sourceCode, io);
 }
 
 export async function setFormWidgetProperties(io: CodeRW, 
                                               sourceCode:SourceLineCol,
                                               properties: WidgetProperties): Promise<string | undefined>{
 
-    return
+    return await fSetFormWidgetProperties(sourceCode, io, properties);
 }
 
 export async function addFormInput(typesSourceCode: string, 
