@@ -2,11 +2,9 @@ import ts, { factory } from "typescript"
 import { graphqlGenTs1 } from "../typeAlias.example"
 import { Formatter, TableType, UiFramework } from '../../definition/context-types'
 import { AppGenerator } from '../../generation/generators/app-generator'
-import {generatePages} from '../../index'
 import { CodeDir, CodeRW } from "../../../io"
 import { sourceFileEntity, createAst, parseGraphqlTypes } from "../helper"
-import path from 'path'
-import fs from "fs"
+import { generatePages } from "../../app"
 
 class testDemoWriter implements CodeRW, CodeDir {
   private _sourceCodeString: string = ''

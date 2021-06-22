@@ -2,10 +2,11 @@ import fs from 'fs'
 import path from 'path'
 import { ts } from 'ts-morph';
 import { SyntaxKind } from 'typescript';
-import { addColumn, addFormInput, deleteColumn, getColumnSourcePosition, getFormWidgetProperties, isSelectedDataTable, isSelectedFormWidget, setFormWidgetProperties } from '../..';
 import { findByCondition, SourceLineCol } from '../../../ast';
+import { addFormInput, getFormWidgetProperties, isSelectedFormWidget, setFormWidgetProperties } from '../../detail';
 import MuiDetailGenerator from '../../generation/generators/detail/mui-detail-generator';
 import { CodegenRw } from '../../io/codegenRw';
+import { addColumn, deleteColumn, getColumnSourcePosition, isSelectedDataTable } from '../../list';
 import { createAst } from '../helper';
 import { TestListHelper } from '../list/list-helper';
 import { graphqlGenTs1 } from '../typeAlias.example';
@@ -58,7 +59,7 @@ describe(".api tests", () => {
         test(".add column (MUI DataTable)", async () => {
             const filePath = 'src/codegen/tests/list/files/is-datatable-test-file.txt';
             const source : SourceLineCol = {lineNumber: 12, columnNumber:17, fileName:filePath};
-            const result = await addColumn(graphqlGenTs1, new CodegenRw(), source, {property: 'testdate', entity: 'Customer'});
+            const result = await addColumn(graphqlGenTs1, new CodegenRw(), source, {property: 'testdate', entityName: 'Customer'});
     
             expect(result).not.toBe(undefined);
     
@@ -83,7 +84,7 @@ describe(".api tests", () => {
             // TODO:PC: Expected result: 
             // - added property "test2" to initialValues
             // - added TextField with id: test2
-            addFormInput(graphqlGenTs1, new CodegenRw(), source, {property: 'test2', entity: 'Customer'}).then(generated => console.log(generated));
+            addFormInput(graphqlGenTs1, new CodegenRw(), source, {property: 'test2', entityName: 'Customer'}).then(generated => console.log(generated));
         });
     
         test(".delete column (MUI DataTable)", async () => {
