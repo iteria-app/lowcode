@@ -1,4 +1,7 @@
+import ts, { factory } from "typescript";
 import { SourceLineCol } from "../ast";
+import { HookImport } from "../ast/hooks";
+import { TagImport } from "../ast/tags";
 import { UiFramework } from "./definition/context-types";
 
 export interface CodegenOptions {
@@ -9,7 +12,7 @@ export interface CodegenOptions {
 }
 
 export interface InsertOptions {
-    entity: string
+    entityName: string
     property: string
     index?: number
 }
@@ -40,3 +43,50 @@ export interface WidgetProperty {
 export interface WidgetProperties {
     properties: WidgetProperty[]
 }
+
+interface ThemeCodegen {
+    providerTag(...children: ts.JsxChild[]): any
+}
+
+interface IntlCodegen {
+    providerTag(...children: ts.JsxChild[]): any
+ }
+
+export interface AppGenerators {
+    newSourceFileContext(path: string): JsxFileContext
+    theme: ThemeCodegen,
+    intl: IntlCodegen,
+    //authorization: AuthorizationCodegen
+}
+
+export class JsxFileContext {
+
+    uniqueImports() {
+        return []
+    }
+  
+    useHook(hook: HookImport, ...params: []) {
+        // TODO unique import
+        return null
+    }
+  
+    tag(tag: TagImport, ...children: ts.JsxChild[]) {
+        // TODO unique import
+        return null
+    }
+  
+    returnFragment(...children: ts.JsxChild[]): ts.Statement | null {
+  
+        if (children?.length == 1) {
+            // TODO handle one child
+        }
+    
+        factory.createReturnStatement(factory.createJsxFragment(
+            factory.createJsxOpeningFragment(),
+            children,
+            factory.createJsxJsxClosingFragment()
+          ))
+    
+        return null
+    }
+}  
