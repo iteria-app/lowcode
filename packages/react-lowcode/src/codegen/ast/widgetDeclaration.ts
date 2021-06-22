@@ -72,7 +72,7 @@ export function getWidgetProperties(node: ts.Node): WidgetProperty[] {
                 if (value) {
                     return {
                         name: prop.name.escapedText.toString(),
-                        value: value
+                        value
                     };
                 }
             }
