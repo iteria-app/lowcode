@@ -133,17 +133,13 @@ function isElementWithAttributes(node: ts.Node): node is ts.JsxOpeningElement | 
 }
 
 function getAttributeValue(attribute: ts.JsxAttribute): string | undefined {
-    let result: string | undefined;
-
     if (attribute.initializer) {
-        result = getStringTypeAttributeValue(attribute.initializer)
+        return getStringTypeAttributeValue(attribute.initializer)
             || getNumberTypeAttributeValue(attribute.initializer)
             || getBooleanTypeAttributeValue(attribute.initializer);
-    } else {
-        result = 'true';
     }
 
-    return result;
+    return 'true';
 }
 
 function getStringTypeAttributeValue(initializer: ts.StringLiteral | ts.JsxExpression): string | undefined {
@@ -153,8 +149,6 @@ function getStringTypeAttributeValue(initializer: ts.StringLiteral | ts.JsxExpre
 function getNumberTypeAttributeValue(initializer: ts.StringLiteral | ts.JsxExpression): string | undefined {
     if (ts.isJsxExpression(initializer) && initializer.expression !== undefined && ts.isNumericLiteral(initializer.expression)) {
         return initializer.expression.getText();
-    } else {
-        return undefined;
     }
 }
 
@@ -162,7 +156,5 @@ function getBooleanTypeAttributeValue(initializer: ts.StringLiteral | ts.JsxExpr
     if (ts.isJsxExpression(initializer) && initializer.expression
         && (initializer.expression.kind === SyntaxKind.TrueKeyword || initializer.expression.kind === SyntaxKind.FalseKeyword)) {
         return initializer.expression.getText();
-    } else {
-        return undefined;
     }
 }
