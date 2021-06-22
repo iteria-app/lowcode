@@ -84,3 +84,12 @@ export const replaceElementsToAST = <T extends ts.Node>(
   return result.transformed[0]
 }
 
+export const transformer = <T extends ts.Node>(transform: (node: ts.Node) => ts.Node | undefined): ts.TransformerFactory<T> => {
+  return context => {
+      const visit: ts.Visitor = node => {
+          return transform(node) || ts.visitEachChild(node, child => visit(child), context);
+      }
+
+      return node => ts.visitNode(node, visit);
+  }
+}
