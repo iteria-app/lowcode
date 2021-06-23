@@ -1,4 +1,4 @@
-import ts, { factory, ObjectLiteralExpression, SourceFile } from "typescript";
+import ts, { factory, JsxAttributeLike, Node, ObjectLiteralExpression, SourceFile, SyntaxKind } from "typescript";
 import { PageComponent } from "../../react-components/react-component-helper";
 import { DetailGenerator } from "./detail-generator-factory";
 import { DetailComponentDefinitionBase } from "../../../definition/detail-definition-core";
@@ -17,6 +17,7 @@ import { InputType } from "./input-types";
 import { WidgetContext } from "../../context/widget-context";
 import {
   createAst,
+  findByCondition,
   replaceElementsToAST,
   SourceLineCol,
 } from "../../../../ast";
@@ -25,7 +26,8 @@ import {
   findObjectLiteralExpression,
   findPropertyAssignment,
 } from "../../../ast/ast";
-import { findWidgetParentNode } from "../../../ast/widgetDeclaration";
+import { findWidgetParentNode, getWidgetProperties } from "../../../ast/widgetDeclaration";
+import { WidgetProperties } from "../../../interfaces";
 
 export default class MuiDetailGenerator implements DetailGenerator {
   private _imports: ts.ImportDeclaration[] = [];
@@ -46,6 +48,122 @@ export default class MuiDetailGenerator implements DetailGenerator {
       generationContext,
       this._imports
     );
+  }
+
+  async getFormWidgetProperties(position: SourceLineCol): Promise<WidgetProperties> {
+    let result: WidgetProperties = {
+      properties: []
+    };
+
+    if (this._widgetContext) {
+      const sourceCode = await this._widgetContext.getSourceCodeString(position);
+      const ast = createAst(sourceCode);
+
+      if (ast) {
+        result = this.getFormWidgetPropertiesFromAst(ast, position);
+      }
+    }
+
+    return result;
+  }
+
+  getFormWidgetPropertiesFromAst(ast: ts.SourceFile, position: SourceLineCol): WidgetProperties {
+    const result: WidgetProperties = {
+      properties: []
+    };
+
+    const pos = ast.getPositionOfLineAndCharacter(position.lineNumber - 1, position.columnNumber - 1);
+    const element = findByCondition<Node>(ast, (node: Node) => {
+      return node.pos === pos;
+    });
+
+    if (element) {
+      result.properties = getWidgetProperties(element);
+    }
+
+    return result;
+  }
+
+  async setFormWidgetProperties(position: SourceLineCol, widgetProperties: WidgetProperties): Promise<string | undefined> {
+    let result: string | undefined;
+
+    if (this._widgetContext) {
+      const sourceCode = await this._widgetContext.getSourceCodeString(position);
+      let ast = createAst(sourceCode);
+
+      if (ast) {
+        const pos = ast.getPositionOfLineAndCharacter(position.lineNumber - 1, position.columnNumber - 1);
+        const element = findByCondition<Node>(ast, (node: Node) => {
+          return node.pos === pos;
+        });
+
+        if (element) {
+          if (ts.isJsxOpeningElement(element) || ts.isJsxSelfClosingElement(element)) {
+            let astChanged = false;
+
+            const newProps = element.attributes.properties.map(prop => {
+              let newProp: JsxAttributeLike | undefined = prop;
+
+              if (ts.isJsxAttribute(prop)) {
+                const propName = prop.name.escapedText.toString();
+                const inputProp = widgetProperties.properties.find(l => l.name === propName);
+
+                if (inputProp) {
+                  if (prop.initializer) {
+                    if (ts.isStringLiteral(prop.initializer)) {
+                      if(inputProp.value !== prop.initializer.text) {
+                        newProp = factory.updateJsxAttribute(prop, prop.name, factory.createStringLiteral(inputProp.value));
+                        astChanged = true;
+                      }
+                    } else if (ts.isJsxExpression(prop.initializer)) {
+                      if (prop.initializer.expression) {
+                        if (prop.initializer.expression.kind === SyntaxKind.TrueKeyword || prop.initializer.expression.kind === SyntaxKind.FalseKeyword) {
+                          if(inputProp.value !== prop.initializer.expression.getText()) {
+                            const booleanValue = factory.createJsxExpression(
+                              undefined,
+                              inputProp.value.toLowerCase() === 'true' ? factory.createTrue() : factory.createFalse()
+                            )
+  
+                            newProp = factory.updateJsxAttribute(prop, prop.name, booleanValue);
+                            astChanged = true;
+                          }
+                        }
+
+                        if (ts.isNumericLiteral(prop.initializer.expression)) {
+                          if (inputProp.value !== prop.initializer.expression.getText()) {
+                            const numericValue = factory.createJsxExpression(
+                              undefined,
+                              factory.createNumericLiteral(inputProp.value)
+                            );
+
+                            newProp = factory.updateJsxAttribute(prop, prop.name, numericValue);
+                            astChanged = true;
+                          }
+                        }
+                      }
+                    }
+                  } else {
+                    if(inputProp.value.toLowerCase() == 'false') {
+                      newProp = undefined;
+                      astChanged = true;
+                    }
+                  }
+                }
+              }
+
+              return newProp;
+            });
+
+            if(astChanged) {
+              ast = replaceElementsToAST(ast, element.attributes.pos, factory.createJsxAttributes(newProps.filter(l => l !== undefined) as ts.JsxAttributeLike[]));
+              result = this.printSourceCode(ast);
+            }
+          }
+        }
+      }
+    }
+
+    return result;
   }
 
   async insertFormWidget(position: SourceLineCol, property: Property): Promise<string> {
@@ -103,7 +221,6 @@ export default class MuiDetailGenerator implements DetailGenerator {
         }
 
         alteredSource = this.printSourceCode(ast);
-        console.log(alteredSource);
       }
     }
 
@@ -117,7 +234,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
         children.forEach((child) => {
           if (ts.isJsxElement(child)) {
             if (child.getFullText().startsWith("Grid item", 1)) {
-              foundedElements.push(child);
+              foundedElements = [...foundedElements, child];
             } else {
               this.findGridElement(child, foundedElements);
             }
@@ -136,7 +253,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
         children.forEach((child) => {
           if (ts.isJsxElement(child)) {
             if (child.getFullText().startsWith("Grid container", 1)) {
-              foundedElements.push(child);
+              foundedElements = [...foundedElements, child];
             } else {
               this.findGridContainer(child, foundedElements);
             }
@@ -258,7 +375,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
         functionDeclaration: functionalComponent,
         imports: uniqueFileImports,
       };
-    }else return undefined
+    } else return undefined
   }
 
   private createStatements(): ts.Statement[] {

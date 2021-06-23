@@ -57,7 +57,6 @@ export default class GrommetDataTableGenerator implements TableGenerator
             }
   
             alteredSource = this.printSourceCode(ast)
-            console.log(alteredSource)
           }
         }
   

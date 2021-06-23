@@ -1,4 +1,4 @@
-import ts, { factory, SourceFile, PropertyAssignment, Node } from "typescript"
+import ts, { factory, SourceFile, PropertyAssignment, Node, ImportDeclaration, Identifier, NodeArray, Statement } from "typescript"
 import { getPropertyType, PropertyType } from '../../graphql/typeAlias'
 import { createFunctionalComponent, PageComponent, createJsxSelfClosingElement, createJsxAttribute } from '../../react-components/react-component-helper'
 import { Entity, getProperties, Property } from '../../entity/index'
@@ -11,7 +11,7 @@ import { createNameSpaceImport, uniqueImports } from "../../../ast/imports"
 import { GeneratorHelper } from "../helper"
 import ReactIntlFormatter from "../../react-components/react-intl/intl-formatter"
 import { WidgetContext } from "../../context/widget-context"
-import { createAst, find, removeElementFromAst, replaceElementsToAST, SourceLineCol } from "../../../../ast"
+import { createAst, findByCondition, removeElementFromAst, replaceElementsToAST, SourceLineCol } from "../../../../ast"
 import { findVariableDeclarations } from "../../../ast/ast"
 import { findWidgetParentNode } from "../../../ast/widgetDeclaration"
 import { ColumnSourcePositionResult } from "../../../interfaces"
@@ -33,140 +33,130 @@ export default class MuiDataTableGenerator implements TableGenerator
        this._intlFormatter = new ReactIntlFormatter(generationContext, this._imports)
     }
   
-    async insertColumn(tablePosition: SourceLineCol, 
-                       property: Property, 
-                       columnIndex?: number): Promise<string> {
-      let alteredSource = ''
-      if(this._widgetContext){
-        let sourceCode = await this._widgetContext.getSourceCodeString(tablePosition)
-        
-        let ast = createAst(sourceCode)
-
-        if(ast){
-          let widgetParentNode = findWidgetParentNode(sourceCode, tablePosition)
-
-          if(widgetParentNode)
-          {
-            let columnsDeclarationNode = this.findColumnsDeclaration(widgetParentNode)
-
-            if(columnsDeclarationNode){
-              let columnDeclarationArray = columnsDeclarationNode.getChildAt(2) as ts.ArrayLiteralExpression
-
-              if(columnDeclarationArray){
-                ast = this.addNewColumn(columnDeclarationArray, 
-                                        property, 
-                                        ast, 
-                                        columnIndex)
-              }
-            }
-          }
-
-          alteredSource = this.printSourceCode(ast)
-        }
-      }
-
-      return alteredSource
-    }
-
-    async deleteColumn(tablePosition: SourceLineCol,
-                       columnIndex: number): Promise<string> {
-                       let alteredSource = '';
+    async insertColumn(tablePosition: SourceLineCol,
+      property: Property,
+      columnIndex?: number): Promise<string> {
+      let alteredSource = '';
 
       if (this._widgetContext) {
-        let sourceCode = await this._widgetContext.getSourceCodeString(tablePosition)
+        const sourceCode = await this._widgetContext.getSourceCodeString(tablePosition);
 
-        let ast = createAst(sourceCode)
-
+        let ast = createAst(sourceCode);
         if (ast) {
-          let widgetParentNode = findWidgetParentNode(sourceCode, tablePosition)
+          const columnDeclarationArray = this.getColumnsDeclaration(sourceCode, tablePosition);
 
-          if (widgetParentNode) {
-            let columnsDeclarationNode = this.findColumnsDeclaration(widgetParentNode)
-
-            if (columnsDeclarationNode) {
-              let columnDeclarationArray = columnsDeclarationNode.getChildAt(2) as ts.ArrayLiteralExpression
-
-              if (columnDeclarationArray?.elements[columnIndex]) {
-                ast = removeElementFromAst(ast, columnDeclarationArray.elements[columnIndex].pos);
-              }
-            }
+          if (columnDeclarationArray) {
+            ast = this.addNewColumn(columnDeclarationArray,
+              property,
+              ast,
+              columnIndex)
           }
 
-          alteredSource = this.printSourceCode(ast)
+          alteredSource = this.printSourceCode(ast);
         }
       }
 
-      return alteredSource
+      return alteredSource;
     }
 
-    async getColumnSourcePosition(tablePosition: SourceLineCol,
-                                  columnIndex: number): Promise<ColumnSourcePositionResult | undefined> {
+    async deleteColumn(tablePosition: SourceLineCol, columnIndex: number): Promise<string> {
+      let alteredSource = '';
+
+      if (this._widgetContext) {
+        const sourceCode = await this._widgetContext.getSourceCodeString(tablePosition);
+
+        let ast = createAst(sourceCode);
+        if (ast) {
+          const columnDeclarationArray = this.getColumnsDeclaration(sourceCode, tablePosition);
+
+          if (columnDeclarationArray?.elements[columnIndex]) {
+            ast = removeElementFromAst(ast, columnDeclarationArray.elements[columnIndex].pos);
+          }
+
+          alteredSource = this.printSourceCode(ast);
+        }
+      }
+
+      return alteredSource;
+    }
+
+    async getColumnSourcePosition(tablePosition: SourceLineCol, columnIndex: number): Promise<ColumnSourcePositionResult | undefined> {
       let result: ColumnSourcePositionResult | undefined;
 
       if (this._widgetContext) {
-        let sourceCode = await this._widgetContext.getSourceCodeString(tablePosition)
+        const sourceCode = await this._widgetContext.getSourceCodeString(tablePosition);
 
-        let ast = createAst(sourceCode)
-
+        let ast = createAst(sourceCode);
         if (ast) {
-          let widgetParentNode = findWidgetParentNode(sourceCode, tablePosition)
+          const columnDeclarationArray = this.getColumnsDeclaration(sourceCode, tablePosition);
 
-          if (widgetParentNode) {
-            let columnsDeclarationNode = this.findColumnsDeclaration(widgetParentNode)
+          if (columnDeclarationArray?.elements[columnIndex]) {
+            let renderHeaderPosition, valueFormatterPosition;
+            const columnPosition = ast.getLineAndCharacterOfPosition(columnDeclarationArray.elements[columnIndex].getStart());
 
-            if (columnsDeclarationNode) {
-              let columnDeclarationArray = columnsDeclarationNode.getChildAt(2) as ts.ArrayLiteralExpression
-
-              if (columnDeclarationArray?.elements[columnIndex]) {
-                let renderHeaderPosition, valueFormatterPosition;
-                const columnPosition = ast.getLineAndCharacterOfPosition(columnDeclarationArray.elements[columnIndex].getStart());
-
-                const renderHeader = find<PropertyAssignment>(columnDeclarationArray.elements[columnIndex], (node: Node) => {
-                  if(ts.isPropertyAssignment(node)) {
-                    if(ts.isIdentifier(node.name)) {
-                      return node.name.escapedText === 'renderHeader';
-                    }
-                  }
-                  return false;
-                });
-                
-                const valueFormatter = find<PropertyAssignment>(columnDeclarationArray.elements[columnIndex], (node: Node) => {
-                  if(ts.isPropertyAssignment(node)) {
-                    if(ts.isIdentifier(node.name)) {
-                      return node.name.escapedText === 'valueFormatter';
-                    }
-                  }
-                  return false;
-                });
-
-                if(renderHeader){
-                  renderHeaderPosition = ast.getLineAndCharacterOfPosition(renderHeader.getStart());
+            const renderHeader = findByCondition<PropertyAssignment>(columnDeclarationArray.elements[columnIndex], (node: Node) => {
+              if (ts.isPropertyAssignment(node)) {
+                if (ts.isIdentifier(node.name)) {
+                  return node.name.escapedText === 'renderHeader';
                 }
-
-                if(valueFormatter) {
-                  valueFormatterPosition = ast.getLineAndCharacterOfPosition(valueFormatter.getStart());
-                }
-
-                result = {
-                  columnPosition: {
-                    fileName: tablePosition.fileName,
-                    columnNumber: columnPosition.character + 1,
-                    lineNumber: columnPosition.line + 1
-                  },
-                  headerPosition: renderHeaderPosition ? {
-                    fileName: tablePosition.fileName,
-                    columnNumber: renderHeaderPosition.character + 1,
-                    lineNumber: renderHeaderPosition.line + 1
-                  } : undefined,
-                  valuePosition: valueFormatterPosition ? {
-                    fileName: tablePosition.fileName,
-                    columnNumber: valueFormatterPosition.character + 1,
-                    lineNumber: valueFormatterPosition.line + 1
-                  } : undefined
-                };
               }
+              return false;
+            });
+
+            const valueFormatter = findByCondition<PropertyAssignment>(columnDeclarationArray.elements[columnIndex], (node: Node) => {
+              if (ts.isPropertyAssignment(node)) {
+                if (ts.isIdentifier(node.name)) {
+                  return node.name.escapedText === 'valueFormatter';
+                }
+              }
+              return false;
+            });
+
+            if (renderHeader) {
+              renderHeaderPosition = ast.getLineAndCharacterOfPosition(renderHeader.getStart());
             }
+
+            if (valueFormatter) {
+              valueFormatterPosition = ast.getLineAndCharacterOfPosition(valueFormatter.getStart());
+            }
+
+            result = {
+              columnPosition: {
+                fileName: tablePosition.fileName,
+                columnNumber: columnPosition.character + 1,
+                lineNumber: columnPosition.line + 1,
+                length: columnDeclarationArray.elements[columnIndex].getText().length
+              },
+              headerPosition: renderHeader && renderHeaderPosition ? {
+                fileName: tablePosition.fileName,
+                columnNumber: renderHeaderPosition.character + 1,
+                lineNumber: renderHeaderPosition.line + 1,
+                length: renderHeader.getText().length
+              } : undefined,
+              valuePosition: valueFormatter && valueFormatterPosition ? {
+                fileName: tablePosition.fileName,
+                columnNumber: valueFormatterPosition.character + 1,
+                lineNumber: valueFormatterPosition.line + 1,
+                length: valueFormatter.getText().length
+              } : undefined
+            };
           }
+        }
+      }
+
+      return result;
+    }
+
+    getColumnsDeclaration(sourceCode: string, tablePosition: SourceLineCol): ts.ArrayLiteralExpression | undefined {
+      let result: ts.ArrayLiteralExpression | undefined;
+
+      let widgetParentNode = findWidgetParentNode(sourceCode, tablePosition)
+
+      if (widgetParentNode) {
+        let columnsDeclarationNode = this.findColumnsDeclaration(widgetParentNode)
+
+        if (columnsDeclarationNode) {
+          result = columnsDeclarationNode.getChildAt(2) as ts.ArrayLiteralExpression;
         }
       }
 

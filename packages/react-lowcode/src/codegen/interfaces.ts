@@ -22,16 +22,19 @@ export interface ColumnSourcePositionOptions{
     index: number
 }
 
+export interface SourceLineColLen extends SourceLineCol {
+    length: number;
+}
+
 export interface ColumnSourcePositionResult {
-    columnPosition: SourceLineCol,
-    valuePosition?: SourceLineCol,
-    headerPosition?: SourceLineCol
+    columnPosition: SourceLineColLen,
+    valuePosition?: SourceLineColLen,
+    headerPosition?: SourceLineColLen
 }
 
 export interface WidgetProperty {
     name: string,
-    value?: string,
-    isWithoutValue: boolean
+    value: string
 }
 
 export interface WidgetProperties {
