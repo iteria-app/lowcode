@@ -1,6 +1,11 @@
 import { createAst } from "../ast";
 import { SourceFile, ScriptTarget, ScriptKind } from "typescript"
 import { Message } from ".";
+import { 
+  createFirstMessage,
+  editExistingMessage,
+  insertNewMessage
+} from "./messageFunctions";
 
 
 export function parseLocaleJSON(localeSourceCode: string, languageLocale = "en") {
@@ -27,16 +32,33 @@ export function parseLocaleAST(ast: SourceFile, languageLocale = "en") {
 }
 
 // it preserves original JSON formatting
-export function patchLocaleJSON(localeFile: string, changedMessages: Message[], originalMessages: Message[]) {
-  for (let i = changedMessages.length; i >= 0; i--) {
-    if (changedMessages[i]?.value == originalMessages[i]?.value) {
-      console.log("Equal")
-    } else {
-      const before = localeFile.substring(0, originalMessages[i].position.pos + 1)
-      const after = localeFile.substring(originalMessages[i].position.end - 1)
-      localeFile = before + changedMessages[i].value + after
-    }
-  }
+export function patchLocaleJSON( 
+  originalMessages: Message[],
+  messageId: string,
+  newValue: string,
+  originalLocaleStringJSON: string | undefined
+  ){
+    const found = originalMessages.find(
+      (message) => message.id == messageId
+    )
 
-  return localeFile
+    if(originalMessages.length == 0){
+      return createFirstMessage(messageId,newValue)
+    }
+    else if (found === undefined) {
+      return insertNewMessage({
+        originalMessages,
+        messageId,
+        newValue,
+        originalLocaleStringJSON,
+      })
+    }
+  else if (originalMessages && found) {
+    return  editExistingMessage({
+      originalMessages,
+      messageId,
+      newValue,
+      originalLocaleStringJSON,
+    })
+  }
 }
