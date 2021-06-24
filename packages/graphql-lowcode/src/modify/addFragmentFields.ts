@@ -55,7 +55,7 @@ function findQueryOffsetsForFields(graphqlQuery: string, fragmentIndentations: n
         const lastFragmentField = node.selectionSet?.selections[node.selectionSet.selections.length - 1]
         const endIndex = lastFragmentField?.loc?.end
 
-        if(endIndex && node.selectionSet?.selections && !fragmentContainsFieldNew(node.selectionSet?.selections, property)) fragmentNewFieldPositions = [...fragmentNewFieldPositions, endIndex + offset]
+        if(endIndex && node.selectionSet?.selections && !fragmentContainsField(node.selectionSet?.selections, property)) fragmentNewFieldPositions = [...fragmentNewFieldPositions, endIndex + offset]
 
         offset += (newFieldLength + fragmentIndentations[iteration])
         if(format) offset += 1
@@ -97,16 +97,7 @@ function patchQueryFields(graphqlQuery: string, fragmentNewFieldPositions: numbe
   return graphqlQuery
 }
 
-function fragmentContainsField(graphqlQuery: string, startIndex: number | undefined, endIndex: number | undefined, fieldName: string) {
-  if (startIndex && endIndex) {
-    const fragmentQuery = graphqlQuery.substr(startIndex, endIndex)
-    if (fragmentQuery.indexOf(fieldName) >= 0) return true
-  }
-
-  return false
-}
-
-function fragmentContainsFieldNew(framentSelections: readonly any[], property: string) {
+function fragmentContainsField(framentSelections: readonly any[], property: string) {
   //checks if fragment contains property
   return framentSelections.some(selection => selection.name.value === property)
 }
