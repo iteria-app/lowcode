@@ -244,3 +244,54 @@ export const properyInsideOutsideInput =
     newProperty
   }
 }`
+
+/**
+ * Different indentation in fragments
+ */
+
+export const differentIndentationInput =
+`{
+  query x {
+    field1
+    newProperty
+  }
+
+  fragment fragmentName on entity {
+    field1
+    field2
+  }
+
+  fragment fragmentName on entity {
+      field1
+      field2
+  }
+
+  fragment fragmentName on entity {
+  field1 field2
+  }
+}`
+
+export const differentIndentationOutput =
+`{
+  query x {
+    field1
+    newProperty
+  }
+
+  fragment fragmentName on entity {
+    field1
+    field2
+    newProperty
+  }
+
+  fragment fragmentName on entity {
+      field1
+      field2
+      newProperty
+  }
+
+  fragment fragmentName on entity {
+  field1 field2
+  newProperty
+  }
+}`

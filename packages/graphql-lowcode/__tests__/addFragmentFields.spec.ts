@@ -49,4 +49,8 @@ describe("Add fragment field", () => {
   test("Property outside + inside of a fragment", () => {
     expect(addFragmentField(scenarios.properyInsideOutsideInput, { entity: 'entity', property: "newProperty" })).toEqual(scenarios.properyInsideOutsideInput)
   })
+
+  test("Different indentation in fragments", () => {
+    expect(addFragmentField(scenarios.differentIndentationInput, { entity: 'entity', property: "newProperty" })).toEqual(scenarios.differentIndentationOutput)
+  })
 })
