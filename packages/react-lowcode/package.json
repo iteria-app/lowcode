@@ -1,6 +1,6 @@
 {
   "name": "@iteria-app/react-lowcode",
-  "version": "0.6.1",
+  "version": "0.6.5",
   "description": "Automate React Apps.",
   "scripts": {
     "build": "npx tsc",
@@ -13,7 +13,8 @@
     "codegenBasicTableF": "ts-node src/codegen/cli/index.ts -p \"d:\\Dev\\LowCode\\ui-material-fork\\example-material-ui\\src\\views\\generated\\\\\" -f \"GeneratedBasicTableF.tsx\" -u \"MaterialUI\" --fr \"Intl\" -c \"list\" -t \"BasicTable\"",
     "codegenMuiTableF": "ts-node src/codegen/cli/index.ts -p \"d:\\Dev\\LowCode\\ui-material-fork\\example-material-ui\\src\\views\\generated\\\\\" -f \"GeneratedDataTableF.tsx\" -u \"MaterialUI\" --fr \"Intl\" -c \"list\" -t \"DataTable\"",
     "codegenMuiDetail": "ts-node src/codegen/cli/index.ts -p \"d:\\Dev\\LowCode\\ui-material-fork\\example-material-ui\\src\\views\\generated\\\\\" -f \"GeneratedMuiDetail.tsx\" -u \"MaterialUI\" --fr \"None\" -c \"detail\" -t \"BasicTable\"",
-    "codegenAll": "npm run codegenBasicTable && npm run codegenMuiTable && npm run codegenBasicTableF && npm run codegenMuiTableF && npm run codegenMuiDetail"
+    "codegenAll": "npm run codegenBasicTable && npm run codegenMuiTable && npm run codegenBasicTableF && npm run codegenMuiTableF && npm run codegenMuiDetail",
+    "codegenTest": "jest codegen*"
   },
   "homepage": "https://iteria.app/",
   "repository": {

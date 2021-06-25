@@ -1,0 +1,12 @@
+query generated {
+  customers(order_by: { name: asc }) {
+    updatedAt
+    phone
+    name
+    id
+    email
+    createdAt
+    avatarUrl
+    address
+  }
+}

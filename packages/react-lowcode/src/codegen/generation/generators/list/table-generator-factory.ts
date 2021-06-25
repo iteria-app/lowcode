@@ -8,8 +8,8 @@ import { Entity, Property } from '../../entity';
 import { SourceLineCol } from '../../../../ast';
 
 export interface TableGenerator{
-    insertColumn(componentPosition: SourceLineCol, property: Property, columnIndex?: number): any
-    generateTableComponent(): PageComponent | undefined
+    insertColumn(componentPosition: SourceLineCol, property: Property, columnIndex?: number): any;
+    generateTableComponent(): PageComponent | undefined;
 }
 
 export class TableGeneratorFactory{

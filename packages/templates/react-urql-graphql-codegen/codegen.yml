@@ -1,0 +1,9 @@
+overwrite: true
+schema: '${REACT_APP_SCHEMA_ENDPOINT:?error with env variable}'
+documents: "src/**/*.graphql"
+generates:
+  src/generated.ts:
+    plugins:
+      - "typescript"
+      - "typescript-operations"
+      - "typescript-urql"
