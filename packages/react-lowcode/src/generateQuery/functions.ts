@@ -12,23 +12,21 @@ const ColumnKind = 'kind';
 const ColumnName = 'name';
 const ColumnFields = 'fields';
 
-var allFragments = '';
-
-var ActualFragment: string[] = [];
-var nameOfActualDataObject = '';
-var fullJson: String = '';
-var dataObjects = [] as  any;
-var indentation = "";
-
 const newLine = '\n';
 const whitespace = '  ';
+
+let allFragments = '';
+let ActualFragment: string[] = [];
+let nameOfActualDataObject = '';
+let dataObjects = [] as  any;
+let indentation = "";
+
 
 
 
 
 export function generateNewIntrospectonQuery(data: any): string {
-    var queryString = '';
-    fullJson = JSON.stringify(data);
+    let queryString = '';
     
     if (('types' in data)) {
         data = data.types
@@ -44,7 +42,7 @@ export function generateNewIntrospectonQuery(data: any): string {
     console.log('Konecny query string:');
     console.log(queryString);
 
-    var graphqlQuery = '';
+    let graphqlQuery = '';
     return graphqlQuery
 }
 
@@ -58,7 +56,7 @@ export function getAllDataObjectsFromJSONAndDeleteItFromQueryData(data: any) {
         }
     }
 
-    var filtered = data.filter(function (el: any) {
+    let filtered = data.filter(function (el: any) {
         return el != null;
     });
 
@@ -76,7 +74,7 @@ export function pushDataObjectDoArray(data: any) {
 }
 
 export function getParameters(data: any): string {
-    var queryString = '';
+    let queryString = '';
     if (data != null) {
         if(typeof data == 'object') {
             data = [data]
@@ -116,7 +114,7 @@ export function processEntityWhenIsObject(data: any[]) {
 }
 
 export function addKeyToQuery(key: string, data: any, startOfParentesis: boolean) {
-    var stringToReturn = ''
+    let stringToReturn = ''
 
     if (isNaN(Number(key)) ) {
         stringToReturn = startOfParentesis ? key + ' ' : ''; 
@@ -127,7 +125,7 @@ export function addKeyToQuery(key: string, data: any, startOfParentesis: boolean
 }
 
 export function processEntityAccordKeys(data: any) {
-    var queryString = '';
+    let queryString = '';
     
     if ((data.name != objectIsQueryDefinition)) {
         queryString += addCommentar(data)
@@ -154,7 +152,7 @@ export function addTypesOfObject(data: any) {
 }
 
 export function addFieldOfObject(data: any) {
-    var queryString = '';
+    let queryString = '';
     if (ColumnFields in data) {
         queryString += getParameters(data.fields);
     } else if (nameOfActualDataObject != "") {
@@ -172,7 +170,7 @@ export function addFieldOfObject(data: any) {
 }
 
 export function addFieldsOrderByDataObject(data: any) {
-    var queryString = '';
+    let queryString = '';
     
     if (data[ColumnFields].length != 0) {
         queryString += startOfObject + newLine;
@@ -187,8 +185,8 @@ export function addFieldsOrderByDataObject(data: any) {
 export function createNewFragment(data: any) {
     let nameOfFragment = ActualFragment.join(fragmentDivider) + fragmentDivider + data[ColumnName];
     let queryString = indentation + '...' + nameOfFragment + newLine;
-    var dataFields = data[ColumnFields];
-    var fragmentIndentation: string = '';
+    let dataFields = data[ColumnFields];
+    let fragmentIndentation: string = '';
 
     allFragments += 'fragment ' + nameOfFragment + ' on ' + data[ColumnName] + " " + addParenthesisByValueForFragment(data, true, fragmentIndentation);
     
@@ -273,7 +271,7 @@ export function cycleskipUuidType(data: any): boolean {
 }
 
 export function addStartOfLine(data: any) {
-    var queryString = '';
+    let queryString = '';
 
     if (ColumnName in data) {
         ActualFragment.push(data[ColumnName])
@@ -284,8 +282,8 @@ export function addStartOfLine(data: any) {
 }
 
 export function addEndOfLine(data: any) {
-    var queryString = '';
-    var lastCharacter = 0;
+    let queryString = '';
+    let lastCharacter = 0;
 
     if (ColumnName in data) {
         if ((ColumnFields in data)) {
@@ -302,7 +300,7 @@ export function addEndOfLine(data: any) {
 
 
 export function addCommentar(data: any) {
-    var queryString = '';
+    let queryString = '';
     if ('description' in data) {
         if (data.description != null) {
             queryString += indentation + commentar + data.description + newLine;
@@ -312,7 +310,7 @@ export function addCommentar(data: any) {
 }
 
 export function addQueryNameOrTableNameToQuery(data: any) {
-    var queryString = '';
+    let queryString = '';
 
     if (ColumnName in data) {
         if ( (data.name == objectIsQueryDefinition) && (ColumnFields in data) ) {
@@ -327,7 +325,7 @@ export function addQueryNameOrTableNameToQuery(data: any) {
 }
 
 export function addArgumentFortable(data: any) {
-    var argumentForString = "(";
+    let argumentForString = "(";
     
     if ((ColumnArguments in data) && (data[ColumnArguments].length != 0) ) {
         for (let argument = 0; argument < data[ColumnArguments].length; argument++) {
