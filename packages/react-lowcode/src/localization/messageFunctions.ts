@@ -17,12 +17,12 @@ export const editExistingMessage = ({
     if (originalMessages[i].id === messageId) {
       const before = originalLocaleStringJSON?.substring(
         0,
-        originalMessages[i].position.pos + 2
+        originalMessages[i].position.pos + 1
       )
       const after = originalLocaleStringJSON?.substring(
-        originalMessages[i].position.end - 1
+        originalMessages[i].position.end 
       )
-      originalLocaleStringJSON = before + newValue + after
+      originalLocaleStringJSON = before + JSON.stringify(newValue) + after
     }
   }
   return originalLocaleStringJSON as string
