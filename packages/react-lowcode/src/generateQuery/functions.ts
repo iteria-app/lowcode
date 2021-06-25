@@ -1,3 +1,5 @@
+import { introspectonJson, typesJson } from './interfaces/introspectonJson';
+
 const startOfQuery = 'query'
 const objectIsQueryDefinition = 'query_root';
 const startOfObject = '{';
@@ -25,19 +27,13 @@ let indentation = "";
 
 
 
-export function generateNewIntrospectonQuery(data: any): string {
+export function generateNewIntrospectonQuery(data: introspectonJson): string {
     let queryString = '';
+    let dataTypes: typesJson[];
     
-    if (('types' in data)) {
-        data = data.types
-    } else if (('__schema' in data)) {
-        if (('types' in data['__schema'])) {
-            data = data['__schema'].types
-        }
-    }
-
-    data = getAllDataObjectsFromJSONAndDeleteItFromQueryData(data);
-    queryString += getParameters(data);
+    dataTypes = data['__schema'].types
+    dataTypes = getAllDataObjectsFromJSONAndDeleteItFromQueryData(dataTypes);
+    queryString += getParameters(dataTypes);
     queryString += newLine + newLine + allFragments;
     console.log('Konecny query string:');
     console.log(queryString);
@@ -81,7 +77,6 @@ export function getParameters(data: any): string {
         Object.entries(data).forEach(([key, value], index, index2) => {
 
             queryString += addKeyToQuery(key, value, true);
-            
             if (typeof (value as Array<unknown>) != 'string') {
                 queryString += processEntityWhenIsObject((value as Array<unknown>));
             } else {

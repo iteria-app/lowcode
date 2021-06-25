@@ -1,3 +1,5 @@
+import { introspectonJson } from "./interfaces/introspectonJson";
+
 export class constantsFoTestingGeneratorQueries {
     
 public static scenario2 = {
@@ -1036,7 +1038,7 @@ public static  scenario6 = {
     ]
 }
 
-public static  scenario7 = {
+public static  scenario7:introspectonJson = {
     "__schema": {
         "directives": [
             {
