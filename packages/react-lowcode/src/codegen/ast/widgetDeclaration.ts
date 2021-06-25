@@ -1,5 +1,6 @@
-import ts from "typescript"
+import ts, { SyntaxKind } from "typescript"
 import { astFindSource,SourceLineCol} from "../../ast"
+import { WidgetProperty } from "../interfaces"
 
 export function findWidgetParentNode(sourceCode:string, position: SourceLineCol): ts.Node  | null | undefined{
     let astCode = astFindSource(sourceCode, position)
@@ -60,6 +61,31 @@ export function isFormWidget(sourceCode: string, position: SourceLineCol): boole
     return isFormWidget
 }
 
+export function getWidgetProperties(node: ts.Node): WidgetProperty[] {
+    let result: WidgetProperty[] = [];
+
+    if (isElementWithAttributes(node)) {
+        result = node.attributes.properties.map(prop => {
+            if (ts.isJsxAttribute(prop)) {
+                const value = getAttributeValue(prop);
+
+                if (value) {
+                    return {
+                        name: prop.name.escapedText.toString(),
+                        value: value
+                    };
+                }
+            }
+
+            return undefined;
+        }).filter((item): item is WidgetProperty => {
+            return item !== undefined;
+        });
+    }
+
+    return result;
+}
+
 function findIdentifier(root: ts.Node): ts.Identifier | undefined{
     let identifier = undefined
     root.getChildren().forEach(child => {
@@ -100,4 +126,43 @@ function isTableDeclaration(node: ts.Node): boolean{
 function isDetailDeclaration(node: ts.Node): boolean{
     ///TODO: check also for export key word
     return ts.isVariableDeclaration(node)
+}
+
+function isElementWithAttributes(node: ts.Node): node is ts.JsxOpeningElement | ts.JsxSelfClosingElement {
+    return (ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) && node.attributes.properties.length > 0;
+}
+
+function getAttributeValue(attribute: ts.JsxAttribute): string | undefined {
+    let result: string | undefined;
+
+    if (attribute.initializer) {
+        result = getStringTypeAttributeValue(attribute.initializer)
+            || getNumberTypeAttributeValue(attribute.initializer)
+            || getBooleanTypeAttributeValue(attribute.initializer);
+    } else {
+        result = 'true';
+    }
+
+    return result;
+}
+
+function getStringTypeAttributeValue(initializer: ts.StringLiteral | ts.JsxExpression): string | undefined {
+    return ts.isStringLiteral(initializer) ? initializer.text : undefined;
+}
+
+function getNumberTypeAttributeValue(initializer: ts.StringLiteral | ts.JsxExpression): string | undefined {
+    if (ts.isJsxExpression(initializer) && initializer.expression !== undefined && ts.isNumericLiteral(initializer.expression)) {
+        return initializer.expression.getText();
+    } else {
+        return undefined;
+    }
+}
+
+function getBooleanTypeAttributeValue(initializer: ts.StringLiteral | ts.JsxExpression): string | undefined {
+    if (ts.isJsxExpression(initializer) && initializer.expression
+        && (initializer.expression.kind === SyntaxKind.TrueKeyword || initializer.expression.kind === SyntaxKind.FalseKeyword)) {
+        return initializer.expression.getText();
+    } else {
+        return undefined;
+    }
 }

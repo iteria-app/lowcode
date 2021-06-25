@@ -1,3 +1,14 @@
+## 0.6.2
+BUG FIXES:
+* small bug fixes
+
+FEATURES:
+* *React Code Generator* enhanced with functions for getting and setting widget fields
+* *React Code Generator* function getColumnSourcePosition() is returning also length 
+   source definition
+
+
+
 ## 0.4.0 (2021-04-07)
 
 BUG FIXES:
