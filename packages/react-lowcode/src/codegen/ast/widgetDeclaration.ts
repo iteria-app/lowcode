@@ -52,8 +52,8 @@ export function isFormWidget(sourceCode: string, position: SourceLineCol): boole
         if(variableDeclaration){
             const identifier = findIdentifier(variableDeclaration)
 
-            if(identifier){
-                isFormWidget = identifier.getText().startsWith('Generated')
+            if(identifier){//TODO(mch): hardly need to refactor this bad solution
+                isFormWidget = identifier.getText().startsWith('Generated') || identifier.getText().indexOf('Formik') > -1
             }
         }
     }

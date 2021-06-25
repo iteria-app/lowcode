@@ -166,61 +166,57 @@ export default class MuiDetailGenerator implements DetailGenerator {
     return result;
   }
 
-  async insertFormWidget(position: SourceLineCol, property: Property): Promise<string> {
-    //Initial values
+  async insertFormWidget(position: SourceLineCol, property: Property, index?:number): Promise<string> {
     let alteredSource = "";
     if (this._widgetContext) {
       let sourceCode = await this._widgetContext.getSourceCodeString(position);
       let ast = createAst(sourceCode);
+      let widgetParentNode = findWidgetParentNode(
+        sourceCode,
+        position
+      );
 
-      if (ast) {
-        let widgetParentNode = findWidgetParentNode(
-          sourceCode,
-          position
-        );
+      if (ast && widgetParentNode) {
+        let formikDeclarationNode = this.findGridDeclaration(widgetParentNode);
 
-        if (widgetParentNode) {
-          let formikDeclarationNode =
-            this.findGridDeclaration(widgetParentNode);
+        if (formikDeclarationNode) {
+          let propertyAssigmentArray: ts.PropertyAssignment[] = [];
+          findPropertyAssignment(
+            formikDeclarationNode.getChildAt(1),
+            propertyAssigmentArray
+          );
 
-          if (formikDeclarationNode) {
-            let propertyAssigmentArray: ts.PropertyAssignment[] = [];
-            findPropertyAssignment(
-              formikDeclarationNode.getChildAt(1),
-              propertyAssigmentArray
-            );
-
-            if (propertyAssigmentArray) {
-              ast = this.addNewField(
-                formikDeclarationNode,
-                propertyAssigmentArray,
-                property,
-                ast
-              );
-            }
-          }
-        }
-
-        let gridElements: ts.JsxElement[] = [];
-        //Add grid with field
-        if (widgetParentNode) {
-          this.findGridElement(widgetParentNode, gridElements);
-        }
-
-        if (gridElements) {
-          if (widgetParentNode) {
-            let gridContainers: ts.JsxElement[] = [];
-            this.findGridContainer(widgetParentNode, gridContainers);
-            ast = this.addNewGridElement(
-              gridElements,
-              gridContainers[0],
+          if (propertyAssigmentArray) {
+            ast = this.addNewField(
+              formikDeclarationNode,
+              propertyAssigmentArray,
               property,
               ast
             );
           }
         }
 
-        alteredSource = this.printSourceCode(ast);
+        //find grid container
+        let gridContainers: ts.JsxElement[] = [];
+        this.findGridContainer(widgetParentNode, gridContainers);
+
+        if(gridContainers.length > 0){
+          //find grid items
+          let gridElements: ts.JsxElement[] = [];
+          this.findGridElement(widgetParentNode, gridElements);
+
+          if (gridElements) {
+              ast = this.addNewGridElement(
+                gridElements,
+                gridContainers[0],
+                property,
+                ast,
+                index
+              );
+
+              alteredSource = this.printSourceCode(ast);
+          }
+        }
       }
     }
 
@@ -234,7 +230,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
         children.forEach((child) => {
           if (ts.isJsxElement(child)) {
             if (child.getFullText().startsWith("Grid item", 1)) {
-              foundedElements = [...foundedElements, child];
+              foundedElements.push(child);
             } else {
               this.findGridElement(child, foundedElements);
             }
@@ -253,7 +249,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
         children.forEach((child) => {
           if (ts.isJsxElement(child)) {
             if (child.getFullText().startsWith("Grid container", 1)) {
-              foundedElements = [...foundedElements, child];
+              foundedElements.push(child);
             } else {
               this.findGridContainer(child, foundedElements);
             }
@@ -265,23 +261,27 @@ export default class MuiDetailGenerator implements DetailGenerator {
     }
   }
 
-
-
   addNewGridElement(
     gridElements: ts.JsxElement[],
     gridContainer: ts.JsxElement,
     property: Property,
-    ast: ts.SourceFile
+    ast: ts.SourceFile,
+    index?: number
   ): ts.SourceFile {
     let newField = this.createTextFieldElement(
       property.getName(),
       property.getTypeText(),
       InputType.text
     );
-    let newElements: ts.JsxElement[] = [
-      ...gridElements,
-      newField,
-    ] as ts.JsxElement[];
+
+    let newElements: ts.JsxElement[];
+
+    if(index && index < gridElements.length + 1){
+      newElements = [...gridElements.slice(0, index - 1), newField, ...gridElements.slice(index - 1)]
+    }else{
+      newElements = [...gridElements, newField]
+    }
+
     return replaceElementsToAST(
       ast,
       gridContainer.pos,

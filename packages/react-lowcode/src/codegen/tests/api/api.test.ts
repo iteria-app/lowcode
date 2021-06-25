@@ -51,7 +51,7 @@ describe(".api tests", () => {
         test(".is form widget", () => {
             const file = fs.readFileSync(path.resolve('src/codegen/tests/detail/detail-test-file.txt'),'utf-8');
       
-            const source : SourceLineCol = {lineNumber: 69, columnNumber:17, fileName:'test'};
+            const source : SourceLineCol = {lineNumber: 50, columnNumber:19, fileName:'test'};
             const isSelected = isSelectedFormWidget(file, source);
             expect(isSelected).toBe(true);
         }); 

@@ -169,7 +169,7 @@ export async function insertFormWidget(
     widgetContext
   );
 
-  return await generator.insertFormWidget(formPosition, options.entityField);
+  return await generator.insertFormWidget(formPosition, options.entityField, options.index);
 }
 
 export async function getColumnSourcePosition(
