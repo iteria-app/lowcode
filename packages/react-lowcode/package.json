@@ -1,6 +1,6 @@
 {
   "name": "@iteria-app/react-lowcode",
-  "version": "0.6.5",
+  "version": "0.6.6",
   "description": "Automate React Apps.",
   "scripts": {
     "build": "npx tsc",
