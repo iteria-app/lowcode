@@ -11,8 +11,9 @@ export function generatePages(inputSourceCode: string, io: CodeRW & CodeDir, opt
     const project = new Project({})
     const myClassFile = project.createSourceFile("src/types.ts", inputSourceCode)
     const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
-
+    alert('generatePages')
     options?.names.map((typeName) => {
+        
         const typeAlias = myClassFile.getTypeAlias(typeName)
         const props = typeAlias?.getType()?.getProperties() ?? []
         if (typeAlias) {
@@ -39,16 +40,15 @@ export function generatePages(inputSourceCode: string, io: CodeRW & CodeDir, opt
                 true,
                 ts.ScriptKind.TSX
             )
-            const pageSouceCode = printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page!.imports, page!.functionDeclaration]), sourceFile)
-            io.writeFile(filePath, pageSouceCode)
+
+            const pageSourceCode = printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page!.imports, page!.functionDeclaration]), sourceFile)
+            
+            console.log(`table for ${typeName} was generated: ${pageSourceCode}`)
+            io.writeFile(filePath, pageSourceCode)
 
             //generate list wrapper
-            const indexWrapperTemplatePath = 'path-to-template'//TODO: put here real template path when template will be done
-            let template = ''
-            io.readFile(indexWrapperTemplatePath).then((source => {if(source) template = source;}))
-
             const templateResolver = new TemplateResolver(entity);
-            const listWrapper = templateResolver.generateListPage(template);
+            const listWrapper = templateResolver.generateListPage(options.pageListTemplate);
 
             if(listWrapper) {
                 const listWrapperFilePath = `src/components/${typeName}Page.tsx`
@@ -62,6 +62,9 @@ export function generatePages(inputSourceCode: string, io: CodeRW & CodeDir, opt
     
                 // TODO:PC: Need print here? or only: io.writeFile(listWrapperFilePath, listWrapper)
                 const wrapperPageSourceCode = printer.printFile(sourceFileWrapperSourceFile);
+
+                console.log(`page for ${typeName} table was generated: ${wrapperPageSourceCode}`)
+
                 io.writeFile(listWrapperFilePath, wrapperPageSourceCode)
             }
         }

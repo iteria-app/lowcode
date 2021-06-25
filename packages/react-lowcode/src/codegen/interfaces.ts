@@ -6,7 +6,9 @@ import { UiFramework } from "./definition/context-types";
 
 export interface CodegenOptions {
     // whitelisted entity names
-    readonly names: string[]
+    readonly names: string[],
+    //template for generating list page
+    pageListTemplate: string,
     // default is MaterialUI
     uiFramework?: UiFramework
 }

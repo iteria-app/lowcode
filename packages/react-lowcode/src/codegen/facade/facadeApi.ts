@@ -13,7 +13,7 @@ import GrommetDataTableGenerator from "../generation/generators/list/grommet-dt-
 import { CodeRW } from "../../io";
 import { CodegenRw } from "../io/codegenRw";
 import { BasicTableGenerator } from "../generation/generators/list/basic-table-generator";
-import { FacadeDeleteOptions, FacadeInsertOptions } from "./interfaces";
+import { FacadeDeleteOptions, FacadeInsertOptions, RouteOptions } from "./interfaces";
 import { ColumnSourcePositionResult, WidgetProperties } from "../interfaces";
 
 export async function insertColumn(
@@ -247,4 +247,8 @@ export async function setFormWidgetProperties(
   );
 
   return await generator.setFormWidgetProperties(position, properties);
+}
+
+export async function addRoute(options: RouteOptions) {
+    
 }
