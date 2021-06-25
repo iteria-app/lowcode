@@ -42,8 +42,7 @@ export function generateNewIntrospectonQuery(data: any): string {
     console.log('Konecny query string:');
     console.log(queryString);
 
-    let graphqlQuery = '';
-    return graphqlQuery
+    return queryString
 }
 
 export function getAllDataObjectsFromJSONAndDeleteItFromQueryData(data: any) {
