@@ -1,5 +1,10 @@
 import { parse, visit } from 'graphql'
 
+interface fieldOffset {
+  offset: number,
+  indentSize: number
+}
+
 export function addFragmentField(graphqlQuery: string, options: { entity: string, property: string }) {
   //if fragment does not contain fragment keyword -> returns unchanged query
   if (!graphqlQuery.indexOf('fragment')) return graphqlQuery
@@ -7,21 +12,17 @@ export function addFragmentField(graphqlQuery: string, options: { entity: string
   //if query is inline add spaces after newProperty, else add new line
   const format = graphqlQuery.indexOf('\n') >= 0 ? '\n' : ''
 
-  //gets indentations for each fragment where a new property is being added
-  const fragmentIndentations = getFragmentIndentations(graphqlQuery, options.entity, options.property)
+  const queryOffsetsForFields = findQueryOffsetsForFields(graphqlQuery, options.entity, options.property)
 
-  //gets new property positions for each fragment where a new property is being added
-  const fragmentNewFieldPositions = findQueryOffsetsForFields(graphqlQuery, fragmentIndentations, options.entity, options.property)
-
-  const finalQuery = patchQueryFields(graphqlQuery, fragmentNewFieldPositions, fragmentIndentations, options.property, format)
+  const finalQuery = patchQueryFields(graphqlQuery, queryOffsetsForFields, options.property, format)
 
   return finalQuery
 }
 
-function getFragmentIndentations(graphqlQuery: string, entity: string, property: string) {
+function findQueryOffsetsForFields(graphqlQuery: string, entity: string, property: string) {
   const ast = parse(graphqlQuery)
 
-  let fragmentIndentations: number[] = []
+  let queryOffsetForFields: fieldOffset[] = []
 
   visit(ast, {
     Field(node) {
@@ -31,40 +32,18 @@ function getFragmentIndentations(graphqlQuery: string, entity: string, property:
         const startIndex = firstFragmentField?.loc?.start
         const endIndex = lastFragmentField?.loc?.end
 
-        if (!fragmentContainsField(graphqlQuery, startIndex, endIndex, property)) fragmentIndentations = [...fragmentIndentations, getFieldIndentation(graphqlQuery, startIndex)]
+        //if fragment does not contain the new property, calculate relative offset to original qiery and indent size for every fragment
+        if (endIndex && node.selectionSet?.selections && !fragmentContainsField(node.selectionSet?.selections, property)) {
+          queryOffsetForFields = [...queryOffsetForFields, {
+            offset: endIndex,
+            indentSize: getFieldIndentation(graphqlQuery, startIndex)
+          }]
+        }
       }
     }
   })
 
-  return fragmentIndentations
-}
-
-function findQueryOffsetsForFields(graphqlQuery: string, fragmentIndentations: number[], entity: string, property: string) {
-  const ast = parse(graphqlQuery)
-  const format = graphqlQuery.indexOf('\n') >= 0 ? true : false
-
-  //after new property is added to a graphql string, the whole string gets longer -> next new properties must be offseted by property length
-  const newFieldLength = property.length
-
-  let fragmentNewFieldPositions: number[] = []
-  let offset = 0, iteration = 0
-
-  visit(ast, {
-    Field(node) {
-      if (node.name.value === entity) {
-        const lastFragmentField = node.selectionSet?.selections[node.selectionSet.selections.length - 1]
-        const endIndex = lastFragmentField?.loc?.end
-
-        if(endIndex && node.selectionSet?.selections && !fragmentContainsField(node.selectionSet?.selections, property)) fragmentNewFieldPositions = [...fragmentNewFieldPositions, endIndex + offset]
-
-        offset += (newFieldLength + fragmentIndentations[iteration])
-        if(format) offset += 1
-        iteration++
-      }
-    }
-  })
-
-  return fragmentNewFieldPositions
+  return queryOffsetForFields
 }
 
 export function getFieldIndentation(graphqlQuery: string, fragmentStartIndex: number | undefined) {
@@ -78,20 +57,24 @@ export function getFieldIndentation(graphqlQuery: string, fragmentStartIndex: nu
   let indent = 0
 
   for (const char of reversedString) {
-    if (char === ' ') indent ++
+    if (char === ' ') indent++
     else break
   }
 
   return indent
 }
 
-function patchQueryFields(graphqlQuery: string, fragmentNewFieldPositions: number[], fragmentIndentations: number[], property: string, format: string) {
-  fragmentNewFieldPositions.forEach((index, iteration) => {
-    const indentSize = fragmentIndentations[iteration]
-    //creates indent string
-    const indentString = Array(indentSize).fill(' ').join('')
+function patchQueryFields(graphqlQuery: string, queryOffsetsForFields: fieldOffset[], property: string, format: string) {
+  //after new property is added to a graphql string, the whole string gets longer -> next new properties must be offseted 
+  //by property length + indentation + if format of query is multiline then add '\n' length, which is one
+  let extraOffset = 0
 
-    graphqlQuery = graphqlQuery.substr(0, index) + `${format}${indentString}${property}` + graphqlQuery.substr(index)
+  queryOffsetsForFields.forEach(field => {
+    const indentString = Array(field.indentSize).fill(' ').join('')
+
+    graphqlQuery = graphqlQuery.substr(0, field.offset + extraOffset) + `${format}${indentString}${property}` + graphqlQuery.substr(field.offset + extraOffset)
+  
+    extraOffset += property.length + field.indentSize + format.length
   })
 
   return graphqlQuery
