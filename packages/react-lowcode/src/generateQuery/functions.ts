@@ -1,80 +1,111 @@
-import { TypeAliasDeclaration } from 'ts-morph';
+const startOfQuery = 'query'
+const objectIsQueryDefinition = 'query_root';
+const startOfObject = '{';
+const endOfObject = '}';
+const limitOfCount = "limit";
+const commentar = '# '
+const fragmentDivider = '_'
+const uuidVariable: string = '$uuid';
 
-var nameOfQuery = 'myQuery';
-var startOfQuery = 'query'
-var objectIsQueryDefinition = 'query_root';
-var startOfObject = '{';
-var endOfObject = '}';
-var limitOfCount = "$limit";
+const ColumnArguments = 'args';
+const ColumnKind = 'kind';
+const ColumnName = 'name';
+const ColumnFields = 'fields';
 
-var isQueryWithName: boolean = false;
 var allFragments = '';
 
-var nameOfActualFragment = '';
-var fullJson: any;
+var ActualFragment: string[] = [];
+var nameOfActualDataObject = '';
+var fullJson: String = '';
+var dataObjects = [] as  any;
+var indentation = "";
 
-var newLine = '\n';
-var doubleDot = ':';
+const newLine = '\n';
+const whitespace = '  ';
 
-/**
- * This method returns GraphQL query
- * @param data 
- * @returns 
- */
-    export function generateNewIntrospectonQuery(data: any): string {
-    fullJson = JSON.stringify(data);
-    console.log('JSON: ', data)
-    // introspectino => graphql AST
+
+
+
+export function generateNewIntrospectonQuery(data: any): string {
     var queryString = '';
+    fullJson = JSON.stringify(data);
     
-    queryString += getParameters(data.types, true);
+    if (('types' in data)) {
+        data = data.types
+    } else if (('__schema' in data)) {
+        if (('types' in data['__schema'])) {
+            data = data['__schema'].types
+        }
+    }
+
+    data = getAllDataObjectsFromJSONAndDeleteItFromQueryData(data);
+    queryString += getParameters(data);
     queryString += newLine + newLine + allFragments;
-    console.log('Konecny String:');
+    console.log('Konecny query string:');
     console.log(queryString);
+
     var graphqlQuery = '';
     return graphqlQuery
 }
 
-/**
- * This method returns GraphQL query.
- * If call this method for first time mainBody argument is true, and if query hasn't extension syntax add end parenthesis
- * @param data 
- * @param mainBody 
- * @returns 
- */
-    export function getParameters(data: any, mainBody: boolean = false): string {
-    var queryString = '';
-
-    Object.entries(data).forEach(([key, value], index, index2) => {
-        //console.log( index, index2)
-        queryString += addKeyToQuery(key, value, true);
-        //console.log('On for Each: ',key, value)
-        if (typeof (value as Array<unknown>) != 'string') {
-            queryString += processEntityWhenIsObject((value as Array<unknown>));
-        } else {
-            queryString += value;
+export function getAllDataObjectsFromJSONAndDeleteItFromQueryData(data: any) {
+    for (let index = 0; index < data.length; index++) {
+        if ( (data[index].kind == "OBJECT") && (data[index].name != "query_root") ) {
+            pushDataObjectDoArray(data[index]);
         }
+        if (data[index].name != "query_root") {
+            delete data[index];
+        }
+    }
 
-        queryString += addKeyToQuery(key, value, false);
+    var filtered = data.filter(function (el: any) {
+        return el != null;
     });
 
-    if (isQueryWithName && mainBody) {
-        queryString += endOfObject;
+    return filtered;
+}
+
+export function pushDataObjectDoArray(data: any) {
+    let dataObject = {
+        name: (ColumnName in data) ? data.name : "",
+        fields: (ColumnFields in data) ? data.fields : [],
+        description: ('description' in data) ? data.description : ""
     }
-    
+
+    dataObjects.push(dataObject)
+}
+
+export function getParameters(data: any): string {
+    var queryString = '';
+    if (data != null) {
+        if(typeof data == 'object') {
+            data = [data]
+        }
+        Object.entries(data).forEach(([key, value], index, index2) => {
+
+            queryString += addKeyToQuery(key, value, true);
+            
+            if (typeof (value as Array<unknown>) != 'string') {
+                queryString += processEntityWhenIsObject((value as Array<unknown>));
+            } else {
+                queryString += value;
+            }
+
+            queryString += addKeyToQuery(key, value, false);
+        });
+    }
+
     return queryString;
 }
 
-/**
- * This method proccess data when data is object
- * @param data 
- * @returns 
- */
-    export function processEntityWhenIsObject(data: any) {
+export function processEntityWhenIsObject(data: any[]) {
     let queryString = '';
-
     if (data.length != undefined) {
         for (let index = 0; index < data.length; index++) {
+            if (data[index].name != objectIsQueryDefinition) {
+                indentation += whitespace;
+            }
+            
             queryString += processEntityAccordKeys(data[index]);
         }
     } else {
@@ -84,151 +115,341 @@ var doubleDot = ':';
     return queryString;
 }
 
-/**
- * This method add key to query if key isn't number
- * @param key 
- * @param data 
- * @param startOfParentesis 
- * @returns 
- */
-    export function addKeyToQuery(key: any, data: any, startOfParentesis: boolean) {
+export function addKeyToQuery(key: string, data: any, startOfParentesis: boolean) {
+    var stringToReturn = ''
+
     if (isNaN(Number(key)) ) {
-        let stringToReturn = startOfParentesis ? key + ' ' : ''; 
+        stringToReturn = startOfParentesis ? key + ' ' : ''; 
         stringToReturn += addParenthesisByValue(data, startOfParentesis);
-        return stringToReturn;
+    } 
+
+    return stringToReturn;
+}
+
+export function processEntityAccordKeys(data: any) {
+    var queryString = '';
+    
+    if ((data.name != objectIsQueryDefinition)) {
+        queryString += addCommentar(data)
+        queryString += addQueryNameOrTableNameToQuery(data);
+        queryString += addStartOfLine(data);
+    }
+
+    addTypesOfObject(data);
+
+    queryString += addFieldOfObject(data);
+
+    if ((data.name != objectIsQueryDefinition)) {
+        queryString += addEndOfLine(data);
+    }
+    nameOfActualDataObject = "";
+
+    return queryString;
+}
+
+export function addTypesOfObject(data: any) {
+    if ( ('type' in data) && !('fields' in data) ) {
+        addTypesToString(data.type);
+    }
+}
+
+export function addFieldOfObject(data: any) {
+    var queryString = '';
+    if (ColumnFields in data) {
+        queryString += getParameters(data.fields);
+    } else if (nameOfActualDataObject != "") {
+        indentation += whitespace;
+        for (let index = 0; index < dataObjects.length; index++) {
+            if (dataObjects[index].name == nameOfActualDataObject) {
+                queryString += addFieldsOrderByDataObject(dataObjects[index])
+            }
+        }
+    }
+    
+    indentation = indentation.substr(whitespace.length);
+
+    return queryString;
+}
+
+export function addFieldsOrderByDataObject(data: any) {
+    var queryString = '';
+    
+    if (data[ColumnFields].length != 0) {
+        queryString += startOfObject + newLine;
+        queryString += createNewFragment(data);
+        indentation = indentation.substr(whitespace.length);
+        queryString += addParenthesisByValue(null, false);
+    }
+
+    return queryString;
+}
+
+export function createNewFragment(data: any) {
+    let nameOfFragment = ActualFragment.join(fragmentDivider) + fragmentDivider + data[ColumnName];
+    let queryString = indentation + '...' + nameOfFragment + newLine;
+    var dataFields = data[ColumnFields];
+    var fragmentIndentation: string = '';
+
+    allFragments += 'fragment ' + nameOfFragment + ' on ' + data[ColumnName] + " " + addParenthesisByValueForFragment(data, true, fragmentIndentation);
+    
+    putTogetherFragmentTables(dataFields, true, fragmentIndentation)
+    allFragments += addParenthesisByValueForFragment(null, false, fragmentIndentation);
+
+    return queryString;
+}
+
+export function putTogetherFragmentTables(dataFields: any, canObject: boolean = true, fragmentIndentation: string) {
+    for (let index = 0; index < dataFields.length; index++) {
+            if (findTypeOfField(dataFields[index])) {
+                if (canObject) {
+                    putObjectToFragmentTables(dataFields[index], fragmentIndentation);
+                }
+            } else if (skipUuidType(dataFields[index])) {
+                fragmentIndentation += whitespace;
+                allFragments += fragmentIndentation + dataFields[index][ColumnName] + newLine;
+                fragmentIndentation = fragmentIndentation.substr(whitespace.length)
+            }
+    }
+}
+
+export function putObjectToFragmentTables(dataField: any, fragmentIndentation: string) {
+    for (let index = 0; index < dataObjects.length; index++) {
+        if (dataObjects[index].name == dataField.name) {
+            fragmentIndentation += whitespace;
+            allFragments += fragmentIndentation + dataObjects[index][ColumnName] + ' ' + addParenthesisByValueForFragment(dataObjects[index], true, fragmentIndentation)
+            
+            putTogetherFragmentTables(dataObjects[index][ColumnFields], false, fragmentIndentation)
+
+            fragmentIndentation = fragmentIndentation.substr(whitespace.length)
+            allFragments += fragmentIndentation + addParenthesisByValueForFragment(null, false, fragmentIndentation)
+        }
+    }
+}
+
+export function findTypeOfField(dataFields: any) {
+    let trullyReturn = false;
+
+    if ('type' in dataFields) {
+        trullyReturn = cyclefindTypeOfField(dataFields.type,)
+    }
+    
+    return trullyReturn
+}
+
+export function cyclefindTypeOfField(data: any): boolean {
+    let trullyReturn = false;
+
+    if ('ofType' in data && data.ofType != null) {
+        trullyReturn = cyclefindTypeOfField(data.ofType);
+    }
+    if (ColumnKind in data && data[ColumnKind] == 'OBJECT') {
+        trullyReturn = true;
+    }
+
+    return trullyReturn;
+}
+
+export function skipUuidType(dataFields: any) {
+    let trullyReturn = false;
+
+    if ('type' in dataFields) {
+        trullyReturn = cycleskipUuidType(dataFields.type,)
+    }
+    
+    return trullyReturn
+}
+
+export function cycleskipUuidType(data: any): boolean {
+    let trullyReturn = true;
+
+    if ('ofType' in data && data.ofType != null) {
+        trullyReturn = cycleskipUuidType(data.ofType);
+    }
+    if (ColumnKind in data && data[ColumnName] == 'uuid') {
+        trullyReturn = false;
+    }
+
+    return trullyReturn;
+}
+
+export function addStartOfLine(data: any) {
+    var queryString = '';
+
+    if (ColumnName in data) {
+        ActualFragment.push(data[ColumnName])
+        queryString += ((ColumnFields in data) ? indentation + startOfObject + newLine : '');
+    }
+
+    return queryString;
+}
+
+export function addEndOfLine(data: any) {
+    var queryString = '';
+    var lastCharacter = 0;
+
+    if (ColumnName in data) {
+        if ((ColumnFields in data)) {
+            queryString += addParenthesisByValue(null, false);
+        } else {
+            queryString += '}\n';
+            queryString += newLine;
+        }
+        ActualFragment.splice(ActualFragment.length - 1)
+    }
+
+    return queryString;
+}
+
+
+export function addCommentar(data: any) {
+    var queryString = '';
+    if ('description' in data) {
+        if (data.description != null) {
+            queryString += indentation + commentar + data.description + newLine;
+        }
+    }
+    return queryString;
+}
+
+export function addQueryNameOrTableNameToQuery(data: any) {
+    var queryString = '';
+
+    if (ColumnName in data) {
+        if ( (data.name == objectIsQueryDefinition) && (ColumnFields in data) ) {
+            return queryString;
+        } else {
+            queryString += definiteNewQuery(data)
+            queryString += indentation + data[ColumnName] + ' ';
+            queryString += addArgumentFortable(data)
+        }
+    }
+    return queryString;
+}
+
+export function addArgumentFortable(data: any) {
+    var argumentForString = "(";
+    
+    if ((ColumnArguments in data) && (data[ColumnArguments].length != 0) ) {
+        for (let argument = 0; argument < data[ColumnArguments].length; argument++) {
+            argumentForString += addArgumentLimit(data[ColumnArguments][argument][ColumnName])
+            argumentForString += addArgumentUuid(data[ColumnArguments][argument])
+        }
+    }
+    if (argumentForString != "(") {
+        argumentForString += ") "
+    } else {
+        argumentForString += ""
+    }
+    return argumentForString;
+}
+
+export function addArgumentLimit(data: any) {
+    let limitForString = '';
+    
+    if (data == 'limit') {
+        limitForString = limitOfCount + ': 100 ';
+    }
+    return limitForString;
+}
+
+export function addArgumentUuid(data: any) {
+    let uuidForString = '';
+    if (findUuidInType(data.type)) {
+        uuidForString = data[ColumnName] + ': ' + uuidVariable + ' ';
+    }
+
+    return uuidForString;
+}
+
+export function findUuidInType(data: any): boolean {
+    let isUuid = false;
+
+    if ('ofType' in data && data.ofType != null) {
+        isUuid = findUuidInType(data.ofType);
+    }
+    if (('name' in data) && (data.name == "uuid")) {
+        isUuid = true
+    }
+
+    return isUuid;
+}
+
+export function isTypeANonNull(data: any): boolean {
+    let isNonNull: boolean = false;
+
+    if ((ColumnKind in data) && (data[ColumnKind] == "NON_NULL")) {
+        isNonNull = true;
+    }
+    if ('ofType' in data && data.ofType != null && (!isNonNull)) {
+        isNonNull = isTypeANonNull(data.ofType);
+    }
+    if ('type' in data && data.type != null) {
+        isNonNull = isTypeANonNull(data.type);
+    }
+
+    return isNonNull
+}
+
+export function addUuidToVariablesOfQuery(data: any, isNonNull: boolean): string {
+    let variableQuery = "";
+    
+    if ('type' in data && data.type != null) {
+        variableQuery += addUuidToVariablesOfQuery(data.type, isNonNull);
+    }
+    if ('ofType' in data && data.ofType != null) {
+        variableQuery += addUuidToVariablesOfQuery(data.ofType, isNonNull);
+    }
+    if (('name' in data) && (data.name == "uuid")) {
+        variableQuery += " (" + uuidVariable + ": " + data.name
+        variableQuery += isNonNull ? "!" : ""
+        variableQuery += ") "
+    }
+    
+    return variableQuery;
+}
+
+export function findUuidArgumentInData(data: any) {
+    let variableForQueryString = '';
+    let isNonNull : boolean = false;
+    for (let index = 0; index < data.length; index++) {
+        if (findUuidInType(data[index].type)){
+            isNonNull = isTypeANonNull(data[index]);
+            variableForQueryString += addUuidToVariablesOfQuery(data[index], isNonNull)
+        }
+    }
+
+    return variableForQueryString
+}
+
+export function definiteNewQuery(data: any) {
+    var queryString = '';
+    var variablesForQuery = findUuidArgumentInData(data[ColumnArguments])
+
+    queryString += startOfQuery + ' ' + data[ColumnName] + variablesForQuery + ' {\n';
+
+    return queryString
+}
+
+export function addTypesToString(data: any) {
+    if ('ofType' in data && data.ofType != null) {
+        addTypesToString(data.ofType);
+    }
+    if (ColumnKind in data && data[ColumnKind] == 'OBJECT') {
+        nameOfActualDataObject = data[ColumnName];
+    }
+}
+
+export function addParenthesisByValue(data: any, isStart: boolean) {
+    if (typeof data != 'string') {
+        return isStart ? startOfObject + newLine : indentation + endOfObject + newLine;
     } else {
         return '';
     }
 }
 
-/**
- * This method return part of query by a keys of object
- * @param data 
- * @returns 
- */
-    export function processEntityAccordKeys(data: any) {
-    var queryString = '';
-                
-    if ('name' in data) {
-        if ( (data.name == objectIsQueryDefinition) && ('fields' in data) ) {
-            queryString += definiteNewQuery(data)
-            return queryString;
-        } else {
-            let searchedWord = new RegExp(':"'+data.name+'"', "g");
-            //console.log('zistenie fragmentu: ',fullJson,(fullJson.match(searchedWord) || []).length, fullJson.match(searchedWord))
-            if ((fullJson.match(searchedWord) || []).length > 1 && 'fields' in data) {
-                queryString += makeNewFragment(data)
-                return queryString;
-            } else {
-                queryString += data.name + ' ';
-            }
-        }
-        
-    }
-    if ('type' in data) {
-        queryString += addTypesToString(data.type);
-    }
-    if ('name' in data) {
-        nameOfActualFragment += '_' + data.name
-        //console.log('Name V type: ',data.name,nameOfActualFragment)
-        queryString += (('fields' in data) ? startOfObject + newLine : '');
-    }
-    if ('fields' in data) {
-        queryString += getParameters(data.fields);
-    }
-    if ('name' in data) {
-        if (('fields' in data)) {
-            queryString += endOfObject + newLine;
-        } else {
-            queryString += newLine;
-        }
-
-        nameOfActualFragment = nameOfActualFragment.slice(0,nameOfActualFragment.lastIndexOf('_'));
-    }
-
-    return queryString;
-}
-
-/**
- * This method process new fragment to another (global) string, which join to queryString on end process of composed query
- * @param data 
- */
-    export function makeNewFragment(data: any) {
-    let nameOfFragment = nameOfActualFragment + '_' + data.name;
-    let queryString = '...' + nameOfFragment + newLine;
-    allFragments += 'fragment ' + nameOfFragment + ' on ' + data.name + ' ' + startOfObject + newLine;
-    
-    allFragments += getParameters(data.fields)
-    allFragments += endOfObject + newLine;
-
-    //console.log('FRAGMENT: ', allFragments)
-    return queryString;
-}
-
-/**
- * This method composed body of query with name
- * @param data 
- * @returns 
- */
-    export function definiteNewQuery(data: any) {
-    var queryString = '';
-    //console.log('Zaciatok Query: ', data)
-
-    isQueryWithName = true;
-    nameOfActualFragment += data.fields[0].name;
-
-    queryString += 'query' + ' ' + data.fields[0].name + ' (' + limitOfCount +': Limit = 100) ' + startOfObject + newLine;
-    //queryString += getParameters(data.fields)
-
-    return queryString
-}
-
-/**
- * This method give types for data
- * @param data 
- * @returns 
- */
-    export function addTypesToString(data: any) {
-    var string = ': ';
-    var keys = Object.keys(data);
-
-    for (let key = 0; key < keys.length; key++) {
-        if (keys[key] == 'name') {
-            string += data[keys[key]];
-        }
-    }
-
-    return string;
-}
-
-/**
- * This method give arguments to parenthesis
- * @param data 
- * @returns 
- */
-    export function addArgumentsToString(data: any) {
-    var string = '( ';
-    var keys = Object.keys(data);
-
-    for (let key = 0; key < keys.length; key++) {
-        string += keys[key] + ': ' + data[keys[key]];
-    }
-    
-    string += ' )';
-
-    return string;
-}
-
-
-/**
- * This method return parenthesis oriented like we need 
- * @param data 
- * @param isStart 
- * @returns 
- */
-    export function addParenthesisByValue(data: any, isStart: boolean) {
+export function addParenthesisByValueForFragment(data: any, isStart: boolean, fragmentIndentation: string) {
     if (typeof data != 'string') {
-        return isStart ? startOfObject + newLine : endOfObject + newLine;
+        return isStart ? startOfObject + newLine : fragmentIndentation + endOfObject + newLine;
     } else {
         return '';
     }
