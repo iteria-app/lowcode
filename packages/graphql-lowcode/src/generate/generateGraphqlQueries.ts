@@ -44,7 +44,8 @@ export function generateGraphqlQueries(introspection: IntrospectionQuery) {
   const selectQuery = buildSelectQuery(queryRoot)
 
   const finalQuery = buildGraphqlQuery(selectQuery, fragmentQuery)
-  console.log(finalQuery)
+  
+  return finalQuery
 }
 
 function getQueryRoot(types: TypesObject[]): QueryRoot {
@@ -89,7 +90,7 @@ function buildSelectQuery(queryRoot: QueryRoot) {
 function buildFragmentQuery(entityFields: Field[], queryRoot: QueryRoot) {
   const scalarFields = getScalarFields(entityFields)
 
-  return `fragment ${queryRoot.queryName}_${queryRoot.entityName} on ${queryRoot.entityName} {\n  ${scalarFields.join('\n  ')}\n}}`
+  return `fragment ${queryRoot.queryName}_${queryRoot.entityName} on ${queryRoot.entityName} {\n  ${scalarFields.join('\n  ')}\n}`
 }
 
 function buildGraphqlQuery(selectQuery: string, fragmentQuery: string) {

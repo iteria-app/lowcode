@@ -295,3 +295,60 @@ export const differentIndentationOutput =
   newProperty
   }
 }`
+
+/**
+ * Simple introspection query
+ */
+export const simpleIntrospectionInput = {
+  types: [
+    {
+      name: 'query_root',
+      fields: [
+        {
+          name: 'entity1s',
+          type: {
+            name: 'entity1'
+          }
+        }
+      ]
+    },
+    {
+      name: 'entity1',
+      fields: [
+        {
+          name: 'id',
+          type: {
+            name: 'uuid',
+            kind: 'SCALAR'
+          }
+        },
+        {
+          name: 'name',
+          type: {
+            name: 'string',
+            kind: 'SCALAR'
+          }
+        },
+        {
+          name: 'objectName',
+          type: {
+            name: '',
+            kind: 'OBJECT'
+          }
+        }
+      ]
+    }
+  ]
+}
+
+export const simpleIntrospectionOutput = 
+`query entity1s {
+  entity1s(limit: 100) {
+    ...entity1s_entity1
+  }
+}
+
+fragment entity1s_entity1 on entity1 {
+  id
+  name
+}`
