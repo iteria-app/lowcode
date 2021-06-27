@@ -1,0 +1,1 @@
+export *  from './react-urql-graphql-codegen/src/components/str/listPageTemplate'
