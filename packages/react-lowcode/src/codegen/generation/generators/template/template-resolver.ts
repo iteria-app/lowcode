@@ -1,6 +1,8 @@
 import ts, { factory } from "typescript";
+import { transformer } from "../../../../ast";
 import { printSourceCode } from "../../../ast/ast";
 import { createImportDeclaration } from "../../../ast/imports";
+import { isOpeningOrSelfClosingElementWithName, isImportDeclarationWithName } from "../../../ast/node";
 import { createAst } from "../../code-generation/createSourceFile";
 import { Entity } from "../../entity";
 import { EntityHelper } from "../../entity/helper";
@@ -17,61 +19,52 @@ export default class TemplateResolver {
 
         if (this._entity) {
             let ast = createAst(template);
-            
+
             if (ast) {
+                const templateComponentName = 'ListPlaceholder';
                 const tableComponentName = EntityHelper.getTableComponentName(this._entity);
                 const inputParameterIdentifier = EntityHelper.getInputParameterIdentifier(this._entity);
 
-                const tableComponentElement = factory.createJsxSelfClosingElement(
-                    factory.createIdentifier(tableComponentName),
-                    undefined,
-                    factory.createJsxAttributes([factory.createJsxAttribute(
-                        inputParameterIdentifier,
-                        factory.createJsxExpression(
-                            undefined,
-                            factory.createPropertyAccessChain(
-                                factory.createIdentifier("data"),
-                                factory.createToken(ts.SyntaxKind.QuestionDotToken),
-                                inputParameterIdentifier
-                            )
-                        )
-                    )])
-                );
-
-                const transformer = <T extends ts.Node>(): ts.TransformerFactory<T> => {
-                    return context => {
-                        const visit: ts.Visitor = node => {
-                            if (ts.isImportDeclaration(node)) {
-                                if (node.importClause) {
-                                    // TODO:PC: Check namedBindings???
-                                    if (node.importClause.name) {
-                                        if (node.importClause.name.escapedText === 'ListPlaceholder') {
-                                            return createImportDeclaration(tableComponentName, './' + tableComponentName);
-                                        }
-                                    }
-                                }
-                            } else {
-                                if (ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) {
-                                    if (ts.isIdentifier(node.tagName)) {
-                                        if (node.tagName.escapedText === 'ListPlaceholder') {
-                                            return tableComponentElement;
-                                        }
-                                    }
-                                }
-                            }
-
-                            return ts.visitEachChild(node, child => visit(child), context)
-                        }
-
-                        return node => ts.visitNode(node, visit)
+                const transformImportDeclaration = (node: ts.Node, importName: string, tableComponentName: string) => {
+                    if(isImportDeclarationWithName(node, importName)) {
+                        return createImportDeclaration(tableComponentName, './' + tableComponentName);
                     }
                 }
 
-                const transformResult = ts.transform(ast, [transformer()]);
-                result = printSourceCode(transformResult.transformed[0]);
+                const transformListElement = (node: ts.Node, elementName: string, tableComponentName: string, inputParameterIdentifier: ts.Identifier) => {
+                    if(isOpeningOrSelfClosingElementWithName(node, elementName)) {
+                        return this.createTableComponentElement(tableComponentName, inputParameterIdentifier);
+                    }
+                }
+
+                const transformListPlaceholderByTableComponent = (node: ts.Node) => {
+                    return transformImportDeclaration(node, templateComponentName, tableComponentName)
+                        || transformListElement(node, templateComponentName, tableComponentName, inputParameterIdentifier);
+                };
+
+                const transformationResult = ts.transform(ast, [transformer(transformListPlaceholderByTableComponent)]);
+                result = printSourceCode(transformationResult.transformed[0]);
             }
         }
 
         return result;
+    }
+
+    private createTableComponentElement = (tableComponentName: string, inputParameterIdentifier: ts.Identifier) => {
+        return factory.createJsxSelfClosingElement(
+            factory.createIdentifier(tableComponentName),
+            undefined,
+            factory.createJsxAttributes([factory.createJsxAttribute(
+                inputParameterIdentifier,
+                factory.createJsxExpression(
+                    undefined,
+                    factory.createPropertyAccessChain(
+                        factory.createIdentifier("data"), //TODO:PC try read identifier from template
+                        factory.createToken(ts.SyntaxKind.QuestionDotToken),
+                        inputParameterIdentifier
+                    )
+                )
+            )])
+        );
     }
 }
