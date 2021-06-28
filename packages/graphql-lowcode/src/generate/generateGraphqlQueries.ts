@@ -22,75 +22,114 @@ interface IntrospectionQuery {
   [key: string]: any
 }
 
-interface Fragment {
-  name: string,
-  queryName: string,
-  entity: string,
-  fields: string[]
+interface QueryRoot {
+  fields: Field[],
+  [key: string]: any
 }
 
-interface QueryRoot {
+interface Entity {
   queryName: string,
-  entityName: string
+  entityName: string,
+  scalarFields: string[]
 }
 
 export function generateGraphqlQueries(introspection: IntrospectionQuery) {
   const types = introspection.types
 
   const queryRoot = getQueryRoot(types)
-  const entityFields = getEntityFields(types, queryRoot.entityName)
+  //if introspection query does not have query_root of type list
+  if(!queryRoot.fields.length) return ''
 
-  const fragmentQuery = buildFragmentQuery(entityFields, queryRoot)
+  const entities = getEntities(queryRoot, types)
+
+  const fragmentsQuery = buildFragmentsQuery(entities)
   const selectQuery = buildSelectQuery(queryRoot)
 
-  const finalQuery = buildGraphqlQuery(selectQuery, fragmentQuery)
-  
+  const finalQuery = buildGraphqlQuery(selectQuery, fragmentsQuery)
+
   return finalQuery
 }
 
 function getQueryRoot(types: TypesObject[]): QueryRoot {
-  for(const typeObject of types) {
+  for (const typeObject of types) {
     //iterate thrugh types to find query root
-    if (typeObject.name === 'query_root') {
-      const queryName = typeObject.fields[0].name ? typeObject.fields[0].name : ''
-      const entityName = typeObject.fields[0].type.name ? typeObject.fields[0].type.name : ''
-
-      return { queryName: queryName, entityName: entityName }
+    if (typeObject.name === 'query_root' && typeObject.kind === 'LIST') {
+      return typeObject
     }
   }
 
-  return {queryName: '', entityName: ''}
+  return { fields: [] }
 }
 
-function getEntityFields(types: TypesObject[], entityName: string): Field[] {
-  for(const typeObject of types) {
-    if(typeObject.name === entityName) return typeObject.fields
+function getEntities(queryRoot: QueryRoot, types: TypesObject[]): Entity[] {
+  const queryAndEntityNames = getQueryAndEntityNames(queryRoot)
+
+  let entities: Entity[] = []
+
+  for (const field of queryAndEntityNames) {
+    const queryName = field.name
+    const entityName = field.type.name
+    const scalarFields = getScalarFields(entityName, types)
+
+    entities = [...entities, { queryName, entityName, scalarFields }]
   }
 
-  return []
+  return entities
 }
 
-function getScalarFields(fields: Field[]) {
+function getQueryAndEntityNames(queryRoot: QueryRoot) {
+  let queryAndEntityNames: any[] = []
+
+  for (const field of queryRoot.fields) {
+    queryAndEntityNames = [...queryAndEntityNames, field]
+  }
+
+  return queryAndEntityNames
+}
+
+function getScalarFields(entityName: string, types: TypesObject[]): string[] {
   let scalarFields: string[] = []
 
-  fields.forEach(field => {
+  const entityFields = getEntityFields(entityName, types)
+
+  entityFields.forEach(field => {
     //skip non scalar fields
-    if (field.type && field.name && field.type.kind === 'SCALAR') scalarFields = [...scalarFields, field.name]
+    if (field.type.kind === 'SCALAR') scalarFields = [...scalarFields, field.name]
   })
 
   return scalarFields
 }
 
-function buildSelectQuery(queryRoot: QueryRoot) {
-  const fragmentName = `${queryRoot.queryName}_${queryRoot.entityName}`
+function getEntityFields(entityName: string, types: TypesObject[]): Field[] {
+  const entityFields = types.find(type => type.name === entityName)
 
-  return `query ${queryRoot.queryName} {\n  ${queryRoot.queryName}(limit: 100) {\n    ...${fragmentName}\n  }\n}`
+  if(entityFields) return entityFields.fields
+  return []
 }
 
-function buildFragmentQuery(entityFields: Field[], queryRoot: QueryRoot) {
-  const scalarFields = getScalarFields(entityFields)
+function buildSelectQuery(queryRoot: QueryRoot) {
+  let selectQueries: string[] = []
 
-  return `fragment ${queryRoot.queryName}_${queryRoot.entityName} on ${queryRoot.entityName} {\n  ${scalarFields.join('\n  ')}\n}`
+  for (const field of queryRoot.fields) {
+    const fragmentName = `${field.name}_${field.type.name}`
+    const newSelectQuery = `query ${field.name} {\n  ${field.name}(limit: 100) {\n    ...${fragmentName}\n  }\n}`
+
+    selectQueries = [...selectQueries, newSelectQuery]
+  }
+
+  return selectQueries.join('\n\n')
+}
+
+function buildFragmentsQuery(entities: Entity[]) {
+  let fragmentsStrings: string[] = []
+
+  for (const entity of entities) {
+    const newFragmentString = `fragment ${entity.queryName}_${entity.entityName} on ${entity.entityName} {\n  ${entity.scalarFields.join('\n  ')}\n}`
+
+    fragmentsStrings = [...fragmentsStrings, newFragmentString]
+  }
+
+  return fragmentsStrings.join('\n\n')
 }
 
 function buildGraphqlQuery(selectQuery: string, fragmentQuery: string) {

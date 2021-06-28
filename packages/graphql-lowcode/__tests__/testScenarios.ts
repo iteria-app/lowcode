@@ -303,6 +303,7 @@ export const simpleIntrospectionInput = {
   types: [
     {
       name: 'query_root',
+      kind: 'LIST',
       fields: [
         {
           name: 'entity1s',
@@ -352,3 +353,123 @@ fragment entity1s_entity1 on entity1 {
   id
   name
 }`
+
+/**
+ *  Multiple entities in query_root
+ */
+
+export const multipleEntitiesInput = {
+  types: [
+    {
+      name: 'query_root',
+      kind: 'LIST',
+      fields: [
+        {
+          name: 'entity1s',
+          type: {
+            name: 'entity1'
+          }
+        },
+        {
+          name: 'entity2s',
+          type: {
+            name: 'entity2'
+          }
+        }
+      ]
+    },
+    {
+      name: 'entity1',
+      fields: [
+        {
+          name: 'id',
+          type: {
+            name: 'uuid',
+            kind: 'SCALAR'
+          }
+        },
+        {
+          name: 'name',
+          type: {
+            name: 'string',
+            kind: 'SCALAR'
+          }
+        },
+        {
+          name: 'objectName',
+          type: {
+            name: '',
+            kind: 'OBJECT'
+          }
+        }
+      ]
+    },
+    {
+      name: 'entity2',
+      fields: [
+        {
+          name: 'id',
+          type: {
+            name: 'uuid',
+            kind: 'SCALAR'
+          }
+        }
+      ]
+    }
+  ]
+}
+
+export const multipleEntitiesOutput =
+`query entity1s {
+  entity1s(limit: 100) {
+    ...entity1s_entity1
+  }
+}
+
+query entity2s {
+  entity2s(limit: 100) {
+    ...entity2s_entity2
+  }
+}
+
+fragment entity1s_entity1 on entity1 {
+  id
+  name
+}
+
+fragment entity2s_entity2 on entity2 {
+  id
+}`
+
+/**
+ * Query_root is not LIST type query
+ */
+
+export const notListTypeIntrospectionInput = {
+  types: [
+    {
+      name: 'query_root',
+      kind: 'OBJECT',
+      fields: [
+        {
+          name: 'entity1s',
+          type: {
+            name: 'entity1'
+          }
+        },
+      ]
+    },
+    {
+      name: 'entity1',
+      fields: [
+        {
+          name: 'id',
+          type: {
+            name: 'uuid',
+            kind: 'SCALAR'
+          }
+        },
+      ]
+    },
+  ]
+}
