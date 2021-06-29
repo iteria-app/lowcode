@@ -29,4 +29,16 @@ describe("Generate graphql queries", () => {
   test("Delete by fields + affected rows", () => {
     expect(generateGraphqlQueries(scenarios.deleteByFieldsInput)).toEqual(scenarios.deleteByFieldsOutput)
   })
+
+  test("Insert one/multiple objects mutations + affected rows", () => {
+    expect(generateGraphqlQueries(scenarios.insertMutationsInput)).toEqual(scenarios.insertMutationsOutput)
+  })
+
+  test("Update one/multiple objects mutations + affected rows", () => {
+    expect(generateGraphqlQueries(scenarios.updateMutationsInput)).toEqual(scenarios.updateMutationsOutput)
+  })
+
+  test("Delete one/multiple objects mutations + affected rows", () => {
+    expect(generateGraphqlQueries(scenarios.deleteMutationsInput)).toEqual(scenarios.deleteMutationsOutput)
+  })
 })

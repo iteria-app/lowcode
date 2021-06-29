@@ -1,12 +1,12 @@
-import { TypesObject, Mutation } from './generateGraphqlQueries'
+import { Argument, Mutation } from './generateGraphqlQueries'
 
-export function getMutationType(type: TypesObject): Mutation {
-  const containsWhere = type.fields.some(field => field.name === 'where')
-  const containsId = type.fields.some(field => field.name === 'id')
-  const containsObject = type.fields.some(field => field.name === 'object')
-  const containsObjects = type.fields.some(field => field.name === 'objects')
-  const containsSet = type.fields.some(field => field.name === '_set')
-  const containsPKColumns = type.fields.some(field => field.name === 'pk_columns')
+export function getMutationType(args: Argument[]): Mutation {
+  const containsWhere = args.some(argument => argument.name === 'where')
+  const containsId = args.some(argument => argument.name === 'id')
+  const containsObject = args.some(argument => argument.name === 'object')
+  const containsObjects = args.some(argument => argument.name === 'objects')
+  const containsSet = args.some(argument => argument.name === '_set')
+  const containsPKColumns = args.some(argument => argument.name === 'pk_columns')
 
   if (containsObjects) return { operation: 'insert', type: 'many'}
   if (containsObject) return { operation: 'insert', type: 'one'}
@@ -15,5 +15,5 @@ export function getMutationType(type: TypesObject): Mutation {
   if (containsSet && containsPKColumns) return { operation: 'update', type: 'one'}
 
   if (containsWhere) return { operation: 'delete', type: 'many'}
-  if (containsId) return { operation: 'insert', type: 'one'}
+  return { operation: 'delete', type: 'one'}
 }

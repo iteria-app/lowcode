@@ -13,7 +13,7 @@ interface Field {
   [key: string]: any
 }
 
-export interface TypesObject {
+interface TypesObject {
   name: string,
   fields: Field[],
   [key: string]: any
@@ -36,7 +36,7 @@ interface Entity {
   fields: string[],
 }
 
-interface Argument {
+export interface Argument {
   name: string,
   [key: string]: any
 }
@@ -173,7 +173,7 @@ function buildMutationQuery(mutationRoot: Root): string {
   let mutationQueries: string[] = []
 
   mutationRoot.fields.forEach(field => {
-    const mutationType = getMutationType(mutationRoot.field)
+    const mutationType = getMutationType(field.args)
 
     const fragmentName = `${field.name}_${field.type.name}`
 
@@ -187,18 +187,18 @@ function buildMutationQuery(mutationRoot: Root): string {
 }
 
 function buildDeleteMutation(field: Field, mutationType: Mutation, fragmentName: string): string {
-  if (mutationType.type === 'delete_many') return `mutation ${field.name} {\n  ${field.name}(where : $where) {\n    ...${fragmentName}}\n}`
-  return `mutation ${field.name} {\n  ${field.name}(id: $id) {\n    ...${fragmentName}}/n}`
+  if (mutationType.type === 'many') return `mutation ${field.name} {\n  ${field.name}(where: $where) {\n    ...${fragmentName}\n  }\n}`
+  return `mutation ${field.name} {\n  ${field.name}(id: $id) {\n    ...${fragmentName}\n  }\n}`
 }
 
 function buildInsertMutation(field: Field, mutationType: Mutation, fragmentName: string): string {
-  if(mutationType.type === 'insert_many') return `mutation ${field.name} {\n  ${field.name}(objects: $objects) {\n    ...${fragmentName}}\n}`
-  return `mutation ${field.name} {\n ${field.name}(object: $object) {\n    ...${fragmentName}}\n}`
+  if(mutationType.type === 'many') return `mutation ${field.name} {\n  ${field.name}(objects: $objects) {\n    ...${fragmentName}\n  }\n}`
+  return `mutation ${field.name} {\n  ${field.name}(object: $object) {\n    ...${fragmentName}\n  }\n}`
 }
 
 function buildUpdateMutation(field: Field, mutationType: Mutation, fragmentName: string): string {
-  if(mutationType.type === 'update_many') return `mutation ${field.name} {\n  ${field.name}(where: $where, _set: $_set) {\n    ...${fragmentName}}\n}`
-  return `mutation ${field.name} {\n  ${field.name}(pk_columns: $pk_columns, _set: $_set) {\n    ...${fragmentName}}\n}`
+  if(mutationType.type === 'many') return `mutation ${field.name} {\n  ${field.name}(where: $where, _set: $_set) {\n    ...${fragmentName}\n  }\n}`
+  return `mutation ${field.name} {\n  ${field.name}(pk_columns: $pk_columns, _set: $_set) {\n    ...${fragmentName}\n  }\n}`
 }
 
 function buildFragmentsQuery(entities: Entity[]): string {

@@ -693,7 +693,7 @@ export const deleteByIdInput = {
 }
 
 export const deleteByIdOutput =
-`mutation delete_table_by_pk {
+  `mutation delete_table_by_pk {
   delete_table_by_pk(id: $id) {
     ...delete_table_by_pk_entity
   }
@@ -743,12 +743,263 @@ export const deleteByFieldsInput = {
 }
 
 export const deleteByFieldsOutput =
-`mutation delete_object {
+  `mutation delete_object {
   delete_object(where: $where) {
     ...delete_object_entity
   }
 }
 
 fragment delete_object_entity on entity {
+  affected_rows
+}`
+
+/**
+ * Single object insert mutation + multiple object insert mutation + affected_rows
+ */
+
+export const insertMutationsInput = {
+  types: [
+    {
+      name: 'mutation_root',
+      fields: [
+        {
+          args: [
+            {
+              name: 'object',
+              type: {
+                kind: 'INPUT_OBJECT',
+                name: null
+              }
+            }
+          ],
+          name: 'insert_object',
+          type: {
+            kind: 'INPUT_OBJECT',
+            name: 'insert_response'
+          }
+        },
+        {
+          args: [
+            {
+              name: 'objects',
+              type: {
+                kind: 'INPUT_OBJECT',
+                name: null
+              }
+            }
+          ],
+          name: 'insert_objects',
+          type: {
+            kind: 'INPUT_OBJECT',
+            name: 'insert_response'
+          }
+        }
+      ]
+    },
+    {
+      name: 'insert_response',
+      fields: [
+        {
+          name: 'affected_rows',
+          type: {
+            kind: 'SCALAR',
+            name: null
+          }
+        }
+      ]
+    }
+  ]
+}
+
+export const insertMutationsOutput =
+`mutation insert_object {
+  insert_object(object: $object) {
+    ...insert_object_insert_response
+  }
+}
+
+mutation insert_objects {
+  insert_objects(objects: $objects) {
+    ...insert_objects_insert_response
+  }
+}
+
+fragment insert_object_insert_response on insert_response {
+  affected_rows
+}
+
+fragment insert_objects_insert_response on insert_response {
+  affected_rows
+}`
+
+/**
+ * Single object update mutation + multiple object update mutation + affected_rows
+ */
+
+export const updateMutationsInput = {
+  types: [
+    {
+      name: 'mutation_root',
+      fields: [
+        {
+          args: [
+            {
+              name: 'where',
+              type: {
+                kind: 'INPUT_OBJECT',
+                name: null
+              }
+            },
+            {
+              name: '_set',
+              type: {
+                kind: 'INPUT_OBJECT',
+                name: null
+              }
+            }
+          ],
+          name: 'update_objects',
+          type: {
+            kind: 'INPUT_OBJECT',
+            name: 'update_response'
+          }
+        },
+        {
+          args: [
+            {
+              name: 'pk_columns',
+              type: {
+                kind: 'INPUT_OBJECT',
+                name: null
+              }
+            },
+            {
+              name: '_set',
+              type: {
+                kind: 'INPUT_OBJECT',
+                name: null
+              }
+            }
+          ],
+          name: 'update_object',
+          type: {
+            kind: 'INPUT_OBJECT',
+            name: 'update_response'
+          }
+        }
+      ]
+    },
+    {
+      name: 'update_response',
+      fields: [
+        {
+          name: 'affected_rows',
+          type: {
+            kind: 'SCALAR',
+            name: null
+          }
+        }
+      ]
+    }
+  ]
+}
+
+export const updateMutationsOutput =
+`mutation update_objects {
+  update_objects(where: $where, _set: $_set) {
+    ...update_objects_update_response
+  }
+}
+
+mutation update_object {
+  update_object(pk_columns: $pk_columns, _set: $_set) {
+    ...update_object_update_response
+  }
+}
+
+fragment update_objects_update_response on update_response {
+  affected_rows
+}
+
+fragment update_object_update_response on update_response {
+  affected_rows
+}`
+
+/**
+ * Single delete update mutation + multiple object delete mutation + affected_rows
+ */
+
+ export const deleteMutationsInput = {
+  types: [
+    {
+      name: 'mutation_root',
+      fields: [
+        {
+          args: [
+            {
+              name: 'where',
+              type: {
+                kind: 'INPUT_OBJECT',
+                name: null
+              }
+            },
+          ],
+          name: 'delete_objects',
+          type: {
+            kind: 'INPUT_OBJECT',
+            name: 'delete_response'
+          }
+        },
+        {
+          args: [
+            {
+              name: 'id',
+              type: {
+                kind: 'INPUT_OBJECT',
+                name: null
+              }
+            },
+          ],
+          name: 'delete_object',
+          type: {
+            kind: 'INPUT_OBJECT',
+            name: 'delete_response'
+          }
+        }
+      ]
+    },
+    {
+      name: 'delete_response',
+      fields: [
+        {
+          name: 'affected_rows',
+          type: {
+            kind: 'SCALAR',
+            name: null
+          }
+        }
+      ]
+    }
+  ]
+}
+
+export const deleteMutationsOutput =
+`mutation delete_objects {
+  delete_objects(where: $where) {
+    ...delete_objects_delete_response
+  }
+}
+
+mutation delete_object {
+  delete_object(id: $id) {
+    ...delete_object_delete_response
+  }
+}
+
+fragment delete_objects_delete_response on delete_response {
+  affected_rows
+}
+
+fragment delete_object_delete_response on delete_response {
   affected_rows
 }`
