@@ -39,7 +39,13 @@ export interface ColumnSourcePositionResult {
 
 export interface WidgetProperty {
     name: string,
-    value: string
+    value: string,
+    type: WidgetPropertyValue
+}
+
+export enum WidgetPropertyValue {
+    "EXPRESSION" = "EXPRESSION",
+    "STRING_LITERAL" = "STRING_LITERAL"
 }
 
 export interface WidgetProperties {

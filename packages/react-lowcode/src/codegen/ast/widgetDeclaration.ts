@@ -1,6 +1,6 @@
 import ts, { SyntaxKind } from "typescript"
 import { astFindSource,SourceLineCol} from "../../ast"
-import { WidgetProperty } from "../interfaces"
+import { WidgetProperty, WidgetPropertyValue } from "../interfaces"
 
 export function findWidgetParentNode(sourceCode:string, position: SourceLineCol): ts.Node  | null | undefined{
     let astCode = astFindSource(sourceCode, position)
@@ -68,15 +68,22 @@ export function getWidgetProperties(node: ts.Node): WidgetProperty[] {
         result = node.attributes.properties.map(prop => {
             if (ts.isJsxAttribute(prop)) {
                 const value = getAttributeValue(prop);
-
-                if (value) {
-                    return {
-                        name: prop.name.escapedText.toString(),
-                        value
-                    };
+                const type = getAttributeType(prop)
+                if (value && type) {
+                    if (type === "EXPRESSION" || type === "true") 
+                        return {
+                            name: prop.name.escapedText.toString(),
+                            value,
+                            type: WidgetPropertyValue.EXPRESSION
+                        };
+                    else 
+                        return {
+                            name: prop.name.escapedText.toString(),
+                            value,
+                            type: WidgetPropertyValue.STRING_LITERAL
+                        };
                 }
             }
-
             return undefined;
         }).filter((item): item is WidgetProperty => {
             return item !== undefined;
@@ -136,10 +143,21 @@ function getAttributeValue(attribute: ts.JsxAttribute): string | undefined {
     if (attribute.initializer) {
         return getStringTypeAttributeValue(attribute.initializer)
             || getNumberTypeAttributeValue(attribute.initializer)
-            || getBooleanTypeAttributeValue(attribute.initializer);
+            || getBooleanTypeAttributeValue(attribute.initializer)
+            || getExpressionTypeAttributeValue(attribute.initializer);
     }
 
     return 'true';
+}
+
+function getAttributeType(attribute: ts.JsxAttribute): string {
+    if (attribute.initializer) {
+        if (ts.isJsxExpression(attribute.initializer)) 
+            return "EXPRESSION"
+        else 
+            return "STRING_LITERAL"
+    }
+    return "true"
 }
 
 function getStringTypeAttributeValue(initializer: ts.StringLiteral | ts.JsxExpression): string | undefined {
@@ -156,5 +174,11 @@ function getBooleanTypeAttributeValue(initializer: ts.StringLiteral | ts.JsxExpr
     if (ts.isJsxExpression(initializer) && initializer.expression
         && (initializer.expression.kind === SyntaxKind.TrueKeyword || initializer.expression.kind === SyntaxKind.FalseKeyword)) {
         return initializer.expression.getText();
+    }
+}
+
+function getExpressionTypeAttributeValue(initializer: ts.StringLiteral | ts.JsxExpression) : string | undefined {
+    if (ts.isJsxExpression(initializer) && initializer.expression) {
+        return initializer.expression.getText()
     }
 }

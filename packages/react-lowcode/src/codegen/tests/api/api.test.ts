@@ -5,6 +5,7 @@ import { SyntaxKind } from 'typescript';
 import { findByCondition, SourceLineCol } from '../../../ast';
 import { addFormInput, getFormWidgetProperties, isSelectedFormWidget, setFormWidgetProperties } from '../../detail';
 import MuiDetailGenerator from '../../generation/generators/detail/mui-detail-generator';
+import { WidgetPropertyValue } from '../../interfaces';
 import { CodegenRw } from '../../io/codegenRw';
 import { addColumn, deleteColumn, getColumnSourcePosition, isSelectedDataTable } from '../../list';
 import { createAst } from '../helper';
@@ -138,104 +139,137 @@ describe(".api tests", () => {
             const filePath = 'src/codegen/tests/detail/detail-test-file.txt';
             const source: SourceLineCol = { lineNumber: 80, columnNumber: 19, fileName: filePath };
             const result = await getFormWidgetProperties(new CodegenRw(), source);
-    
-            expect(result.properties).toStrictEqual(
-                [
-                    {
-                        name: "fullWidth",
-                        value: "true"
-                    },
-                    {
-                        name: "required",
-                        value: "true"
-                    },
-                    {
-                        name: "disabled",
-                        value: "false"
-                    },
-                    {
-                        name: "rows",
-                        value: "10"
-                    },
-                    {
-                        name: "id",
-                        value: "updatedAt"
-                    },
-                    {
-                        name: "type",
-                        value: "date"
-                    },
-                    {
-                        name: "label",
-                        value: "updatedAt"
-                    }
-                ]
-            );
+            
+            expect(result.properties).toStrictEqual([
+                {
+                    name: "fullWidth",
+                    value: "true",
+                    type: WidgetPropertyValue.EXPRESSION
+                },
+                {
+                    name: "required",
+                    value: "true",
+                    type: WidgetPropertyValue.EXPRESSION
+                },
+                {
+                    name: "disabled",
+                    value: "false",
+                    type: WidgetPropertyValue.EXPRESSION
+                },
+                {
+                    name: "rows",
+                    value: "10",
+                    type: WidgetPropertyValue.EXPRESSION
+                },
+                {
+                    name: "id",
+                    value: "updatedAt",
+                    type: WidgetPropertyValue.STRING_LITERAL
+                },
+                {
+                    name: "type",
+                    value: "date",
+                    type: WidgetPropertyValue.STRING_LITERAL
+                },
+                {
+                    name: "label",
+                    value: "updatedAt",
+                    type: WidgetPropertyValue.STRING_LITERAL
+                },
+                {
+                    name: "InputLabelProps",
+                    value: "{ shrink: true }",
+                    type: WidgetPropertyValue.EXPRESSION
+                },
+                {
+                    name: "value",
+                    value: "intl.formatDate(formik.values.updatedAt)",
+                    type: WidgetPropertyValue.EXPRESSION
+                },
+                {
+                    name: "onChange",
+                    value: "formik.handleChange",
+                    type: WidgetPropertyValue.EXPRESSION
+                }
+            ])
         }); 
         
         test(".set Widget Fields (MUI TextField)", async () => {
             const properties =             [
                 {
                     name: "fullWidth",
-                    value: "false"
+                    value: "false",
+                    type: WidgetPropertyValue.EXPRESSION
                 },
                 {
                     name: "required",
-                    value: "false"
+                    value: "false",
+                    type: WidgetPropertyValue.EXPRESSION
                 },
                 {
                     name: "disabled",
-                    value: "true"
+                    value: "true",
+                    type: WidgetPropertyValue.EXPRESSION
                 },
                 {
                     name: "rows",
-                    value: "5"
+                    value: "5",
+                    type: WidgetPropertyValue.EXPRESSION
                 },
                 {
                     name: "id",
-                    value: "updatedAtTime"
+                    value: "updatedAtTime",
+                    type: WidgetPropertyValue.STRING_LITERAL
                 },
                 {
                     name: "type",
-                    value: "time"
+                    value: "time",
+                    type: WidgetPropertyValue.STRING_LITERAL
                 },
                 {
                     name: "label",
-                    value: "updatedAtTime"
+                    value: "updatedAtTime",
+                    type: WidgetPropertyValue.STRING_LITERAL
                 }
             ];
     
             const expectedProperties = [
                 {
                     name: "required",
-                    value: "false"
+                    value: "false",
+                    type: WidgetPropertyValue.EXPRESSION
                 },
                 {
                     name: "disabled",
-                    value: "true"
+                    value: "true",
+                    type: WidgetPropertyValue.EXPRESSION
                 },
                 {
                     name: "rows",
-                    value: "5"
+                    value: "5",
+                    type: WidgetPropertyValue.EXPRESSION
                 },
                 {
                     name: "id",
-                    value: "updatedAtTime"
+                    value: "updatedAtTime",
+                    type: WidgetPropertyValue.STRING_LITERAL
                 },
                 {
                     name: "type",
-                    value: "time"
+                    value: "time",
+                    type: WidgetPropertyValue.STRING_LITERAL
                 },
                 {
                     name: "label",
-                    value: "updatedAtTime"
+                    value: "updatedAtTime",
+                    type: WidgetPropertyValue.STRING_LITERAL
                 }
             ];
     
             const filePath = 'src/codegen/tests/detail/detail-test-file.txt';
             const source: SourceLineCol = { lineNumber: 80, columnNumber: 19, fileName: filePath };
             const result = await setFormWidgetProperties(new CodegenRw(), source, { properties: properties });
-    
+
             expect(result).not.toBe(undefined);
     
             if(result) {
@@ -265,15 +299,18 @@ describe(".api tests", () => {
             const properties =             [
                 {
                     name: "disabled",
-                    value: "false"
+                    value: "false",
+                    type: WidgetPropertyValue.EXPRESSION
                 },
                 {
                     name: "rows",
-                    value: "10"
+                    value: "10",
+                    type: WidgetPropertyValue.EXPRESSION
                 },
                 {
                     name: "id",
-                    value: "updatedAt"
+                    value: "updatedAt",
+                    type: WidgetPropertyValue.STRING_LITERAL
                 }
             ];
     
