@@ -9,8 +9,12 @@ export class EntityHelper {
         return camalizeString(entity.getName())
     }
 
-    static getTableComponentName(entity: Entity) {
-        return `${entity.getName()}Table`
+    static getListComponentName(entity: Entity) {
+        return `${entity.getName()}List`
+    }
+
+    static getListPageComponentName(entity: Entity) {
+        return `${this.getListComponentName(entity)}Page`
     }
 
     static getInputParameterIdentifier(entity: Entity) : ts.Identifier {
