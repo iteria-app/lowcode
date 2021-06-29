@@ -10,7 +10,23 @@ describe("Generate graphql queries", () => {
     expect(generateGraphqlQueries(scenarios.multipleEntitiesInput)).toEqual(scenarios.multipleEntitiesOutput)
   })
 
-  test("Different query_root type (OBJECT)", () => {
-    expect(generateGraphqlQueries(scenarios.notListTypeIntrospectionInput)).toEqual('')
+  /*test("Different query_root type (OBJECT)", () => {
+    expect(generateGraphqlQueries(scenarios.notListTypeIntrospectionInput)).toEqual(scenarios.notListTypeIntrospectionOutput)
+  })*/
+
+  test("Introspection with single entity with arguments", () => {
+    expect(generateGraphqlQueries(scenarios.simpleOptionalArgumentInput)).toEqual(scenarios.simpleOptionalArgumentOutput)
+  })
+
+  test("Introspection with multiple entities with arguments", () => {
+    expect(generateGraphqlQueries(scenarios.multipleOptionalArgumentsInput)).toEqual(scenarios.multipleOptionalArgumentsOutput)
+  })
+
+  test("Delete by id", () => {
+    expect(generateGraphqlQueries(scenarios.deleteByIdInput)).toEqual(scenarios.deleteByIdOutput)
+  })
+
+  test("Delete by fields + affected rows", () => {
+    expect(generateGraphqlQueries(scenarios.deleteByFieldsInput)).toEqual(scenarios.deleteByFieldsOutput)
   })
 })
