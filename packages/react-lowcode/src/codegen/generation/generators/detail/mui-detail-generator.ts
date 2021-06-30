@@ -129,7 +129,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
                           }
                         }
 
-                        if (ts.isNumericLiteral(prop.initializer.expression)) {
+                        else if (ts.isNumericLiteral(prop.initializer.expression)) {
                           if (inputProp.value !== prop.initializer.expression.getText()) {
                             const numericValue = factory.createJsxExpression(
                               undefined,
@@ -138,6 +138,16 @@ export default class MuiDetailGenerator implements DetailGenerator {
 
                             newProp = factory.updateJsxAttribute(prop, prop.name, numericValue);
                             astChanged = true;
+                          }
+                        }
+                        else {
+                          if (inputProp.value !== prop.initializer.expression.getText()) {
+                            const value = factory.createJsxExpression(
+                              undefined,
+                              factory.createRegularExpressionLiteral(inputProp.value)
+                            )
+                            newProp = factory.updateJsxAttribute(prop, prop.name, value)
+                            astChanged = true
                           }
                         }
                       }
