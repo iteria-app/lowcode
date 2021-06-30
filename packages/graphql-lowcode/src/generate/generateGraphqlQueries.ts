@@ -33,7 +33,7 @@ interface Root {
 interface Entity {
   queryName: string,
   entityName: string,
-  fields: string[],
+  fields: Field[],
 }
 
 export interface Argument {
@@ -54,7 +54,7 @@ export function generateGraphqlQueries(introspection: IntrospectionQuery) {
 
   const entities = [...getEntities(queryRoot, types), ...getEntities(mutationRoot, types)]
 
-  const fragmentsQuery = buildFragmentsQuery(entities)
+  const fragmentsQuery = buildFragmentsQuery(entities, types)
 
   const selectQuery = buildSelectQuery(queryRoot)
   const mutationQuery = buildMutationQuery(mutationRoot)
@@ -92,8 +92,10 @@ function getEntities(root: Root, types: TypesObject[]): Entity[] {
   for (const field of queryAndEntityNames) {
     const queryName = field.name
     const entityName = field.type.name
-    //if query root is type of list, get only scalar fields
-    const entityFields = root.kind === 'LIST' ? getFieldNames(entityName, types, 'SCALAR') : getFieldNames(entityName, types)
+    let entityFields = getEntityFields(entityName, types)
+
+    //if root is type of LIST get only SCALAR fields
+    if(root.kind === 'LIST') entityFields = entityFields.filter(field => field.type.kind === 'SCALAR')
 
     entities = [...entities, { queryName, entityName, fields: entityFields }]
   }
@@ -111,20 +113,15 @@ function getQueryAndEntityNames(queryRoot: Root) {
   return queryAndEntityNames
 }
 
-function getFieldNames(entityName: string, types: TypesObject[], ofType?: string): string[] {
-  let fieldNames: string[] = []
+//gets the deepest ofType name value from returning field
+function getReturningType(returningField: Field): string {
+  let actualType = returningField.type
 
-  const entityFields = getEntityFields(entityName, types)
+  while (actualType.ofType) {
+    actualType = actualType.ofType
+  }
 
-  entityFields.forEach(field => {
-    //skip of type fields, e.g. SCALAR
-    if (ofType) {
-      if (field.type.kind === ofType) fieldNames = [...fieldNames, field.name]
-    }
-    else fieldNames = [...fieldNames, field.name]
-  })
-
-  return fieldNames
+  return actualType.name ? actualType.name : ''
 }
 
 function getEntityFields(entityName: string, types: TypesObject[]): Field[] {
@@ -177,35 +174,51 @@ function buildMutationQuery(mutationRoot: Root): string {
 
     const fragmentName = `${field.name}_${field.type.name}`
 
-    if(mutationType.operation === 'insert') mutationQueries = [...mutationQueries, buildInsertMutation(field, mutationType, fragmentName)]
-    if(mutationType.operation === 'update') mutationQueries = [...mutationQueries, buildUpdateMutation(field, mutationType, fragmentName)]
-    if(mutationType.operation === 'delete') mutationQueries = [...mutationQueries, buildDeleteMutation(field, mutationType, fragmentName)]
+    mutationQueries = [...mutationQueries, buildMutationString(field, fragmentName)]
   })
 
   return mutationQueries.join('\n\n')
 
 }
 
-function buildDeleteMutation(field: Field, mutationType: Mutation, fragmentName: string): string {
-  if (mutationType.type === 'many') return `mutation ${field.name} {\n  ${field.name}(where: $where) {\n    ...${fragmentName}\n  }\n}`
-  return `mutation ${field.name} {\n  ${field.name}(id: $id) {\n    ...${fragmentName}\n  }\n}`
+function buildMutationString(field: Field, fragmentName: string) {
+  const parametersQuery = buildParametersString(field.args, '')
+
+  return `mutation ${field.name} {\n  ${field.name}${parametersQuery} {\n    ...${fragmentName}\n  }\n}`
 }
 
-function buildInsertMutation(field: Field, mutationType: Mutation, fragmentName: string): string {
-  if(mutationType.type === 'many') return `mutation ${field.name} {\n  ${field.name}(objects: $objects) {\n    ...${fragmentName}\n  }\n}`
-  return `mutation ${field.name} {\n  ${field.name}(object: $object) {\n    ...${fragmentName}\n  }\n}`
+function buildReturningString(types: TypesObject[], returningType: string): string {
+  let returningFields: string[] = []
+
+  for(const type of types) {
+    if(type.name === returningType) {
+      type.fields.forEach(field => {
+        returningFields = [...returningFields, field.name]
+      })
+
+      break
+    }
+  }
+
+  return `returning {\n    ${returningFields.join('\n    ')}\n  }`
 }
 
-function buildUpdateMutation(field: Field, mutationType: Mutation, fragmentName: string): string {
-  if(mutationType.type === 'many') return `mutation ${field.name} {\n  ${field.name}(where: $where, _set: $_set) {\n    ...${fragmentName}\n  }\n}`
-  return `mutation ${field.name} {\n  ${field.name}(pk_columns: $pk_columns, _set: $_set) {\n    ...${fragmentName}\n  }\n}`
-}
-
-function buildFragmentsQuery(entities: Entity[]): string {
+function buildFragmentsQuery(entities: Entity[], types: TypesObject[]): string {
   let fragmentsStrings: string[] = []
 
   entities.forEach(entity => {
-    const newFragmentString = `fragment ${entity.queryName}_${entity.entityName} on ${entity.entityName} {\n  ${entity.fields.join('\n  ')}\n}`
+    let fragmentFields: string[] = []
+
+    entity.fields.forEach(field => {
+      //if mutation root has returning type, build returning object with fields to be inserted into fragment fields
+      if (field.name === 'returning') {
+        const returningType = getReturningType(field)
+        const returningString = buildReturningString(types, returningType)
+
+        fragmentFields = [...fragmentFields, returningString]
+      } else fragmentFields = [...fragmentFields, field.name]
+    })
+    const newFragmentString = `fragment ${entity.queryName}_${entity.entityName} on ${entity.entityName} {\n  ${fragmentFields.join('\n  ')}\n}`
 
     fragmentsStrings = [...fragmentsStrings, newFragmentString]
   })

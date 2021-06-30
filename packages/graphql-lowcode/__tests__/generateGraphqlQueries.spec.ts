@@ -41,4 +41,8 @@ describe("Generate graphql queries", () => {
   test("Delete one/multiple objects mutations + affected rows", () => {
     expect(generateGraphqlQueries(scenarios.deleteMutationsInput)).toEqual(scenarios.deleteMutationsOutput)
   })
+
+  test("Mutation with returning fields", () => {
+    expect(generateGraphqlQueries(scenarios.mutationWithReturningInput)).toEqual(scenarios.mutationWithReturningOutput)
+  })
 })

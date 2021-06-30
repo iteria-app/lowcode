@@ -1003,3 +1003,99 @@ fragment delete_objects_delete_response on delete_response {
 fragment delete_object_delete_response on delete_response {
   affected_rows
 }`
+
+/**
+ * Single delete update mutation + multiple object delete mutation + affected_rows
+ */
+
+ export const mutationWithReturningInput = {
+  types: [
+    {
+      name: 'mutation_root',
+      fields: [
+        {
+          args: [
+            {
+              name: 'where',
+              type: {
+                kind: 'INPUT_OBJECT',
+                name: null
+              }
+            },
+          ],
+          name: 'delete_objects',
+          type: {
+            kind: 'INPUT_OBJECT',
+            name: 'delete_response'
+          }
+        }
+      ]
+    },
+    {
+      name: 'delete_response',
+      fields: [
+        {
+          name: 'affected_rows',
+          type: {
+            kind: 'SCALAR',
+            name: null
+          }
+        },
+        {
+          name: 'returning',
+          type: {
+            kind: "NON_NULL",
+            name: null,
+            ofType: {
+              kind: "LIST",
+              name: null,
+              ofType: {
+                kind: "NON_NULL",
+                name: null,
+                ofType: {
+                  kind: "OBJECT",
+                  name: "deleted_object",
+                  ofType: null
+                }
+              }
+            }
+          },
+        }
+      ]
+    },
+    {
+      name: 'deleted_object',
+      fields: [
+        {
+          name: 'id',
+          type: {
+            name: 'uuid',
+            type: 'SCALAR'
+          }
+        },
+        {
+          name: 'name',
+          type: {
+            name: 'string',
+            type: 'SCALAR'
+          }
+        }
+      ]
+    }
+  ]
+}
+
+export const mutationWithReturningOutput =
+`mutation delete_objects {
+  delete_objects(where: $where) {
+    ...delete_objects_delete_response
+  }
+}
+
+fragment delete_objects_delete_response on delete_response {
+  affected_rows
+  returning {
+    id
+    name
+  }
+}`
