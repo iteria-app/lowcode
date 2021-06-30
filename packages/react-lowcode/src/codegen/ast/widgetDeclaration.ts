@@ -69,19 +69,12 @@ export function getWidgetProperties(node: ts.Node): WidgetProperty[] {
             if (ts.isJsxAttribute(prop)) {
                 const value = getAttributeValue(prop);
                 const type = getAttributeType(prop)
-                if (value && type) {
-                    if (type === "EXPRESSION" || type === "true") 
-                        return {
-                            name: prop.name.escapedText.toString(),
-                            value,
-                            type: WidgetPropertyValue.EXPRESSION
-                        };
-                    else 
-                        return {
-                            name: prop.name.escapedText.toString(),
-                            value,
-                            type: WidgetPropertyValue.STRING_LITERAL
-                        };
+                if (value) {
+                    return {
+                        name: prop.name.escapedText.toString(),
+                        value,
+                        type: type !== undefined ? type : WidgetPropertyValue.EXPRESSION
+                    };
                 }
             }
             return undefined;
@@ -150,14 +143,13 @@ function getAttributeValue(attribute: ts.JsxAttribute): string | undefined {
     return 'true';
 }
 
-function getAttributeType(attribute: ts.JsxAttribute): string {
+function getAttributeType(attribute: ts.JsxAttribute) : string | undefined {
     if (attribute.initializer) {
         if (ts.isJsxExpression(attribute.initializer)) 
-            return "EXPRESSION"
+            return WidgetPropertyValue.EXPRESSION
         else 
-            return "STRING_LITERAL"
+            return WidgetPropertyValue.STRING_LITERAL
     }
-    return "true"
 }
 
 function getStringTypeAttributeValue(initializer: ts.StringLiteral | ts.JsxExpression): string | undefined {

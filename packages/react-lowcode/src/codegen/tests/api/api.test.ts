@@ -137,9 +137,8 @@ describe(".api tests", () => {
     
         test(".get Widget Fields (MUI TextField)", async () => {
             const filePath = 'src/codegen/tests/detail/detail-test-file.txt';
-            const source: SourceLineCol = { lineNumber: 80, columnNumber: 19, fileName: filePath };
+            const source: SourceLineCol = { lineNumber: 70, columnNumber: 19, fileName: filePath };
             const result = await getFormWidgetProperties(new CodegenRw(), source);
-            
             expect(result.properties).toStrictEqual([
                 {
                     name: "fullWidth",
@@ -147,43 +146,23 @@ describe(".api tests", () => {
                     type: WidgetPropertyValue.EXPRESSION
                 },
                 {
-                    name: "required",
-                    value: "true",
-                    type: WidgetPropertyValue.EXPRESSION
-                },
-                {
-                    name: "disabled",
-                    value: "false",
-                    type: WidgetPropertyValue.EXPRESSION
-                },
-                {
-                    name: "rows",
-                    value: "10",
-                    type: WidgetPropertyValue.EXPRESSION
-                },
-                {
                     name: "id",
-                    value: "updatedAt",
+                    value: "phone",
                     type: WidgetPropertyValue.STRING_LITERAL
                 },
                 {
                     name: "type",
-                    value: "date",
+                    value: "input",
                     type: WidgetPropertyValue.STRING_LITERAL
                 },
                 {
                     name: "label",
-                    value: "updatedAt",
+                    value: "phone",
                     type: WidgetPropertyValue.STRING_LITERAL
                 },
                 {
-                    name: "InputLabelProps",
-                    value: "{ shrink: true }",
-                    type: WidgetPropertyValue.EXPRESSION
-                },
-                {
                     name: "value",
-                    value: "intl.formatDate(formik.values.updatedAt)",
+                    value: "intl.formatMessage({ id: formik.values.phone })",
                     type: WidgetPropertyValue.EXPRESSION
                 },
                 {
@@ -202,74 +181,63 @@ describe(".api tests", () => {
                     type: WidgetPropertyValue.EXPRESSION
                 },
                 {
-                    name: "required",
-                    value: "false",
-                    type: WidgetPropertyValue.EXPRESSION
-                },
-                {
-                    name: "disabled",
-                    value: "true",
-                    type: WidgetPropertyValue.EXPRESSION
-                },
-                {
-                    name: "rows",
-                    value: "5",
-                    type: WidgetPropertyValue.EXPRESSION
-                },
-                {
                     name: "id",
-                    value: "updatedAtTime",
+                    value: "phoneNumber",
                     type: WidgetPropertyValue.STRING_LITERAL
                 },
                 {
                     name: "type",
-                    value: "time",
+                    value: "input",
                     type: WidgetPropertyValue.STRING_LITERAL
                 },
                 {
                     name: "label",
-                    value: "updatedAtTime",
+                    value: "phoneNumber",
                     type: WidgetPropertyValue.STRING_LITERAL
+                },
+                {
+                    name: "value",
+                    value: "intl.formatMessage({ id: formik.values.message })",
+                    type: WidgetPropertyValue.EXPRESSION
+                },
+                {
+                    name: "onChange",
+                    value: "formik.handleChange",
+                    type: WidgetPropertyValue.EXPRESSION
                 }
             ];
     
             const expectedProperties = [
                 {
-                    name: "required",
-                    value: "false",
-                    type: WidgetPropertyValue.EXPRESSION
-                },
-                {
-                    name: "disabled",
-                    value: "true",
-                    type: WidgetPropertyValue.EXPRESSION
-                },
-                {
-                    name: "rows",
-                    value: "5",
-                    type: WidgetPropertyValue.EXPRESSION
-                },
-                {
                     name: "id",
-                    value: "updatedAtTime",
+                    value: "phoneNumber",
                     type: WidgetPropertyValue.STRING_LITERAL
                 },
                 {
                     name: "type",
-                    value: "time",
+                    value: "input",
                     type: WidgetPropertyValue.STRING_LITERAL
                 },
                 {
                     name: "label",
-                    value: "updatedAtTime",
+                    value: "phoneNumber",
                     type: WidgetPropertyValue.STRING_LITERAL
+                },
+                {
+                    name: "value",
+                    value: "intl.formatMessage({ id: formik.values.message })",
+                    type: WidgetPropertyValue.EXPRESSION
+                },
+                {
+                    name: "onChange",
+                    value: "formik.handleChange",
+                    type: WidgetPropertyValue.EXPRESSION
                 }
             ];
     
             const filePath = 'src/codegen/tests/detail/detail-test-file.txt';
-            const source: SourceLineCol = { lineNumber: 80, columnNumber: 19, fileName: filePath };
+            const source: SourceLineCol = { lineNumber: 70, columnNumber: 19, fileName: filePath };
             const result = await setFormWidgetProperties(new CodegenRw(), source, { properties: properties });
-
             expect(result).not.toBe(undefined);
     
             if(result) {
@@ -278,7 +246,7 @@ describe(".api tests", () => {
                     if (ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) {
                         const idProperty = node.attributes.properties.find(p => p.kind === SyntaxKind.JsxAttribute && p.name.text === 'id');
                         if(idProperty && ts.isJsxAttribute(idProperty) && idProperty.initializer && ts.isStringLiteral(idProperty.initializer)) {
-                            return idProperty.initializer.text === 'updatedAtTime';
+                            return idProperty.initializer.text === 'phoneNumber';
                         }
                     }
                     return false;
