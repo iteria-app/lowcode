@@ -2,11 +2,12 @@ import ts, { factory } from "typescript"
 import { graphqlGenTs1 } from "../typeAlias.example"
 import { Formatter, TableType, UiFramework } from '../../definition/context-types'
 import { AppGenerator } from '../../generation/generators/app-generator'
-import {generatePages} from '../../index'
 import { CodeDir, CodeRW } from "../../../io"
 import { sourceFileEntity, createAst, parseGraphqlTypes } from "../helper"
+import { generatePages } from "../../app"
+import { CodegenRw } from "../../io/codegenRw"
 import path from 'path'
-import fs from "fs"
+import fs from 'fs'
 
 class testDemoWriter implements CodeRW, CodeDir {
   private _sourceCodeString: string = ''
@@ -31,9 +32,13 @@ class testDemoWriter implements CodeRW, CodeDir {
 describe("table generation", () => {
   
   test (".test table generation from index", ()=>{
-    var options = {names:['Customer']}
 
     var testWriter = new testDemoWriter()
+
+    const io = new CodegenRw()
+    const template = fs.readFileSync(path.resolve('src/codegen/tests/list/files/page-list-template.txt'), 'utf-8')
+    
+    var options = {names:['Customer'], pageListTemplate: template}
 
     generatePages(graphqlGenTs1, testWriter, options)
 

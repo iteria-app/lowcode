@@ -52,8 +52,8 @@ export function isFormWidget(sourceCode: string, position: SourceLineCol): boole
         if(variableDeclaration){
             const identifier = findIdentifier(variableDeclaration)
 
-            if(identifier){
-                isFormWidget = identifier.getText().startsWith('Generated')
+            if(identifier){//TODO(mch): hardly need to refactor this bad solution
+                isFormWidget = identifier.getText().startsWith('Generated') || identifier.getText().indexOf('Formik') > -1
             }
         }
     }
@@ -72,7 +72,7 @@ export function getWidgetProperties(node: ts.Node): WidgetProperty[] {
                 if (value) {
                     return {
                         name: prop.name.escapedText.toString(),
-                        value: value
+                        value
                     };
                 }
             }
@@ -133,17 +133,13 @@ function isElementWithAttributes(node: ts.Node): node is ts.JsxOpeningElement | 
 }
 
 function getAttributeValue(attribute: ts.JsxAttribute): string | undefined {
-    let result: string | undefined;
-
     if (attribute.initializer) {
-        result = getStringTypeAttributeValue(attribute.initializer)
+        return getStringTypeAttributeValue(attribute.initializer)
             || getNumberTypeAttributeValue(attribute.initializer)
             || getBooleanTypeAttributeValue(attribute.initializer);
-    } else {
-        result = 'true';
     }
 
-    return result;
+    return 'true';
 }
 
 function getStringTypeAttributeValue(initializer: ts.StringLiteral | ts.JsxExpression): string | undefined {
@@ -153,8 +149,6 @@ function getStringTypeAttributeValue(initializer: ts.StringLiteral | ts.JsxExpre
 function getNumberTypeAttributeValue(initializer: ts.StringLiteral | ts.JsxExpression): string | undefined {
     if (ts.isJsxExpression(initializer) && initializer.expression !== undefined && ts.isNumericLiteral(initializer.expression)) {
         return initializer.expression.getText();
-    } else {
-        return undefined;
     }
 }
 
@@ -162,7 +156,5 @@ function getBooleanTypeAttributeValue(initializer: ts.StringLiteral | ts.JsxExpr
     if (ts.isJsxExpression(initializer) && initializer.expression
         && (initializer.expression.kind === SyntaxKind.TrueKeyword || initializer.expression.kind === SyntaxKind.FalseKeyword)) {
         return initializer.expression.getText();
-    } else {
-        return undefined;
     }
 }

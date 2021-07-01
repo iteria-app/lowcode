@@ -9,3 +9,10 @@ export interface FacadeInsertOptions{
 export interface FacadeDeleteOptions {
     index: number
 }
+
+export interface RouteOptions {
+    routeFilePath: string
+    entityName: string,
+    componentName: string,
+    componentPath: string
+}

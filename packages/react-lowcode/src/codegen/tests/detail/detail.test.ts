@@ -1,5 +1,4 @@
 // TODO https://github.com/vvakame/typescript-formatter/blob/master/lib/formatter.ts
-import { Project, SourceFile } from "ts-morph"
 import ts, { factory } from "typescript"
 import { graphqlGenTs1 } from "../typeAlias.example"
 import { UiFramework, TableType, Formatter } from '../../definition/context-types'

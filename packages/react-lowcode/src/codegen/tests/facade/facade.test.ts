@@ -186,7 +186,13 @@ describe("codegen facade tests", () => {
     });
 
     test(".add widget to existing detail page", () => {
-      insertFormWidget({lineNumber: 33,columnNumber: 19, fileName: 'src/codegen/tests/detail/detail-test-file.txt'}, {entityField: getEntityProperty(graphqlGenTs1,'test')[0]}, new CodegenRw()).then(
+      insertFormWidget({lineNumber: 50,columnNumber: 19, fileName: 'src/codegen/tests/detail/detail-test-file.txt'}, {entityField: getEntityProperty(graphqlGenTs1,'test2')[0]}, new CodegenRw()).then(
+        (data) => console.log(data)
+      )
+    });
+
+    test(".add widget at position to existing detail page", () => {
+      insertFormWidget({lineNumber: 50,columnNumber: 19, fileName: 'src/codegen/tests/detail/detail-test-file.txt'}, {entityField: getEntityProperty(graphqlGenTs1,'test2')[0], index:3}, new CodegenRw()).then(
         (data) => console.log(data)
       )
     });
