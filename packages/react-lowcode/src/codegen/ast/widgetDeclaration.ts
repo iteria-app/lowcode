@@ -68,12 +68,12 @@ export function getWidgetProperties(node: ts.Node): WidgetProperty[] {
         result = node.attributes.properties.map(prop => {
             if (ts.isJsxAttribute(prop)) {
                 const value = getAttributeValue(prop);
-                const type = getAttributeType(prop)
+                const type = getAttributeType(prop) ?? WidgetPropertyValue.EXPRESSION
                 if (value) {
                     return {
                         name: prop.name.escapedText.toString(),
                         value,
-                        type: type !== undefined ? type : WidgetPropertyValue.EXPRESSION
+                        type
                     };
                 }
             }
