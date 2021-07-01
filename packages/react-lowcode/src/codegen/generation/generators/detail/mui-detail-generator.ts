@@ -141,34 +141,29 @@ export default class MuiDetailGenerator implements DetailGenerator {
                           }
                         }
                         else if (inputProp.value !== prop.initializer.expression.getText()) {
+                            const prefix = inputProp.value.substring(
+                              0,
+                              inputProp.value.indexOf("(")
+                            ).split(".")
                             
-                            // const prefix = inputProp.value.substring(
-                            //   0,
-                            //   inputProp.value.indexOf("(")
-                            // ).split(".")
 
-                            // const value = factory.createJsxExpression (
-                            //   undefined,
-                            //   factory.createCallExpression (
-                            //     factory.createPropertyAccessExpression(
-                            //       factory.createIdentifier(prefix[0]),
-                            //       factory.createIdentifier(prefix[1])
-                            //     ),
-                            //     undefined,
-                            //     [factory.createStringLiteral (
-                            //       inputProp.value.substring(
-                            //         inputProp.value.indexOf("{"),
-                            //         inputProp.value.lastIndexOf("}") + 1
-                            //       )
-                            //     )]
-                            //   )
-                            // )
-                            
                             const value = factory.createJsxExpression (
                               undefined,
-                              factory.createStringLiteral(inputProp.value)
+                              factory.createCallExpression (
+                                factory.createPropertyAccessExpression(
+                                  factory.createIdentifier(prefix[0]),
+                                  factory.createIdentifier(prefix[1])
+                                ),
+                                undefined,
+                                [factory.createIdentifier (
+                                  inputProp.value.substring(
+                                    inputProp.value.indexOf("{"),
+                                    inputProp.value.lastIndexOf("}") + 1
+                                  )
+                                )]
+                              )
                             )
-                            
+
                             newProp = factory.updateJsxAttribute(prop, prop.name, value)
                             astChanged = true
                         }
