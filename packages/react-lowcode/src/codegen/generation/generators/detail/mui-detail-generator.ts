@@ -27,7 +27,7 @@ import {
   findPropertyAssignment,
 } from "../../../ast/ast";
 import { findWidgetParentNode, getWidgetProperties } from "../../../ast/widgetDeclaration";
-import { WidgetProperties } from "../../../interfaces";
+import { WidgetProperties, WidgetProperty } from "../../../interfaces";
 
 export default class MuiDetailGenerator implements DetailGenerator {
   private _imports: ts.ImportDeclaration[] = [];
@@ -140,29 +140,9 @@ export default class MuiDetailGenerator implements DetailGenerator {
                             astChanged = true;
                           }
                         }
+                        // intl.formatMessage({ id: formik.values.message }) || formik.handleChange 
                         else if (inputProp.value !== prop.initializer.expression.getText()) {
-                            const prefix = inputProp.value.substring(
-                              0,
-                              inputProp.value.indexOf("(")
-                            ).split(".")
-                            
-
-                            const value = factory.createJsxExpression (
-                              undefined,
-                              factory.createCallExpression (
-                                factory.createPropertyAccessExpression(
-                                  factory.createIdentifier(prefix[0]),
-                                  factory.createIdentifier(prefix[1])
-                                ),
-                                undefined,
-                                [factory.createIdentifier (
-                                  inputProp.value.substring(
-                                    inputProp.value.indexOf("{"),
-                                    inputProp.value.lastIndexOf("}") + 1
-                                  )
-                                )]
-                              )
-                            )
+                            const value = this.createNewJsxExpression(inputProp)
 
                             newProp = factory.updateJsxAttribute(prop, prop.name, value)
                             astChanged = true
@@ -191,6 +171,15 @@ export default class MuiDetailGenerator implements DetailGenerator {
     }
 
     return result;
+  }
+
+  createNewJsxExpression(inputproperty: WidgetProperty) : ts.JsxExpression {
+    return factory.createJsxExpression(
+      undefined,
+      factory.createIdentifier(
+        inputproperty.value
+      )
+    )
   }
 
   async insertFormWidget(position: SourceLineCol, property: Property, index?:number): Promise<string> {
