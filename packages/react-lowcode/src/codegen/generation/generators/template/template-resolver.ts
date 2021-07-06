@@ -1,11 +1,11 @@
 import ts, { factory } from "typescript";
 import { transformer } from "../../../../ast";
 import { printSourceCode } from "../../../ast/ast";
-import { createImportDeclaration } from "../../../ast/imports";
+import { createNamedImportDeclaration } from "../../../ast/imports";
 import { isOpeningOrSelfClosingElementWithName, isImportDeclarationWithName, isFunctionDeclarationWithName } from "../../../ast/node";
 import { createAst } from "../../code-generation/createSourceFile";
 import { Entity } from "../../entity";
-import { EntityHelper } from "../../entity/helper";
+import { getInputParameterIdentifier, getListComponentName, getListPageComponentName } from "../../entity/helper";
 
 export default class TemplateResolver {
     private _entity?: Entity
@@ -23,13 +23,13 @@ export default class TemplateResolver {
             if (ast) {
                 const templateComponentName = 'ListPlaceholder';
                 const templatePageComponentName = 'App'
-                const listComponentName = EntityHelper.getListComponentName(this._entity);
-                const listPageComponentName = EntityHelper.getListPageComponentName(this._entity);
-                const inputParameterIdentifier = EntityHelper.getInputParameterIdentifier(this._entity);
+                const listComponentName = getListComponentName(this._entity);
+                const listPageComponentName = getListPageComponentName(this._entity);
+                const inputParameterIdentifier = getInputParameterIdentifier(this._entity);
 
                 const transformImportDeclaration = (node: ts.Node, importName: string, tableComponentName: string) => {
                     if(isImportDeclarationWithName(node, importName)) {
-                        return createImportDeclaration(tableComponentName, './' + tableComponentName);
+                        return createNamedImportDeclaration(tableComponentName, './' + tableComponentName);
                     }
                 }
 

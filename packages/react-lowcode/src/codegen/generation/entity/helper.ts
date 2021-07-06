@@ -4,20 +4,22 @@ import { Entity } from ".";
 import { camalizeString } from "../../../strings/camel";
 import { identifier } from "../../ast/identifier";
 
-export class EntityHelper {
-    static getEntityName(entity: Entity): string{
-        return camalizeString(entity.getName())
-    }
+export function getEntityName(entity: Entity): string{
+    return camalizeString(entity.getName())
+}
 
-    static getListComponentName(entity: Entity) {
-        return `${entity.getName()}List`
-    }
+export function getListComponentName(entity: Entity) {
+    return `${entity.getName()}List`
+}
 
-    static getListPageComponentName(entity: Entity) {
-        return `${this.getListComponentName(entity)}Page`
-    }
+export function getListPageComponentName(entity: Entity) {
+    return `${getListComponentName(entity)}Page`
+}
 
-    static getInputParameterIdentifier(entity: Entity) : ts.Identifier {
-        return identifier(Pluralize.plural(this.getEntityName(entity)))
-    }
+export function getInputParameterIdentifier(entity: Entity) : ts.Identifier {
+    return identifier(getPluralizedEntityName(entity.getName()))
+}
+
+export function getPluralizedEntityName(entityName: string) : string {
+    return Pluralize.plural(camalizeString(entityName))
 }

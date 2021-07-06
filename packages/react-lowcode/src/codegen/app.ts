@@ -5,10 +5,9 @@ import ts, { factory } from "typescript"
 import { Project } from "ts-morph"
 import { CodegenOptions } from './interfaces'
 import TemplateResolver from './generation/generators/template/template-resolver'
-import { addRoute } from './generation/generators/routes/route-generator'
 import { generateRoute } from './facade/facadeApi'
 import { Entity } from './generation/entity'
-import { EntityHelper } from './generation/entity/helper'
+import { getEntityName, getListPageComponentName, getPluralizedEntityName } from './generation/entity/helper'
 
 // generates CRUD React pages (master-detail, eg. orders list, order detail form) from typescript
 export function generatePages(inputSourceCode: string, io: CodeRW & CodeDir, options?: CodegenOptions) {
@@ -31,7 +30,9 @@ export function generatePages(inputSourceCode: string, io: CodeRW & CodeDir, opt
                 }))
             }
 
-            const listPageFilePath = `src/components/${typeName}ListPage.tsx`
+            const entityListComponentPageName = getListPageComponentName(entity)
+            const listPageFilePath = `src/components/${entityListComponentPageName}.tsx`
+            const moduleRouteUri = `app${getPluralizedEntityName(entity.getName())}`
 
             //generate component for list
             generateListComponent(io, entity, typeName)
@@ -40,7 +41,10 @@ export function generatePages(inputSourceCode: string, io: CodeRW & CodeDir, opt
             generateListPage(io, entity, typeName, options.pageListTemplate, listPageFilePath);
 
             //generate route for generated list page
-            addNewListRoute(io, entity.getName(), listPageFilePath)
+            addNewListRoute(io, moduleRouteUri, entityListComponentPageName, listPageFilePath)
+
+            //generate new menu item for generated list page
+            //addnewme
         }
     })
 
@@ -98,16 +102,17 @@ export function generatePages(inputSourceCode: string, io: CodeRW & CodeDir, opt
     }
 
     function addNewListRoute(io:CodeRW,
-        entityName: string, 
-        componentFilePath: string){
+                             moduleRouteUri: string, 
+                             componentName: string,
+                             componentFilePath: string){
             //for the beginning path to route json definition will be harcoded
             const routeDefinitionFilePath = 'src/routes.tsx'
 
             generateRoute(
                 { routeFilePath: routeDefinitionFilePath, 
-                  componentName: 'EntityHelper.getEntityName()', 
-                  componentPath: componentFilePath, 
-                  entityName: entityName
+                  componentName: componentName, 
+                  componentFilePath: componentFilePath, 
+                  componentRouteUri: moduleRouteUri
                 }, 
                 io).then(generatedSource => {
                     if(generatedSource){
@@ -116,4 +121,7 @@ export function generatePages(inputSourceCode: string, io: CodeRW & CodeDir, opt
                 }
             )
     }
+
+    //function addNewMenuItem(io:CodeRW,
+      //  )
 }

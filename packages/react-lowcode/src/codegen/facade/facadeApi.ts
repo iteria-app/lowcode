@@ -12,9 +12,9 @@ import MuiDetailGenerator from "../generation/generators/detail/mui-detail-gener
 import GrommetDataTableGenerator from "../generation/generators/list/grommet-dt-generator";
 import { CodeRW } from "../../io";
 import { BasicTableGenerator } from "../generation/generators/list/basic-table-generator";
-import { FacadeDeleteOptions, FacadeInsertOptions, RouteOptions } from "./interfaces";
+import { FacadeDeleteOptions, FacadeInsertOptions, MenuItemOptions, RouteOptions } from "./interfaces";
 import { ColumnSourcePositionResult, WidgetProperties } from "../interfaces";
-import { addRoute } from "../generation/generators/routes/route-generator";
+import { generateNewRoute } from "../generation/generators/routes/route-generator";
 
 export async function insertColumn(
   tablePosition: SourceLineCol,
@@ -249,10 +249,16 @@ export async function setFormWidgetProperties(
   return await generator.setFormWidgetProperties(position, properties);
 }
 
-export async function generateRoute(options: RouteOptions, io:CodeRW): Promise<string | undefined> {
+export async function generateRoute(options: RouteOptions, io: CodeRW): Promise<string | undefined> {
   const routesDefinitionSource = await io.readFile(options.routeFilePath)
 
   if(routesDefinitionSource){
-    return addRoute(routesDefinitionSource, options.entityName, options.componentName, options.componentPath)
+    return generateNewRoute(routesDefinitionSource, 
+                            options.componentRouteUri, 
+                            options.componentName, 
+                            options.componentFilePath
+            )
   }
 }
+
+//export async function generateNewMenuItem(options: MenuItemOptions, io: CodeRW)

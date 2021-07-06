@@ -1,5 +1,5 @@
 import { generateCode } from "ts-factory-code-generator-generator";
-import { EntityHelper } from "../../generation/entity/helper";
+import { getListPageComponentName } from "../../generation/entity/helper";
 import TemplateResolver from "../../generation/generators/template/template-resolver";
 import { parseGraphqlTypes, sourceFileEntity } from "../helper";
 import { graphqlGenTs1 } from "../typeAlias.example";
@@ -38,7 +38,7 @@ export default App;
 
         expect(generatedCode).toContain('import { CustomerList } from "./CustomerList";');
         expect(generatedCode).toContain('<CustomerList customers={data?.customers}/>');
-        expect(generatedCode).toContain(`function ${EntityHelper.getListPageComponentName(testEntity!)}`);
+        expect(generatedCode).toContain(`function ${getListPageComponentName(testEntity!)}`);
         
         expect(generatedCode).not.toContain("import ListPlaceholder from './ListPlaceholder'");
         expect(generatedCode).not.toContain("<ListPlaceholder customers={data?.customers} />");
