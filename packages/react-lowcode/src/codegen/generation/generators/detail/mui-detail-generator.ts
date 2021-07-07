@@ -140,18 +140,20 @@ export default class MuiDetailGenerator implements DetailGenerator {
                             astChanged = true;
                           }
                         }
-                        // intl.formatMessage({ id: formik.values.message }) || formik.handleChange 
+                        // intl.formatMessage({ id: formik.values.message }) || formik.handleChange || { shrink: true } || randomtext
                         else if (inputProp.value !== prop.initializer.expression.getText()) {
                             const newAst = createAst(inputProp.value)
                             const childrens = newAst?.statements[0].getChildren()
-                            let child : any = childrens !== undefined ? childrens[0] : undefined
+                            const child : any = childrens !== undefined ? childrens[0] : undefined
 
                             let expression = child.expression
                             const messageId = child.arguments != null ? child.arguments[0].getText() : ""
                             let val;
+
                             // check if node has nested expression
-                            if (!this.isNested(expression))
+                            if (this.isNotNested(expression))
                               expression = child
+
                             // if inputValue is object  
                             if (expression.kind === ts.SyntaxKind.OpenBraceToken) {
                               const statements = child.parent.statements
@@ -160,6 +162,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
                                 const value = statements[0].getChildren()[2].getText()
                                 val = this.createNewJsxExpressionWithObjectAssertion(attr, value)
                               } else {
+                                // insert empty object
                                 val = this.createNewJsxExpressionWithObjectAssertion(undefined, undefined)
                               }
                             } else {
@@ -179,8 +182,8 @@ export default class MuiDetailGenerator implements DetailGenerator {
                                   val = factory.createJsxExpression(
                                     undefined,
                                     factory.createPropertyAccessExpression(
-                                      factory.createIdentifier(expression.expression != null ? expression.expression.getText() : expression.getText()),
-                                      factory.createIdentifier(expression.name != null ? expression.name.escapedText : expression.getText())
+                                      factory.createIdentifier(expression.expression.getText()),
+                                      factory.createIdentifier(expression.name.escapedText)
                                     )
                                   ) 
                                 }
@@ -215,31 +218,41 @@ export default class MuiDetailGenerator implements DetailGenerator {
     return result;
   }
 
-  createNewJsxExpression(inputproperty: WidgetProperty) : ts.JsxExpression {
+  // createNewJsxExpression(inputproperty: WidgetProperty) : ts.JsxExpression {
+  //   return factory.createJsxExpression(
+  //     undefined,
+  //     factory.createIdentifier(
+  //       inputproperty.value
+  //     )
+  //   )
+  // }
+
+  createNewJsxExpressionWithMessage(expression: any, messageId: string) : ts.JsxExpression {
+    if (expression.name && expression.expression) {
+      return factory.createJsxExpression(
+        undefined,
+        factory.createCallExpression(
+          factory.createPropertyAccessExpression(
+            factory.createIdentifier(expression.expression.getText()),
+            factory.createIdentifier(expression.name.escapedText)
+          ),
+          undefined,
+          [factory.createIdentifier(messageId)]
+        )
+      ) 
+    } 
     return factory.createJsxExpression(
       undefined,
-      factory.createIdentifier(
-        inputproperty.value
+      factory.createCallExpression(
+        factory.createIdentifier(expression.expression.getText()),
+        undefined,
+        [factory.createIdentifier(messageId)]
       )
     )
   }
 
-  createNewJsxExpressionWithMessage(expression: any, messageId: string) : ts.JsxExpression {
-    return factory.createJsxExpression(
-      undefined,
-      factory.createCallExpression(
-        factory.createPropertyAccessExpression(
-          factory.createIdentifier(expression.expression.getText()),
-          factory.createIdentifier(expression.name.escapedText)
-        ),
-        undefined,
-        [factory.createIdentifier(messageId)]
-      )
-    ) 
-  }
-
-  isNested(expression : any) : boolean {
-    return expression || expression.expression
+  isNotNested(expression : any) : boolean {
+    return !expression || !expression.expression
   }
 
   createNewJsxExpressionWithObjectAssertion(attr : string | undefined, value: string | undefined) : ts.JsxExpression {
