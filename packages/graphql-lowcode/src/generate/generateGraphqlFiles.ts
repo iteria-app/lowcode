@@ -1,5 +1,5 @@
-import { is } from './introspection'
-import { generateGraphqlQueries, getRoot, getNestedOfTypeName } from './generateGraphqlQueries'
+import { is2 } from './introspection'
+import { generateGraphqlQueries, getRoot, getNestedOfType } from './generateGraphqlQueries'
 import { IntrospectionQuery, Field, TypesObject } from './types'
 
 interface graphqlFile {
@@ -7,7 +7,7 @@ interface graphqlFile {
   content: string
 }
 
-generateGraphQlFiles(is.data.__schema, ['customer'])
+generateGraphQlFiles(is2.data.__schema, ['customer'])
 
 function generateGraphQlFiles(introspection: IntrospectionQuery, names: string[]) {
   const queryRoot = getRoot(introspection.types, 'query_root')
@@ -45,7 +45,7 @@ function isReturningEntity(field: Field, allTypes: TypesObject[], entityName: st
   if (ofType === true) return true
   if (ofType === 'leaf') return false
 
-  const nestedOfTypeName = getNestedOfTypeName(field)
+  const nestedOfTypeName = getNestedOfType(field).name
   allTypes = allTypes.filter(type => type.name === nestedOfTypeName)
 
   const nestedType = allTypes.find(type => type.name === nestedOfTypeName)

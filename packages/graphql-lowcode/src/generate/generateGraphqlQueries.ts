@@ -1,4 +1,5 @@
-import { IntrospectionQuery, Field, TypesObject, EntityQuery, Argument, Root } from './types'
+import { IntrospectionQuery, Field, TypesObject, EntityQuery, Argument, Root, Type } from './types'
+import { getHasuraInputFields } from './hasuraGetMutationType'
 
 export function generateGraphqlQueries(introspection: IntrospectionQuery) {
   const types = introspection.types
@@ -36,7 +37,7 @@ function getEntities(root: Root, types: TypesObject[]): EntityQuery[] {
 
   for (const field of queryAndEntityNames) {
     const queryName = field.name
-    const entityName = getNestedOfTypeName(field)
+    const entityName = getNestedOfType(field).name ?? ''
     let entityFields = getEntityFields(entityName, types)
 
     //if root is type of LIST get only SCALAR fields
@@ -77,37 +78,69 @@ function getEntityFields(entityName: string, types: TypesObject[]): Field[] {
 }
 
 //Finds the deepest nested field type name/entity
-export function getNestedOfTypeName(field: Field) {
+export function getNestedOfType(field: Field | Argument): Type {
   let actualType = field.type
 
   while (actualType.ofType) actualType = actualType.ofType
 
-  if(actualType.name) return actualType.name
-  return 'null'
+  if (actualType.name) return actualType
+  return { name: '', kind: '' }
 }
 
-function buildParametersString(args: Argument[], kind: string): string {
-  let parameters: string[] = []
+function isMandatory(field: Field | Argument) {
+  let actualType = field.type
 
-  if (args) {
-    args.forEach(argument => {
-      const newParameter = `${argument.name}: $${argument.name}`
-
-      parameters = [...parameters, newParameter]
-    })
+  while (actualType.ofType) {
+    if (actualType.kind === 'NON_NULL') return true
+    actualType = actualType.ofType
   }
 
-  return parameters.length ? `(${parameters.join(', ')})` : ''
+  return false
+}
+
+function isListType(field: Field) {
+  let actualType = field.type
+
+  while (actualType.ofType) {
+    if (actualType.kind === 'LIST') return true
+    actualType = actualType.ofType
+  }
+
+  return false
+}
+
+function buildParametersAndVariablesString(field: Field) {
+  const inputFields = getHasuraInputFields(field.args)
+
+  //filtering arguments for further use, only few are needed
+  const filteredArgs = field.args.filter((arg: { name: String }) => inputFields.includes(arg.name))
+
+  let queryParams: string[] = []
+  let variables: string[] = []
+
+  filteredArgs.forEach((arg: { name: string }) => {
+    const newParameter = `${arg.name}: $${arg.name}`
+
+    const mandatory = isMandatory(arg) ? '!' : ''
+
+    const variableType = getNestedOfType(arg).name
+    const newVariable = `$${arg.name}: ${variableType}${mandatory}`
+
+    queryParams = [...queryParams, newParameter]
+    variables = [...variables, newVariable]
+  })
+
+  return { params: queryParams.length ? `(${queryParams.join(', ')})` : '', variables: variables.length ? `(${variables.join(', ')})` : '' }
 }
 
 function buildSelectQuery(queryRoot: Root): string {
   let selectQueries: string[] = []
 
   queryRoot.fields.forEach(field => {
-    const fragmentName = `${field.name}_${getNestedOfTypeName(field)}`
-    const parametersString = buildParametersString(field.args, queryRoot.kind)
+    const fragmentName = `${field.name}_${getNestedOfType(field).name}`
+    const { params, variables } = buildParametersAndVariablesString(field)
 
-    const newSelectQuery = `query ${field.name} {\n  ${field.name}${parametersString} {\n    ...${fragmentName}\n  }\n}`
+    const newSelectQuery = `query ${field.name}${variables} {\n  ${field.name}${params} {\n    ...${fragmentName}\n  }\n}`
 
     selectQueries = [...selectQueries, newSelectQuery]
   })
@@ -119,8 +152,7 @@ function buildMutationQuery(mutationRoot: Root): string {
   let mutationQueries: string[] = []
 
   mutationRoot.fields.forEach(field => {
-    //const mutationType = getMutationType(field.args)
-    const fragmentName = `${field.name}_${getNestedOfTypeName(field)}`
+    const fragmentName = `${field.name}_${getNestedOfType(field).name}`
 
     mutationQueries = [...mutationQueries, buildMutationString(field, fragmentName)]
   })
@@ -130,9 +162,9 @@ function buildMutationQuery(mutationRoot: Root): string {
 }
 
 function buildMutationString(field: Field, fragmentName: string) {
-  const parametersQuery = buildParametersString(field.args, '')
+  const { params, variables } = buildParametersAndVariablesString(field)
 
-  return `mutation ${field.name} {\n  ${field.name}${parametersQuery} {\n    ...${fragmentName}\n  }\n}`
+  return `mutation ${field.name}${variables} {\n  ${field.name}${params} {\n    ...${fragmentName}\n  }\n}`
 }
 
 function buildReturningString(types: TypesObject[], returningType: string): string {
@@ -141,7 +173,9 @@ function buildReturningString(types: TypesObject[], returningType: string): stri
   for (const type of types) {
     if (type.name === returningType && type.fields) {
       type.fields.forEach(field => {
-        returningFields = [...returningFields, field.name]
+        if (getNestedOfType(field).kind === 'SCALAR') {
+          returningFields = [...returningFields, field.name]
+        }
       })
 
       break
@@ -164,7 +198,9 @@ function buildFragmentsQuery(entities: EntityQuery[], types: TypesObject[], targ
         const returningString = buildReturningString(types, returningType)
 
         fragmentFields = [...fragmentFields, returningString]
-      } else fragmentFields = [...fragmentFields, field.name]
+      } else {
+        if (getNestedOfType(field).kind === 'SCALAR') fragmentFields = [...fragmentFields, field.name]
+      }
     })
     const newFragmentString = `fragment ${entity.queryName}_${entity.entityName} on ${entity.entityName} {\n  ${fragmentFields.join('\n  ')}\n}`
 
