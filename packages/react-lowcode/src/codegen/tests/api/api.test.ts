@@ -177,7 +177,7 @@ describe(".api tests", () => {
         }); 
         
         test(".set Widget Fields (MUI TextField)", async () => {
-            const properties =             [
+            const properties = [
                 {
                     name: "fullWidth",
                     value: "false",

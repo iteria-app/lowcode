@@ -142,9 +142,51 @@ export default class MuiDetailGenerator implements DetailGenerator {
                         }
                         // intl.formatMessage({ id: formik.values.message }) || formik.handleChange 
                         else if (inputProp.value !== prop.initializer.expression.getText()) {
-                            const value = this.createNewJsxExpression(inputProp)
+                            const newAst = createAst(inputProp.value)
+                            const childrens = newAst?.statements[0].getChildren()
+                            let child : any = childrens !== undefined ? childrens[0] : undefined
 
-                            newProp = factory.updateJsxAttribute(prop, prop.name, value)
+                            let expression = child.expression
+                            const messageId = child.arguments != null ? child.arguments[0].getText() : ""
+                            let val;
+                            // check if node has nested expression
+                            if (!this.isNested(expression))
+                              expression = child
+                            // if inputValue is object  
+                            if (expression.kind === ts.SyntaxKind.OpenBraceToken) {
+                              const statements = child.parent.statements
+                              if (statements) {
+                                const attr = statements[0].getChildren()[0].getText()
+                                const value = statements[0].getChildren()[2].getText()
+                                val = this.createNewJsxExpressionWithObjectAssertion(attr, value)
+                              } else {
+                                val = this.createNewJsxExpressionWithObjectAssertion(undefined, undefined)
+                              }
+                            } else {
+                              if (messageId !== "") {
+                                val = this.createNewJsxExpressionWithMessage(expression, messageId)
+                              } else {
+                                // without messageId and not nested
+                                if (expression.expression == null && expression.name == null) {
+                                  val = factory.createJsxExpression(
+                                    undefined,
+                                    factory.createIdentifier(
+                                      expression.getText()
+                                    )
+                                  )
+                                } else {
+                                  // without messageId and nested
+                                  val = factory.createJsxExpression(
+                                    undefined,
+                                    factory.createPropertyAccessExpression(
+                                      factory.createIdentifier(expression.expression != null ? expression.expression.getText() : expression.getText()),
+                                      factory.createIdentifier(expression.name != null ? expression.name.escapedText : expression.getText())
+                                    )
+                                  ) 
+                                }
+                              }
+                            }
+                            newProp = factory.updateJsxAttribute(prop, prop.name, val)
                             astChanged = true
                         }
                       }
@@ -180,6 +222,47 @@ export default class MuiDetailGenerator implements DetailGenerator {
         inputproperty.value
       )
     )
+  }
+
+  createNewJsxExpressionWithMessage(expression: any, messageId: string) : ts.JsxExpression {
+    return factory.createJsxExpression(
+      undefined,
+      factory.createCallExpression(
+        factory.createPropertyAccessExpression(
+          factory.createIdentifier(expression.expression.getText()),
+          factory.createIdentifier(expression.name.escapedText)
+        ),
+        undefined,
+        [factory.createIdentifier(messageId)]
+      )
+    ) 
+  }
+
+  isNested(expression : any) : boolean {
+    return expression || expression.expression
+  }
+
+  createNewJsxExpressionWithObjectAssertion(attr : string | undefined, value: string | undefined) : ts.JsxExpression {
+    if (attr && value) {
+      return factory.createJsxExpression(
+        undefined,
+        factory.createObjectLiteralExpression(
+          [factory.createPropertyAssignment(
+            factory.createIdentifier(attr),
+            factory.createIdentifier(value)
+          )],
+          false
+        )
+      )
+    } else {
+       return factory.createJsxExpression(
+        undefined,
+        factory.createObjectLiteralExpression(
+          undefined,
+          undefined
+        )
+      )
+    }
   }
 
   async insertFormWidget(position: SourceLineCol, property: Property, index?:number): Promise<string> {
