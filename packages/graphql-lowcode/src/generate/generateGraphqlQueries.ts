@@ -1,60 +1,14 @@
-import { getMutationType } from './hasuraGetMutationType'
-
-interface Type {
-  name: null | string,
-  kind?: string,
-  [key: string]: any
-}
-
-interface Field {
-  name: string,
-  type: Type,
-  kind?: string,
-  [key: string]: any
-}
-
-interface TypesObject {
-  name: string,
-  fields: Field[],
-  [key: string]: any
-}
-
-interface IntrospectionQuery {
-  types: TypesObject[],
-  [key: string]: any
-}
-
-interface Root {
-  fields: Field[],
-  kind: string,
-  [key: string]: any
-}
-
-interface Entity {
-  queryName: string,
-  entityName: string,
-  fields: Field[],
-}
-
-export interface Argument {
-  name: string,
-  [key: string]: any
-}
-
-export interface Mutation {
-  operation: string,
-  type: string
-}
+import { IntrospectionQuery, Field, TypesObject, EntityQuery, Argument, Root } from './types'
 
 export function generateGraphqlQueries(introspection: IntrospectionQuery) {
   const types = introspection.types
 
-  const queryRoot = getQueryRoot(types)
-  const mutationRoot = getMutationRoot(types)
+  const queryRoot = getRoot(types, 'query_root')
+  const mutationRoot = getRoot(types, 'mutation_root')
 
   const entities = [...getEntities(queryRoot, types), ...getEntities(mutationRoot, types)]
 
-  const fragmentsQuery = buildFragmentsQuery(entities, types)
+  const fragmentsQuery = buildFragmentsQuery(entities, types, 'hasura')
 
   const selectQuery = buildSelectQuery(queryRoot)
   const mutationQuery = buildMutationQuery(mutationRoot)
@@ -66,36 +20,27 @@ export function generateGraphqlQueries(introspection: IntrospectionQuery) {
   return finalQuery
 }
 
-function getQueryRoot(types: TypesObject[]): Root {
+export function getRoot(types: TypesObject[], type: string): Root {
   for (const typeObject of types) {
-    //iterate through types to find query root
-    if (typeObject.name === 'query_root') return { fields: typeObject.fields, kind: typeObject.kind }
+    //iterate through types to find query/mutation root
+    if (typeObject.fields && typeObject.name === type) return { fields: typeObject.fields, kind: typeObject.kind }
   }
 
   return { fields: [], kind: '' }
 }
 
-function getMutationRoot(types: TypesObject[]): Root {
-  for (const typeObject of types) {
-    //iterate throught types to find mutation root
-    if (typeObject.name === 'mutation_root') return { fields: typeObject.fields, kind: typeObject.kind }
-  }
-
-  return { fields: [], kind: '' }
-}
-
-function getEntities(root: Root, types: TypesObject[]): Entity[] {
+function getEntities(root: Root, types: TypesObject[]): EntityQuery[] {
   const queryAndEntityNames = getQueryAndEntityNames(root)
 
-  let entities: Entity[] = []
+  let entities: EntityQuery[] = []
 
   for (const field of queryAndEntityNames) {
     const queryName = field.name
-    const entityName = field.type.name
+    const entityName = getNestedOfTypeName(field)
     let entityFields = getEntityFields(entityName, types)
 
     //if root is type of LIST get only SCALAR fields
-    if(root.kind === 'LIST') entityFields = entityFields.filter(field => field.type.kind === 'SCALAR')
+    if (root.kind === 'LIST') entityFields = entityFields.filter(field => field.type.kind === 'SCALAR')
 
     entities = [...entities, { queryName, entityName, fields: entityFields }]
   }
@@ -127,17 +72,22 @@ function getReturningType(returningField: Field): string {
 function getEntityFields(entityName: string, types: TypesObject[]): Field[] {
   const entity = types.find(type => type.name === entityName)
 
-  if (entity) return entity.fields
+  if (entity && entity.fields) return entity.fields
   return []
+}
+
+//Finds the deepest nested field type name/entity
+export function getNestedOfTypeName(field: Field) {
+  let actualType = field.type
+
+  while (actualType.ofType) actualType = actualType.ofType
+
+  if(actualType.name) return actualType.name
+  return 'null'
 }
 
 function buildParametersString(args: Argument[], kind: string): string {
   let parameters: string[] = []
-
-  //limit to 100 if is type of list and no other parameters are specified
-  if (kind === 'LIST') {
-    if (!args || !args.some(argument => argument.name == 'limit')) parameters = [...parameters, 'limit: 100']
-  }
 
   if (args) {
     args.forEach(argument => {
@@ -154,11 +104,10 @@ function buildSelectQuery(queryRoot: Root): string {
   let selectQueries: string[] = []
 
   queryRoot.fields.forEach(field => {
-    const fragmentName = `${field.name}_${field.type.name}`
+    const fragmentName = `${field.name}_${getNestedOfTypeName(field)}`
     const parametersString = buildParametersString(field.args, queryRoot.kind)
-    const pkParameter = queryRoot.kind !== 'LIST' ? '($id: ID!)' : ''
 
-    const newSelectQuery = `query ${field.name}${pkParameter} {\n  ${field.name}${parametersString} {\n    ...${fragmentName}\n  }\n}`
+    const newSelectQuery = `query ${field.name} {\n  ${field.name}${parametersString} {\n    ...${fragmentName}\n  }\n}`
 
     selectQueries = [...selectQueries, newSelectQuery]
   })
@@ -170,9 +119,8 @@ function buildMutationQuery(mutationRoot: Root): string {
   let mutationQueries: string[] = []
 
   mutationRoot.fields.forEach(field => {
-    const mutationType = getMutationType(field.args)
-
-    const fragmentName = `${field.name}_${field.type.name}`
+    //const mutationType = getMutationType(field.args)
+    const fragmentName = `${field.name}_${getNestedOfTypeName(field)}`
 
     mutationQueries = [...mutationQueries, buildMutationString(field, fragmentName)]
   })
@@ -190,8 +138,8 @@ function buildMutationString(field: Field, fragmentName: string) {
 function buildReturningString(types: TypesObject[], returningType: string): string {
   let returningFields: string[] = []
 
-  for(const type of types) {
-    if(type.name === returningType) {
+  for (const type of types) {
+    if (type.name === returningType && type.fields) {
       type.fields.forEach(field => {
         returningFields = [...returningFields, field.name]
       })
@@ -203,7 +151,7 @@ function buildReturningString(types: TypesObject[], returningType: string): stri
   return `returning {\n    ${returningFields.join('\n    ')}\n  }`
 }
 
-function buildFragmentsQuery(entities: Entity[], types: TypesObject[]): string {
+function buildFragmentsQuery(entities: EntityQuery[], types: TypesObject[], target?: string): string {
   let fragmentsStrings: string[] = []
 
   entities.forEach(entity => {
@@ -211,7 +159,7 @@ function buildFragmentsQuery(entities: Entity[], types: TypesObject[]): string {
 
     entity.fields.forEach(field => {
       //if mutation root has returning type, build returning object with fields to be inserted into fragment fields
-      if (field.name === 'returning') {
+      if (target && target === 'hasura' && field.name === 'returning') {
         const returningType = getReturningType(field)
         const returningString = buildReturningString(types, returningType)
 
