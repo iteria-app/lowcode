@@ -7,9 +7,9 @@ interface graphqlFile {
   content: string
 }
 
-generateGraphQlFiles(is2.data.__schema, ['customer'])
+//generateGraphQlFiles(is2.data.__schema, ['products'])
 
-function generateGraphQlFiles(introspection: IntrospectionQuery, names: string[]) {
+export function generateGraphQlFiles(introspection: IntrospectionQuery, names: string[]) {
   const queryRoot = getRoot(introspection.types, 'query_root')
   const mutationRoot = getRoot(introspection.types, 'mutation_root')
 

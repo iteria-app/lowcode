@@ -109,8 +109,26 @@ function isListType(field: Field) {
   return false
 }
 
+function getOrderByTypeName(field: Field) {
+  for (const arg of field.args) {
+    if (arg.name === 'order_by') {
+      return getNestedOfType(arg).name
+    }
+  }
+
+  return ''
+}
+
 function buildParametersAndVariablesString(field: Field) {
   const inputFields = getHasuraInputFields(field.args)
+
+  //checks whether argument is list type, if yes add limit = 100, offset
+  //if args can be ordered by 'order_by' argument, add it to list query
+  const order_by = ''//getOrderByTypeName(field)
+  const order_by_ParamString = order_by != '' ? `, order_by: $order_by` : ''
+  const order_by_VarString = order_by != '' ? `, $order_by: ${order_by}` : ''
+  const listTypeVar = isListType(field) ? `$limit: Int = 100, $offset: Int${order_by_VarString}` : ''
+  const listTypeParam = isListType(field) ? `limit: $limit, offset: $offset${order_by_ParamString}` : ''
 
   //filtering arguments for further use, only few are needed
   const filteredArgs = field.args.filter((arg: { name: String }) => inputFields.includes(arg.name))
@@ -121,6 +139,7 @@ function buildParametersAndVariablesString(field: Field) {
   filteredArgs.forEach((arg: { name: string }) => {
     const newParameter = `${arg.name}: $${arg.name}`
 
+    //adds '!' after type name
     const mandatory = isMandatory(arg) ? '!' : ''
 
     const variableType = getNestedOfType(arg).name
@@ -129,6 +148,12 @@ function buildParametersAndVariablesString(field: Field) {
     queryParams = [...queryParams, newParameter]
     variables = [...variables, newVariable]
   })
+
+  //adds order_by params and variables to final strings
+  if (order_by != '') {
+    queryParams = [...queryParams, listTypeParam]
+    variables = [...variables, listTypeVar]
+  }
 
   return { params: queryParams.length ? `(${queryParams.join(', ')})` : '', variables: variables.length ? `(${variables.join(', ')})` : '' }
 }
