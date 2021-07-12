@@ -143,53 +143,22 @@ export default class MuiDetailGenerator implements DetailGenerator {
                         // intl.formatMessage({ id: formik.values.message }) || formik.handleChange || { shrink: true } || randomtext
                         else if (inputProp.value !== prop.initializer.expression.getText()) {
                             const newAst = createAst(inputProp.value)
-                            const childrens = newAst?.statements[0].getChildren()
-                            const child : any = childrens !== undefined ? childrens[0] : undefined
-
-                            let expression = child.expression
-                            const messageId = child.arguments != null ? child.arguments[0].getText() : ""
-                            let val;
-
-                            // check if node has nested expression
-                            if (this.isNotNested(expression))
-                              expression = child
-
-                            // if inputValue is object  
-                            if (expression.kind === ts.SyntaxKind.OpenBraceToken) {
-                              const statements = child.parent.statements
-                              if (statements) {
-                                const attr = statements[0].getChildren()[0].getText()
-                                const value = statements[0].getChildren()[2].getText()
-                                val = this.createNewJsxExpressionWithObjectAssertion(attr, value)
-                              } else {
-                                // insert empty object
-                                val = this.createNewJsxExpressionWithObjectAssertion(undefined, undefined)
-                              }
-                            } else {
-                              if (messageId !== "") {
-                                val = this.createNewJsxExpressionWithMessage(expression, messageId)
-                              } else {
-                                // without messageId and not nested
-                                if (expression.expression == null && expression.name == null) {
-                                  val = factory.createJsxExpression(
-                                    undefined,
-                                    factory.createIdentifier(
-                                      expression.getText()
-                                    )
-                                  )
-                                } else {
-                                  // without messageId and nested
-                                  val = factory.createJsxExpression(
-                                    undefined,
-                                    factory.createPropertyAccessExpression(
-                                      factory.createIdentifier(expression.expression.getText()),
-                                      factory.createIdentifier(expression.name.escapedText)
-                                    )
-                                  ) 
-                                }
-                              }
+                            const statement = newAst?.statements[0] as any
+                            let value
+                          
+                            if (statement?.kind == SyntaxKind.ExpressionStatement) {
+                              value = factory.createJsxExpression(
+                                  undefined,
+                                  statement.expression
+                              )
+                            } else if (statement.kind == SyntaxKind.Block) {
+                              value = factory.createJsxExpression(
+                                undefined,
+                                factory.createIdentifier(statement.getText())
+                              )
                             }
-                            newProp = factory.updateJsxAttribute(prop, prop.name, val)
+                            
+                            newProp = factory.updateJsxAttribute(prop, prop.name, value)
                             astChanged = true
                         }
                       }
@@ -216,66 +185,6 @@ export default class MuiDetailGenerator implements DetailGenerator {
     }
 
     return result;
-  }
-
-  // createNewJsxExpression(inputproperty: WidgetProperty) : ts.JsxExpression {
-  //   return factory.createJsxExpression(
-  //     undefined,
-  //     factory.createIdentifier(
-  //       inputproperty.value
-  //     )
-  //   )
-  // }
-
-  createNewJsxExpressionWithMessage(expression: any, messageId: string) : ts.JsxExpression {
-    if (expression.name && expression.expression) {
-      return factory.createJsxExpression(
-        undefined,
-        factory.createCallExpression(
-          factory.createPropertyAccessExpression(
-            factory.createIdentifier(expression.expression.getText()),
-            factory.createIdentifier(expression.name.escapedText)
-          ),
-          undefined,
-          [factory.createIdentifier(messageId)]
-        )
-      ) 
-    } 
-    return factory.createJsxExpression(
-      undefined,
-      factory.createCallExpression(
-        factory.createIdentifier(expression.expression.getText()),
-        undefined,
-        [factory.createIdentifier(messageId)]
-      )
-    )
-  }
-
-  isNotNested(expression : any) : boolean {
-    return !expression || !expression.expression
-  }
-
-  createNewJsxExpressionWithObjectAssertion(attr : string | undefined, value: string | undefined) : ts.JsxExpression {
-    if (attr && value) {
-      return factory.createJsxExpression(
-        undefined,
-        factory.createObjectLiteralExpression(
-          [factory.createPropertyAssignment(
-            factory.createIdentifier(attr),
-            factory.createIdentifier(value)
-          )],
-          false
-        )
-      )
-    } else {
-       return factory.createJsxExpression(
-        undefined,
-        factory.createObjectLiteralExpression(
-          undefined,
-          undefined
-        )
-      )
-    }
   }
 
   async insertFormWidget(position: SourceLineCol, property: Property, index?:number): Promise<string> {
