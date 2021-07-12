@@ -1,37 +1,25 @@
-import { is2 } from './introspection'
 import { generateGraphqlQueries, getRoot, getNestedOfType } from './generateGraphqlQueries'
 import { IntrospectionQuery, Field, TypesObject } from './types'
 
-interface graphqlFile {
-  fileName: string,
-  content: string
-}
+export function generateGraphqlFile(introspection: IntrospectionQuery, name: string): string {
+  //TODO toLoweCase all
+  name = name.toLowerCase();
 
-//generateGraphQlFiles(is2.data.__schema, ['products'])
-
-export function generateGraphQlFiles(introspection: IntrospectionQuery, names: string[]) {
   const queryRoot = getRoot(introspection.types, 'query_root')
   const mutationRoot = getRoot(introspection.types, 'mutation_root')
-
-  let graphqlFiles: graphqlFile[] = []
 
   //Filtering all queries that works with entities given as parameter 'names'
   //Generating queries for each name in parameter
   //Writing queries into 'name'.graphql file
-  names.forEach(name => {
-    const filteredQueryRootFields = filterQueries(queryRoot.fields, introspection.types, name)
-    const filteredMutationRootFields = filterQueries(mutationRoot.fields, introspection.types, name)
+  const filteredQueryRootFields = filterQueries(queryRoot.fields, introspection.types, name)
+  const filteredMutationRootFields = filterQueries(mutationRoot.fields, introspection.types, name)
 
-    //changing introspection roots fields for filteredFields
-    const modifiedIntrospection = findAndChangeRootFields(introspection, filteredQueryRootFields, filteredMutationRootFields)
+  //changing introspection roots fields for filteredFields
+  const modifiedIntrospection = findAndChangeRootFields(introspection, filteredQueryRootFields, filteredMutationRootFields)
 
-    const generatedQueries = generateGraphqlQueries(modifiedIntrospection)
-    console.log(generatedQueries)
+  const generatedQueries = generateGraphqlQueries(modifiedIntrospection, name)
 
-    graphqlFiles = [...graphqlFiles, { fileName: name, content: generatedQueries }]
-  })
-
-  return graphqlFiles
+  return generatedQueries
 }
 
 //Filters every root field whether it is returning the entity given in parameter
@@ -75,4 +63,8 @@ function findAndChangeRootFields(introspection: IntrospectionQuery, queryRootFie
   }
 
   return introspection
+}
+
+export function getEntity(types: TypesObject[], entityName: string) {
+  return types.find(type => type.name === entityName)
 }

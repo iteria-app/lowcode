@@ -1,18 +1,20 @@
 import { IntrospectionQuery, Field, TypesObject, EntityQuery, Argument, Root, Type } from './types'
 import { getHasuraInputFields } from './hasuraGetMutationType'
 
-export function generateGraphqlQueries(introspection: IntrospectionQuery) {
+export function generateGraphqlQueries(introspection: IntrospectionQuery, name: string) {
   const types = introspection.types
 
   const queryRoot = getRoot(types, 'query_root')
   const mutationRoot = getRoot(types, 'mutation_root')
 
-  const entities = [...getEntities(queryRoot, types), ...getEntities(mutationRoot, types)]
+  const entities = [...getEntities(queryRoot, types, 'SCALAR'), ...getEntities(mutationRoot, types)]
 
   const fragmentsQuery = buildFragmentsQuery(entities, types, 'hasura')
 
-  const selectQuery = buildSelectQuery(queryRoot)
-  const mutationQuery = buildMutationQuery(mutationRoot)
+  //filter queries that returns SCALAR type
+
+  const selectQuery = buildSelectQuery(queryRoot, name)
+  const mutationQuery = buildMutationQuery(mutationRoot, name)
 
   const queries = [selectQuery, mutationQuery, fragmentsQuery]
 
@@ -30,7 +32,7 @@ export function getRoot(types: TypesObject[], type: string): Root {
   return { fields: [], kind: '' }
 }
 
-function getEntities(root: Root, types: TypesObject[]): EntityQuery[] {
+function getEntities(root: Root, types: TypesObject[], filterOnlyFields? :string): EntityQuery[] {
   const queryAndEntityNames = getQueryAndEntityNames(root)
 
   let entities: EntityQuery[] = []
@@ -40,9 +42,12 @@ function getEntities(root: Root, types: TypesObject[]): EntityQuery[] {
     const entityName = getNestedOfType(field).name ?? ''
     let entityFields = getEntityFields(entityName, types)
 
-    //if root is type of LIST get only SCALAR fields
-    if (root.kind === 'LIST') entityFields = entityFields.filter(field => field.type.kind === 'SCALAR')
-
+    //if parameter fitlerOnlyFields then skip every root that does not return filtered type fields
+    if(filterOnlyFields && !entityFields.some(field => getNestedOfType(field).kind === filterOnlyFields)) {
+      //remove it from root
+      root.fields = root.fields.filter(fieldToBeDelete => fieldToBeDelete !== field)
+      continue
+    }
     entities = [...entities, { queryName, entityName, fields: entityFields }]
   }
 
@@ -119,7 +124,7 @@ function getOrderByTypeName(field: Field) {
   return ''
 }
 
-function buildParametersAndVariablesString(field: Field) {
+function buildParametersAndVariablesString(field: Field, name: string) {
   const inputFields = getHasuraInputFields(field.args)
 
   //checks whether argument is list type, if yes add limit = 100, offset
@@ -137,13 +142,25 @@ function buildParametersAndVariablesString(field: Field) {
   let variables: string[] = []
 
   filteredArgs.forEach((arg: { name: string }) => {
-    const newParameter = `${arg.name}: $${arg.name}`
+    let newParameter = ''
+
+    if (inputFields.includes('_set') && arg.name === '_set') newParameter = `${arg.name}: $${name}`
+    else if (inputFields.includes('object') && arg.name === 'object') newParameter = `${arg.name}: $${name}`
+    else if (inputFields.includes('objects') && arg.name === 'objects') newParameter = `${arg.name}: $${name}`
+
+    else newParameter = `${arg.name}: $${arg.name}`
 
     //adds '!' after type name
     const mandatory = isMandatory(arg) ? '!' : ''
 
+    let newVariable = ''
     const variableType = getNestedOfType(arg).name
-    const newVariable = `$${arg.name}: ${variableType}${mandatory}`
+
+    if (inputFields.includes('_set') && arg.name === '_set') newVariable = `$${name}: ${variableType}${mandatory}`
+    else if (inputFields.includes('object') && arg.name === 'object') newVariable = `$${name}: ${variableType}${mandatory}`
+    else if (inputFields.includes('objects') && arg.name === 'objects') newVariable = `$${name}: ${variableType}${mandatory}`
+
+    else newVariable = `$${arg.name}: ${variableType}${mandatory}`
 
     queryParams = [...queryParams, newParameter]
     variables = [...variables, newVariable]
@@ -158,14 +175,14 @@ function buildParametersAndVariablesString(field: Field) {
   return { params: queryParams.length ? `(${queryParams.join(', ')})` : '', variables: variables.length ? `(${variables.join(', ')})` : '' }
 }
 
-function buildSelectQuery(queryRoot: Root): string {
+function buildSelectQuery(queryRoot: Root, name: string): string {
   let selectQueries: string[] = []
 
-  queryRoot.fields.forEach(field => {
-    const fragmentName = `${field.name}_${getNestedOfType(field).name}`
-    const { params, variables } = buildParametersAndVariablesString(field)
+  queryRoot.fields.forEach(query => {
+    const fragmentName = `${query.name}_${getNestedOfType(query).name}`
+    const { params, variables } = buildParametersAndVariablesString(query, name)
 
-    const newSelectQuery = `query ${field.name}${variables} {\n  ${field.name}${params} {\n    ...${fragmentName}\n  }\n}`
+    const newSelectQuery = `query ${query.name}${variables} {\n  ${query.name}${params} {\n    ...${fragmentName}\n  }\n}`
 
     selectQueries = [...selectQueries, newSelectQuery]
   })
@@ -173,21 +190,21 @@ function buildSelectQuery(queryRoot: Root): string {
   return selectQueries.join('\n\n')
 }
 
-function buildMutationQuery(mutationRoot: Root): string {
+function buildMutationQuery(mutationRoot: Root, name: string): string {
   let mutationQueries: string[] = []
 
   mutationRoot.fields.forEach(field => {
     const fragmentName = `${field.name}_${getNestedOfType(field).name}`
 
-    mutationQueries = [...mutationQueries, buildMutationString(field, fragmentName)]
+    mutationQueries = [...mutationQueries, buildMutationString(field, fragmentName, name)]
   })
 
   return mutationQueries.join('\n\n')
 
 }
 
-function buildMutationString(field: Field, fragmentName: string) {
-  const { params, variables } = buildParametersAndVariablesString(field)
+function buildMutationString(field: Field, fragmentName: string, name: string) {
+  const { params, variables } = buildParametersAndVariablesString(field, name)
 
   return `mutation ${field.name}${variables} {\n  ${field.name}${params} {\n    ...${fragmentName}\n  }\n}`
 }
@@ -227,9 +244,10 @@ function buildFragmentsQuery(entities: EntityQuery[], types: TypesObject[], targ
         if (getNestedOfType(field).kind === 'SCALAR') fragmentFields = [...fragmentFields, field.name]
       }
     })
+
     const newFragmentString = `fragment ${entity.queryName}_${entity.entityName} on ${entity.entityName} {\n  ${fragmentFields.join('\n  ')}\n}`
 
-    fragmentsStrings = [...fragmentsStrings, newFragmentString]
+    if (fragmentFields.length) fragmentsStrings = [...fragmentsStrings, newFragmentString]
   })
 
   return fragmentsStrings.join('\n\n')
