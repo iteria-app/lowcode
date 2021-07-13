@@ -270,7 +270,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
   ): ts.SourceFile {
     let newField = this.createTextFieldElement(
       property.getName(),
-      property.getTypeText(),
+      property.getType(),
       InputType.text
     );
 
