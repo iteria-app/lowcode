@@ -5,9 +5,7 @@ import ts, { factory } from "typescript"
 import { Property } from './generation/entity/index'
 import { CodegenOptions } from './interfaces'
 import TemplateResolver from './generation/generators/template/template-resolver'
-import { generateGraphqlFile, getEntity } from '../../../graphql-lowcode/src/generate/generateGraphqlFiles'
-import { getNestedOfType } from '../../../graphql-lowcode/src/generate/generateGraphqlQueries'
-import { IntrospectionQuery } from '../../../graphql-lowcode/src/generate/types'
+import { IntrospectionQuery, getNestedOfType, generateGraphqlFile, getEntity } from 'graphql-lowcode/src/generate'
 
 // generates CRUD React pages (master-detail, eg. orders list, order detail form) from typescript
 export function generatePages(introspection: IntrospectionQuery, io: CodeRW & CodeDir, options?: CodegenOptions) {

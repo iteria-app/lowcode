@@ -1,4 +1,6 @@
 {
+  "name": "@iteria-app/graphql-lowcode",
+  "version": "0.0.1",
   "scripts": {
     "test": "yarn jest"
   },
