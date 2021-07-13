@@ -13,6 +13,7 @@ export const editExistingMessage = ({
   newValue,
   originalLocaleStringJSON,
 }: MessagesProps) => {
+  let newLocalString: string = ""
   for (let i = originalMessages.length - 1; i >= 0; i--) {
     if (originalMessages[i].id === messageId) {
       const before = originalLocaleStringJSON?.substring(
@@ -22,10 +23,10 @@ export const editExistingMessage = ({
       const after = originalLocaleStringJSON?.substring(
         originalMessages[i].position.end 
       )
-      originalLocaleStringJSON = before + JSON.stringify(newValue) + after
+      newLocalString = before + JSON.stringify(newValue) + after
     }
   }
-  return originalLocaleStringJSON as string
+  return newLocalString
 }
 
 export const insertNewMessage = ({
@@ -34,6 +35,7 @@ export const insertNewMessage = ({
   newValue,
   originalLocaleStringJSON,
 }: MessagesProps) => {
+  let newLocalString: string = ""
   for (let i = originalMessages.length - 1; i >= 0; i--) {
     if (
       originalMessages[i].id ===
@@ -62,10 +64,10 @@ export const insertNewMessage = ({
 
       const space = copyRow?.match(/([\s]+)/g)
       const newRow = `${space}${JSON.stringify(messageId)}: ${JSON.stringify(newValue)}`
-      originalLocaleStringJSON = `${before},` + newRow + after
+      newLocalString = `${before},` + newRow + after
     }
   }
-  return originalLocaleStringJSON as string
+  return newLocalString
 }
 
 export const createFirstMessage = (messageId: string, newValue: string) => {

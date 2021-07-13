@@ -62,13 +62,34 @@ export function patchLocaleJSON(
   return localeFile
 }
 
-export function putLocaleMessage(
+export function createLocalJson(
+  originalLocaleStringJSON: string | undefined,
   messageId: string,
-  newValue: string,
-  originalLocaleStringJSON: string | undefined
+  newValue: string
 ) {
   const originalMessages =
     parseLocaleJSON(originalLocaleStringJSON as string) || []
+  const localFile = putLocaleMessage(
+    messageId,
+    newValue,
+    originalLocaleStringJSON,
+    originalMessages
+  )
+  const changedMessages = parseLocaleJSON(localFile as string) || []
+  const patchJson = patchLocaleJSON(
+    originalLocaleStringJSON || "",
+    changedMessages,
+    originalMessages
+  )
+  return patchJson
+}
+
+export function putLocaleMessage(
+  messageId: string,
+  newValue: string,
+  originalLocaleStringJSON: string | undefined,
+  originalMessages: Message[]
+) {
   const found = originalMessages?.find((message) => message.id == messageId)
 
   if (originalMessages?.length == 0) {
