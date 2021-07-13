@@ -1,0 +1,4 @@
+import { Table,TableHead,TableRow,TableCell,TableBody } from "@material-ui/core";
+export default function CustomerTable({ customers }) {
+    return <Table><TableHead><TableRow><TableCell>address</TableCell><TableCell>avatarUrl</TableCell><TableCell>createdAt</TableCell><TableCell>email</TableCell><TableCell>id</TableCell><TableCell>name</TableCell><TableCell>phone</TableCell><TableCell>test2</TableCell><TableCell>testdate</TableCell><TableCell>updatedAt</TableCell></TableRow></TableHead><TableBody>{customers.map(customer => <TableRow><TableCell>{customer.address}</TableCell><TableCell>{customer.avatarUrl}</TableCell><TableCell>{customer.createdAt}</TableCell><TableCell>{customer.email}</TableCell><TableCell>{customer.id}</TableCell><TableCell>{customer.name}</TableCell><TableCell>{customer.phone}</TableCell><TableCell>{customer.test2}</TableCell><TableCell>{customer.testdate}</TableCell><TableCell>{customer.updatedAt}</TableCell></TableRow>)}</TableBody></Table>;
+}

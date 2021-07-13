@@ -21,5 +21,5 @@ export interface MenuItemOptions {
     menuDefinitionFilePath: string,
     itemTitle: string,
     itemUri: string,
-    itemIcon: string
+    itemIcon?: string
 }
