@@ -11,6 +11,7 @@ import { addColumn, deleteColumn, getColumnSourcePosition, isSelectedDataTable }
 import { createAst } from '../helper';
 import { TestListHelper } from '../list/list-helper';
 import { graphqlGenTs1 } from '../typeAlias.example';
+import { is2 } from './files/introspection';
 
 describe(".api tests", () => {
     describe("Preparing: test auxiliary functions to verify the tests", () => {
@@ -294,14 +295,14 @@ describe(".api tests", () => {
             const componentStorageRoot = 'src/codegen/tests/api/files/output'
             
             var options = {
-                           names:['Customer'], 
+                           names:['customer'], 
                            pageListTemplate: template, 
                            componentStoragePath:componentStorageRoot, 
                            menuDefinitionFilePath: menuDefinitionFilePath, 
                            routeDefinitionFilePath:routeDefinitionFilePath,
                           }
         
-            generatePages(graphqlGenTs1, io, options)
+            generatePages(is2.data.__schema, io, options)
           });
     });
 });

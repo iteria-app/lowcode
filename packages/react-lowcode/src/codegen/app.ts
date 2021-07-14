@@ -2,37 +2,48 @@ import { AppGenerator } from './generation/generators/app-generator'
 import { UiFramework, TableType, Formatter } from './definition/context-types'
 import { CodeDir, CodeRW } from '../io'
 import ts, { factory } from "typescript"
-import { Project } from "ts-morph"
+import { Property } from './generation/entity/index'
 import { CodegenOptions } from './interfaces'
 import TemplateResolver from './generation/generators/template/template-resolver'
+import { generateGraphqlFile, getEntity } from '../../../graphql-lowcode/src/generate/generateGraphqlFiles'
+import { getNestedOfType } from '../../../graphql-lowcode/src/generate/generateGraphqlQueries'
+import { IntrospectionQuery } from '../../../graphql-lowcode/src/generate/types'
+import { getListPageComponentName, getPluralizedEntityName } from './generation/entity/helper'
 import { generateMenuItem, generateRoute } from './facade/facadeApi'
 import { Entity } from './generation/entity'
-import { getListPageComponentName, getPluralizedEntityName } from './generation/entity/helper'
 
 // generates CRUD React pages (master-detail, eg. orders list, order detail form) from typescript
-export function generatePages(inputSourceCode: string, 
+export function generatePages(introspection: IntrospectionQuery, 
                               io: CodeRW & CodeDir, 
                               options?: CodegenOptions) {
-    const project = new Project({})
-    const myClassFile = project.createSourceFile("src/types.ts", inputSourceCode)
+
     const componentStorageRoot = options?.componentStoragePath ?? 'src/components'
     const routeDefinitionFilePath = options?.routeDefinitionFilePath ?? 'src/routes.tsx'
     const menuDefinitionFilePath = options?.menuDefinitionFilePath ?? 'src/layouts/DashboardLayout/NavBar/index.tsx'
 
-
     options?.names.map((typeName) => {
-        const typeAlias = myClassFile.getTypeAlias(typeName)
-        const props = typeAlias?.getType()?.getProperties() ?? []
-        if (typeAlias) {
-            const entity = {
-                getName: () => typeName,
-                getType: () => typeAlias,
-                properties: props.map((prop) => ({
-                    getName: () => prop.getName(),
-                    getType: () => prop.getTypeAtLocation(myClassFile),
-                    getTypeText: () => prop.getDeclarations()[0].getText()
-                }))
-            }
+        const graphqlQueries = generateGraphqlFile(introspection, typeName)
+
+        if (graphqlQueries != '') 
+            io.writeFile(`${componentStorageRoot}/${typeName}.graphql`, graphqlQueries)
+
+        const entityType = getEntity(introspection.types, typeName)
+
+        if (entityType && entityType.fields) {
+        const entityName = entityType.name
+
+        let props: Property[] = []
+        entityType.fields.forEach(field => {
+            const propName = field.name
+            const propType = getNestedOfType(field).name ?? ''
+
+            props = [...props, { getName: () => propName, getType: () => propType }]
+        })
+
+        const entity = {
+            getName: () => entityName,
+            properties: props
+        }
 
             const entityListComponentPageName = getListPageComponentName(entity)
             const listComponentFilePath = `${componentStorageRoot}/${typeName}.tsx`
@@ -131,19 +142,19 @@ function addNewListRoute(io:CodeRW,
                          moduleRouteUri: string, 
                          componentName: string,
                          componentFilePath: string){
-        generateRoute(
-            { 
-                routeFilePath: routeDefinitionFilePath, 
-                componentName: componentName, 
-                componentFilePath: componentFilePath, 
-                componentRouteUri: moduleRouteUri
-            }, 
-            io).then(generatedSource => {
-                if(generatedSource){
-                    io.writeFile(routeDefinitionFilePath, generatedSource)
-                }
+    generateRoute(
+        { 
+            routeFilePath: routeDefinitionFilePath, 
+            componentName: componentName, 
+            componentFilePath: componentFilePath, 
+            componentRouteUri: moduleRouteUri
+        }, 
+        io).then(generatedSource => {
+            if(generatedSource){
+                io.writeFile(routeDefinitionFilePath, generatedSource)
             }
-        )
+        }
+    )
 }
 
 function addNewMenuItem(io:CodeRW, 

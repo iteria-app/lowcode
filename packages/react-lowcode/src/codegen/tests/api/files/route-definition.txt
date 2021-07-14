@@ -1,5 +1,6 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
+import customerListPage from "src/codegen/tests/api/files/output/customerListPage.tsx";
 import CustomerListPage from "src/codegen/tests/api/files/output/CustomerListPage.tsx";
 import DashboardLayout from 'src/layouts/DashboardLayout';
 import MainLayout from 'src/layouts/MainLayout';
@@ -24,7 +25,7 @@ const routes = [
             { path: 'generated-customers', element: <GeneratedCustomers /> },
             { path: 'generated-customer-detail', element: <CustomerDetailView /> },
             { path: 'settings', element: <SettingsView /> },
-            { path: '*', element: <Navigate to="/404"/> }, { path: "app/customers", element: <CustomerListPage /> }]
+            { path: '*', element: <Navigate to="/404"/> }, { path: "app/customers", element: <CustomerListPage /> }, { path: "app/customers", element: <customerListPage /> }]
     },
     {
         path: '/',

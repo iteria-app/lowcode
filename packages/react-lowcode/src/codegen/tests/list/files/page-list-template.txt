@@ -1,4 +1,4 @@
-import { useGeneratedQuery } from '../generated'
+import useGeneratedQuery from '../generated'
 import Fetching from './Fetching'
 import Error from './Error'
 import ListPlaceholder from './ListPlaceholder'

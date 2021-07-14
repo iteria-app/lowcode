@@ -76,7 +76,7 @@ const NavBar = ({ onMobileClose, openMobile }) => {
             href: '/404',
             icon: AlertCircleIcon,
             title: 'Error'
-        }, { href: "app/customers", title: "customers" }];
+        }, { href: "app/customers", title: "customers" }, { href: "app/customers", title: "customers" }];
     const classes: any = useStyles();
     const location = useLocation();
     useEffect(() => {
