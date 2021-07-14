@@ -124,9 +124,23 @@ export class TestListHelper {
                     
                     headColumns.forEach(item => {
                         if(ts.isJsxOpeningElement(item.openingElement) && ts.isJsxClosingElement(item.closingElement)) {
-                            if(item.children.length === 1) {
-                                if(ts.isJsxText(item.children[0])) {
-                                    result.push(item.children[0].text);
+                            const formattedMessageElement = TestListHelper.findJsxElementByName(item, 'FormattedMessage');
+                            if(formattedMessageElement) {
+                                const idAttribute = TestListHelper.findJsxAttributeByName(formattedMessageElement, 'id');
+                                if(idAttribute) {
+                                    const value = TestListHelper.getJsxAttributeStringValue(idAttribute);
+                                    if(value) {
+                                        const valueSplit = value.split('.');
+                                        if(valueSplit.length === 2) {
+                                            result.push(valueSplit[1]);
+                                        }
+                                    }
+                                }
+                            } else {
+                                if(item.children.length === 1) {
+                                    if(ts.isJsxText(item.children[0])) {
+                                        result.push(item.children[0].text);
+                                    }
                                 }
                             }
                         }
@@ -180,6 +194,12 @@ export class TestListHelper {
                     return node;
                 }
             }
+        } else if (ts.isJsxSelfClosingElement(node)) {
+            if (ts.isIdentifier(node.tagName)) {
+                if (node.tagName.escapedText === name) {
+                    return node;
+                }
+            }
         }
 
         return node.forEachChild((child) => {
@@ -199,5 +219,25 @@ export class TestListHelper {
         node.forEachChild((child) => {
             this.findJsxElementsByName(child, name, output);
         });
+    }
+
+    private static findJsxAttributeByName(node: ts.Node, name: string): ts.JsxAttribute | undefined {
+        if (ts.isJsxAttribute(node)) {
+            if(node.name.escapedText.toString() === name) {
+                return node;
+            }
+        }
+
+        return node.forEachChild((child) => {
+            return this.findJsxAttributeByName(child, name);
+        });
+    }
+
+    private static getJsxAttributeStringValue(attribute: ts.JsxAttribute): string | undefined {
+        if (attribute.initializer) {
+            if (ts.isStringLiteral(attribute.initializer)) {
+                return attribute.initializer.text;
+            } 
+        }
     }
 }
