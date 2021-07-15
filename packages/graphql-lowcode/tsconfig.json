@@ -4,5 +4,11 @@
     "downlevelIteration": true,
     "module": "commonjs",
     "strict": true,
-  }
+    "outDir": "cjs"
+  },
+  "exclude": [
+    "node_modules",
+    "cjs",
+    "__tests__"
+  ]
 }
