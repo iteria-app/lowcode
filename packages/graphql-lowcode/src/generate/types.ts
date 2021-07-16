@@ -18,6 +18,9 @@ export interface TypesObject {
 }
 
 export interface IntrospectionQuery {
+  queryType?: { name: string } | null,
+  mutationType?: { name: string } | null,
+  subscriptionType?: { name: string } | null,
   types: TypesObject[],
   [key: string]: any
 }
@@ -25,6 +28,7 @@ export interface IntrospectionQuery {
 export interface Root {
   fields: Field[],
   kind: string,
+  name?: string,
   [key: string]: any
 }
 

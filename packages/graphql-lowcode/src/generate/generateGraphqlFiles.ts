@@ -1,33 +1,69 @@
-import { generateGraphqlQueries, getRoot, getNestedOfType } from './generateGraphqlQueries'
-import { IntrospectionQuery, Field, TypesObject } from './types'
+import { generateGraphqlQueries, getNestedOfType } from './generateGraphqlQueries'
+import { getRootNames, getRoots } from './roots/roots'
+import { IntrospectionQuery, Field, TypesObject, Root } from './types'
+
+/**
+ * 
+ * @param introspection Introspection JSON `data.__schema`
+ * @param name Entity name
+ * @param target GraphQL server name that queries are built for
+ * @returns 
+ */
 
 export function generateGraphqlFile(introspection: IntrospectionQuery, name: string): string {
-  //TODO toLoweCase all
-  name = name.toLowerCase();
+  const rootNames = getRootNames(introspection)
 
-  const queryRoot = getRoot(introspection.types, 'query_root')
-  const mutationRoot = getRoot(introspection.types, 'mutation_root')
-
-  //Filtering all queries that works with entities given as parameter 'names'
-  //Generating queries for each name in parameter
-  //Writing queries into 'name'.graphql file
-  const filteredQueryRootFields = filterQueries(queryRoot.fields, introspection.types, name)
-  const filteredMutationRootFields = filterQueries(mutationRoot.fields, introspection.types, name)
-
-  //changing introspection roots fields for filteredFields
-  const modifiedIntrospection = findAndChangeRootFields(introspection, filteredQueryRootFields, filteredMutationRootFields)
+  const roots = getRoots(introspection.types, rootNames)
+  const modifiedRoots = filterRootQueries(roots, introspection.types, name)
+  const modifiedIntrospection = replaceRootFields(modifiedRoots, introspection)
 
   const generatedQueries = generateGraphqlQueries(modifiedIntrospection, name)
 
   return generatedQueries
 }
 
-//Filters every root field whether it is returning the entity given in parameter
-function filterQueries(rootFields: Field[], types: TypesObject[], entityName: string) {
-  return rootFields.filter(field => isReturningEntity(field, types, entityName))
+function replaceRootFields(roots: (Root | undefined)[], introspection: IntrospectionQuery): IntrospectionQuery {
+  for (const root of roots) {
+    if (root) {
+      for (const type of introspection.types) {
+        if (type.name === root.name) type.fields = root.fields
+      }
+    }
+  }
+
+  return introspection
 }
 
-//Recursively goes through every query/mutation root fields and finds if they are returning given entity
+/**
+ * 
+ * @param roots Query, Mutation, Subscription root nodes
+ * @param types Introspection JSON `data.__schema.types`
+ * @param entityName Name of filtered entity
+ * @returns Filtered roots
+ */
+
+function filterRootQueries(roots: (Root | undefined)[], types: TypesObject[], entityName: string): (Root | undefined)[] {
+  let modifiedRoots: (Root | undefined)[] = []
+
+  for (const root of roots) {
+    if (root) {
+      root.fields = root.fields.filter(field => isReturningEntity(field, types, entityName))
+    }
+
+    modifiedRoots = [...modifiedRoots, root]
+  }
+
+  return modifiedRoots
+}
+
+/**
+ * Recursively goes through every query/mutation root fields and finds if they are returning given entity
+ * @param field Root field
+ * @param allTypes Types object from Introspection
+ * @param entityName Name of entity 
+ * @returns True/false whether field is returning given entity
+ */
+
 function isReturningEntity(field: Field, allTypes: TypesObject[], entityName: string): boolean {
   const ofType = isOfType(field, entityName)
   if (ofType === true) return true
@@ -40,29 +76,19 @@ function isReturningEntity(field: Field, allTypes: TypesObject[], entityName: st
   return nestedType?.fields?.some(nestedField => isReturningEntity(nestedField, allTypes, entityName)) ? true : false
 }
 
-//Checks whether the field is of type given in parameter entity name
+/**
+ * Checks whether the field is of type given in parameter entity name
+ * @returns True/false whether field is of given type
+ */
+
 function isOfType(field: Field, entityName: string) {
   let actualType = field.type
 
   while (actualType.ofType) actualType = actualType.ofType
 
-  if (actualType.name === entityName) return true
+  if (actualType.name && actualType.name.toLowerCase() === entityName.toLowerCase()) return true
   if (actualType.kind === 'SCALAR') return 'leaf'
   return false
-}
-
-//Changes introspection roots fields with given fields in parameter
-function findAndChangeRootFields(introspection: IntrospectionQuery, queryRootFields: Field[], mutationRootFields: Field[]) {
-  for (const type of introspection.types) {
-    if (type.name === 'query_root') {
-      type.fields = queryRootFields
-    }
-    if (type.name === 'mutation_root') {
-      type.fields = mutationRootFields
-    }
-  }
-
-  return introspection
 }
 
 export function getEntity(types: TypesObject[], entityName: string) {
