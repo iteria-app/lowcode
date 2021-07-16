@@ -10,3 +10,4 @@ export interface Message {
 export * from './json'
 export * from './dom'
 export * from './io'
+export * from './react-intl/intl'
