@@ -29,6 +29,8 @@ export function generateGraphqlQueries(introspection: IntrospectionQuery, name: 
 
   const finalQuery = buildGraphqlQuery(queries)
 
+  console.log(finalQuery)
+
   return finalQuery
 }
 

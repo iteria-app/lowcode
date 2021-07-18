@@ -1,5 +1,6 @@
 import { Argument, TypesObject, Field } from '../types'
 import { getNestedOfType } from '../generateGraphqlQueries'
+import { buildVariableString } from '../parameters/buildParametersAndVariablesString'
 
 export function getHasuraInputFields(args: Argument[]): String[] {
   const containsWhere = args.some(argument => argument.name === 'where')
@@ -20,21 +21,12 @@ export function getHasuraInputFields(args: Argument[]): String[] {
 }
 
 export function buildReturningString(types: TypesObject[], returningType: string): string {
-  let returningFields: string[] = []
+  const type = types.find(type => type.name === returningType)
+  const scalarFields = type?.fields?.filter(field => getNestedOfType(field).kind === 'SCALAR')
+  const returningFields = scalarFields?.map(field => field.name)
 
-  for (const type of types) {
-    if (type.name === returningType && type.fields) {
-      type.fields.forEach(field => {
-        if (getNestedOfType(field).kind === 'SCALAR') {
-          returningFields = [...returningFields, field.name]
-        }
-      })
-
-      break
-    }
-  }
-
-  return `returning {\n    ${returningFields.join('\n    ')}\n  }`
+  if (returningFields) return `returning {\n    ${returningFields.join('\n    ')}\n  }`
+  return ''
 }
 
 /**
@@ -50,5 +42,13 @@ export function getReturningType(field: Field): string {
     actualType = actualType.ofType
   }
 
-  return actualType.name ? actualType.name : ''
+  return actualType.name ?? ''
+}
+
+export function changeInputFieldsNames(arg: { name: string }, entityName: string): { newParameter: string, newVariable: string } | undefined {
+  const variableTypeString = buildVariableString(arg)
+
+  if (arg.name === '_set') return { newParameter: `${arg.name}: $${entityName != '' ? entityName : '_set'}`, newVariable: `$${entityName != '' ? entityName : '_set'}: ${variableTypeString}` }
+  else if (arg.name === 'object') return { newParameter: `${arg.name}: $${entityName != '' ? entityName : 'object'}`, newVariable: `$${entityName != '' ? entityName : 'object'}: ${variableTypeString}` }
+  else if (arg.name === 'objects') return { newParameter: `${arg.name}: $${entityName != '' ? entityName : 'objects'}`, newVariable: `$${entityName != '' ? entityName : 'objects'}: ${variableTypeString}` }
 }

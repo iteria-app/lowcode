@@ -20,28 +20,19 @@ export function getRootNames(introspection: IntrospectionQuery): { type: string,
 /**
  * 
  * @param types Introspection JSON `data.types`
- * @param queryRootName Query root name
- * @param mutationRootName Mutation root name
- * @param subscriptionRootName Subscription root name
  * @returns Array of root type objects `[query, mutation, subscription]`
  */
 
-export function getRoots(
-  types: TypesObject[],
-  rootNames: { type: string, name?: string }[],
-): (Root | undefined)[] {
-  let roots: (Root | undefined)[] = []
+export function getRoots(types: TypesObject[], rootNames: { type: string, name?: string }[],): (Root | undefined)[] {
+  const [query, mutation, subscription] = rootNames
 
-  rootNames.forEach(root => {
-    if (root.name) {
-      for (const typeObject of types) {
-        if (typeObject.fields && typeObject.name === root.name) {
-          roots = [...roots, { fields: typeObject.fields, kind: typeObject.kind, name: root.name }]
-        }
-      }
-    }
-    else roots = [...roots, undefined]
+  const roots = types.filter(type => type.fields && rootNames.some(root => type.name === root.name)).map(filteredType => {
+    return { fields: filteredType.fields ?? [], kind: filteredType.kind, name: filteredType.name }
   })
 
-  return roots
+  const queryRoot = roots.find(root => root.name === query.name)
+  const mutationRoot = roots.find(root => root.name === mutation.name)
+  const subscriptionRoot = roots.find(root => root.name === subscription.name)
+
+  return[queryRoot, mutationRoot, subscriptionRoot]
 }
