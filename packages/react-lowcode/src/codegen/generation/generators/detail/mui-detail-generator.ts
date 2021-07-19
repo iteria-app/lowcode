@@ -157,7 +157,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
                                 factory.createIdentifier(statement.getText())
                               )
                             }
-                            
+                            if (!value) return 
                             newProp = factory.updateJsxAttribute(prop, prop.name, value)
                             astChanged = true
                         }

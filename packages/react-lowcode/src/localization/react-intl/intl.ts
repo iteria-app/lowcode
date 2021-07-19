@@ -1,24 +1,23 @@
-export function expressionToMessageId(expression: string) : string | undefined {
-    if (expression && expression.startsWith("intl.formatMessage(")) {
-        const start = expression.indexOf(":")
-        const end = expression.indexOf("}")
-        let messageId = undefined
-        if (start !== -1 && end !== -1) {
-            messageId = expression.substring(
-                start + 1,
-                end
-            )
-        } else {
-            messageId = expression.substring(
-                expression.indexOf("(") + 1,
-                expression.indexOf(")")
-            )
+import {createAst} from '../../ast'
+
+export function expressionToMessageId(expression: string, attrName: string) : string | undefined {
+    const acceptedElements = ["label", "placeholder", "helperText"]
+    if (acceptedElements.indexOf(attrName) !== -1) {
+        const tree = createAst(expression)
+        const statement = tree?.statements[0] as any
+        if (statement.expression && statement.expression.expression && statement.expression.arguments) {
+            const argument = statement.expression.arguments[0]
+            const prop = argument.properties[0]
+            const messageId = prop.initializer.getText() as string
+            const ret = messageId.replace("$", "").replace("{", "").replace("}", "")
+            return ret
         }
-        return messageId
+
+        return "undefined"
     }
     return undefined
 }
 
 export function messageIdToExpression(messageId: string) : string {
-    return `intl.formatMessage({ id:${messageId} })`
+    return `intl.formatMessage({ id: '${messageId}' })`
 }

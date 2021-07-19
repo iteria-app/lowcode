@@ -1,10 +1,10 @@
 import { expressionToMessageId, messageIdToExpression } from "../../../localization"
 
 test(".parse messageId", async () => {
-    const input = "intl.formatMessage('messageId')"
+    const input = "intl.formatMessage({ id: '${messageId}'})"
     const expected = "messageId"
 
-    const result = expressionToMessageId(input)
+    const result = expressionToMessageId(input, "label")
     expect(result).toEqual(expected)
 })
 
