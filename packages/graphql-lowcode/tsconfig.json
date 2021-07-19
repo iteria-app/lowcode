@@ -3,6 +3,13 @@
     "target": "es5",
     "downlevelIteration": true,
     "module": "commonjs",
+    "declaration": true,
     "strict": true,
-  }
+    "outDir": "cjs"
+  },
+  "exclude": [
+    "node_modules",
+    "cjs",
+    "__tests__"
+  ]
 }
