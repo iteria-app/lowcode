@@ -1,7 +1,7 @@
 import fs from 'fs'
 import path from 'path'
-import { ts } from 'ts-morph';
 import { SyntaxKind } from 'typescript';
+import { generatePages } from '../..';
 import { findByCondition, SourceLineCol } from '../../../ast';
 import { addFormInput, getFormWidgetProperties, isSelectedFormWidget, setFormWidgetProperties } from '../../detail';
 import MuiDetailGenerator from '../../generation/generators/detail/mui-detail-generator';
@@ -10,6 +10,9 @@ import { addColumn, deleteColumn, getColumnSourcePosition, isSelectedDataTable }
 import { createAst } from '../helper';
 import { TestListHelper } from '../list/list-helper';
 import { graphqlGenTs1 } from '../typeAlias.example';
+import { is2 } from './files/introspection';
+import ts from 'typescript'
+import { TableType } from '../../definition/context-types';
 
 describe(".api tests", () => {
     describe("Preparing: test auxiliary functions to verify the tests", () => {
@@ -282,6 +285,26 @@ describe(".api tests", () => {
             const result = await setFormWidgetProperties(new CodegenRw(), source, { properties: properties });
     
             expect(result).toBe(undefined);
-        });  
+        });
+        
+        test (".test table generation from index", ()=>{
+
+            const io = new CodegenRw()
+            const template = fs.readFileSync(path.resolve('src/codegen/tests/list/files/page-list-template.txt'), 'utf-8')
+            const routeDefinitionFilePath = 'src/codegen/tests/api/files/route-definition.txt'
+            const menuDefinitionFilePath = 'src/codegen/tests/api/files/menu-definition.txt'
+            const componentStorageRoot = 'src/codegen/tests/api/files/output'
+            
+            var options = {
+                           names:['customer'], 
+                           pageListTemplate: template, 
+                           componentStoragePath:componentStorageRoot, 
+                           menuDefinitionFilePath: menuDefinitionFilePath, 
+                           routeDefinitionFilePath:routeDefinitionFilePath,
+                           tableType: TableType.DataTable
+                          }
+        
+            generatePages(is2.data.__schema, io, options)
+          });
     });
 });

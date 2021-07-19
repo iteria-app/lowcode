@@ -15,6 +15,7 @@ import { BasicTableGenerator } from "../generation/generators/list/basic-table-g
 import { FacadeDeleteOptions, FacadeInsertOptions, MenuItemOptions, RouteOptions } from "./interfaces";
 import { ColumnSourcePositionResult, WidgetProperties } from "../interfaces";
 import { generateNewRoute } from "../generation/generators/routes/route-generator";
+import { addMenuItem } from "../generation/generators/menu/menu-generator";
 
 export async function insertColumn(
   tablePosition: SourceLineCol,
@@ -261,4 +262,13 @@ export async function generateRoute(options: RouteOptions, io: CodeRW): Promise<
   }
 }
 
-//export async function generateNewMenuItem(options: MenuItemOptions, io: CodeRW)
+export async function generateMenuItem(options: MenuItemOptions, io: CodeRW) {
+  const menuDefinitionSource = await io.readFile(options.menuDefinitionFilePath)
+
+  if(menuDefinitionSource){
+      return addMenuItem(menuDefinitionSource, 
+                         options.itemTitle, 
+                         options.itemUri, 
+                         options.itemIcon)
+  }
+}

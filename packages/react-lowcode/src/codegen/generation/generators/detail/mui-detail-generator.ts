@@ -302,7 +302,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
     // return ast;
     let newField = this.createTextFieldElement(
       property.getName(),
-      property.getTypeText(),
+      property.getType(),
       InputType.text
     );
 

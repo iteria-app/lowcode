@@ -46,3 +46,10 @@ export const createStringJsxAttribute = (name: string, value: string) => {
         factory.createStringLiteral(value)
       );
 }
+export const isUseQueryHook = (node: ts.Node, name: string): boolean | undefined => {
+  if(ts.isCallExpression(node)) {
+    if(node.expression.getFullText().indexOf(name) > 0) {
+      return true
+    }
+  }
+}

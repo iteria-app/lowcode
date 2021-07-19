@@ -1,8 +1,9 @@
 import ts, { factory } from "typescript";
 import { transformer } from "../../../../ast";
 import { printSourceCode } from "../../../ast/ast";
-import { createNamedImportDeclaration } from "../../../ast/imports";
-import { isOpeningOrSelfClosingElementWithName, isImportDeclarationWithName, isFunctionDeclarationWithName } from "../../../ast/node";
+import { createUseQueryExpression } from "../../../ast/hooks";
+import { createImportDeclaration, createNamedImportDeclaration } from "../../../ast/imports";
+import { isOpeningOrSelfClosingElementWithName, isImportDeclarationWithName, isUseQueryHook, isFunctionDeclarationWithName } from "../../../ast/node";
 import { createAst } from "../../code-generation/createSourceFile";
 import { Entity } from "../../entity";
 import { getInputParameterIdentifier, getListComponentName, getListPageComponentName } from "../../entity/helper";
@@ -26,6 +27,28 @@ export default class TemplateResolver {
                 const listComponentName = getListComponentName(this._entity);
                 const listPageComponentName = getListPageComponentName(this._entity);
                 const inputParameterIdentifier = getInputParameterIdentifier(this._entity);
+
+                //find 'useGeneratedQuery' import and replace it with use'queryName's
+                //TODO pascalCase function 'customer' -> 'Customers'
+                const generatedQueryName = this._entity.getName()
+                const hookName = `use${generatedQueryName.charAt(0).toUpperCase() + generatedQueryName.slice(1)}s`
+
+                const transformUseQueryImport = (node: ts.Node, importName: string, queryName: string) => {
+                  if(isImportDeclarationWithName(node, importName)) {
+                    return createImportDeclaration(queryName, './generated/graphql');
+                  }
+                }
+
+                const transformImportGeneratedQuery = (node: ts.Node) => {
+                  return transformUseQueryImport(node, 'useGeneratedQuery', hookName);
+                }
+
+                //find 'useGeneratedQuery' hook and replace it with use'queryName's
+                const transformUseQueryHook = (node: ts.Node) => {
+                  if(isUseQueryHook(node, 'useGeneratedQuery')) {
+                    return createUseQueryExpression(hookName)
+                  }
+                }
 
                 const transformImportDeclaration = (node: ts.Node, importName: string, tableComponentName: string) => {
                     if(isImportDeclarationWithName(node, importName)) {
@@ -60,9 +83,13 @@ export default class TemplateResolver {
                     }
                 }
 
-                let transformationResult = ts.transform(ast, [transformer(transformListPlaceholderByListComponent)])
-                transformationResult = ts.transform(transformationResult.transformed[0], [transformer(transformPageComponent)])
-                transformationResult = ts.transform(transformationResult.transformed[0], [transformer(transformExportElement)])
+                const transformationResult = ts.transform(ast, 
+                  [transformer(transformListPlaceholderByListComponent), 
+                   transformer(transformPageComponent),
+                   transformer(transformExportElement),
+                   transformer(transformImportGeneratedQuery),
+                   transformer(transformUseQueryHook)]);
+
                 result = printSourceCode(transformationResult.transformed[0]);
             }
         }

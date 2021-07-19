@@ -1,100 +1,164 @@
-interface Type {
-  name: null | string,
-  kind?: string,
-  [key: string]: any
-}
+import { IntrospectionQuery, Field, TypesObject, EntityQuery, Argument, Root, Type } from './types'
+import { buildFragmentsQuery } from './fragments/buildFragmentsQuery'
+import { getRootNames, getRoots } from './roots/roots'
+import { buildParametersAndVariablesString } from './parameters/buildParametersAndVariablesString'
 
-interface Field {
-  name: string,
-  type: Type,
-  kind?: string,
-  [key: string]: any
-}
+/**
+ * 
+ * @param introspection Introspection JSON `data.__schema`
+ * @param name Used to replace variable names in query/mutations variables
+ * @param target (optional) GraphQL server name for which queries are built for, e.g. `hasura`
+ * @returns Generated GraphQL queries and mutations with fragments
+ */
 
-interface TypesObject {
-  name: string,
-  fields: Field[],
-  [key: string]: any
-}
-
-interface IntrospectionQuery {
-  types: TypesObject[],
-  [key: string]: any
-}
-
-interface Fragment {
-  name: string,
-  queryName: string,
-  entity: string,
-  fields: string[]
-}
-
-interface QueryRoot {
-  queryName: string,
-  entityName: string
-}
-
-export function generateGraphqlQueries(introspection: IntrospectionQuery) {
+export function generateGraphqlQueries(introspection: IntrospectionQuery, name: string): string {
   const types = introspection.types
 
-  const queryRoot = getQueryRoot(types)
-  const entityFields = getEntityFields(types, queryRoot.entityName)
+  const rootNames = getRootNames(introspection)
 
-  const fragmentQuery = buildFragmentQuery(entityFields, queryRoot)
-  const selectQuery = buildSelectQuery(queryRoot)
+  const [queryRoot, mutationRoot, subscriptionRoot] = getRoots(types, rootNames)
 
-  const finalQuery = buildGraphqlQuery(selectQuery, fragmentQuery)
-  
+  const entities = getEntities([queryRoot, mutationRoot], types, 'SCALAR')
+
+  const fragmentsQuery = buildFragmentsQuery(entities, types)
+
+  const selectQuery = queryRoot ? buildSelectQuery(queryRoot, name) : ''
+  const mutationQuery = mutationRoot ? buildMutationQuery(mutationRoot, name) : ''
+
+  const queries = [selectQuery, mutationQuery, fragmentsQuery]
+
+  const finalQuery = buildGraphqlQuery(queries)
+
+  console.log(finalQuery)
+
   return finalQuery
 }
 
-function getQueryRoot(types: TypesObject[]): QueryRoot {
-  for(const typeObject of types) {
-    //iterate thrugh types to find query root
-    if (typeObject.name === 'query_root') {
-      const queryName = typeObject.fields[0].name ? typeObject.fields[0].name : ''
-      const entityName = typeObject.fields[0].type.name ? typeObject.fields[0].type.name : ''
+/**
+ * 
+ * @param roots Introspection root types (Query, Mutation, Subscription)
+ * @param types Introspection JSON `data.types`
+ * @param filterOnlyFields Fields to be filtered e.g. `SCALAR` returns only entities with fields of type SCALAR
+ * @returns Array of `EntityQuery`
+ */
 
-      return { queryName: queryName, entityName: entityName }
+function getEntities(roots: (Root | undefined)[], types: TypesObject[], filterOnlyFields?: string): EntityQuery[] {
+  const entities = roots.map(root => {
+    let rootEntities: EntityQuery[] = []
+
+    if (root?.name) {
+      for (const field of root.fields) {
+        const queryName = field.name
+        const entityName = getNestedOfType(field).name ?? ''
+        let entityFields = getEntityFields(entityName, types)
+
+        //if parameter fitlerOnlyFields then skip every root that does not return filtered type fields
+        if (filterOnlyFields && !entityFields.some(field => getNestedOfType(field).kind === filterOnlyFields)) {
+
+          //remove it from root
+          root.fields = root.fields.filter(fieldToBeDelete => fieldToBeDelete !== field)
+          continue
+        }
+        rootEntities = [...rootEntities, { queryName, entityName, fields: entityFields }]
+      }
     }
-  }
 
-  return {queryName: '', entityName: ''}
+    return rootEntities
+  })
+
+  //array of arrays to one array
+  return Array.prototype.concat.apply([], entities)
 }
 
-function getEntityFields(types: TypesObject[], entityName: string): Field[] {
-  for(const typeObject of types) {
-    if(typeObject.name === entityName) return typeObject.fields
-  }
+/**
+ * 
+ * @param entityName Name of searched entity
+ * @param types Introspection JSON `data.__schema.types`
+ * @returns Entity fields if entity is found
+ */
 
+function getEntityFields(entityName: string, types: TypesObject[]): Field[] {
+  const entity = types.find(type => type.name === entityName)
+
+  if (entity && entity.fields) return entity.fields
   return []
 }
 
-function getScalarFields(fields: Field[]) {
-  let scalarFields: string[] = []
+/**
+ * 
+ * @param field 
+ * @returns Deepest ofType object of field
+ */
 
-  fields.forEach(field => {
-    //skip non scalar fields
-    if (field.type && field.name && field.type.kind === 'SCALAR') scalarFields = [...scalarFields, field.name]
+export function getNestedOfType(field: Field | Argument): Type {
+  let actualType = field.type
+
+  while (actualType.ofType) actualType = actualType.ofType
+
+  if (actualType.name) return actualType
+  return { name: '', kind: '' }
+}
+
+/**
+ * 
+ * @param queryRoot Query root node from Introspection
+ * @param name Name of entity that queries are built for
+ * @returns Formatted string with all usable Query root queries
+ */
+
+function buildSelectQuery(queryRoot: Root, name: string): string {
+  let selectQueries: string[] = []
+
+  queryRoot.fields.forEach(query => {
+    const fragmentName = `${query.name}_${getNestedOfType(query).name}`
+    const { params, variables } = buildParametersAndVariablesString(query, name)
+
+    const newSelectQuery = `query ${query.name}${variables} {\n  ${query.name}${params} {\n    ...${fragmentName}\n  }\n}`
+
+    selectQueries = [...selectQueries, newSelectQuery]
   })
 
-  return scalarFields
+  return selectQueries.join('\n\n')
 }
 
-function buildSelectQuery(queryRoot: QueryRoot) {
-  const fragmentName = `${queryRoot.queryName}_${queryRoot.entityName}`
+/**
+ * 
+ * @param mutationRoot Mutation root node from Introspection
+ * @param name Name of entity that queries are built for
+ * @returns Formatted string with all usable Query root queries
+ */
 
-  return `query ${queryRoot.queryName} {\n  ${queryRoot.queryName}(limit: 100) {\n    ...${fragmentName}\n  }\n}`
+function buildMutationQuery(mutationRoot: Root, name: string): string {
+  let mutationQueries: string[] = []
+
+  mutationRoot.fields.forEach(field => {
+    const fragmentName = `${field.name}_${getNestedOfType(field).name}`
+
+    mutationQueries = [...mutationQueries, buildMutationString(field, fragmentName, name)]
+  })
+
+  return mutationQueries.join('\n\n')
+
 }
 
-function buildFragmentQuery(entityFields: Field[], queryRoot: QueryRoot) {
-  const scalarFields = getScalarFields(entityFields)
+/**
+ * 
+ * @param field Mutation root field
+ * @param fragmentName Name of inserted fragment
+ * @param name Name of entity that mutation is built for
+ * @returns 
+ */
 
-  return `fragment ${queryRoot.queryName}_${queryRoot.entityName} on ${queryRoot.entityName} {\n  ${scalarFields.join('\n  ')}\n}`
+function buildMutationString(field: Field, fragmentName: string, name: string): string {
+  const { params, variables } = buildParametersAndVariablesString(field, name)
+
+  return `mutation ${field.name}${variables} {\n  ${field.name}${params} {\n    ...${fragmentName}\n  }\n}`
 }
 
-function buildGraphqlQuery(selectQuery: string, fragmentQuery: string) {
-  return `${selectQuery}\n\n${fragmentQuery}`
+function buildGraphqlQuery(queries: string[]) {
+  queries = queries.filter(query => query != '')
+
+  return `${queries.join('\n\n')}`
 }
 
 

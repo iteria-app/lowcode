@@ -13,6 +13,12 @@ export interface CodegenOptions {
     uiFramework?: UiFramework,
     //default is basic table
     tableType?: TableType
+    //default is /src/components/
+    componentStoragePath?: string
+    //default is src/routes.tsx
+    routeDefinitionFilePath?: string
+    //default is /src/layouts/DashboardLayout/NavBar/index.tsx
+    menuDefinitionFilePath?: string
 }
 
 export interface InsertOptions {
