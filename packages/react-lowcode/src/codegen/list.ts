@@ -7,6 +7,8 @@ import {
     insertColumn, 
     deleteColumn as fDeleteColumn, 
     getColumnSourcePosition as fGetColumnSourcePosition,
+    insertColumnToDataTableGrommet,
+    insertColumnToBasicTableGrommet
 } from './facade/facadeApi'
 import { Property } from "./generation/entity"
 
@@ -23,9 +25,20 @@ export async function addColumn(typesSourceCode: string,
     let generatedSource = undefined
 
     if(property){
-        generatedSource = await insertColumn(sourceCode, 
-        {entityField: property, index: options.index}, 
-        io)
+        // generatedSource = await insertColumn(sourceCode, 
+        // {entityField: property, index: options.index}, 
+        // io)
+
+        generatedSource = await insertColumnToDataTableGrommet(
+            sourceCode,
+            {
+                entityField: property,
+                index: options.index
+            },
+            io
+        )
+
+        // console.log(generatedSource)
     }
 
     return generatedSource

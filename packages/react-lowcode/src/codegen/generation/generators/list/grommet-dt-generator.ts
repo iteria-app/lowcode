@@ -36,16 +36,17 @@ export default class GrommetDataTableGenerator implements TableGenerator
         if(this._widgetContext){
           let sourceCode = await this._widgetContext.getSourceCodeString(position)
           let ast = createAst(sourceCode)
-  
+          console.log(sourceCode)
           if(ast){
             let widgetParentNode = findWidgetParentNode(sourceCode, position)
   
             if(widgetParentNode)
             {
               let columnsDeclarationNode = this.findColumnsDeclaration(widgetParentNode)
-  
+              console.log(columnsDeclarationNode)
               if(columnsDeclarationNode){
                 let columnDeclarationArray = columnsDeclarationNode.getChildAt(2) as ts.ArrayLiteralExpression
+                console.log("HERe>??:::::::::::>>>>>>>>>>>>>>>>>>>>>>>: ", columnDeclarationArray)
   
                 if(columnDeclarationArray){
                   ast = this.addNewColumn(columnDeclarationArray, 
