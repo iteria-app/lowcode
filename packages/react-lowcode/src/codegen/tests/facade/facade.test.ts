@@ -206,11 +206,6 @@ describe("codegen facade tests", () => {
     });
   });
 
- 
-
-
-
-
     test(".delete column from existing table", () => {
       deleteColumn({lineNumber: 15,columnNumber: 73, fileName: 'src/codegen/tests/list/list-test-file.txt'}, { index:5 }, new CodegenRw()).then(
         (data) => console.log(data)

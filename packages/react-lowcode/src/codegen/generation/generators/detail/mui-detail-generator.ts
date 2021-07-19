@@ -1,4 +1,4 @@
-import ts, { factory, JsxAttributeLike, Node, ObjectLiteralExpression, SourceFile, SyntaxKind } from "typescript";
+import ts, { factory, JsxAttributeLike, Node, ObjectLiteralExpression, SourceFile, SyntaxKind, transform } from "typescript";
 import { PageComponent } from "../../react-components/react-component-helper";
 import { DetailGenerator } from "./detail-generator-factory";
 import { DetailComponentDefinitionBase } from "../../../definition/detail-definition-core";
@@ -20,14 +20,17 @@ import {
   findByCondition,
   replaceElementsToAST,
   SourceLineCol,
+  transformer,
 } from "../../../../ast";
 import {
   findVariableDeclarations,
   findObjectLiteralExpression,
   findPropertyAssignment,
+  printSourceCode,
 } from "../../../ast/ast";
 import { findWidgetParentNode, getWidgetProperties } from "../../../ast/widgetDeclaration";
 import { WidgetProperties } from "../../../interfaces";
+import { createStringJsxAttribute, isJsxAttributeWithName } from "../../../ast/node";
 
 export default class MuiDetailGenerator implements DetailGenerator {
   private _imports: ts.ImportDeclaration[] = [];
@@ -268,6 +271,35 @@ export default class MuiDetailGenerator implements DetailGenerator {
     ast: ts.SourceFile,
     index?: number
   ): ts.SourceFile {
+
+    // const inputElementCode = this.createInputElementFromTemplate(property);
+    // if(inputElementCode) {
+    //   const inputElementAst = createAst(inputElementCode);
+    //   if(inputElementAst) {
+    //     const inputElement = findByCondition<ts.JsxChild>(inputElementAst, (node: ts.Node) => {
+    //       return  ts.isJsxText(node) || ts.isJsxExpression(node) || ts.isJsxElement(node) || ts.isJsxSelfClosingElement(node) || ts.isJsxFragment(node);
+    //     });
+        
+    //     if(inputElement) {
+    //       const gridItemElement = this.createGridItemElement([inputElement]);
+
+    //       let newElements: ts.JsxElement[];
+    //       if(index && index < gridElements.length + 1){
+    //         newElements = [...gridElements.slice(0, index - 1), gridItemElement, ...gridElements.slice(index - 1)]
+    //       }else{
+    //         newElements = [...gridElements, gridItemElement]
+    //       }
+      
+    //       return replaceElementsToAST(
+    //         ast,
+    //         gridContainer.pos,
+    //         this.createGridContainer(newElements)
+    //       );
+    //     }
+    //   }
+    // }
+
+    // return ast;
     let newField = this.createTextFieldElement(
       property.getName(),
       property.getTypeText(),
@@ -1018,6 +1050,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
       ])
     );
   }
+
   private createTextFieldElement(
     name: string,
     text: string,
@@ -1052,6 +1085,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
       factory.createJsxClosingElement(factory.createIdentifier("Grid"))
     );
   }
+
   private getTextFieldElement(
     name: string,
     text: string,
@@ -1062,5 +1096,147 @@ export default class MuiDetailGenerator implements DetailGenerator {
     } else {
       return this.createTextFieldComponent(name, text);
     }
+  }
+
+
+
+  createInputElementFromTemplate = (property: Property, template: string = ''): string | undefined => {
+    const propName = property.getName();
+    const propType: PropertyType = getPropertyType(property);
+
+    switch (propType) {
+      case PropertyType.string:
+      case PropertyType.numeric: {
+        template = `
+          <TextField 
+              id={id}
+              type="input"
+              label={T('label')} 
+              value={value} 
+              onChange={handleChange}
+              fullWidth 
+          />
+        `;
+        break;
+      }
+    }
+
+    if(template) {
+      const ast = createAst(template);
+
+      if (ast) {
+        const transformIdAttribute = (node: ts.Node) => {
+          const attributeName = 'id';
+          if (isJsxAttributeWithName(node, attributeName)) {
+            return createStringJsxAttribute(attributeName, propName);
+          }
+        };
+  
+        const transformLabelAttribute = (node: ts.Node) => {
+          const attributeName = 'label';
+          if (isJsxAttributeWithName(node, attributeName)) {
+            return createStringJsxAttribute(attributeName, propName);
+          }
+        };
+  
+        const transformValueAttribute = (node: ts.Node) => {
+          const attributeName = 'value';
+          if (isJsxAttributeWithName(node, attributeName)) {
+            return this.createValueJsxAttribute(propName, propType);
+          }
+        };
+
+        const transformOnChangeAttribute = (node: ts.Node) => {
+          const attributeName = 'onChange';
+          if (isJsxAttributeWithName(node, attributeName)) {
+            return this.createFormikOnChangeAttribute(propName);
+          }
+        };
+
+        const transformInputTemplate = (node: ts.Node) => {
+          return transformIdAttribute(node) || transformLabelAttribute(node) || transformValueAttribute(node) || transformOnChangeAttribute(node);
+        };
+
+        const transformationResult = ts.transform(ast, [transformer(transformInputTemplate)]);
+        return printSourceCode(transformationResult.transformed[0]);
+      }
+    }
+  };
+
+  private createValueJsxAttribute(
+    name: string,
+    propType: PropertyType
+  ): ts.JsxAttribute {
+    // if (this._context.formatter === Formatter.ReactIntl) {
+    //   if (type === InputType.date) {
+    //     return this.createDateValueFormattedAttribute(name);
+    //   } else {
+    //     return this.createTextValueFormattedAttribute(name);
+    //   }
+    // } else {
+    //   return this.createTextValueAttribute(name);
+    // }
+
+    return this.createFormikValueAttribute(name);
+  }
+
+  private createFormikValueAttribute(name: string): ts.JsxAttribute {
+    return factory.createJsxAttribute(
+      factory.createIdentifier("value"),
+      factory.createJsxExpression(
+        undefined,
+        factory.createPropertyAccessExpression(
+          factory.createPropertyAccessExpression(
+            factory.createIdentifier("formik"),
+            factory.createIdentifier("values")
+          ),
+          factory.createIdentifier(name)
+        )
+      )
+    );
+  }
+
+  private createFormikOnChangeAttribute(name: string): ts.JsxAttribute {
+    return factory.createJsxAttribute(
+      factory.createIdentifier("onChange"),
+      factory.createJsxExpression(
+        undefined,
+        factory.createPropertyAccessExpression(
+          factory.createIdentifier("formik"),
+          factory.createIdentifier("handleChange")
+        )
+      )
+    );
+  }
+
+  private createGridItemElement(children: readonly ts.JsxChild[]): ts.JsxElement {
+    return factory.createJsxElement(
+      factory.createJsxOpeningElement(
+        factory.createIdentifier("Grid"),
+        undefined,
+        factory.createJsxAttributes([
+          factory.createJsxAttribute(
+            factory.createIdentifier("item"),
+            undefined
+          ),
+          factory.createJsxAttribute(
+            factory.createIdentifier("md"),
+            factory.createJsxExpression(
+              undefined,
+              factory.createNumericLiteral("6")
+            )
+          ),
+          factory.createJsxAttribute(
+            factory.createIdentifier("xs"),
+            factory.createJsxExpression(
+              undefined,
+              factory.createNumericLiteral("12")
+            )
+          ),
+        ])
+      ),
+      children,
+      factory.createJsxClosingElement(factory.createIdentifier("Grid"))
+    );
   }
 }

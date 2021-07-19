@@ -1,4 +1,4 @@
-import ts from "typescript";
+import ts, { factory, JsxChild } from "typescript";
 
 export const isImportDeclarationWithName = (node: ts.Node, name: string): boolean | undefined => {
     if (ts.isImportDeclaration(node)) {
@@ -28,4 +28,21 @@ export const isFunctionDeclarationWithName = (node: ts.Node, name: string): bool
             return true;
         }
     }
+}
+
+export const isJsxAttributeWithName = (node: ts.Node, name: string): boolean | undefined => {
+    if(ts.isJsxAttribute(node)) {
+        return node.name.escapedText === name;
+    }
+}
+
+export const isJsxChild = (node: ts.Node): boolean => {
+    return ts.isJsxText(node) || ts.isJsxExpression(node) || ts.isJsxElement(node) || ts.isJsxSelfClosingElement(node) || ts.isJsxFragment(node);
+}
+
+export const createStringJsxAttribute = (name: string, value: string) => {
+    return factory.createJsxAttribute(
+        factory.createIdentifier(name),
+        factory.createStringLiteral(value)
+      );
 }
