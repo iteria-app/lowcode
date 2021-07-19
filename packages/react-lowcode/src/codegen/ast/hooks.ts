@@ -4,12 +4,11 @@ import ts, { factory } from "typescript"
 
 export function defineHook(defaultInstanceName: string, hookName: string, packageName: string): Hook {
     let importDeclaration = createNamedImportDeclaration(hookName, packageName)
-
-  return {
-    hookName: hookName,
-    defaultInstanceName,
-    importDeclaration
-  }
+    return {
+      hookName: hookName,
+      defaultInstanceName,
+      importDeclaration
+    }
 }
 
 export function createUseQueryExpression(hookName: string, variables?: string[]): ts.CallExpression {

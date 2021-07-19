@@ -29,7 +29,6 @@ export default class TemplateResolver {
                 const inputParameterIdentifier = getInputParameterIdentifier(this._entity);
 
                 //find 'useGeneratedQuery' import and replace it with use'queryName's
-
                 //TODO pascalCase function 'customer' -> 'Customers'
                 const generatedQueryName = this._entity.getName()
                 const hookName = `use${generatedQueryName.charAt(0).toUpperCase() + generatedQueryName.slice(1)}s`

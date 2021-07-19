@@ -1,10 +1,10 @@
 {
   "name": "root",
   "private": true,
+  "workspaces": ["packages/*"],
   "devDependencies": {
     "@types/chrome": "^0.0.128",
-    "@types/jest": "^26.0.21",
-    "lerna": "^3.22.1"
+    "@types/jest": "^26.0.21"
   },
   "dependencies": {
     "jest": "^26.6.3",

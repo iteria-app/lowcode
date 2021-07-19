@@ -5,9 +5,7 @@ import ts, { factory } from "typescript"
 import { Property } from './generation/entity/index'
 import { CodegenOptions } from './interfaces'
 import TemplateResolver from './generation/generators/template/template-resolver'
-import { generateGraphqlFile, getEntity } from '../../../graphql-lowcode/src/generate/generateGraphqlFiles'
-import { getNestedOfType } from '../../../graphql-lowcode/src/generate/generateGraphqlQueries'
-import { IntrospectionQuery } from '../../../graphql-lowcode/src/generate/types'
+import { IntrospectionQuery, generateGraphqlFile, getEntity, getNestedOfType } from '@iteria-app/graphql-lowcode/cjs/generate'
 import { getListPageComponentName, getPluralizedEntityName } from './generation/entity/helper'
 import { generateMenuItem, generateRoute } from './facade/facadeApi'
 import { Entity } from './generation/entity'
@@ -33,7 +31,8 @@ export function generatePages(introspection: IntrospectionQuery,
         const entityName = entityType.name
 
         let props: Property[] = []
-        entityType.fields.forEach(field => {
+        
+        entityType.fields.forEach((field: { name: any }) => {
             const propName = field.name
             const propType = getNestedOfType(field).name ?? ''
 
@@ -55,7 +54,7 @@ export function generatePages(introspection: IntrospectionQuery,
             generateListComponent(io, 
                                   listComponentFilePath,
                                   entity, 
-                                  typeName)
+                                  options)
 
             //generate page for list component
             generateListPage(io, 
@@ -83,7 +82,6 @@ export function generatePages(introspection: IntrospectionQuery,
 function generateListComponent(io: CodeRW, 
                                filePath: string,
                                entity: Entity, 
-                               typeName:string, 
                                options?:CodegenOptions) {
     let context = {
         uiFramework: options?.uiFramework ?? UiFramework.MaterialUI, 
@@ -93,6 +91,8 @@ function generateListComponent(io: CodeRW,
             height: "400px"
         }
     }
+
+    console.log(`GENERATOR: selected table type: ${context.index.tableType}`)
         
     const generator = new AppGenerator(context, entity)
     const page = generator.generateListComponent(/* TODO entity / type name should be input - not in context */)

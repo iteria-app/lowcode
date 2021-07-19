@@ -1,6 +1,5 @@
 import fs from 'fs'
 import path from 'path'
-import { ts } from 'ts-morph';
 import { SyntaxKind } from 'typescript';
 import { generatePages } from '../..';
 import { findByCondition, SourceLineCol } from '../../../ast';
@@ -12,6 +11,8 @@ import { createAst } from '../helper';
 import { TestListHelper } from '../list/list-helper';
 import { graphqlGenTs1 } from '../typeAlias.example';
 import { is2 } from './files/introspection';
+import ts from 'typescript'
+import { TableType } from '../../definition/context-types';
 
 describe(".api tests", () => {
     describe("Preparing: test auxiliary functions to verify the tests", () => {
@@ -300,6 +301,7 @@ describe(".api tests", () => {
                            componentStoragePath:componentStorageRoot, 
                            menuDefinitionFilePath: menuDefinitionFilePath, 
                            routeDefinitionFilePath:routeDefinitionFilePath,
+                           tableType: TableType.DataTable
                           }
         
             generatePages(is2.data.__schema, io, options)
