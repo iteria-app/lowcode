@@ -19,5 +19,5 @@ export function expressionToMessageId(expression: string, attrName: string) : st
 }
 
 export function messageIdToExpression(messageId: string) : string {
-    return `intl.formatMessage({ id: '${messageId}' })`
+    return `intl.formatMessage({ id: ${messageId} })`
 }
