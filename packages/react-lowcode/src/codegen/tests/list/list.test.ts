@@ -40,7 +40,7 @@ describe("table generation", () => {
     
     var options = {names:['Customer'], pageListTemplate: template}
 
-    generatePages(graphqlGenTs1, testWriter, options)
+    // generatePages(graphqlGenTs1, testWriter, options)
 
     console.log('generated:' + testWriter.getSourceString())
   });
