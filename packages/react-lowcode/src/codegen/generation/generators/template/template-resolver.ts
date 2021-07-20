@@ -3,11 +3,10 @@ import { transformer } from "../../../../ast";
 import { printSourceCode } from "../../../ast/ast";
 import { createUseQueryExpression } from "../../../ast/hooks";
 import { createImportDeclaration } from "../../../ast/imports";
-import { isOpeningOrSelfClosingElementWithName, isImportDeclarationWithName, isUseQueryHook } from "../../../ast/node";
+import { isOpeningOrSelfClosingElementWithName, isImportDeclarationWithName, isUseQueryHook, isUseQueryHookImport } from "../../../ast/node";
 import { createAst } from "../../code-generation/createSourceFile";
 import { Entity } from "../../entity";
 import { EntityHelper } from "../../entity/helper";
-import { camalizeString } from "../../../../strings/camel";
 
 export default class TemplateResolver {
     private _entity?: Entity
@@ -28,13 +27,11 @@ export default class TemplateResolver {
                 const inputParameterIdentifier = EntityHelper.getInputParameterIdentifier(this._entity);
 
                 //find 'useGeneratedQuery' import and replace it with use'queryName's
-
-                //TODO pascalCase function 'customer' -> 'Customers'
-                const generatedQueryName = this._entity.getName()
-                const hookName = `use${generatedQueryName.charAt(0).toUpperCase() + generatedQueryName.slice(1)}s`
+                const generatedQueryName = this._entity.getListTypeQueryName() ?? ''
+                const hookName = `use${generatedQueryName.charAt(0).toUpperCase() + generatedQueryName.slice(1)}Query`
 
                 const transformUseQueryImport = (node: ts.Node, importName: string, queryName: string) => {
-                  if(isImportDeclarationWithName(node, importName)) {
+                  if(isUseQueryHookImport(node, importName)) {
                     return createImportDeclaration(queryName, './generated/graphql');
                   }
                 }

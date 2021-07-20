@@ -1,4 +1,7 @@
 import { IntrospectionQuery, TypesObject, Root } from '../types'
+import { getNestedOfType } from '../generateGraphqlQueries'
+import { getEntity } from '../generateGraphqlFiles'
+import { Field } from '../types'
 
 /**
  * @param introspection Introspection JSON `data`
@@ -34,5 +37,41 @@ export function getRoots(types: TypesObject[], rootNames: { type: string, name?:
   const mutationRoot = roots.find(root => root.name === mutation.name)
   const subscriptionRoot = roots.find(root => root.name === subscription.name)
 
-  return[queryRoot, mutationRoot, subscriptionRoot]
+  return [queryRoot, mutationRoot, subscriptionRoot]
+}
+
+export function getQueryNames(introspection: IntrospectionQuery, entityName: string): (string | undefined)[] {
+  const rootNames = getRootNames(introspection)
+  const [queryRoot, mutationRoot, subscriptionRoot] = getRoots(introspection.types, rootNames)
+
+  const listTypeQuery = queryRoot?.fields.find(field => isListType(field)) ?? queryRoot?.fields[0] //TODO zmenit
+  const detailTypeQuery = queryRoot?.fields.find(field => isObjectType(field) ?? queryRoot?.fields[0])
+
+  //TODO update, insert etc...
+
+
+  return [listTypeQuery?.name, detailTypeQuery?.name]
+}
+
+function isListType(typeField: Field) {
+  let actualType = typeField.type
+
+  while (actualType) {
+    if (actualType.kind === 'LIST') return true
+    actualType = actualType.ofType
+  }
+
+  return false
+}
+
+function isObjectType(typeField: Field) {
+  let actualType = typeField.type
+
+  while(actualType) {
+    if(actualType.kind === 'OBJECT') return true
+    if(actualType.kind === 'NON-NULL') continue
+    return false
+  }
+
+  return false
 }

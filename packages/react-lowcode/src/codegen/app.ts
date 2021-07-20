@@ -5,7 +5,7 @@ import ts, { factory } from "typescript"
 import { Property } from './generation/entity/index'
 import { CodegenOptions } from './interfaces'
 import TemplateResolver from './generation/generators/template/template-resolver'
-import { IntrospectionQuery, getNestedOfType, generateGraphqlFile, getEntity } from 'graphql-lowcode/src/generate'
+import { IntrospectionQuery, getNestedOfType, generateGraphqlFile, getEntity, getQueryNames } from '@iteria-app/graphql-lowcode/src/generate'
 
 // generates CRUD React pages (master-detail, eg. orders list, order detail form) from typescript
 export function generatePages(introspection: IntrospectionQuery, io: CodeRW & CodeDir, options?: CodegenOptions) {
@@ -17,6 +17,8 @@ export function generatePages(introspection: IntrospectionQuery, io: CodeRW & Co
     if (graphqlQueries != '') io.writeFile(`./src/views/${name}/${name}.graphql`, graphqlQueries)
 
     const entityType = getEntity(introspection.types, name)
+
+    const [listTypeQueryName, detailTypeQueryName] = getQueryNames(introspection, name)
 
     if (entityType && entityType.fields) {
       const entityName = entityType.name
@@ -30,6 +32,8 @@ export function generatePages(introspection: IntrospectionQuery, io: CodeRW & Co
       })
 
       const entity = {
+        getListTypeQueryName: () => listTypeQueryName,
+        getDetailTypeQueryName: () => detailTypeQueryName,
         getName: () => entityName,
         properties: props
       }
