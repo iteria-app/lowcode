@@ -148,7 +148,6 @@ export default class MuiDetailGenerator implements DetailGenerator {
                             const statement = newAst?.statements[0] as any
                             let value
                             if (statement.expression.kind == SyntaxKind.Identifier) {
-                              console.log("here?")
                               value = factory.createStringLiteral(inputProp.value)
                             }
                             else if (statement.expression.kind == SyntaxKind.CallExpression || statement.expression.kind == SyntaxKind.PropertyAccessExpression) {
