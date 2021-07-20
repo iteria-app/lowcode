@@ -26,7 +26,7 @@ import {
   findObjectLiteralExpression,
   findPropertyAssignment,
 } from "../../../ast/ast";
-import { findWidgetParentNode, getWidgetProperties } from "../../../ast/widgetDeclaration";
+import { findWidgetParentNode, getWidgetProperties, getTypeOfValue } from "../../../ast/widgetDeclaration";
 import { WidgetProperties, WidgetProperty } from "../../../interfaces";
 
 export default class MuiDetailGenerator implements DetailGenerator {
@@ -107,29 +107,20 @@ export default class MuiDetailGenerator implements DetailGenerator {
               if (ts.isJsxAttribute(prop)) {
                 const propName = prop.name.escapedText.toString();
                 const inputProp = widgetProperties.properties.find(l => l.name === propName);
-
                 if (inputProp) {
                   if (prop.initializer) {
-                    if (ts.isStringLiteral(prop.initializer)) {
-                      if(inputProp.value !== prop.initializer.text) {
-                        const test = createAst(inputProp.value)
-                        const statement = test?.statements[0] as any
-                        if (statement.expression.kind !== SyntaxKind.CallExpression) {
+                    const type = getTypeOfValue(inputProp.value)
+                    const initializer = prop.initializer
+                    if (type === "STRING_LITERAL") {
+                      const text = ts.isStringLiteral(initializer) ? initializer.text : initializer.getText()
+                      if(inputProp.value !== text) {
                           newProp = factory.updateJsxAttribute(prop, prop.name, factory.createStringLiteral(inputProp.value));
                           astChanged = true;
-                        } else {
-                          const val = factory.createJsxExpression(
-                            undefined,
-                            statement.expression
-                          )
-                          newProp = factory.updateJsxAttribute(prop, prop.name, val)
-                          astChanged = true
-                        }
                       }
-                    } else if (ts.isJsxExpression(prop.initializer)) {
-                      if (prop.initializer.expression) {
-                        if (prop.initializer.expression.kind === SyntaxKind.TrueKeyword || prop.initializer.expression.kind === SyntaxKind.FalseKeyword) {
-                          if(inputProp.value !== prop.initializer.expression.getText()) {
+                    } else if (type === "EXPRESSION") {
+                      if (ts.isJsxExpression(initializer) && initializer.expression) {
+                        if (initializer.expression.kind === SyntaxKind.TrueKeyword || initializer.expression.kind === SyntaxKind.FalseKeyword) {
+                          if(inputProp.value !== initializer.expression.getText()) {
                             const booleanValue = factory.createJsxExpression(
                               undefined,
                               inputProp.value.toLowerCase() === 'true' ? factory.createTrue() : factory.createFalse()
@@ -140,8 +131,8 @@ export default class MuiDetailGenerator implements DetailGenerator {
                           }
                         }
 
-                        else if (ts.isNumericLiteral(prop.initializer.expression)) {
-                          if (inputProp.value !== prop.initializer.expression.getText()) {
+                        else if (ts.isNumericLiteral(initializer.expression)) {
+                          if (inputProp.value !== initializer.expression.getText()) {
                             const numericValue = factory.createJsxExpression(
                               undefined,
                               factory.createNumericLiteral(inputProp.value)
@@ -152,11 +143,12 @@ export default class MuiDetailGenerator implements DetailGenerator {
                           }
                         }
                         // intl.formatMessage({ id: formik.values.message }) || formik.handleChange || { shrink: true } || randomtext
-                        else if (inputProp.value !== prop.initializer.expression.getText()) {
+                        else if (inputProp.value !== initializer.expression.getText()) {
                             const newAst = createAst(inputProp.value)
                             const statement = newAst?.statements[0] as any
                             let value
                             if (statement.expression.kind == SyntaxKind.Identifier) {
+                              console.log("here?")
                               value = factory.createStringLiteral(inputProp.value)
                             }
                             else if (statement.expression.kind == SyntaxKind.CallExpression || statement.expression.kind == SyntaxKind.PropertyAccessExpression) {
@@ -175,6 +167,19 @@ export default class MuiDetailGenerator implements DetailGenerator {
                             newProp = factory.updateJsxAttribute(prop, prop.name, value)
                             astChanged = true
                         }
+                      }
+                      // to be able to convert string value into expression 
+                      else if (initializer.kind == SyntaxKind.StringLiteral && inputProp.value !== initializer.getText()) {
+                        const newAst = createAst(inputProp.value)
+                        const statement = newAst?.statements[0] as any
+                        
+                        const value = factory.createJsxExpression(
+                          undefined,
+                          statement.expression
+                        )
+                        
+                        newProp = factory.updateJsxAttribute(prop, prop.name, value)
+                        astChanged = true
                       }
                     }
                   } else {

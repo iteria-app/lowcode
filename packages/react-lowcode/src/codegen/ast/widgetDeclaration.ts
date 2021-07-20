@@ -1,5 +1,5 @@
 import ts, { SyntaxKind } from "typescript"
-import { astFindSource,SourceLineCol} from "../../ast"
+import { astFindSource,createAst,SourceLineCol} from "../../ast"
 import { WidgetProperty, WidgetPropertyValue } from "../interfaces"
 
 export function findWidgetParentNode(sourceCode:string, position: SourceLineCol): ts.Node  | null | undefined{
@@ -146,10 +146,21 @@ function getAttributeValue(attribute: ts.JsxAttribute): string | undefined {
 
 function getAttributeType(attribute: ts.JsxAttribute): string | undefined {
     if (attribute.initializer) {
-        if (ts.isJsxExpression(attribute.initializer)) 
-            return WidgetPropertyValue.EXPRESSION
-        else 
+        if (ts.isStringLiteral(attribute.initializer))
             return WidgetPropertyValue.STRING_LITERAL
+        else 
+            return WidgetPropertyValue.EXPRESSION
+    }
+    return undefined
+}
+
+export function getTypeOfValue(value: string): string {
+    const tree = createAst(value)
+    const statement = tree?.statements[0] as any 
+    if (statement.expression.kind === SyntaxKind.CallExpression || statement.expression.kind === SyntaxKind.PropertyAccessExpression) {
+        return WidgetPropertyValue.EXPRESSION
+    } else {
+        return WidgetPropertyValue.STRING_LITERAL
     }
 }
 
