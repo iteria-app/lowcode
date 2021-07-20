@@ -112,8 +112,19 @@ export default class MuiDetailGenerator implements DetailGenerator {
                   if (prop.initializer) {
                     if (ts.isStringLiteral(prop.initializer)) {
                       if(inputProp.value !== prop.initializer.text) {
-                        newProp = factory.updateJsxAttribute(prop, prop.name, factory.createStringLiteral(inputProp.value));
-                        astChanged = true;
+                        const test = createAst(inputProp.value)
+                        const statement = test?.statements[0] as any
+                        if (statement.expression.kind !== SyntaxKind.CallExpression) {
+                          newProp = factory.updateJsxAttribute(prop, prop.name, factory.createStringLiteral(inputProp.value));
+                          astChanged = true;
+                        } else {
+                          const val = factory.createJsxExpression(
+                            undefined,
+                            statement.expression
+                          )
+                          newProp = factory.updateJsxAttribute(prop, prop.name, val)
+                          astChanged = true
+                        }
                       }
                     } else if (ts.isJsxExpression(prop.initializer)) {
                       if (prop.initializer.expression) {
@@ -145,8 +156,10 @@ export default class MuiDetailGenerator implements DetailGenerator {
                             const newAst = createAst(inputProp.value)
                             const statement = newAst?.statements[0] as any
                             let value
-                          
-                            if (statement?.kind == SyntaxKind.ExpressionStatement) {
+                            if (statement.expression.kind == SyntaxKind.Identifier) {
+                              value = factory.createStringLiteral(inputProp.value)
+                            }
+                            else if (statement.expression.kind == SyntaxKind.CallExpression || statement.expression.kind == SyntaxKind.PropertyAccessExpression) {
                               value = factory.createJsxExpression(
                                   undefined,
                                   statement.expression
@@ -157,6 +170,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
                                 factory.createIdentifier(statement.getText())
                               )
                             }
+                            
                             if (!value) return
                             newProp = factory.updateJsxAttribute(prop, prop.name, value)
                             astChanged = true
