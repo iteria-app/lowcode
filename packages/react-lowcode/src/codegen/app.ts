@@ -5,7 +5,7 @@ import ts, { factory } from "typescript"
 import { Property } from './generation/entity/index'
 import { CodegenOptions } from './interfaces'
 import TemplateResolver from './generation/generators/template/template-resolver'
-import { IntrospectionQuery, getNestedOfType, generateGraphqlFile, getEntity } from 'graphql-lowcode/src/generate'
+import { IntrospectionQuery, getNestedOfType, generateGraphqlFile, getEntity } from '@iteria-app/graphql-lowcode/esm/generate'
 
 // generates CRUD React pages (master-detail, eg. orders list, order detail form) from typescript
 export function generatePages(introspection: IntrospectionQuery, io: CodeRW & CodeDir, options?: CodegenOptions) {

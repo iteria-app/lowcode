@@ -1232,6 +1232,11 @@
   "resolved" "https://registry.npmjs.org/@istanbuljs/schema/-/schema-0.1.3.tgz"
   "version" "0.1.3"
 
+"@iteria-app/graphql-lowcode@^0.1.0":
+  "integrity" "sha512-bE1b54WzDjzZ3xHCvt56gG6xnAyKykXrN+tUU806i+0A6atUuRDTTHsPPZTST1qEUFA7nqhMUvWXzpZDD0/uuw=="
+  "resolved" "https://registry.npmjs.org/@iteria-app/graphql-lowcode/-/graphql-lowcode-0.1.1.tgz"
+  "version" "0.1.1"
+
 "@jest/console@^26.6.2":
   "integrity" "sha512-IY1R2i2aLsLr7Id3S6p2BA82GNWryt4oSvEXLAKc+L2zdi89dSkE8xC1C+0kpATG4JhBJREnQOH7/zmccM2B0g=="
   "resolved" "https://registry.npmjs.org/@jest/console/-/console-26.6.2.tgz"
