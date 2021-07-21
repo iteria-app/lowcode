@@ -1,11 +1,13 @@
 import ts, { factory } from "typescript";
 import { transformer } from "../../../../ast";
 import { printSourceCode } from "../../../ast/ast";
+import { createUseQueryExpression } from "../../../ast/hooks";
 import { createImportDeclaration } from "../../../ast/imports";
-import { isOpeningOrSelfClosingElementWithName, isImportDeclarationWithName } from "../../../ast/node";
+import { isOpeningOrSelfClosingElementWithName, isImportDeclarationWithName, isUseQueryHook } from "../../../ast/node";
 import { createAst } from "../../code-generation/createSourceFile";
 import { Entity } from "../../entity";
 import { EntityHelper } from "../../entity/helper";
+import { camalizeString } from "../../../../strings/camel";
 
 export default class TemplateResolver {
     private _entity?: Entity
@@ -25,6 +27,29 @@ export default class TemplateResolver {
                 const tableComponentName = EntityHelper.getTableComponentName(this._entity);
                 const inputParameterIdentifier = EntityHelper.getInputParameterIdentifier(this._entity);
 
+                //find 'useGeneratedQuery' import and replace it with use'queryName's
+
+                //TODO pascalCase function 'customer' -> 'Customers'
+                const generatedQueryName = this._entity.getName()
+                const hookName = `use${generatedQueryName.charAt(0).toUpperCase() + generatedQueryName.slice(1)}s`
+
+                const transformUseQueryImport = (node: ts.Node, importName: string, queryName: string) => {
+                  if(isImportDeclarationWithName(node, importName)) {
+                    return createImportDeclaration(queryName, './generated/graphql');
+                  }
+                }
+
+                const transformImportGeneratedQuery = (node: ts.Node) => {
+                  return transformUseQueryImport(node, 'useGeneratedQuery', hookName);
+                }
+
+                //find 'useGeneratedQuery' hook and replace it with use'queryName's
+                const transformUseQueryHook = (node: ts.Node) => {
+                  if(isUseQueryHook(node, 'useGeneratedQuery')) {
+                    return createUseQueryExpression(hookName)
+                  }
+                }
+
                 const transformImportDeclaration = (node: ts.Node, importName: string, tableComponentName: string) => {
                     if(isImportDeclarationWithName(node, importName)) {
                         return createImportDeclaration(tableComponentName, './' + tableComponentName);
@@ -42,7 +67,10 @@ export default class TemplateResolver {
                         || transformListElement(node, templateComponentName, tableComponentName, inputParameterIdentifier);
                 };
 
-                const transformationResult = ts.transform(ast, [transformer(transformListPlaceholderByTableComponent)]);
+                const transformationResult = ts.transform(ast, 
+                  [transformer(transformListPlaceholderByTableComponent), 
+                  transformer(transformImportGeneratedQuery),
+                  transformer(transformUseQueryHook)]);
                 result = printSourceCode(transformationResult.transformed[0]);
             }
         }
