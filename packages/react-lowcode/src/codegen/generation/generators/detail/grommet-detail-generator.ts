@@ -20,12 +20,15 @@ export default class GrommetDetailGenerator
   private _context: GenerationContext
   private _entity: Entity
   private _intlFormatter: ReactIntlFormatter
+  private _entityName: string = ""
 
   constructor(generationContext: GenerationContext, entity: Entity) {
     this._helper = new GeneratorHelper(generationContext, this._imports)
     this._context = generationContext
     this._entity = entity
     this._intlFormatter = new ReactIntlFormatter(generationContext, this._imports)
+    if (entity)
+        this._entityName = entity.getName();
   }
   getDetailDefinition(): DetailComponentDefinitionBase {
     return GrommetDetailComponents;
@@ -60,7 +63,7 @@ export default class GrommetDetailGenerator
     );
 
     uniqueFileImports.push(
-      createNamedImportDeclaration("Customer", "./Customer")
+      createNamedImportDeclaration(this._entityName, "./" + this._entityName)
     );
 
     return { functionDeclaration: functionalComponent, imports: uniqueFileImports };
@@ -317,13 +320,13 @@ export default class GrommetDetailGenerator
       case PropertyType.string:
         assignment = factory.createPropertyAssignment(
           factory.createIdentifier(propertyName),
-          factory.createIdentifier("customer." + propertyName)
+          factory.createIdentifier(this._entityName.toLowerCase() + "." + propertyName)
         );
         break;
       case PropertyType.datetime:
         assignment = factory.createPropertyAssignment(
           factory.createIdentifier(propertyName),
-          factory.createIdentifier("customer." + propertyName)
+          factory.createIdentifier(this._entityName.toLowerCase() + "." + propertyName)
         );
         break;
     }
@@ -348,7 +351,7 @@ export default class GrommetDetailGenerator
             ),
             [
               factory.createTypeReferenceNode(
-                factory.createIdentifier("Customer"),
+                factory.createIdentifier(this._entityName),
                 undefined
               ),
             ]
@@ -361,7 +364,7 @@ export default class GrommetDetailGenerator
                 undefined,
                 undefined,
                 undefined,
-                factory.createIdentifier("(customer)"),
+                factory.createIdentifier("(" + this._entityName.toLowerCase() + ")"),
                 undefined,
                 undefined,
                 undefined
