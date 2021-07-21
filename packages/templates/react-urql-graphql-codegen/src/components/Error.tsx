@@ -6,9 +6,9 @@ interface IError {
 const Error: React.FC<IError> = ({ error }) => {
 
   return (
-    <>
+    <div>
       {error}
-    </>
+    </div>
   )
 }
 

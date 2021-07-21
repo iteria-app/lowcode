@@ -8,5 +8,6 @@ query generated {
     createdAt
     avatarUrl
     address
+    seq
   }
 }
