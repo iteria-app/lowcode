@@ -31,18 +31,19 @@ import {
 import { findWidgetParentNode, getWidgetProperties } from "../../../ast/widgetDeclaration";
 import { WidgetProperties } from "../../../interfaces";
 import { createStringJsxAttribute, isJsxAttributeWithName } from "../../../ast/node";
+import { getEntityName } from "../../entity/helper";
 
 export default class MuiDetailGenerator implements DetailGenerator {
   private _imports: ts.ImportDeclaration[] = [];
   private _context: GenerationContext;
-  private _entity?: Entity;
+  private _entity: Entity;
   private _widgetContext: WidgetContext | undefined;
   private _intlFormatter: ReactIntlFormatter;
-  private _entityName: string = "";
+  private _dataPropertyName: string;
 
   constructor(
     generationContext: GenerationContext,
-    entity?: Entity,
+    entity: Entity,
     widgetContext?: WidgetContext
   ) {
     this._context = generationContext;
@@ -52,8 +53,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
       generationContext,
       this._imports
     );
-    if (entity)
-        this._entityName = entity.getName();
+    this._dataPropertyName = getEntityName(this._entity)
   }
 
   async getFormWidgetProperties(position: SourceLineCol): Promise<WidgetProperties> {
@@ -405,7 +405,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
         )
       );
       uniqueFileImports.push(createNamedImportDeclaration("useFormik", "formik"));
-      uniqueFileImports.push(createNamedImportDeclaration(this._entityName, "./" + this._entityName));
+      uniqueFileImports.push(createNamedImportDeclaration(this._entity.getName(), "./" + this._entity.getName()));
 
       return {
         functionDeclaration: functionalComponent,
@@ -910,13 +910,13 @@ export default class MuiDetailGenerator implements DetailGenerator {
       case PropertyType.string:
         assignment = factory.createPropertyAssignment(
           factory.createIdentifier(propertyName),
-          factory.createIdentifier(this._entityName.toLowerCase() + "." + propertyName)
+          factory.createIdentifier(this._dataPropertyName + "." + propertyName)
         );
         break;
       case PropertyType.datetime:
         assignment = factory.createPropertyAssignment(
           factory.createIdentifier(propertyName),
-          factory.createIdentifier(this._entityName.toLowerCase() + "." + propertyName)
+          factory.createIdentifier(this._dataPropertyName + "." + propertyName)
         );
         break;
     }
@@ -1023,7 +1023,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
             ),
             [
               factory.createTypeReferenceNode(
-                factory.createIdentifier(this._entityName),
+                factory.createIdentifier(this._entity.getName()),
                 undefined
               ),
             ]
@@ -1036,7 +1036,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
                 undefined,
                 undefined,
                 undefined,
-                factory.createIdentifier("(" + this._entityName.toLowerCase() + ")"),
+                factory.createIdentifier("(" + this._dataPropertyName + ")"),
                 undefined,
                 undefined,
                 undefined
