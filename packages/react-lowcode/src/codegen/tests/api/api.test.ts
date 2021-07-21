@@ -195,12 +195,12 @@ describe(".api tests", () => {
                 },
                 {
                     name: "label",
-                    value: "phoneNumber",
-                    type: WidgetPropertyValue.STRING_LITERAL
+                    value: "intl.formatMessage({ id: 'formik.values.message' })",
+                    type: WidgetPropertyValue.EXPRESSION
                 },
                 {
                     name: "value",
-                    value: "intl.formatMessage({ id: formik.values.message })",
+                    value: "intl.formatMessage({ id: formik.values.phone })",
                     type: WidgetPropertyValue.EXPRESSION
                 },
                 {
@@ -223,12 +223,12 @@ describe(".api tests", () => {
                 },
                 {
                     name: "label",
-                    value: "phoneNumber",
-                    type: WidgetPropertyValue.STRING_LITERAL
+                    value: "intl.formatMessage({ id: 'formik.values.message' })",
+                    type: WidgetPropertyValue.EXPRESSION
                 },
                 {
                     name: "value",
-                    value: "intl.formatMessage({ id: formik.values.message })",
+                    value: "intl.formatMessage({ id: formik.values.phone })",
                     type: WidgetPropertyValue.EXPRESSION
                 },
                 {
@@ -241,7 +241,6 @@ describe(".api tests", () => {
             const filePath = 'src/codegen/tests/detail/detail-test-file.txt';
             const source: SourceLineCol = { lineNumber: 70, columnNumber: 19, fileName: filePath };
             const result = await setFormWidgetProperties(new CodegenRw(), source, { properties: properties });
-            console.log(result)
             expect(result).not.toBe(undefined);
     
             if(result) {

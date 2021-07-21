@@ -151,16 +151,17 @@ function getAttributeType(attribute: ts.JsxAttribute): string | undefined {
         else 
             return WidgetPropertyValue.EXPRESSION
     }
-    return undefined
 }
 
-export function getTypeOfValue(value: string): string {
+export function getTypeOfValue(value: string): string | undefined {
     const tree = createAst(value)
     const statement = tree?.statements[0] as any 
-    if (statement.expression.kind === SyntaxKind.CallExpression || statement.expression.kind === SyntaxKind.PropertyAccessExpression) {
-        return WidgetPropertyValue.EXPRESSION
-    } else {
-        return WidgetPropertyValue.STRING_LITERAL
+    if (statement) {
+        if (statement.expression.kind === SyntaxKind.CallExpression || statement.expression.kind === SyntaxKind.PropertyAccessExpression) {
+            return WidgetPropertyValue.EXPRESSION
+        } else {
+            return WidgetPropertyValue.STRING_LITERAL
+        }
     }
 }
 

@@ -5,11 +5,11 @@ export function expressionToMessageId(expression: string, attrName: string) : st
     if (acceptedElements.indexOf(attrName) !== -1) {
         const tree = createAst(expression)
         const statement = tree?.statements[0] as any
-        if (statement.expression && statement.expression.expression && statement.expression.arguments) {
+        if (statement && statement.expression && statement.expression.expression && statement.expression.arguments) {
             const argument = statement.expression.arguments[0]
             const prop = argument.properties[0]
             const messageId = prop.initializer.getText() as string
-            const ret = messageId.replace("$", "").replace("{", "").replace("}", "")
+            const ret = messageId.replaceAll("/.*($)({)(}).*/g", "").replaceAll("'","")
             return ret
         }
 
@@ -19,5 +19,5 @@ export function expressionToMessageId(expression: string, attrName: string) : st
 }
 
 export function messageIdToExpression(messageId: string) : string {
-    return `intl.formatMessage({ id: ${messageId} })`
+    return `intl.formatMessage({ id: '${messageId}' })`
 }

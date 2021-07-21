@@ -142,24 +142,25 @@ export default class MuiDetailGenerator implements DetailGenerator {
                             astChanged = true;
                           }
                         }
-                        // intl.formatMessage({ id: formik.values.message }) || formik.handleChange || { shrink: true } || randomtext
+                        // intl.formatMessage({ id: 'formik.values.message' }) || formik.handleChange || { shrink: true } || randomtext
                         else if (inputProp.value !== initializer.expression.getText()) {
                             const newAst = createAst(inputProp.value)
                             const statement = newAst?.statements[0] as any
                             let value
-                            if (statement.expression.kind == SyntaxKind.Identifier) {
-                              value = factory.createStringLiteral(inputProp.value)
-                            }
-                            else if (statement.expression.kind == SyntaxKind.CallExpression || statement.expression.kind == SyntaxKind.PropertyAccessExpression) {
-                              value = factory.createJsxExpression(
+                            if (statement && statement.expression && statement.expression.arguments) {
+                              if (statement.expression.kind == SyntaxKind.CallExpression || statement.expression.kind == SyntaxKind.PropertyAccessExpression) {
+                                const properties = statement.expression.arguments[0].properties[0]
+                                statement.expression.arguments[0] = this.createObjectLiteral(properties)
+                                value = factory.createJsxExpression(
+                                    undefined,
+                                    statement.expression
+                                )
+                              } else if (statement.kind == SyntaxKind.Block) {
+                                value = factory.createJsxExpression(
                                   undefined,
-                                  statement.expression
-                              )
-                            } else if (statement.kind == SyntaxKind.Block) {
-                              value = factory.createJsxExpression(
-                                undefined,
-                                factory.createIdentifier(statement.getText())
-                              )
+                                  factory.createIdentifier(statement.getText())
+                                )
+                              }
                             }
                             
                             if (!value) return
@@ -171,12 +172,18 @@ export default class MuiDetailGenerator implements DetailGenerator {
                       else if (initializer.kind == SyntaxKind.StringLiteral && inputProp.value !== initializer.getText()) {
                         const newAst = createAst(inputProp.value)
                         const statement = newAst?.statements[0] as any
+                        let value
                         
-                        const value = factory.createJsxExpression(
-                          undefined,
-                          statement.expression
-                        )
-                        
+                        if (statement && statement.expression.arguments) {
+                          statement.expression.arguments[0] = this.createObjectLiteral(statement.expression.arguments[0].properties[0])
+
+                          value = factory.createJsxExpression(
+                            undefined,
+                            statement.expression  
+                          )                            
+                        }
+
+                        if (!value) return
                         newProp = factory.updateJsxAttribute(prop, prop.name, value)
                         astChanged = true
                       }
@@ -203,6 +210,16 @@ export default class MuiDetailGenerator implements DetailGenerator {
     }
 
     return result;
+  }
+
+  createObjectLiteral(property : any) {
+    return factory.createObjectLiteralExpression(
+      [factory.createPropertyAssignment(
+        factory.createIdentifier(property.name.escapedText),
+        factory.createStringLiteral(property.initializer.text, true)
+      )],
+      false
+    )
   }
 
   async insertFormWidget(position: SourceLineCol, property: Property, index?:number): Promise<string> {
