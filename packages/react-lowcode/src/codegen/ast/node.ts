@@ -21,20 +21,3 @@ export const isOpeningOrSelfClosingElementWithName = (node: ts.Node, name: strin
         }
     }
 }
-
-export const isUseQueryHookImport = (node: ts.Node, name: string): boolean | undefined => {
-  if(ts.isImportDeclaration(node)) {
-    if(node.pos >= 0) {
-      if(node.getFullText().indexOf(name) > 0) return true
-    }
-  }
-  return false
-}
-
-export const isUseQueryHook = (node: ts.Node, name: string): boolean | undefined => {
-  if(ts.isCallExpression(node)) {
-    if(node.expression.getFullText().indexOf(name) > 0) {
-      return true
-    }
-  }
-}

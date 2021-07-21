@@ -18,7 +18,7 @@ export function generatePages(introspection: IntrospectionQuery, io: CodeRW & Co
 
     const entityType = getEntity(introspection.types, name)
 
-    const [listTypeQueryName, detailTypeQueryName] = getQueryNames(introspection, name)
+    const entityNameGetters = getQueryNames(introspection, name)
 
     if (entityType && entityType.fields) {
       const entityName = entityType.name
@@ -32,8 +32,7 @@ export function generatePages(introspection: IntrospectionQuery, io: CodeRW & Co
       })
 
       const entity = {
-        getListTypeQueryName: () => listTypeQueryName,
-        getDetailTypeQueryName: () => detailTypeQueryName,
+        ...entityNameGetters,
         getName: () => entityName,
         properties: props
       }

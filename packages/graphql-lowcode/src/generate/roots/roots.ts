@@ -40,17 +40,19 @@ export function getRoots(types: TypesObject[], rootNames: { type: string, name?:
   return [queryRoot, mutationRoot, subscriptionRoot]
 }
 
-export function getQueryNames(introspection: IntrospectionQuery, entityName: string): (string | undefined)[] {
+export function getQueryNames(introspection: IntrospectionQuery, entityName: string) {
   const rootNames = getRootNames(introspection)
   const [queryRoot, mutationRoot, subscriptionRoot] = getRoots(introspection.types, rootNames)
 
   const listTypeQuery = queryRoot?.fields.find(field => isListType(field)) ?? queryRoot?.fields[0] //TODO zmenit
-  const detailTypeQuery = queryRoot?.fields.find(field => isObjectType(field) ?? queryRoot?.fields[0])
+  const detailTypeQuery = queryRoot?.fields.find(field => isObjectType(field, entityName) ?? queryRoot?.fields[0])
 
   //TODO update, insert etc...
 
-
-  return [listTypeQuery?.name, detailTypeQuery?.name]
+  return {
+    getListTypeQueryName: () => listTypeQuery?.name,
+    getDetailTypeQueryName: () => detailTypeQuery?.name
+  }
 }
 
 function isListType(typeField: Field) {
@@ -64,13 +66,13 @@ function isListType(typeField: Field) {
   return false
 }
 
-function isObjectType(typeField: Field) {
+function isObjectType(typeField: Field, entityName: string) {
   let actualType = typeField.type
 
-  while(actualType) {
-    if(actualType.kind === 'OBJECT') return true
-    if(actualType.kind === 'NON-NULL') continue
-    return false
+  while (actualType) {
+    if (actualType.kind === 'OBJECT' && actualType.name === entityName) return true
+    if (actualType.kind !== 'NON_NULL') return false
+    actualType = actualType.ofType
   }
 
   return false
