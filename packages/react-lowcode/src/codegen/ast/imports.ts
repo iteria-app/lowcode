@@ -93,17 +93,3 @@ export function uniqueImports(imports:ts.ImportDeclaration[]): ts.ImportDeclarat
 
     return uniqueImportDeclarations;
 }
-
-export const isUseQueryHookImport = (node: ts.Node, name: string): boolean | undefined => {
-  if(ts.isImportDeclaration(node) && node.pos >= 0) {
-    return node.getChildren().some(declarationChild =>
-      ts.isImportClause(declarationChild) && declarationChild.getChildren().some(clauseChild => 
-        ts.isNamedImports(clauseChild) && clauseChild.elements.some(element =>
-          element.name.escapedText === name 
-        )
-      )
-    )
-  }
-
-  return false
-}

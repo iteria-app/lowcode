@@ -2,7 +2,7 @@ import ts, { factory } from "typescript";
 import { transformer } from "../../../../ast";
 import { printSourceCode } from "../../../ast/ast";
 import { createUseQueryExpression } from "../../../ast/hooks";
-import { createImportDeclaration, isUseQueryHookImport } from "../../../ast/imports";
+import { createImportDeclaration } from "../../../ast/imports";
 import { isOpeningOrSelfClosingElementWithName, isImportDeclarationWithName } from "../../../ast/node";
 import { isUseQueryHook } from '../../../ast/hooks';
 import { createAst } from "../../code-generation/createSourceFile";
@@ -32,7 +32,7 @@ export default class TemplateResolver {
                 const hookName = `use${generatedQueryName.charAt(0).toUpperCase() + generatedQueryName.slice(1)}Query`
 
                 const transformUseQueryImport = (node: ts.Node, importName: string, queryName: string) => {
-                  if(isUseQueryHookImport(node, importName)) {
+                  if(isImportDeclarationWithName(node, importName)) {
                     return createImportDeclaration(queryName, './generated/graphql');
                   }
                 }
