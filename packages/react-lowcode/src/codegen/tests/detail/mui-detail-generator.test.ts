@@ -6,21 +6,21 @@ import { graphqlGenTs1 } from "../typeAlias.example";
 
 describe(".create Input Element from template", () => {
     test("Input.Text", () => {
-        const generator = new MuiDetailGenerator({});
-        const property = getEntityProperty(graphqlGenTs1, 'test2')[0];
+        // const generator = new MuiDetailGenerator({});
+        // const property = getEntityProperty(graphqlGenTs1, 'test2')[0];
 
-        const result = generator.createInputElementFromTemplate(property);
+        // const result = generator.createInputElementFromTemplate(property);
 
-        if (result) {
-            const inputElementAst = createAst(result);
+        // if (result) {
+        //     const inputElementAst = createAst(result);
 
-            if (inputElementAst) {
-                const inputElement = findByCondition<ts.JsxChild>(inputElementAst, (node: ts.Node) => {
-                    return ts.isJsxText(node) || ts.isJsxExpression(node) || ts.isJsxElement(node) || ts.isJsxSelfClosingElement(node) || ts.isJsxFragment(node);
-                });
-            }
-        }
+        //     if (inputElementAst) {
+        //         const inputElement = findByCondition<ts.JsxChild>(inputElementAst, (node: ts.Node) => {
+        //             return ts.isJsxText(node) || ts.isJsxExpression(node) || ts.isJsxElement(node) || ts.isJsxSelfClosingElement(node) || ts.isJsxFragment(node);
+        //         });
+        //     }
+        // }
 
-        console.log(result);
+        // console.log(result);
     });
 });
