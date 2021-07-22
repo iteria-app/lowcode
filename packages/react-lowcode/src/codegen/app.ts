@@ -5,7 +5,7 @@ import ts, { factory } from "typescript"
 import { Property } from './generation/entity/index'
 import { CodegenOptions } from './interfaces'
 import TemplateResolver from './generation/generators/template/template-resolver'
-import { IntrospectionQuery, getNestedOfType, generateGraphqlFile, getEntity } from 'graphql-lowcode/src/generate'
+import { IntrospectionQuery, getNestedOfType, generateGraphqlFile, getEntity, getQueryNames } from '@iteria-app/graphql-lowcode/src/generate'
 
 // generates CRUD React pages (master-detail, eg. orders list, order detail form) from typescript
 export function generatePages(introspection: IntrospectionQuery, io: CodeRW & CodeDir, options?: CodegenOptions) {
@@ -54,7 +54,7 @@ export function generatePages(introspection: IntrospectionQuery, io: CodeRW & Co
       io.writeFile(filePath, pageSourceCode)
 
       //generate list wrapper
-      const templateResolver = new TemplateResolver(entity);
+      const templateResolver = new TemplateResolver(entity, introspection);
       const listWrapper = templateResolver.generateListPage(options.pageListTemplate);
 
       if (listWrapper) {
