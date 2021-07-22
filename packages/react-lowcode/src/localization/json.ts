@@ -1,7 +1,8 @@
 import { createAst } from "../ast";
 import { SourceFile, ScriptTarget, ScriptKind } from "typescript"
 import { Message } from ".";
-
+import { CodeDir, CodeRW } from "../io"
+import { stripExtension } from "../workspace"
 
 export function parseLocaleJSON(localeSourceCode: string, languageLocale = "en") {
     const localeAst = createAst(localeSourceCode, ScriptTarget.ESNext, ScriptKind.JSON)
@@ -40,3 +41,26 @@ export function patchLocaleJSON(localeFile: string, changedMessages: Message[], 
 
   return localeFile
 }
+
+
+export async function getAllTranslations(path: string, io: CodeDir & CodeRW) : Promise<Object> {
+  if (path) {
+    const allTranslations : any = {} 
+    const directory = await io.readDirectory(path)
+    if (directory){
+      const langs = Object.values(directory)
+      for (let index in langs) {
+        const item = langs[index] as any
+        const fileName = item[0]
+        const lang = stripExtension(fileName)
+        const translation = await io.readFile(path + "/" + fileName)
+        if (translation) {
+          allTranslations[lang] = JSON.parse(translation)
+        }
+      }
+      return allTranslations
+    }
+  } 
+  return {}
+}
+ 
