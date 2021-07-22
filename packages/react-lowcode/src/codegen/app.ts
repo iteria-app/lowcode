@@ -18,8 +18,6 @@ export function generatePages(introspection: IntrospectionQuery, io: CodeRW & Co
 
     const entityType = getEntity(introspection.types, name)
 
-    const entityNameGetters = getQueryNames(introspection, name)
-
     if (entityType && entityType.fields) {
       const entityName = entityType.name
 
@@ -32,7 +30,6 @@ export function generatePages(introspection: IntrospectionQuery, io: CodeRW & Co
       })
 
       const entity = {
-        ...entityNameGetters,
         getName: () => entityName,
         properties: props
       }
@@ -57,7 +54,7 @@ export function generatePages(introspection: IntrospectionQuery, io: CodeRW & Co
       io.writeFile(filePath, pageSourceCode)
 
       //generate list wrapper
-      const templateResolver = new TemplateResolver(entity);
+      const templateResolver = new TemplateResolver(introspection, entity);
       const listWrapper = templateResolver.generateListPage(options.pageListTemplate);
 
       if (listWrapper) {

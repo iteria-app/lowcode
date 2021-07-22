@@ -1,6 +1,4 @@
 export interface Entity {
-  getListTypeQueryName(): string | undefined,
-  getDetailTypeQueryName(): string | undefined,
   getName(): string
   readonly properties: Property[]
 }

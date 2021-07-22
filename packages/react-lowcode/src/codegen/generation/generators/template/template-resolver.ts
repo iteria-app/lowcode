@@ -8,12 +8,15 @@ import { isUseQueryHook } from '../../../ast/hooks';
 import { createAst } from "../../code-generation/createSourceFile";
 import { Entity } from "../../entity";
 import { EntityHelper } from "../../entity/helper";
+import { IntrospectionQuery, getQueryNames, queryHookName } from '@iteria-app/graphql-lowcode/src/generate'
 
 export default class TemplateResolver {
     private _entity?: Entity
+    private _introspection: IntrospectionQuery
 
-    constructor(entity?: Entity) {
+    constructor(introspection: IntrospectionQuery, entity?: Entity) {
         this._entity = entity;
+        this._introspection = introspection;
     }
 
     generateListPage(template: string): string | undefined {
@@ -28,8 +31,8 @@ export default class TemplateResolver {
                 const inputParameterIdentifier = EntityHelper.getInputParameterIdentifier(this._entity);
 
                 //find 'useGeneratedQuery' import and replace it with use'queryName's
-                const generatedQueryName = this._entity.getListTypeQueryName() ?? ''
-                const hookName = `use${generatedQueryName.charAt(0).toUpperCase() + generatedQueryName.slice(1)}Query`
+                const { listQueryName } = getQueryNames(this._introspection, this._entity.getName())
+                const hookName = queryHookName(listQueryName ?? '')
 
                 const transformUseQueryImport = (node: ts.Node, importName: string, queryName: string) => {
                   if(isImportDeclarationWithName(node, importName)) {

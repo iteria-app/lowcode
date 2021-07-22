@@ -1,7 +1,5 @@
 import { IntrospectionQuery, TypesObject, Root } from '../types'
-import { getNestedOfType } from '../generateGraphqlQueries'
-import { getEntity } from '../generateGraphqlFiles'
-import { Field } from '../types'
+import { Field, Type } from '../types'
 
 /**
  * @param introspection Introspection JSON `data`
@@ -50,29 +48,23 @@ export function getQueryNames(introspection: IntrospectionQuery, entityName: str
   //TODO update, insert etc...
 
   return {
-    getListTypeQueryName: () => listTypeQuery?.name,
-    getDetailTypeQueryName: () => detailTypeQuery?.name
+    listQueryName: listTypeQuery?.name,
+    detailQueryName: detailTypeQuery?.name
   }
 }
 
-function isListType(typeField: Field) {
-  let actualType = typeField.type
-
-  while (actualType) {
-    if (actualType.kind === 'LIST') return true
-    actualType = actualType.ofType
+function isListType(typeField: Field | Type) {
+  for(typeField = typeField.type; typeField.ofType; typeField = typeField.ofType) {
+    if(typeField.kind === 'LIST') return true
   }
 
   return false
 }
 
-function isObjectType(typeField: Field, entityName: string) {
-  let actualType = typeField.type
-
-  while (actualType) {
-    if (actualType.kind === 'OBJECT' && actualType.name === entityName) return true
-    if (actualType.kind !== 'NON_NULL') return false
-    actualType = actualType.ofType
+function isObjectType(typeField: Field | Type, entityName: string) {
+  for(typeField = typeField.type; typeField.ofType; typeField = typeField.ofType) {
+    if (typeField.kind === 'OBJECT' && typeField.name === entityName) return true
+    if (typeField.kind !== 'NON_NULL') return false
   }
 
   return false
