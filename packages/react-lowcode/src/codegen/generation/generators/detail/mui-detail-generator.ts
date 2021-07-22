@@ -30,7 +30,7 @@ import {
 } from "../../../ast/ast";
 import { findWidgetParentNode, getWidgetProperties } from "../../../ast/widgetDeclaration";
 import { WidgetProperties } from "../../../interfaces";
-import { createStringJsxAttribute, isJsxAttributeWithName } from "../../../ast/node";
+import { clearNodePosition, createStringJsxAttribute, isJsxAttributeWithName } from "../../../ast/node";
 
 export default class MuiDetailGenerator implements DetailGenerator {
   private _imports: ts.ImportDeclaration[] = [];
@@ -272,53 +272,59 @@ export default class MuiDetailGenerator implements DetailGenerator {
     index?: number
   ): ts.SourceFile {
 
-    // const inputElementCode = this.createInputElementFromTemplate(property);
-    // if(inputElementCode) {
-    //   const inputElementAst = createAst(inputElementCode);
-    //   if(inputElementAst) {
-    //     const inputElement = findByCondition<ts.JsxChild>(inputElementAst, (node: ts.Node) => {
-    //       return  ts.isJsxText(node) || ts.isJsxExpression(node) || ts.isJsxElement(node) || ts.isJsxSelfClosingElement(node) || ts.isJsxFragment(node);
-    //     });
+    const inputElementCode = this.createInputElementFromTemplate(property);
+
+    if(inputElementCode) {
+      const inputElementAst = createAst(inputElementCode);
+
+      if(inputElementAst) {
+        const inputElement = findByCondition<ts.JsxChild>(inputElementAst, (node: ts.Node) => {
+          return  ts.isJsxText(node) || ts.isJsxExpression(node) || ts.isJsxElement(node) || ts.isJsxSelfClosingElement(node) || ts.isJsxFragment(node);
+        });
         
-    //     if(inputElement) {
-    //       const gridItemElement = this.createGridItemElement([inputElement]);
+        if(inputElement) {          
+          clearNodePosition(inputElement);
+          
+          const gridItemElement = this.createGridItemElement([inputElement]);
 
-    //       let newElements: ts.JsxElement[];
-    //       if(index && index < gridElements.length + 1){
-    //         newElements = [...gridElements.slice(0, index - 1), gridItemElement, ...gridElements.slice(index - 1)]
-    //       }else{
-    //         newElements = [...gridElements, gridItemElement]
-    //       }
+          let newElements: ts.JsxElement[];
+          if(index && index < gridElements.length + 1){
+            newElements = [...gridElements.slice(0, index - 1), gridItemElement, ...gridElements.slice(index - 1)]
+          }else{
+            newElements = [...gridElements, gridItemElement]
+          }
       
-    //       return replaceElementsToAST(
-    //         ast,
-    //         gridContainer.pos,
-    //         this.createGridContainer(newElements)
-    //       );
-    //     }
-    //   }
-    // }
-
-    // return ast;
-    let newField = this.createTextFieldElement(
-      property.getName(),
-      property.getType(),
-      InputType.text
-    );
-
-    let newElements: ts.JsxElement[];
-
-    if(index && index < gridElements.length + 1){
-      newElements = [...gridElements.slice(0, index - 1), newField, ...gridElements.slice(index - 1)]
-    }else{
-      newElements = [...gridElements, newField]
+          return replaceElementsToAST(
+            ast,
+            gridContainer.pos,
+            this.createGridContainer(newElements)
+          );
+        }
+      }
     }
 
-    return replaceElementsToAST(
-      ast,
-      gridContainer.pos,
-      this.createGridContainer(newElements)
-    );
+    return ast;
+
+    // Old way, TODO: remove!!
+    // let newField = this.createTextFieldElement(
+    //   property.getName(),
+    //   property.getType(),
+    //   InputType.text
+    // );
+
+    // let newElements: ts.JsxElement[];
+
+    // if(index && index < gridElements.length + 1){
+    //   newElements = [...gridElements.slice(0, index - 1), newField, ...gridElements.slice(index - 1)]
+    // }else{
+    //   newElements = [...gridElements, newField]
+    // }
+
+    // return replaceElementsToAST(
+    //   ast,
+    //   gridContainer.pos,
+    //   this.createGridContainer(newElements)
+    // );
   }
 
   private addNewField(
@@ -1098,15 +1104,12 @@ export default class MuiDetailGenerator implements DetailGenerator {
     }
   }
 
-
-
   createInputElementFromTemplate = (property: Property, template: string = ''): string | undefined => {
     const propName = property.getName();
-    const propType: PropertyType = getPropertyType(property);
+    const propType: PropertyType = PropertyType.string; // getPropertyType(property);
 
     switch (propType) {
-      case PropertyType.string:
-      case PropertyType.numeric: {
+      case PropertyType.string: {
         template = `
           <TextField 
               id={id}
@@ -1128,7 +1131,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
         const transformIdAttribute = (node: ts.Node) => {
           const attributeName = 'id';
           if (isJsxAttributeWithName(node, attributeName)) {
-            return createStringJsxAttribute(attributeName, propName);
+            return createStringJsxAttribute(attributeName, propName)
           }
         };
   
