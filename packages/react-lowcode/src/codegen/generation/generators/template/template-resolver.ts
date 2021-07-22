@@ -12,9 +12,9 @@ import { IntrospectionQuery, getQueryNames, queryHookName } from '@iteria-app/gr
 
 export default class TemplateResolver {
     private _entity?: Entity
-    private _introspection: IntrospectionQuery
+    private _introspection?: IntrospectionQuery
 
-    constructor(introspection: IntrospectionQuery, entity?: Entity) {
+    constructor(entity?: Entity, introspection?: IntrospectionQuery) {
         this._entity = entity;
         this._introspection = introspection;
     }
@@ -31,7 +31,7 @@ export default class TemplateResolver {
                 const inputParameterIdentifier = EntityHelper.getInputParameterIdentifier(this._entity);
 
                 //find 'useGeneratedQuery' import and replace it with use'queryName's
-                const { listQueryName } = getQueryNames(this._introspection, this._entity.getName())
+                const { listQueryName } = this._introspection ? getQueryNames(this._introspection, this._entity.getName()) : { listQueryName : undefined }
                 const hookName = queryHookName(listQueryName ?? '')
 
                 const transformUseQueryImport = (node: ts.Node, importName: string, queryName: string) => {

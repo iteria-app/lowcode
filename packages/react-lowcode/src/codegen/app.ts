@@ -54,7 +54,7 @@ export function generatePages(introspection: IntrospectionQuery, io: CodeRW & Co
       io.writeFile(filePath, pageSourceCode)
 
       //generate list wrapper
-      const templateResolver = new TemplateResolver(introspection, entity);
+      const templateResolver = new TemplateResolver(entity, introspection);
       const listWrapper = templateResolver.generateListPage(options.pageListTemplate);
 
       if (listWrapper) {
