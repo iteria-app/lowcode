@@ -1,7 +1,6 @@
 {
   "name": "root",
   "private": true,
-  "workspaces": ["packages/*"],
   "devDependencies": {
     "@types/chrome": "^0.0.128",
     "@types/jest": "^26.0.21"

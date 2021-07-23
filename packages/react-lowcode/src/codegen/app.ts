@@ -6,9 +6,10 @@ import { Property } from './generation/entity/index'
 import { CodegenOptions } from './interfaces'
 import TemplateResolver from './generation/generators/template/template-resolver'
 import { IntrospectionQuery, generateGraphqlFile, getEntity, getNestedOfType } from '@iteria-app/graphql-lowcode/cjs/generate'
-import { getListPageComponentName, getPluralizedEntityName } from './generation/entity/helper'
+import { getListComponentName, getListPageComponentName, getPluralizedEntityName } from './generation/entity/helper'
 import { generateMenuItem, generateRoute } from './facade/facadeApi'
 import { Entity } from './generation/entity'
+import path from 'path'
 
 // generates CRUD React pages (master-detail, eg. orders list, order detail form) from typescript
 export function generatePages(introspection: IntrospectionQuery, 
@@ -45,10 +46,11 @@ export function generatePages(introspection: IntrospectionQuery,
         }
 
             const entityListComponentPageName = getListPageComponentName(entity)
-            const listComponentFilePath = `${componentStorageRoot}/${typeName}.tsx`
+            const listComponentName = getListComponentName(entity)
+            const listComponentFilePath = `${componentStorageRoot}/${listComponentName}.tsx`
             const listPageComponentFilePath = `${componentStorageRoot}/${entityListComponentPageName}.tsx`
             const moduleName = getPluralizedEntityName(entity.getName())
-            const moduleRouteUri = `app/${moduleName}`
+            const moduleRouteUri = `codegen-${moduleName}`
 
             //generate component for list
             generateListComponent(io, 
@@ -74,7 +76,7 @@ export function generatePages(introspection: IntrospectionQuery,
             addNewMenuItem(io,
                            menuDefinitionFilePath, 
                            moduleName, 
-                           moduleRouteUri)
+                           '/app/' + moduleRouteUri)
         }
     })
 }
