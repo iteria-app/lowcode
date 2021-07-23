@@ -8,6 +8,7 @@ export interface Field {
   name: string,
   type: Type,
   kind?: string,
+  args: Argument[],
   [key: string]: any
 }
 

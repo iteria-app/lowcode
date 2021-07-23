@@ -340,6 +340,7 @@ export const simpleOptionalArgumentInput = {
       name: 'entity1',
       fields: [
         {
+          args: [],
           name: 'id',
           type: {
             name: 'uuid',
@@ -523,6 +524,7 @@ export const deleteByIdInput = {
       name: 'entity',
       fields: [
         {
+          args: [],
           name: 'id',
           type: {
             name: 'uuid',
@@ -531,6 +533,7 @@ export const deleteByIdInput = {
           }
         },
         {
+          args: [],
           name: 'name',
           type: {
             name: 'string',
@@ -591,6 +594,7 @@ export const deleteByFieldsInput = {
       name: 'entity',
       fields: [
         {
+          args: [],
           name: 'affected_rows',
           type: {
             name: 'Int',
@@ -668,6 +672,7 @@ export const insertMutationsInput = {
       name: 'insert_response',
       fields: [
         {
+          args: [],
           name: 'affected_rows',
           type: {
             kind: 'SCALAR',
@@ -771,6 +776,7 @@ export const updateMutationsInput = {
       name: 'update_response',
       fields: [
         {
+          args: [],
           name: 'affected_rows',
           type: {
             kind: 'SCALAR',
@@ -862,6 +868,7 @@ export const deleteMutationsInput = {
       name: 'delete_response',
       fields: [
         {
+          args: [],
           name: 'affected_rows',
           type: {
             kind: 'SCALAR',
@@ -931,6 +938,7 @@ export const mutationWithReturningInput = {
       name: 'delete_response',
       fields: [
         {
+          args: [],
           name: 'affected_rows',
           type: {
             kind: 'SCALAR',
@@ -939,6 +947,7 @@ export const mutationWithReturningInput = {
           }
         },
         {
+          args: [],
           name: 'returning',
           type: {
             kind: "NON_NULL",
@@ -964,6 +973,7 @@ export const mutationWithReturningInput = {
       name: 'deleted_object',
       fields: [
         {
+          args: [],
           name: 'id',
           type: {
             name: 'uuid',
@@ -972,6 +982,7 @@ export const mutationWithReturningInput = {
           }
         },
         {
+          args: [],
           name: 'name',
           type: {
             name: 'string',
