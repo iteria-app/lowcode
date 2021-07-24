@@ -68,10 +68,11 @@ export var GeneratedCustomerDetail: React.FC<ICustomer> = customer => {
                 </Grid>
                 <Grid item md={6} xs={12}>
                   <TextField
-                    fullWidth
+                    fullWidth={false}
                     id="phone"
                     type="input"
                     label="phone"
+                    rows={10}
                     value={intl.formatMessage({ id: formik.values.phone })}
                     onChange={formik.handleChange}
                   />

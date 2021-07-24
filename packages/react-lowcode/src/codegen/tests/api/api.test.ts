@@ -180,7 +180,7 @@ describe(".api tests", () => {
             const properties = [
                 {
                     name: "fullWidth",
-                    value: "false",
+                    value: "true",
                     type: WidgetPropertyValue.EXPRESSION
                 },
                 {
@@ -196,6 +196,11 @@ describe(".api tests", () => {
                 {
                     name: "label",
                     value: "intl.formatMessage({ id: 'formik.values.message' })",
+                    type: WidgetPropertyValue.EXPRESSION
+                },
+                {
+                    name: "rows",
+                    value: "20",
                     type: WidgetPropertyValue.EXPRESSION
                 },
                 {
@@ -212,6 +217,11 @@ describe(".api tests", () => {
     
             const expectedProperties = [
                 {
+                    name: "fullWidth",
+                    value: "true",
+                    type: WidgetPropertyValue.EXPRESSION
+                },
+                {
                     name: "id",
                     value: "phoneNumber",
                     type: WidgetPropertyValue.STRING_LITERAL
@@ -224,6 +234,11 @@ describe(".api tests", () => {
                 {
                     name: "label",
                     value: "intl.formatMessage({ id: 'formik.values.message' })",
+                    type: WidgetPropertyValue.EXPRESSION
+                },
+                {
+                    name: "rows",
+                    value: "20",
                     type: WidgetPropertyValue.EXPRESSION
                 },
                 {
@@ -242,7 +257,7 @@ describe(".api tests", () => {
             const source: SourceLineCol = { lineNumber: 70, columnNumber: 19, fileName: filePath };
             const result = await setFormWidgetProperties(new CodegenRw(), source, { properties: properties });
             expect(result).not.toBe(undefined);
-    
+
             if(result) {
                 const resultAst = createAst(result);
                 var updatedAtNode = findByCondition<ts.Node>(resultAst, (node: ts.Node) => {
