@@ -443,7 +443,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
   private createInputsForEntity(): ts.JsxChild[] {
     let inputs: ts.JsxChild[] = [];
 
-    getProperties(this._entity!).forEach((property) => {
+    getProperties(this._entity).forEach((property) => {
       let propertyInput = this.tryCreateInputForProperty(property);
 
       if (propertyInput) {
@@ -501,7 +501,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
         ),
         factory.createJsxAttribute(
           factory.createIdentifier("id"),
-          factory.createStringLiteral(name)
+          factory.createStringLiteral(this._dataPropertyName + "." + name)
         ),
         factory.createJsxAttribute(
           factory.createIdentifier("type"),
@@ -626,7 +626,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
           factory.createJsxAttributes([
             factory.createJsxAttribute(
               factory.createIdentifier("id"),
-              factory.createStringLiteral(name)
+              factory.createStringLiteral(this._dataPropertyName + "." + name)
             ),
             factory.createJsxAttribute(
               factory.createIdentifier("src"),
@@ -684,7 +684,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
         ),
         factory.createJsxAttribute(
           factory.createIdentifier("id"),
-          factory.createStringLiteral(name)
+          factory.createStringLiteral(this._dataPropertyName + "." + name)
         ),
         factory.createJsxAttribute(
           factory.createIdentifier("type"),
@@ -828,13 +828,13 @@ export default class MuiDetailGenerator implements DetailGenerator {
             factory.createObjectLiteralExpression(
               [
                 factory.createPropertyAssignment(
-                  factory.createIdentifier("id"),
+                  factory.createIdentifier("'" + "id"),
                   factory.createPropertyAccessExpression(
                     factory.createPropertyAccessExpression(
                       factory.createIdentifier("formik"),
                       factory.createIdentifier("values")
                     ),
-                    factory.createIdentifier(name)
+                    factory.createIdentifier(name + "'")
                   )
                 ),
               ],
@@ -894,7 +894,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
   private creteInitialValuesForEntity() {
     let inputs: ts.PropertyAssignment[] = [];
 
-    getProperties(this._entity!).forEach((property) => {
+    getProperties(this._entity).forEach((property) => {
       let propertyInput = this.tryCreateInitialValueForProperty(property);
 
       if (propertyInput) {
@@ -1029,7 +1029,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
             ),
             [
               factory.createTypeReferenceNode(
-                factory.createIdentifier(this._entity.getName()),
+                factory.createIdentifier(this?._entity?.getName()!),
                 undefined
               ),
             ]

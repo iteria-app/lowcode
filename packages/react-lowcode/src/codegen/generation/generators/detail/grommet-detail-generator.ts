@@ -130,7 +130,7 @@ export default class GrommetDetailGenerator
       factory.createJsxAttributes([
         factory.createJsxAttribute(
           factory.createIdentifier("id"),
-          factory.createStringLiteral(name)
+          factory.createStringLiteral(this._dataPropertyName + "." + name)
         ),
         factory.createJsxAttribute(
           factory.createIdentifier("type"),
@@ -152,13 +152,13 @@ export default class GrommetDetailGenerator
               undefined,
               [factory.createObjectLiteralExpression(
                 [factory.createPropertyAssignment(
-                  factory.createIdentifier("id"),
+                  factory.createIdentifier("'" + "id"),
                   factory.createPropertyAccessExpression(
                     factory.createPropertyAccessExpression(
                       factory.createIdentifier("formik"),
                       factory.createIdentifier("values")
                     ),
-                    factory.createIdentifier(text)
+                    factory.createIdentifier(text + "'")
                   )
                 )],
                 false
