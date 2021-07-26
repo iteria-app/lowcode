@@ -34,15 +34,12 @@ export class BasicTableGenerator implements TableGenerator
     async insertColumn(position: SourceLineCol,
         property: Property,
         columnIndex?: number): Promise<string> {
-
         let alteredSource = ''
         if (this._widgetContext) {
             let sourceCode = await this._widgetContext.getSourceCodeString(position);
             let ast = createAst(sourceCode);
-
             if (ast) {
                 let widgetParentNode = findWidgetParentNode(sourceCode, position);
-
                 if (widgetParentNode) {
                     const tableDefinition = this.getTableDefinition();
 
@@ -57,7 +54,8 @@ export class BasicTableGenerator implements TableGenerator
 
                             if (tableHeadRow && tableBodyRow) {
                                 this._context.formatter = this.findUsedFormatter(ast);
-
+                                console.log(this._context.uiFramework)
+                                console.log(this._context.formatter)
                                 let headColumns: ts.JsxElement[] = [];
                                 let bodyColumns: ts.JsxElement[] = [];
 
@@ -67,7 +65,8 @@ export class BasicTableGenerator implements TableGenerator
                                 if (!this.tableBodyColumnExists(bodyColumns, property)) {
                                     const addHeaderColumn = this.propertyHead(property, this._entity!);
                                     const addBodyColumn = this.propertyCell(property, this._entity!);
-
+                                    console.log(addHeaderColumn)
+                                    
                                     if (columnIndex && columnIndex > 0 && columnIndex < headColumns.length + 1) {
                                         headColumns = [...headColumns.slice(0, columnIndex - 1), ...[addHeaderColumn], ...headColumns.slice(columnIndex - 1)];
                                         bodyColumns = [...bodyColumns.slice(0, columnIndex - 1), ...[addBodyColumn], ...bodyColumns.slice(columnIndex - 1)];
@@ -76,6 +75,11 @@ export class BasicTableGenerator implements TableGenerator
                                         bodyColumns.push(addBodyColumn);
                                     }
 
+                                    // console.log(headColumns[(columnIndex as number)].getFullText())
+                                    // console.log(bodyColumns[(columnIndex as number)].getFullText())
+                                    // headColumns.forEach(element => {
+                                    //     console.log(element)
+                                    // });
                                     const rowComponent = this._helper.prepareComponent(this.getTableDefinition().row, this._imports);
                                     const headerRow = createJsxElement(rowComponent.tagName, [], headColumns);
                                     const bodyRow = createJsxElement(rowComponent.tagName, [], bodyColumns);

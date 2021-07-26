@@ -37,6 +37,7 @@ export function findVariableDeclarations(
 ) {
   if (parentNode != undefined) {
     if (ts.isVariableDeclaration(parentNode)) {
+      console.log(parentNode)
       array.push(parentNode);
     }
 

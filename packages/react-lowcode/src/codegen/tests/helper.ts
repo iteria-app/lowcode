@@ -34,12 +34,12 @@ export function createAst(
     }
   }
 
-  export function getEntityProperty(typesSourceCode: string,  name: string, typeName = "Customer"): Property[] {
+  export function getEntityProperty(typesSourceCode: string,  name: string, typeName = "Utilization"): Property[] {
     const myClassFile = parseGraphqlTypes(typesSourceCode)
     const testEntity = sourceFileEntity(myClassFile, typeName)
-    
-    let property = testEntity?.properties.filter(((prop: { getName: () => string })=> { 
-      return prop.getName().toLowerCase() === name 
+
+    let property = testEntity?.properties.filter(((prop: { getName: () => string })=> {
+      return prop.getName().toLowerCase() === name.toLowerCase()
     }))
 
     return property ?? []

@@ -36,14 +36,14 @@ export default class GrommetDataTableGenerator implements TableGenerator
         if(this._widgetContext){
           let sourceCode = await this._widgetContext.getSourceCodeString(position)
           let ast = createAst(sourceCode)
-          console.log(sourceCode)
           if(ast){
             let widgetParentNode = findWidgetParentNode(sourceCode, position)
+            // console.log("WIDGETPARENT: ", widgetParentNode)
   
             if(widgetParentNode)
             {
               let columnsDeclarationNode = this.findColumnsDeclaration(widgetParentNode)
-              console.log(columnsDeclarationNode)
+              console.log("DECLARATIONNODE: ", columnsDeclarationNode)
               if(columnsDeclarationNode){
                 let columnDeclarationArray = columnsDeclarationNode.getChildAt(2) as ts.ArrayLiteralExpression
                 console.log("HERe>??:::::::::::>>>>>>>>>>>>>>>>>>>>>>>: ", columnDeclarationArray)
@@ -85,13 +85,13 @@ export default class GrommetDataTableGenerator implements TableGenerator
 
     private findColumnsDeclaration(widgetParent: ts.Node): ts.VariableDeclaration | undefined{
         let array: ts.VariableDeclaration[] = []
+        // console.log(widgetParent.getFullText())
         findVariableDeclarations(widgetParent, array)
-  
          if(array.length > 0){
            let columnDeclaration = array.filter((def: ts.VariableDeclaration) => {
              return def.getChildAt(0).getFullText().trim() === 'columns'
            });
-          
+          //  console.log("DECLARATION: ", columnDeclaration)
            if(columnDeclaration && columnDeclaration.length > 0){
              return columnDeclaration[0] as ts.VariableDeclaration
            }

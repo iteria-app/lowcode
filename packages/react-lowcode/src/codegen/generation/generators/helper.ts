@@ -23,6 +23,7 @@ export class GeneratorHelper {
     }
     
     getEntityName(entity: Entity): string{
+      console.log(entity)
         return camalizeString(entity.getName())
     }
 

@@ -4,6 +4,7 @@
   "description": "Automate React Apps.",
   "scripts": {
     "build": "npx tsc",
+    "watch": "npx tsc --watch",
     "tscd": "npx tsc --emitDeclarationOnly",
     "tsc": "npx tsc",
     "etsc": "etsc",

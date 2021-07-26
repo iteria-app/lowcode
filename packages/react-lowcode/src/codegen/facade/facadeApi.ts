@@ -113,7 +113,7 @@ export async function insertColumnToBasicTableMui(
 
   let generator = new BasicTableGenerator(
     generationContext,
-    options.entity,
+    undefined,
     widgetContext
   );
   
@@ -142,7 +142,6 @@ export async function insertColumnToBasicTableGrommet(
     options.entity,
     widgetContext
   );
-  
   return await generator.insertColumn(tablePosition, options.entityField, options.index);
 }
 

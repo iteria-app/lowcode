@@ -7,10 +7,9 @@ import {
     insertColumn, 
     deleteColumn as fDeleteColumn, 
     getColumnSourcePosition as fGetColumnSourcePosition,
-    insertColumnToDataTableGrommet,
     insertColumnToBasicTableGrommet
 } from './facade/facadeApi'
-import { Property } from "./generation/entity"
+import { Entity, Property } from "./generation/entity"
 
 export function isSelectedDataTable(sourceCode:string, tablePosition: SourceLineCol){
     return isDataTableWidget(sourceCode, tablePosition)
@@ -25,20 +24,24 @@ export async function addColumn(typesSourceCode: string,
     let generatedSource = undefined
 
     if(property){
+        console.log("inproperty")
         // generatedSource = await insertColumn(sourceCode, 
         // {entityField: property, index: options.index}, 
         // io)
-
-        generatedSource = await insertColumnToDataTableGrommet(
+        let ent : any = {};
+        ent.properties = property
+        ent.getName = property.getName
+        generatedSource = await insertColumnToBasicTableGrommet(
             sourceCode,
             {
                 entityField: property,
-                index: options.index
+                index: options.index,
+                entity: ent
             },
             io
         )
 
-        // console.log(generatedSource)
+
     }
 
     return generatedSource
