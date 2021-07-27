@@ -2,7 +2,7 @@ import { SourceLineCol } from "../ast"
 import { CodeRW } from "../io"
 import { isDataTableWidget } from "./ast/widgetDeclaration"
 import { ColumnSourcePositionOptions, ColumnSourcePositionResult, DeleteOptions, InsertOptions } from "./interfaces"
-import { getEntityProperty } from "./tests/helper"
+import { getEntityProperty, parseGraphqlTypes, sourceFileEntity } from "./tests/helper"
 import { 
     insertColumn, 
     deleteColumn as fDeleteColumn, 
@@ -18,30 +18,38 @@ export function isSelectedDataTable(sourceCode:string, tablePosition: SourceLine
 export async function addColumn(typesSourceCode: string, 
     io: CodeRW, 
     sourceCode:SourceLineCol, 
-    options: InsertOptions): Promise<string | undefined>{
+    options: InsertOptions, 
+    repo: string): Promise<string | undefined>{
         
     const property: Property = getEntityProperty(typesSourceCode, options.property, options.entityName)[0]
     let generatedSource = undefined
 
     if(property){
-        console.log("inproperty")
-        // generatedSource = await insertColumn(sourceCode, 
-        // {entityField: property, index: options.index}, 
-        // io)
-        let ent : any = {};
-        ent.properties = property
-        ent.getName = property.getName
-        generatedSource = await insertColumnToBasicTableGrommet(
-            sourceCode,
+        if (repo.indexOf("grommet") === -1) {
+            generatedSource = await insertColumn(
+            sourceCode, 
             {
-                entityField: property,
-                index: options.index,
-                entity: ent
-            },
-            io
-        )
-
-
+                entityField: property, index: options.index
+            }, 
+            io)
+        } else {
+            const myClassFile = parseGraphqlTypes(typesSourceCode)
+            const entity = sourceFileEntity(myClassFile, options.entityName)
+    
+            let ent : any = {};
+            ent.properties = [property]
+            ent.getName = entity?.getName
+    
+            generatedSource = await insertColumnToBasicTableGrommet(
+                sourceCode,
+                {
+                    entityField: property,
+                    index: options.index,
+                    entity: ent
+                },
+                io
+            )
+        }    
     }
 
     return generatedSource

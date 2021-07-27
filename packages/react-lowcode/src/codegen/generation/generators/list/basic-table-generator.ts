@@ -51,11 +51,10 @@ export class BasicTableGenerator implements TableGenerator
                         if (tableHead && tableBody) {
                             const tableHeadRow = this.findElementByName(tableHead, tableDefinition.row.tagName.text);
                             const tableBodyRow = this.findElementByName(tableBody, tableDefinition.row.tagName.text);
-
+                            // to be able insert into iteration with right iterator
+                            const prefixIterator = (tableBodyRow?.parent as any)?.parameters[0].getText()
                             if (tableHeadRow && tableBodyRow) {
                                 this._context.formatter = this.findUsedFormatter(ast);
-                                console.log(this._context.uiFramework)
-                                console.log(this._context.formatter)
                                 let headColumns: ts.JsxElement[] = [];
                                 let bodyColumns: ts.JsxElement[] = [];
 
@@ -64,22 +63,18 @@ export class BasicTableGenerator implements TableGenerator
 
                                 if (!this.tableBodyColumnExists(bodyColumns, property)) {
                                     const addHeaderColumn = this.propertyHead(property, this._entity!);
-                                    const addBodyColumn = this.propertyCell(property, this._entity!);
-                                    console.log(addHeaderColumn)
-                                    
+                                    const addBodyColumn = this.propertyCell(property, this._entity!, prefixIterator);                                    
                                     if (columnIndex && columnIndex > 0 && columnIndex < headColumns.length + 1) {
-                                        headColumns = [...headColumns.slice(0, columnIndex - 1), ...[addHeaderColumn], ...headColumns.slice(columnIndex - 1)];
-                                        bodyColumns = [...bodyColumns.slice(0, columnIndex - 1), ...[addBodyColumn], ...bodyColumns.slice(columnIndex - 1)];
+                                        headColumns = [...headColumns.slice(0, columnIndex), ...[addHeaderColumn], ...headColumns.slice(columnIndex)];
+                                        bodyColumns = [...bodyColumns.slice(0, columnIndex), ...[addBodyColumn], ...bodyColumns.slice(columnIndex)];
+                                    } else if (columnIndex !== undefined && columnIndex == 0) {
+                                        headColumns = [...[addHeaderColumn], ...headColumns]
+                                        bodyColumns = [...[addBodyColumn], ...bodyColumns]
                                     } else {
                                         headColumns.push(addHeaderColumn);
                                         bodyColumns.push(addBodyColumn);
                                     }
 
-                                    // console.log(headColumns[(columnIndex as number)].getFullText())
-                                    // console.log(bodyColumns[(columnIndex as number)].getFullText())
-                                    // headColumns.forEach(element => {
-                                    //     console.log(element)
-                                    // });
                                     const rowComponent = this._helper.prepareComponent(this.getTableDefinition().row, this._imports);
                                     const headerRow = createJsxElement(rowComponent.tagName, [], headColumns);
                                     const bodyRow = createJsxElement(rowComponent.tagName, [], bodyColumns);
@@ -147,7 +142,7 @@ export class BasicTableGenerator implements TableGenerator
 
     private createBodyRow(): ts.JsxElement {
       const rowComponent = this._helper.prepareComponent(this.getTableDefinition().row, this._imports)
-
+      
       let bodyRow = createJsxElement(rowComponent.tagName, [],getProperties(this._entity!)
                        ?.map(prop => this.propertyCell(prop, this._entity!)))
 
@@ -174,7 +169,7 @@ export class BasicTableGenerator implements TableGenerator
         )
     }
     
-    private propertyCell(prop: Property, entity: Entity) {
+    private propertyCell(prop: Property, entity: Entity, prefixIterator?: string ) {
         let child: ts.JsxChild;
 
         if(this._context.formatter === Formatter.ReactIntl) {
@@ -183,8 +178,8 @@ export class BasicTableGenerator implements TableGenerator
             child = factory.createJsxExpression(
                 undefined,
                 factory.createPropertyAccessExpression(
-                  this.getRowIdentifier(),
-                  factory.createIdentifier(prop.getName())
+                    prefixIterator !== undefined ? factory.createIdentifier(prefixIterator ?? entity.getName().toLowerCase()) : this.getRowIdentifier(),
+                    factory.createIdentifier(prop.getName())
                 )
               )
         }

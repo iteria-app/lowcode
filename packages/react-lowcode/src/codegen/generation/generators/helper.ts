@@ -23,8 +23,7 @@ export class GeneratorHelper {
     }
     
     getEntityName(entity: Entity): string{
-      console.log(entity)
-        return camalizeString(entity.getName())
+      return camalizeString(entity.getName())
     }
 
     addImportDeclaration(specifier: string, module: string, isNameSpaceImport: boolean = false): ts.ImportDeclaration{
@@ -66,7 +65,7 @@ export class GeneratorHelper {
         if(this._context.formatter === Formatter.ReactIntl){
           localizedName = this.intlFormatter.localizePropertyNameUsingTag(property, entity)
         }else{
-          localizedName = jsxText(property.getName())
+          localizedName = this.intlFormatter.localizePropertyNameUsingTag(property, entity) //jsxText(property.getName())
         }
   
         return localizedName;
