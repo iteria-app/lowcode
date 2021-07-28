@@ -39,8 +39,8 @@ describe("table generation", () => {
     const template = fs.readFileSync(path.resolve('src/codegen/tests/list/files/page-list-template.txt'), 'utf-8')
     
     var options = {names:['Customer'], pageListTemplate: template}
-
-    // generatePages(graphqlGenTs1, testWriter, options)
+    //@ts-ignore
+    generatePages(graphqlGenTs1, testWriter, options)
 
     console.log('generated:' + testWriter.getSourceString())
   });
