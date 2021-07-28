@@ -1,4 +1,4 @@
-import { parse, visit } from 'graphql'
+import { FieldNode, parse, visit } from 'graphql'
 
 interface fieldOffset {
   offset: number,
@@ -25,7 +25,7 @@ function findQueryOffsetsForFields(graphqlQuery: string, entity: string, propert
   let queryOffsetForFields: fieldOffset[] = []
 
   visit(ast, {
-    Field(node: any/*TODO do not use anytype whenever possible*/) {
+    Field(node: FieldNode ) {
       if (node.name.value === entity) {
         const firstFragmentField = node.selectionSet?.selections[0]
         const lastFragmentField = node.selectionSet?.selections[node.selectionSet.selections.length - 1]

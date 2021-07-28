@@ -297,237 +297,41 @@ export const differentIndentationOutput =
 }`
 
 /**
- * Simple introspection query
- */
-export const simpleIntrospectionInput = {
-  types: [
-    {
-      name: 'query_root',
-      kind: 'LIST',
-      fields: [
-        {
-          args: [
-            {
-              name: 'limit',
-              defaultValue: 100,
-            }
-          ],
-          name: 'entity1s',
-          type: {
-            name: 'entity1'
-          }
-        }
-      ]
-    },
-    {
-      name: 'entity1',
-      fields: [
-        {
-          name: 'id',
-          type: {
-            name: 'uuid',
-            kind: 'SCALAR'
-          }
-        },
-        {
-          name: 'name',
-          type: {
-            name: 'string',
-            kind: 'SCALAR'
-          }
-        },
-        {
-          name: 'objectName',
-          type: {
-            name: '',
-            kind: 'OBJECT'
-          }
-        }
-      ]
-    }
-  ]
-}
-
-export const simpleIntrospectionOutput =
-  `query entity1s {
-  entity1s(limit: $limit) {
-    ...entity1s_entity1
-  }
-}
-
-fragment entity1s_entity1 on entity1 {
-  id
-  name
-}`
-
-/**
- *  Multiple entities in query_root
- */
-
-export const multipleEntitiesInput = {
-  types: [
-    {
-      name: 'query_root',
-      kind: 'LIST',
-      fields: [
-        {
-          args: [
-            {
-              name: 'limit',
-              defaultValue: 100,
-            }
-          ],
-          name: 'entity1s',
-          type: {
-            name: 'entity1'
-          }
-        },
-        {
-          name: 'entity2s',
-          type: {
-            name: 'entity2'
-          }
-        }
-      ]
-    },
-    {
-      name: 'entity1',
-      fields: [
-        {
-          name: 'id',
-          type: {
-            name: 'uuid',
-            kind: 'SCALAR'
-          }
-        },
-        {
-          name: 'name',
-          type: {
-            name: 'string',
-            kind: 'SCALAR'
-          }
-        },
-        {
-          name: 'objectName',
-          type: {
-            name: '',
-            kind: 'OBJECT'
-          }
-        }
-      ]
-    },
-    {
-      name: 'entity2',
-      fields: [
-        {
-          name: 'id',
-          type: {
-            name: 'uuid',
-            kind: 'SCALAR'
-          }
-        }
-      ]
-    }
-  ]
-}
-
-export const multipleEntitiesOutput =
-  `query entity1s {
-  entity1s(limit: $limit) {
-    ...entity1s_entity1
-  }
-}
-
-query entity2s {
-  entity2s(limit: 100) {
-    ...entity2s_entity2
-  }
-}
-
-fragment entity1s_entity1 on entity1 {
-  id
-  name
-}
-
-fragment entity2s_entity2 on entity2 {
-  id
-}`
-
-/**
- * Query_root is not LIST type query
- */
-
-export const notListTypeIntrospectionInput = {
-  types: [
-    {
-      name: 'query_root',
-      kind: 'OBJECT',
-      fields: [
-        {
-          name: 'entity1s',
-          type: {
-            name: 'entity1'
-          }
-        },
-      ]
-    },
-    {
-      name: 'entity1',
-      fields: [
-        {
-          name: 'id',
-          type: {
-            name: 'uuid',
-            kind: 'SCALAR'
-          }
-        },
-        {
-          name: 'name',
-          type: {
-            name: 'string',
-            kind: 'SCALAR'
-          }
-        }
-      ]
-    },
-  ]
-}
-
-export const notListTypeIntrospectionOutput =
-  `query entity1s($id: ID!) {
-  entity1s(where: {id: $id}) {
-    ...entity1s_entity1
-  }
-}
-
-fragment entity1s_entity1 on entity1 {
-  id
-  name
-}`
-
-/**
  * Introspection with optional single argument
  */
 
 export const simpleOptionalArgumentInput = {
+  queryType: {
+    name: 'query_root'
+  },
   types: [
     {
       name: 'query_root',
-      kind: 'LIST',
       fields: [
         {
           args: [
             {
               name: 'where',
+              type: {
+                name: 'whereObject',
+                kind: 'INPUT_OBJECT',
+                ofType: null
+              }
             },
             {
               name: 'limit',
-              defaultValue: 100,
+              type: {
+                name: 'Int',
+                kind: 'SCALAR',
+                ofType: null
+              }
             }
           ],
           name: 'entity1s',
           type: {
-            name: 'entity1'
+            name: 'entity1',
+            kind: 'OBJECT',
+            ofType: null
           }
         },
       ]
@@ -536,10 +340,12 @@ export const simpleOptionalArgumentInput = {
       name: 'entity1',
       fields: [
         {
+          args: [],
           name: 'id',
           type: {
             name: 'uuid',
-            kind: 'SCALAR'
+            kind: 'SCALAR',
+            ofType: null
           }
         },
       ]
@@ -548,7 +354,7 @@ export const simpleOptionalArgumentInput = {
 }
 
 export const simpleOptionalArgumentOutput =
-  `query entity1s {
+  `query entity1s($where: whereObject, $limit: Int) {
   entity1s(where: $where, limit: $limit) {
     ...entity1s_entity1
   }
@@ -563,38 +369,67 @@ fragment entity1s_entity1 on entity1 {
  */
 
 export const multipleOptionalArgumentsInput = {
+  queryType: {
+    name: 'query_root'
+  },
   types: [
     {
       name: 'query_root',
-      kind: 'LIST',
       fields: [
         {
           args: [
             {
               name: 'where',
+              type: {
+                kind: 'INPUT_OBJECT',
+                name: 'whereObject',
+                ofType: null
+              }
             },
             {
               name: 'limit',
-              defaultValue: 100,
+              type: {
+                kind: 'SCALAR',
+                name: 'Int',
+                ofType: null
+              }
             }
           ],
           name: 'entity1s',
           type: {
-            name: 'entity1'
+            name: null,
+            kind: 'LIST',
+            ofType: {
+              kind: 'OBJECT',
+              name: 'entity1',
+              ofType: null
+            }
           }
         },
         {
           args: [
             {
-              name: 'order_by'
+              name: 'order_by',
+              type: {
+                kind: 'INPUT_OBJECT',
+                name: 'order_by_object',
+                ofType: null
+              }
             },
             {
-              name: 'offset'
+              name: 'offset',
+              type: {
+                kind: 'SCALAR',
+                name: 'Int',
+                ofType: null
+              }
             }
           ],
           name: 'entity2s',
           type: {
-            name: 'entity2'
+            name: 'entity2',
+            kind: 'OBJECT',
+            ofType: null
           }
         }
       ]
@@ -606,7 +441,8 @@ export const multipleOptionalArgumentsInput = {
           name: 'id',
           type: {
             name: 'uuid',
-            kind: 'SCALAR'
+            kind: 'SCALAR',
+            ofType: null
           }
         },
       ]
@@ -618,7 +454,8 @@ export const multipleOptionalArgumentsInput = {
           name: 'id',
           type: {
             name: 'uuid',
-            kind: 'SCALAR'
+            kind: 'SCALAR',
+            ofType: null
           }
         }
       ]
@@ -627,14 +464,14 @@ export const multipleOptionalArgumentsInput = {
 }
 
 export const multipleOptionalArgumentsOutput =
-  `query entity1s {
-  entity1s(where: $where, limit: $limit) {
+  `query entity1s($where: whereObject, $limit: Int = 100, $offset: Int) {
+  entity1s(where: $where) {
     ...entity1s_entity1
   }
 }
 
 query entity2s {
-  entity2s(limit: 100, order_by: $order_by, offset: $offset) {
+  entity2s {
     ...entity2s_entity2
   }
 }
@@ -652,6 +489,9 @@ fragment entity2s_entity2 on entity2 {
  */
 
 export const deleteByIdInput = {
+  mutationType: {
+    name: 'mutation_root'
+  },
   types: [
     {
       name: 'mutation_root',
@@ -659,13 +499,23 @@ export const deleteByIdInput = {
         {
           args: [
             {
-              name: 'id'
+              name: 'id',
+              type: {
+                kind: 'NON_NULL',
+                name: null,
+                ofType: {
+                  name: 'Int',
+                  kind: 'uuid',
+                  ofType: null
+                }
+              }
             }
           ],
           name: 'delete_table_by_pk',
           type: {
             kind: 'OBJECT',
-            name: 'entity'
+            name: 'entity',
+            ofType: null
           }
         }
       ]
@@ -674,17 +524,21 @@ export const deleteByIdInput = {
       name: 'entity',
       fields: [
         {
+          args: [],
           name: 'id',
           type: {
             name: 'uuid',
-            type: 'SCALAR'
+            kind: 'SCALAR',
+            ofType: null
           }
         },
         {
+          args: [],
           name: 'name',
           type: {
             name: 'string',
-            type: 'SCALAR'
+            kind: 'SCALAR',
+            ofType: null
           }
         }
       ]
@@ -693,7 +547,7 @@ export const deleteByIdInput = {
 }
 
 export const deleteByIdOutput =
-  `mutation delete_table_by_pk {
+  `mutation delete_table_by_pk($id: Int!) {
   delete_table_by_pk(id: $id) {
     ...delete_table_by_pk_entity
   }
@@ -709,6 +563,9 @@ fragment delete_table_by_pk_entity on entity {
  */
 
 export const deleteByFieldsInput = {
+  mutationType: {
+    name: 'mutation_root'
+  },
   types: [
     {
       name: 'mutation_root',
@@ -716,13 +573,19 @@ export const deleteByFieldsInput = {
         {
           args: [
             {
-              name: 'where'
+              name: 'where',
+              type: {
+                kind: 'INPUT_OBJECT',
+                name: 'whereObject',
+                ofType: null
+              }
             }
           ],
           name: 'delete_object',
           type: {
             kind: 'OBJECT',
-            name: 'entity'
+            name: 'entity',
+            ofType: null
           }
         }
       ]
@@ -731,10 +594,12 @@ export const deleteByFieldsInput = {
       name: 'entity',
       fields: [
         {
+          args: [],
           name: 'affected_rows',
           type: {
             name: 'Int',
-            type: 'SCALAR'
+            kind: 'SCALAR',
+            ofType: null
           }
         }
       ]
@@ -743,7 +608,7 @@ export const deleteByFieldsInput = {
 }
 
 export const deleteByFieldsOutput =
-  `mutation delete_object {
+  `mutation delete_object($where: whereObject) {
   delete_object(where: $where) {
     ...delete_object_entity
   }
@@ -758,6 +623,9 @@ fragment delete_object_entity on entity {
  */
 
 export const insertMutationsInput = {
+  mutationType: {
+    name: 'mutation_root'
+  },
   types: [
     {
       name: 'mutation_root',
@@ -768,14 +636,16 @@ export const insertMutationsInput = {
               name: 'object',
               type: {
                 kind: 'INPUT_OBJECT',
-                name: null
+                name: 'newObject',
+                ofType: null
               }
             }
           ],
           name: 'insert_object',
           type: {
             kind: 'INPUT_OBJECT',
-            name: 'insert_response'
+            name: 'insert_response',
+            ofType: null
           }
         },
         {
@@ -784,14 +654,16 @@ export const insertMutationsInput = {
               name: 'objects',
               type: {
                 kind: 'INPUT_OBJECT',
-                name: null
+                name: 'newObjects',
+                ofType: null
               }
             }
           ],
           name: 'insert_objects',
           type: {
             kind: 'INPUT_OBJECT',
-            name: 'insert_response'
+            name: 'insert_response',
+            ofType: null
           }
         }
       ]
@@ -800,10 +672,12 @@ export const insertMutationsInput = {
       name: 'insert_response',
       fields: [
         {
+          args: [],
           name: 'affected_rows',
           type: {
             kind: 'SCALAR',
-            name: null
+            name: 'Int',
+            ofType: null
           }
         }
       ]
@@ -812,13 +686,13 @@ export const insertMutationsInput = {
 }
 
 export const insertMutationsOutput =
-`mutation insert_object {
+  `mutation insert_object($object: newObject) {
   insert_object(object: $object) {
     ...insert_object_insert_response
   }
 }
 
-mutation insert_objects {
+mutation insert_objects($objects: newObjects) {
   insert_objects(objects: $objects) {
     ...insert_objects_insert_response
   }
@@ -837,6 +711,9 @@ fragment insert_objects_insert_response on insert_response {
  */
 
 export const updateMutationsInput = {
+  mutationType: {
+    name: 'mutation_root'
+  },
   types: [
     {
       name: 'mutation_root',
@@ -847,21 +724,24 @@ export const updateMutationsInput = {
               name: 'where',
               type: {
                 kind: 'INPUT_OBJECT',
-                name: null
+                name: 'whereObjects',
+                ofType: null,
               }
             },
             {
               name: '_set',
               type: {
                 kind: 'INPUT_OBJECT',
-                name: null
+                name: 'updatedObjects',
+                ofType: null,
               }
             }
           ],
           name: 'update_objects',
           type: {
             kind: 'INPUT_OBJECT',
-            name: 'update_response'
+            name: 'update_response',
+            ofType: null
           }
         },
         {
@@ -870,21 +750,24 @@ export const updateMutationsInput = {
               name: 'pk_columns',
               type: {
                 kind: 'INPUT_OBJECT',
-                name: null
+                name: 'pk_columns_input',
+                ofType: null
               }
             },
             {
               name: '_set',
               type: {
                 kind: 'INPUT_OBJECT',
-                name: null
+                name: 'updatedObject',
+                ofType: null
               }
             }
           ],
           name: 'update_object',
           type: {
             kind: 'INPUT_OBJECT',
-            name: 'update_response'
+            name: 'update_response',
+            ofType: null
           }
         }
       ]
@@ -893,10 +776,12 @@ export const updateMutationsInput = {
       name: 'update_response',
       fields: [
         {
+          args: [],
           name: 'affected_rows',
           type: {
             kind: 'SCALAR',
-            name: null
+            name: 'Int',
+            ofType: null
           }
         }
       ]
@@ -905,13 +790,13 @@ export const updateMutationsInput = {
 }
 
 export const updateMutationsOutput =
-`mutation update_objects {
+  `mutation update_objects($where: whereObjects, $_set: updatedObjects) {
   update_objects(where: $where, _set: $_set) {
     ...update_objects_update_response
   }
 }
 
-mutation update_object {
+mutation update_object($pk_columns: pk_columns_input, $_set: updatedObject) {
   update_object(pk_columns: $pk_columns, _set: $_set) {
     ...update_object_update_response
   }
@@ -929,7 +814,10 @@ fragment update_object_update_response on update_response {
  * Single delete update mutation + multiple object delete mutation + affected_rows
  */
 
- export const deleteMutationsInput = {
+export const deleteMutationsInput = {
+  mutationType: {
+    name: 'mutation_root'
+  },
   types: [
     {
       name: 'mutation_root',
@@ -940,14 +828,16 @@ fragment update_object_update_response on update_response {
               name: 'where',
               type: {
                 kind: 'INPUT_OBJECT',
-                name: null
+                name: 'objectsToBeDeleted',
+                ofType: null
               }
             },
           ],
           name: 'delete_objects',
           type: {
             kind: 'INPUT_OBJECT',
-            name: 'delete_response'
+            name: 'delete_response',
+            ofType: null
           }
         },
         {
@@ -955,15 +845,21 @@ fragment update_object_update_response on update_response {
             {
               name: 'id',
               type: {
-                kind: 'INPUT_OBJECT',
-                name: null
+                kind: "NON_NULL",
+                name: null,
+                ofType: {
+                  kind: "SCALAR",
+                  name: "uuid",
+                  ofType: null
+                }
               }
             },
           ],
           name: 'delete_object',
           type: {
             kind: 'INPUT_OBJECT',
-            name: 'delete_response'
+            name: 'delete_response',
+            ofType: null,
           }
         }
       ]
@@ -972,10 +868,12 @@ fragment update_object_update_response on update_response {
       name: 'delete_response',
       fields: [
         {
+          args: [],
           name: 'affected_rows',
           type: {
             kind: 'SCALAR',
-            name: null
+            name: 'Int',
+            ofType: null
           }
         }
       ]
@@ -984,13 +882,13 @@ fragment update_object_update_response on update_response {
 }
 
 export const deleteMutationsOutput =
-`mutation delete_objects {
+  `mutation delete_objects($where: objectsToBeDeleted) {
   delete_objects(where: $where) {
     ...delete_objects_delete_response
   }
 }
 
-mutation delete_object {
+mutation delete_object($id: uuid!) {
   delete_object(id: $id) {
     ...delete_object_delete_response
   }
@@ -1008,7 +906,10 @@ fragment delete_object_delete_response on delete_response {
  * Single delete update mutation + multiple object delete mutation + affected_rows
  */
 
- export const mutationWithReturningInput = {
+export const mutationWithReturningInput = {
+  mutationType: {
+    name: "mutation_root"
+  },
   types: [
     {
       name: 'mutation_root',
@@ -1019,14 +920,16 @@ fragment delete_object_delete_response on delete_response {
               name: 'where',
               type: {
                 kind: 'INPUT_OBJECT',
-                name: null
+                name: 'objectToBeDeleted',
+                ofType: null
               }
             },
           ],
           name: 'delete_objects',
           type: {
             kind: 'INPUT_OBJECT',
-            name: 'delete_response'
+            name: 'delete_response',
+            ofType: null
           }
         }
       ]
@@ -1035,13 +938,16 @@ fragment delete_object_delete_response on delete_response {
       name: 'delete_response',
       fields: [
         {
+          args: [],
           name: 'affected_rows',
           type: {
             kind: 'SCALAR',
-            name: null
+            name: 'Int',
+            ofType: null
           }
         },
         {
+          args: [],
           name: 'returning',
           type: {
             kind: "NON_NULL",
@@ -1067,17 +973,21 @@ fragment delete_object_delete_response on delete_response {
       name: 'deleted_object',
       fields: [
         {
+          args: [],
           name: 'id',
           type: {
             name: 'uuid',
-            type: 'SCALAR'
+            kind: 'SCALAR',
+            ofType: null
           }
         },
         {
+          args: [],
           name: 'name',
           type: {
             name: 'string',
-            type: 'SCALAR'
+            kind: 'SCALAR',
+            ofType: null
           }
         }
       ]
@@ -1086,7 +996,7 @@ fragment delete_object_delete_response on delete_response {
 }
 
 export const mutationWithReturningOutput =
-`mutation delete_objects {
+  `mutation delete_objects($where: objectToBeDeleted) {
   delete_objects(where: $where) {
     ...delete_objects_delete_response
   }
