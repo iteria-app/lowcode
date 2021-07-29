@@ -40,12 +40,12 @@ test("interface generation", () => {
   const myClassFile = parseGraphqlTypes(graphqlGenTs1)
   const testEntity = sourceFileEntity(myClassFile)
 
-    let generationContext = {useFormatter:false, uiFramework: UiFramework.Grommet, tableType: TableType.BasicTable, entity: testEntity!!};
+    let generationContext = {useFormatter:false, uiFramework: UiFramework.MaterialUI, tableType: TableType.BasicTable, entity: testEntity!!};
     let generator = new AppGenerator(generationContext , testEntity!!);
 
     const page = generator.generateInterface();
     
     const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
 
-  console.log('generated:', printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray(), sourceFile))
+  console.log('generated:', printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page!.imports, page!.functionDeclaration]), sourceFile))
 })

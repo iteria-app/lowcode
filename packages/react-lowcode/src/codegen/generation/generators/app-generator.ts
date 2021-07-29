@@ -50,6 +50,6 @@ export class AppGenerator {
 
      generateInterface() {
         let generator = new InterfaceGenerator(this._entity);
-        return generator.generateInterface();
+        return generator.generateDetailComponent();
     }
 }
