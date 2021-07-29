@@ -51,3 +51,10 @@ export const isOpeningOrSelfClosingElementWithName = (node: ts.Node, name: strin
         }
     }
 }
+export const clearNodePosition = (node: ts.Node): void => {
+    ts.setTextRange(node, { pos: -1, end: -1 });
+
+    node.forEachChild((child: ts.Node) => {
+        clearNodePosition(child);
+    });
+}
