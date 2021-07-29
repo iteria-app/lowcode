@@ -87,7 +87,7 @@ export async function insertColumnToDataTableGrommet(
 
   let generator = new GrommetDataTableGenerator(
     generationContext,
-    undefined,
+    options.entity,
     widgetContext
   );
   

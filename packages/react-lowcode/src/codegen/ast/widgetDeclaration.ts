@@ -30,10 +30,11 @@ export function isDataTableWidget(sourceCode:string, position: SourceLineCol): b
         let identifier = findIdentifier(astCode)
 
         if(identifier){
-            isDataTableDeclaration = identifier.getText() === 'DataGrid'
+            isDataTableDeclaration = identifier.getText() === 'DataGrid' || identifier.getText() === "DataTable"
         }else{
             let dataGridNode = astCode.getChildAt(1) as ts.JsxSelfClosingElement
             const grommetChild = astCode.getChildAt(0) as ts.JsxSelfClosingElement
+
             if(dataGridNode && (dataGridNode.getChildAt(0)?.getChildAt(1)?.getText() === 'DataGrid' || grommetChild.tagName.getText()))//todo(mch): very very uglu, need to be refactored to be more generic
                 isDataTableDeclaration = true
         }
