@@ -216,10 +216,23 @@ describe("codegen facade tests", () => {
       )
     });
 
-    test(".add widget to existing detail page", () => {
-      insertFormWidget({lineNumber: 50,columnNumber: 19, fileName: 'src/codegen/tests/detail/detail-test-file.txt'}, {entityField: getEntityProperty(graphqlGenTs1,'test2')[0]}, new CodegenRw()).then(
-        (data) => console.log(data)
-      )
+    test(".add widget to existing detail page", async () => {
+      const myClassFile = parseGraphqlTypes(graphqlGenTs1);
+      const testEntity = sourceFileEntity(myClassFile);
+
+      const formPosition: SourceLineCol = {
+        lineNumber: 50,
+        columnNumber: 19, 
+        fileName: 'src/codegen/tests/detail/detail-test-file.txt'
+      };
+
+      const options: FacadeInsertOptions = {
+        entity: testEntity!!, 
+        entityField: getEntityProperty(graphqlGenTs1,'test2')[0]
+      };
+
+      const result = await insertFormWidget(formPosition, options, new CodegenRw());
+      console.log(result);
     });
 
     test(".add widget at position to existing detail page", () => {

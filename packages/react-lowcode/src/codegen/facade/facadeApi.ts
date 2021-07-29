@@ -166,7 +166,7 @@ export async function insertFormWidget(
 
   let generator = new MuiDetailGenerator(
     generationContext,
-    undefined,
+    options.entity!,
     widgetContext
   );
 
@@ -217,7 +217,7 @@ export async function getFormWidgetProperties(
 
   let generator = new MuiDetailGenerator(
     generationContext,
-    undefined,
+    undefined!,
     widgetContext
   );
 
@@ -243,7 +243,7 @@ export async function setFormWidgetProperties(
 
   let generator = new MuiDetailGenerator(
     generationContext,
-    undefined,
+    undefined!,
     widgetContext
   );
 
