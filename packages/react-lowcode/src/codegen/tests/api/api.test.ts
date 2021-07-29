@@ -257,7 +257,7 @@ describe(".api tests", () => {
     
                 if(updatedAtNode) {
                     const position = resultAst.getLineAndCharacterOfPosition(updatedAtNode.getStart());
-                    const newProperties = new MuiDetailGenerator({}).getFormWidgetPropertiesFromAst(resultAst, { lineNumber: position.line + 1, columnNumber: position.character + 1, fileName: '' });
+                    const newProperties = new MuiDetailGenerator({}, undefined!).getFormWidgetPropertiesFromAst(resultAst, { lineNumber: position.line + 1, columnNumber: position.character + 1, fileName: '' });
     
                     expect(newProperties.properties).toStrictEqual(expectedProperties);
                 }
