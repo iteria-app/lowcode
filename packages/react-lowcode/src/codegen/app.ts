@@ -2,10 +2,10 @@ import { AppGenerator } from './generation/generators/app-generator'
 import { UiFramework, TableType, Formatter } from './definition/context-types'
 import { CodeDir, CodeRW } from '../io'
 import ts, { factory } from "typescript"
-import { Entity, Property } from './generation/entity/index'
+import { Entity, createEntityFromIntrospection } from './generation/entity/index'
 import { CodegenOptions } from './interfaces'
 import TemplateResolver from './generation/generators/template/template-resolver'
-import { IntrospectionQuery, getNestedOfType, generateGraphqlFile, getEntity, getQueryNames } from '@iteria-app/graphql-lowcode/src/generate'
+import { IntrospectionQuery, generateGraphqlFile } from '@iteria-app/graphql-lowcode/esm/generate'
 import { getListComponentName, getListPageComponentName, getPluralizedEntityName } from './generation/entity/helper'
 import { generateMenuItem, generateRoute } from './facade/facadeApi'
 
@@ -14,41 +14,25 @@ export function generatePages(introspection: IntrospectionQuery,
                               io: CodeRW & CodeDir, 
                               options?: CodegenOptions) {
 
-    const componentStorageRoot = options?.componentStoragePath ?? 'src/components'
-    const routeDefinitionFilePath = options?.routeDefinitionFilePath ?? 'src/routes.tsx'
-    const menuDefinitionFilePath = options?.menuDefinitionFilePath ?? 'src/layouts/DashboardLayout/NavBar/index.tsx'
-
     options?.names.map((typeName) => {
-        const graphqlQueries = generateGraphqlFile(introspection, typeName)
+        const entity: Entity | undefined = createEntityFromIntrospection(introspection, typeName)
 
-        if (graphqlQueries != '') 
-            io.writeFile(`${componentStorageRoot}/${typeName}.graphql`, graphqlQueries)
-
-        const entityType = getEntity(introspection.types, typeName)
-
-        if (entityType && entityType.fields) {
-        const entityName = entityType.name
-
-        let props: Property[] = []
-        
-        entityType.fields.forEach((field: { name: any }) => {
-            const propName = field.name
-            const propType = getNestedOfType(field).name ?? ''
-
-            props = [...props, { getName: () => propName, getType: () => propType }]
-        })
-
-        const entity = {
-            getName: () => entityName,
-            properties: props
-        }
-
+        if (entity) {
+            const componentStorageRoot = options?.componentStoragePath ?? 'src/components'
+            const routeDefinitionFilePath = options?.routeDefinitionFilePath ?? 'src/routes.tsx'
+            const menuDefinitionFilePath = options?.menuDefinitionFilePath ?? 'src/layouts/DashboardLayout/NavBar/index.tsx'
             const entityListComponentPageName = getListPageComponentName(entity)
             const listComponentName = getListComponentName(entity)
             const listComponentFilePath = `${componentStorageRoot}/${listComponentName}.tsx`
             const listPageComponentFilePath = `${componentStorageRoot}/${entityListComponentPageName}.tsx`
             const moduleName = getPluralizedEntityName(entity.getName())
             const moduleRouteUri = `codegen-${moduleName}`
+
+            //generate graphql queries
+            const graphqlQueries = generateGraphqlFile(introspection, typeName)
+
+            if (graphqlQueries != '') 
+                io.writeFile(`${componentStorageRoot}/${typeName}.graphql`, graphqlQueries)
 
             //generate component for list
             generateListComponent(io, 

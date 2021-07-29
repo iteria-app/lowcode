@@ -7,7 +7,7 @@ import { isOpeningOrSelfClosingElementWithName, isImportDeclarationWithName, isF
 import { isUseQueryHook } from '../../../ast/hooks';
 import { createAst } from "../../code-generation/createSourceFile";
 import { Entity } from "../../entity";
-import { IntrospectionQuery, getQueryNames, queryHookName } from '@iteria-app/graphql-lowcode/src/generate'
+import { IntrospectionQuery, getQueryNames, queryHookName } from '@iteria-app/graphql-lowcode/esm/generate'
 import { getInputParameterIdentifier, getListComponentName, getListPageComponentName } from "../../entity/helper";
 
 export default class TemplateResolver {

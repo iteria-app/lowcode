@@ -1304,10 +1304,10 @@
   resolved "https://registry.yarnpkg.com/@istanbuljs/schema/-/schema-0.1.3.tgz#e45e384e4b8ec16bce2fd903af78450f6bf7ec98"
   integrity sha512-ZXRY4jNvVgSVQ8DL3LTcakaAtXwTVUxE81hslsyD2AtoXW/wVob10HkOJ1X/pAlcI7D+2YoZKg5do8G/w6RYgA==
 
-"@iteria-app/graphql-lowcode@0.1.1":
-  version "0.1.1"
-  resolved "https://registry.yarnpkg.com/@iteria-app/graphql-lowcode/-/graphql-lowcode-0.1.1.tgz#62b923af2eff83a32828d610bbd8d6be67e8638e"
-  integrity sha512-bE1b54WzDjzZ3xHCvt56gG6xnAyKykXrN+tUU806i+0A6atUuRDTTHsPPZTST1qEUFA7nqhMUvWXzpZDD0/uuw==
+"@iteria-app/graphql-lowcode@^0.1.2":
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/@iteria-app/graphql-lowcode/-/graphql-lowcode-0.1.2.tgz#ba733ce4a10caecda88915eb4f10a992cf491faa"
+  integrity sha512-JP/ak9eay0msYKM3FmspbQggndHl5vP1ryLCm4/xum0O1JKNAOLnplZko2mk20a/F64Iyx6T/IQVaYWOdC7n9A==
 
 "@jest/console@^26.6.2":
   version "26.6.2"

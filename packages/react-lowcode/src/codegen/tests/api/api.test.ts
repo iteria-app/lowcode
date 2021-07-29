@@ -10,7 +10,7 @@ import { addColumn, deleteColumn, getColumnSourcePosition, isSelectedDataTable }
 import { createAst } from '../helper';
 import { TestListHelper } from '../list/list-helper';
 import { graphqlGenTs1 } from '../typeAlias.example';
-import { is2 } from './files/introspection';
+import { is2 } from '../introspection-example';
 import ts from 'typescript'
 import { TableType } from '../../definition/context-types';
 
