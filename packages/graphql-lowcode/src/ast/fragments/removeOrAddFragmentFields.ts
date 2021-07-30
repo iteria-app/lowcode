@@ -1,16 +1,25 @@
-import { BREAK, FragmentDefinitionNode, SelectionNode, FragmentSpreadNode, FieldNode, parse, visit } from 'graphql'
+import { BREAK, FragmentDefinitionNode, SelectionNode, FieldNode, parse, visit } from 'graphql'
 import { addFragmentField } from '../../modify'
 
-export function removeOrAddFragmentField(file: string, fragmentName: string, fieldName: string) {
+export function removeOrAddFragmentField(file: string, fragmentName: string, fieldName: string, parents: string[], childrenField?: boolean) {
   try {
     const ast = parse(file)
 
     visit(ast, {
       FragmentDefinition(node: FragmentDefinitionNode) {
         if (node.name.value === fragmentName) {
-          const remainingNodes = node.selectionSet?.selections.length
+          let actualNodeSelections = node.selectionSet.selections
 
-          const modifiedNode = node.selectionSet?.selections.filter((selection: SelectionNode): selection is FieldNode => true).find(selection => {
+          for (const actualParent of parents) {
+            const foundNode = actualNodeSelections.filter((selection: SelectionNode): selection is FieldNode => true).find(selection => selection.name.value === actualParent)
+
+            if (foundNode && foundNode.selectionSet) actualNodeSelections = foundNode.selectionSet?.selections
+            else actualNodeSelections = []
+          }
+
+          const remainingNodes = actualNodeSelections.length
+
+          const modifiedNode = actualNodeSelections.filter((selection: SelectionNode): selection is FieldNode => true).find(selection => {
             return selection.name.value === fieldName
           })
 
@@ -20,14 +29,14 @@ export function removeOrAddFragmentField(file: string, fragmentName: string, fie
 
             //if there is only one node left add '__typename' to the fragment to make the code valid
             const { leftSpaces, leftNewLines } = countWhitespacesAndNewLinesToLeft(file, modifiedNode.loc?.start)
+
             file = file.substr(0, (modifiedNode.loc?.start - (leftSpaces + leftNewLines))) +
-              `${remainingNodes === 1 ? buildFragmentStringWithIndent('__typename', leftSpaces) : ''}` +
+              `${remainingNodes === 1 ? buildFragmentFieldStringWithIndent('__typename', leftSpaces) : ''}` +
               file.substr(modifiedNode.loc?.end, file.length - 1)
           } else { //fragment not included -> add it
-
             //if the only fragment field is '__typename' delete it and add new field
-            file = addFragmentField(file, { entity: fragmentName, property: fieldName })
-            if (remainingNodes === 1) file = ifTypenameDeleteIt(file, fragmentName)
+            file = addFragmentField(file, { entity: fragmentName, property: fieldName }, parents, childrenField)
+            if (remainingNodes === 1) file = ifTypenameDeleteIt(file, fragmentName, parents)
           }
 
           BREAK
@@ -42,17 +51,27 @@ export function removeOrAddFragmentField(file: string, fragmentName: string, fie
   }
 }
 
-function buildFragmentStringWithIndent(name: string, indent: number) {
+function buildFragmentFieldStringWithIndent(name: string, indent: number) {
   return `\n${Array(indent).fill(' ').join('')}${name}`
 }
 
-function ifTypenameDeleteIt(file: string, fragmentName: string) {
+function ifTypenameDeleteIt(file: string, fragmentName: string, parents: string[]) {
   const ast = parse(file)
 
   visit(ast, {
     FragmentDefinition(node: FragmentDefinitionNode) {
       if (node.name.value === fragmentName) {
-        const typeNameField = node.selectionSet?.selections.filter((selection: SelectionNode): selection is FieldNode => true).find(selection => {
+
+        let actualNodeSelections = node.selectionSet.selections
+
+        for (const actualParent of parents) {
+          const foundNode = actualNodeSelections.filter((selection: SelectionNode): selection is FieldNode => true).find(selection => selection.name.value === actualParent)
+
+          if (foundNode && foundNode.selectionSet) actualNodeSelections = foundNode.selectionSet?.selections
+          else actualNodeSelections = []
+        }
+
+        const typeNameField = actualNodeSelections.filter((selection: SelectionNode): selection is FieldNode => true).find(selection => {
           return selection.name.value === '__typename'
         })
 
@@ -118,5 +137,5 @@ export function removeFragment(file: string, fragmentName: string): { fileWithou
 }
 
 export function addFragment(file: string, fragment: string) {
-  return file = `${file}\n\n${fragment}`
+  return file = `${file}\n${fragment}\n`
 }

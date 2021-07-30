@@ -1,5 +1,4 @@
-import { OperationDefinitionNode, parse, visit, SelectionNode, FragmentSpreadNode, FieldNode, FragmentDefinitionNode, BREAK } from 'graphql'
-import { addFragmentField } from '../modify/addFragmentFields'
+import { OperationDefinitionNode, parse, visit, SelectionNode, FragmentSpreadNode, FieldNode, FragmentDefinitionNode, BREAK, GraphQLError } from 'graphql'
 
 export function getSelectedQueryNames(file: string) {
   const ast = parse(file)
@@ -18,27 +17,29 @@ export function getSelectedQueryNames(file: string) {
   return queryNames
 }
 
-export function getSelectedFragmentFields(file: string, queryName: string): { fragmentName: string, fragmentFields: string[] } {
+export function getSelectedFragmentFields(file: string, fragmentName: string, parents: string[]) {
   const ast = parse(file)
 
-  let fragmentName = getFragmentSpreadName(file, queryName) ?? ''
-  let fragmentFields: string[] = []
+  let selectedFields: string[] = []
 
-  if (fragmentName) {
-    visit(ast, {
-      FragmentDefinition(node: FragmentDefinitionNode) {
-        if (node.name.value === fragmentName) {
-          fragmentFields = node.selectionSet?.selections.filter((selection: SelectionNode): selection is FieldNode => true).map(selection => selection.name?.value)
-          BREAK
+  visit(ast, {
+    FragmentDefinition(node: FragmentDefinitionNode) {
+      if(node.name.value === fragmentName) {
+        let actualNodeSelections = node.selectionSet.selections
+
+        for(const actualParent of parents) {
+          const foundNode = actualNodeSelections.filter((selection: SelectionNode): selection is FieldNode => true).find(selection => selection.name.value === actualParent)
+
+          if(foundNode && foundNode.selectionSet) actualNodeSelections = foundNode.selectionSet?.selections
+          else actualNodeSelections = []
         }
-      }
-    })
-  }
 
-  return {
-    fragmentName: fragmentName,
-    fragmentFields: fragmentFields
-  }
+        selectedFields = actualNodeSelections.filter((selection: SelectionNode): selection is FieldNode => true).map(selection => selection.name.value)
+      }
+    }
+  })
+
+  return selectedFields
 }
 
 export function getFragmentSpreadName(file: string, queryName: string): string {
@@ -59,14 +60,33 @@ export function getFragmentSpreadName(file: string, queryName: string): string {
 }
 
 export function getLastQueryLoc(file: string) {
-  const ast = parse(file)
   let pos = 0
 
+  try {
+    const ast = parse(file)
+
+    visit(ast, {
+      OperationDefinition(node: OperationDefinitionNode) {
+        if (node.loc) pos = node.loc.end
+      }
+    })
+  } catch (error) {
+    //TODO handle
+  }
+
+  return pos
+}
+
+export function getNumberOfQueries(file: string) {
+  const ast = parse(file)
+
+  let n = 0
+
   visit(ast, {
-    OperationDefinition(node: OperationDefinitionNode) {
-      if (node.loc) pos = node.loc.end
+    OperationDefinition(node) {
+      n++
     }
   })
 
-  return pos
+  return n
 }

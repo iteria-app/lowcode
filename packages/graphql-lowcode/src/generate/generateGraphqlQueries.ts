@@ -40,7 +40,7 @@ export function generateGraphqlQueries(introspection: IntrospectionQuery, name: 
  * @returns Array of `EntityQuery`
  */
 
-function getEntities(roots: (Root | undefined)[], types: TypesObject[], filterOnlyFields?: string): EntityQuery[] {
+export function getEntities(roots: (Root | undefined)[], types: TypesObject[], filterOnlyFields?: string): EntityQuery[] {
   const entities = roots.map(root => {
     let rootEntities: EntityQuery[] = []
 
