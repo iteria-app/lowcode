@@ -52,7 +52,7 @@ export class BasicTableGenerator implements TableGenerator
                             const tableHeadRow = this.findElementByName(tableHead, tableDefinition.row.tagName.text);
                             const tableBodyRow = this.findElementByName(tableBody, tableDefinition.row.tagName.text);
                             // to be able insert into iteration with right iterator
-                            const prefixIterator = (tableBodyRow?.parent as any)?.parameters[0].getText()
+                            const prefixIterator = (tableBodyRow?.parent as any)?.parameters[0]?.getText()
                             if (tableHeadRow && tableBodyRow) {
                                 this._context.formatter = this.findUsedFormatter(ast);
                                 let headColumns: ts.JsxElement[] = [];

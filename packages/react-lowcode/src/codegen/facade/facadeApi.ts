@@ -113,7 +113,7 @@ export async function insertColumnToBasicTableMui(
 
   let generator = new BasicTableGenerator(
     generationContext,
-    undefined,
+    options.entity,
     widgetContext
   );
   
