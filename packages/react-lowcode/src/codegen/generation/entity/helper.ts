@@ -3,17 +3,18 @@ import Pluralize from "typescript-pluralize";
 import { Entity } from ".";
 import { camalizeString } from "../../../strings/camel";
 import { identifier } from "../../ast/identifier";
+import { pascalCase } from "pascal-case";
 
 export function getEntityName(entity: Entity): string{
     return camalizeString(entity.getName())
 }
 
 export function getListComponentName(entity: Entity) {
-    return `${entity.getName()}List`
+    return pascalCase(`${entity.getName()}List`)
 }
 
 export function getListPageComponentName(entity: Entity) {
-    return `${getListComponentName(entity)}Page`
+    return pascalCase(`${getListComponentName(entity)}Page`)
 }
 
 export function getInputParameterIdentifier(entity: Entity) : ts.Identifier {

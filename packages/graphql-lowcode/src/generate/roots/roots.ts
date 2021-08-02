@@ -1,4 +1,5 @@
 import { IntrospectionQuery, TypesObject, Root } from '../types'
+import { Field, Type } from '../types'
 
 /**
  * @param introspection Introspection JSON `data`
@@ -34,5 +35,37 @@ export function getRoots(types: TypesObject[], rootNames: { type: string, name?:
   const mutationRoot = roots.find(root => root.name === mutation.name)
   const subscriptionRoot = roots.find(root => root.name === subscription.name)
 
-  return[queryRoot, mutationRoot, subscriptionRoot]
+  return [queryRoot, mutationRoot, subscriptionRoot]
+}
+
+export function getQueryNames(introspection: IntrospectionQuery, entityName: string) {
+  const rootNames = getRootNames(introspection)
+  const [queryRoot, mutationRoot, subscriptionRoot] = getRoots(introspection.types, rootNames)
+
+  const listTypeQuery = queryRoot?.fields.find(field => isListType(field)) ?? queryRoot?.fields[0] //TODO zmenit
+  const detailTypeQuery = queryRoot?.fields.find(field => isObjectType(field, entityName) ?? queryRoot?.fields[0])
+
+  //TODO update, insert etc...
+
+  return {
+    listQueryName: listTypeQuery?.name,
+    detailQueryName: detailTypeQuery?.name
+  }
+}
+
+function isListType(typeField: Field | Type) {
+  for(typeField = typeField.type; typeField.ofType; typeField = typeField.ofType) {
+    if(typeField.kind === 'LIST') return true
+  }
+
+  return false
+}
+
+function isObjectType(typeField: Field | Type, entityName: string) {
+  for(typeField = typeField.type; typeField.ofType; typeField = typeField.ofType) {
+    if (typeField.kind === 'OBJECT' && typeField.name === entityName) return true
+    if (typeField.kind !== 'NON_NULL') return false
+  }
+
+  return false
 }

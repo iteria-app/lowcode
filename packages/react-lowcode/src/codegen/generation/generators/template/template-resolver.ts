@@ -3,16 +3,20 @@ import { transformer } from "../../../../ast";
 import { printSourceCode } from "../../../ast/ast";
 import { createUseQueryExpression } from "../../../ast/hooks";
 import { createImportDeclaration, createNamedImportDeclaration } from "../../../ast/imports";
-import { isOpeningOrSelfClosingElementWithName, isImportDeclarationWithName, isUseQueryHook, isFunctionDeclarationWithName } from "../../../ast/node";
+import { isOpeningOrSelfClosingElementWithName, isImportDeclarationWithName, isFunctionDeclarationWithName } from "../../../ast/node";
+import { isUseQueryHook } from '../../../ast/hooks';
 import { createAst } from "../../code-generation/createSourceFile";
 import { Entity } from "../../entity";
+import { IntrospectionQuery, getQueryNames, queryHookName } from '@iteria-app/graphql-lowcode/esm/generate'
 import { getInputParameterIdentifier, getListComponentName, getListPageComponentName } from "../../entity/helper";
 
 export default class TemplateResolver {
     private _entity?: Entity
+    private _introspection?: IntrospectionQuery
 
-    constructor(entity?: Entity) {
+    constructor(entity?: Entity, introspection?: IntrospectionQuery) {
         this._entity = entity;
+        this._introspection = introspection;
     }
 
     generateListPage(template: string): string | undefined {
@@ -29,9 +33,8 @@ export default class TemplateResolver {
                 const inputParameterIdentifier = getInputParameterIdentifier(this._entity);
 
                 //find 'useGeneratedQuery' import and replace it with use'queryName's
-                //TODO pascalCase function 'customer' -> 'Customers'
-                const generatedQueryName = this._entity.getName()
-                const hookName = `use${generatedQueryName.charAt(0).toUpperCase() + generatedQueryName.slice(1)}s`
+                const { listQueryName } = this._introspection ? getQueryNames(this._introspection, this._entity.getName()) : { listQueryName : undefined }
+                const hookName = queryHookName(listQueryName ?? '')
 
                 const transformUseQueryImport = (node: ts.Node, importName: string, queryName: string) => {
                   if(isImportDeclarationWithName(node, importName)) {
