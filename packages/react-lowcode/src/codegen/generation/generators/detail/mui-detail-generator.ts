@@ -307,27 +307,6 @@ export default class MuiDetailGenerator implements DetailGenerator {
     }
 
     return ast;
-
-    // Old way, TODO: remove!!
-    // let newField = this.createTextFieldElement(
-    //   property.getName(),
-    //   property.getType(),
-    //   InputType.text
-    // );
-
-    // let newElements: ts.JsxElement[];
-
-    // if(index && index < gridElements.length + 1){
-    //   newElements = [...gridElements.slice(0, index - 1), newField, ...gridElements.slice(index - 1)]
-    // }else{
-    //   newElements = [...gridElements, newField]
-    // }
-
-    // return replaceElementsToAST(
-    //   ast,
-    //   gridContainer.pos,
-    //   this.createGridContainer(newElements)
-    // );
   }
 
   private addNewField(
@@ -392,7 +371,6 @@ export default class MuiDetailGenerator implements DetailGenerator {
   generateDetailComponent(): PageComponent | undefined {
     if(this._entity)
     {
-
       var statements = this.createStatements();
 
       var functionalComponent = this.createConstFunction(
@@ -1112,20 +1090,8 @@ export default class MuiDetailGenerator implements DetailGenerator {
     const propName = property.getName();
     const propType: PropertyType = PropertyType.string; // getPropertyType(property);
 
-    switch (propType) {
-      case PropertyType.string: {
-        template = `
-          <TextField 
-              id={id}
-              type="input"
-              label={T('label')} 
-              value={value} 
-              onChange={handleChange}
-              fullWidth 
-          />
-        `;
-        break;
-      }
+    if(template !== '') {
+      template = this.getDefaultInputTemplateByPropertyType(propType);
     }
 
     if(template) {
@@ -1167,6 +1133,38 @@ export default class MuiDetailGenerator implements DetailGenerator {
         const transformationResult = ts.transform(ast, [transformer(transformInputTemplate)]);
         return printSourceCode(transformationResult.transformed[0]);
       }
+    }
+  };
+
+  private getDefaultInputTemplateByPropertyType = (propType: PropertyType): string => {
+    switch (propType) {
+      case PropertyType.string: {
+        return `
+          import React from 'react';
+          import { useIntl } from 'react-intl';
+          import { TextField } from '@material-ui/core';
+          
+          export const StringInputTemplate = ({ value, handleChange, error }) => {
+            const intl = useIntl();
+          
+            const T = (name: string): string => {
+              return intl.formatMessage({ id: name });
+            };
+          
+            return (
+              <TextField
+                  id="id"
+                  type="input"
+                  label={T('label')} 
+                  value={value} 
+                  onChange={handleChange}
+                  fullWidth 
+              />
+            );
+          };        
+        `;
+      }
+      default: return '';
     }
   };
 

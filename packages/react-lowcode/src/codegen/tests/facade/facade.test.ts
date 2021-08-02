@@ -6,6 +6,7 @@ import { SourceLineCol } from "../../../ast";
 import { FacadeInsertOptions } from "../../facade/interfaces";
 import { TestListHelper } from "../list/list-helper";
 import { Formatter } from "../../definition/context-types";
+import { TestFacadeHelper } from "./facade-helper";
 
 describe("codegen facade tests", () => {
   describe(".add column", () => {
@@ -228,6 +229,8 @@ describe("codegen facade tests", () => {
       };
 
       const result = await insertFormWidget(formPosition, options, new CodegenRw());
+      const a = TestFacadeHelper.getFormikInitialValues(result);
+
       console.log(result);
     });
 
