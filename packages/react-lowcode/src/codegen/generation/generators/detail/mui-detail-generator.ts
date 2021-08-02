@@ -1,4 +1,4 @@
-import ts, { factory, JsxAttributeLike, Node, ObjectLiteralExpression, SourceFile, SyntaxKind } from "typescript";
+import ts, { factory, JsxAttributeLike, Node, ObjectLiteralExpression, SourceFile, SyntaxKind, transform } from "typescript";
 import { PageComponent } from "../../react-components/react-component-helper";
 import { DetailGenerator } from "./detail-generator-factory";
 import { DetailComponentDefinitionBase } from "../../../definition/detail-definition-core";
@@ -8,7 +8,7 @@ import { MuiDetailComponents } from "../../../definition/material-ui/detail";
 import { Entity, getProperties, Property } from "../../entity";
 import { getPropertyType, PropertyType } from "../../graphql/typeAlias";
 import {
-  createImportDeclaration,
+  createNamedImportDeclaration,
   createNameSpaceImport,
   uniqueImports,
 } from "../../../ast/imports";
@@ -20,25 +20,30 @@ import {
   findByCondition,
   replaceElementsToAST,
   SourceLineCol,
+  transformer,
 } from "../../../../ast";
 import {
   findVariableDeclarations,
   findObjectLiteralExpression,
   findPropertyAssignment,
+  printSourceCode,
 } from "../../../ast/ast";
 import { findWidgetParentNode, getWidgetProperties } from "../../../ast/widgetDeclaration";
 import { WidgetProperties } from "../../../interfaces";
+import { clearNodePosition, createStringJsxAttribute, isJsxAttributeWithName } from "../../../ast/node";
+import { getEntityName } from "../../entity/helper";
 
 export default class MuiDetailGenerator implements DetailGenerator {
   private _imports: ts.ImportDeclaration[] = [];
   private _context: GenerationContext;
-  private _entity?: Entity;
+  private _entity: Entity;
   private _widgetContext: WidgetContext | undefined;
   private _intlFormatter: ReactIntlFormatter;
+  private _dataPropertyName: string;
 
   constructor(
     generationContext: GenerationContext,
-    entity?: Entity,
+    entity: Entity,
     widgetContext?: WidgetContext
   ) {
     this._context = generationContext;
@@ -48,6 +53,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
       generationContext,
       this._imports
     );
+    this._dataPropertyName = getEntityName(this._entity)
   }
 
   async getFormWidgetProperties(position: SourceLineCol): Promise<WidgetProperties> {
@@ -268,25 +274,60 @@ export default class MuiDetailGenerator implements DetailGenerator {
     ast: ts.SourceFile,
     index?: number
   ): ts.SourceFile {
-    let newField = this.createTextFieldElement(
-      property.getName(),
-      property.getType(),
-      InputType.text
-    );
 
-    let newElements: ts.JsxElement[];
+    const inputElementCode = this.createInputElementFromTemplate(property);
 
-    if(index && index < gridElements.length + 1){
-      newElements = [...gridElements.slice(0, index - 1), newField, ...gridElements.slice(index - 1)]
-    }else{
-      newElements = [...gridElements, newField]
+    if(inputElementCode) {
+      const inputElementAst = createAst(inputElementCode);
+
+      if(inputElementAst) {
+        const inputElement = findByCondition<ts.JsxChild>(inputElementAst, (node: ts.Node) => {
+          return  ts.isJsxText(node) || ts.isJsxExpression(node) || ts.isJsxElement(node) || ts.isJsxSelfClosingElement(node) || ts.isJsxFragment(node);
+        });
+        
+        if(inputElement) {          
+          clearNodePosition(inputElement);
+          
+          const gridItemElement = this.createGridItemElement([inputElement]);
+
+          let newElements: ts.JsxElement[];
+          if(index && index < gridElements.length + 1){
+            newElements = [...gridElements.slice(0, index - 1), gridItemElement, ...gridElements.slice(index - 1)]
+          }else{
+            newElements = [...gridElements, gridItemElement]
+          }
+      
+          return replaceElementsToAST(
+            ast,
+            gridContainer.pos,
+            this.createGridContainer(newElements)
+          );
+        }
+      }
     }
 
-    return replaceElementsToAST(
-      ast,
-      gridContainer.pos,
-      this.createGridContainer(newElements)
-    );
+    return ast;
+
+    // Old way, TODO: remove!!
+    // let newField = this.createTextFieldElement(
+    //   property.getName(),
+    //   property.getType(),
+    //   InputType.text
+    // );
+
+    // let newElements: ts.JsxElement[];
+
+    // if(index && index < gridElements.length + 1){
+    //   newElements = [...gridElements.slice(0, index - 1), newField, ...gridElements.slice(index - 1)]
+    // }else{
+    //   newElements = [...gridElements, newField]
+    // }
+
+    // return replaceElementsToAST(
+    //   ast,
+    //   gridContainer.pos,
+    //   this.createGridContainer(newElements)
+    // );
   }
 
   private addNewField(
@@ -351,6 +392,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
   generateDetailComponent(): PageComponent | undefined {
     if(this._entity)
     {
+
       var statements = this.createStatements();
 
       var functionalComponent = this.createConstFunction(
@@ -363,13 +405,13 @@ export default class MuiDetailGenerator implements DetailGenerator {
       var uniqueFileImports = uniqueImports(this._imports);
       uniqueFileImports.push(createNameSpaceImport("React", "react"));
       uniqueFileImports.push(
-        createImportDeclaration(
+        createNamedImportDeclaration(
           "TextField, Avatar, Card, CardHeader, CardContent, Grid",
           "@material-ui/core"
         )
       );
-      uniqueFileImports.push(createImportDeclaration("useFormik", "formik"));
-      uniqueFileImports.push(createImportDeclaration("Customer", "./Customer"));
+      uniqueFileImports.push(createNamedImportDeclaration("useFormik", "formik"));
+      uniqueFileImports.push(createNamedImportDeclaration(this._entity.getName(), "./" + this._entity.getName()));
 
       return {
         functionDeclaration: functionalComponent,
@@ -401,7 +443,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
   private createInputsForEntity(): ts.JsxChild[] {
     let inputs: ts.JsxChild[] = [];
 
-    getProperties(this._entity!).forEach((property) => {
+    getProperties(this._entity).forEach((property) => {
       let propertyInput = this.tryCreateInputForProperty(property);
 
       if (propertyInput) {
@@ -459,7 +501,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
         ),
         factory.createJsxAttribute(
           factory.createIdentifier("id"),
-          factory.createStringLiteral(name)
+          factory.createStringLiteral(this._dataPropertyName + "." + name)
         ),
         factory.createJsxAttribute(
           factory.createIdentifier("type"),
@@ -584,7 +626,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
           factory.createJsxAttributes([
             factory.createJsxAttribute(
               factory.createIdentifier("id"),
-              factory.createStringLiteral(name)
+              factory.createStringLiteral(this._dataPropertyName + "." + name)
             ),
             factory.createJsxAttribute(
               factory.createIdentifier("src"),
@@ -642,7 +684,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
         ),
         factory.createJsxAttribute(
           factory.createIdentifier("id"),
-          factory.createStringLiteral(name)
+          factory.createStringLiteral(this._dataPropertyName + "." + name)
         ),
         factory.createJsxAttribute(
           factory.createIdentifier("type"),
@@ -786,13 +828,13 @@ export default class MuiDetailGenerator implements DetailGenerator {
             factory.createObjectLiteralExpression(
               [
                 factory.createPropertyAssignment(
-                  factory.createIdentifier("id"),
+                  factory.createIdentifier("'" + "id"),
                   factory.createPropertyAccessExpression(
                     factory.createPropertyAccessExpression(
                       factory.createIdentifier("formik"),
                       factory.createIdentifier("values")
                     ),
-                    factory.createIdentifier(name)
+                    factory.createIdentifier(name + "'")
                   )
                 ),
               ],
@@ -852,7 +894,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
   private creteInitialValuesForEntity() {
     let inputs: ts.PropertyAssignment[] = [];
 
-    getProperties(this._entity!).forEach((property) => {
+    getProperties(this._entity).forEach((property) => {
       let propertyInput = this.tryCreateInitialValueForProperty(property);
 
       if (propertyInput) {
@@ -874,13 +916,13 @@ export default class MuiDetailGenerator implements DetailGenerator {
       case PropertyType.string:
         assignment = factory.createPropertyAssignment(
           factory.createIdentifier(propertyName),
-          factory.createIdentifier("customer." + propertyName)
+          factory.createIdentifier(this._dataPropertyName + "." + propertyName)
         );
         break;
       case PropertyType.datetime:
         assignment = factory.createPropertyAssignment(
           factory.createIdentifier(propertyName),
-          factory.createIdentifier("customer." + propertyName)
+          factory.createIdentifier(this._dataPropertyName + "." + propertyName)
         );
         break;
     }
@@ -987,7 +1029,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
             ),
             [
               factory.createTypeReferenceNode(
-                factory.createIdentifier("Customer"),
+                factory.createIdentifier(this?._entity?.getName()!),
                 undefined
               ),
             ]
@@ -1000,7 +1042,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
                 undefined,
                 undefined,
                 undefined,
-                factory.createIdentifier("(customer)"),
+                factory.createIdentifier("(" + this._dataPropertyName + ")"),
                 undefined,
                 undefined,
                 undefined
@@ -1018,6 +1060,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
       ])
     );
   }
+
   private createTextFieldElement(
     name: string,
     text: string,
@@ -1052,6 +1095,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
       factory.createJsxClosingElement(factory.createIdentifier("Grid"))
     );
   }
+
   private getTextFieldElement(
     name: string,
     text: string,
@@ -1062,5 +1106,144 @@ export default class MuiDetailGenerator implements DetailGenerator {
     } else {
       return this.createTextFieldComponent(name, text);
     }
+  }
+
+  createInputElementFromTemplate = (property: Property, template: string = ''): string | undefined => {
+    const propName = property.getName();
+    const propType: PropertyType = PropertyType.string; // getPropertyType(property);
+
+    switch (propType) {
+      case PropertyType.string: {
+        template = `
+          <TextField 
+              id={id}
+              type="input"
+              label={T('label')} 
+              value={value} 
+              onChange={handleChange}
+              fullWidth 
+          />
+        `;
+        break;
+      }
+    }
+
+    if(template) {
+      const ast = createAst(template);
+
+      if (ast) {
+        const transformIdAttribute = (node: ts.Node) => {
+          const attributeName = 'id';
+          if (isJsxAttributeWithName(node, attributeName)) {
+            return createStringJsxAttribute(attributeName, propName)
+          }
+        };
+  
+        const transformLabelAttribute = (node: ts.Node) => {
+          const attributeName = 'label';
+          if (isJsxAttributeWithName(node, attributeName)) {
+            return createStringJsxAttribute(attributeName, propName);
+          }
+        };
+  
+        const transformValueAttribute = (node: ts.Node) => {
+          const attributeName = 'value';
+          if (isJsxAttributeWithName(node, attributeName)) {
+            return this.createValueJsxAttribute(propName, propType);
+          }
+        };
+
+        const transformOnChangeAttribute = (node: ts.Node) => {
+          const attributeName = 'onChange';
+          if (isJsxAttributeWithName(node, attributeName)) {
+            return this.createFormikOnChangeAttribute(propName);
+          }
+        };
+
+        const transformInputTemplate = (node: ts.Node) => {
+          return transformIdAttribute(node) || transformLabelAttribute(node) || transformValueAttribute(node) || transformOnChangeAttribute(node);
+        };
+
+        const transformationResult = ts.transform(ast, [transformer(transformInputTemplate)]);
+        return printSourceCode(transformationResult.transformed[0]);
+      }
+    }
+  };
+
+  private createValueJsxAttribute(
+    name: string,
+    propType: PropertyType
+  ): ts.JsxAttribute {
+    // if (this._context.formatter === Formatter.ReactIntl) {
+    //   if (type === InputType.date) {
+    //     return this.createDateValueFormattedAttribute(name);
+    //   } else {
+    //     return this.createTextValueFormattedAttribute(name);
+    //   }
+    // } else {
+    //   return this.createTextValueAttribute(name);
+    // }
+
+    return this.createFormikValueAttribute(name);
+  }
+
+  private createFormikValueAttribute(name: string): ts.JsxAttribute {
+    return factory.createJsxAttribute(
+      factory.createIdentifier("value"),
+      factory.createJsxExpression(
+        undefined,
+        factory.createPropertyAccessExpression(
+          factory.createPropertyAccessExpression(
+            factory.createIdentifier("formik"),
+            factory.createIdentifier("values")
+          ),
+          factory.createIdentifier(name)
+        )
+      )
+    );
+  }
+
+  private createFormikOnChangeAttribute(name: string): ts.JsxAttribute {
+    return factory.createJsxAttribute(
+      factory.createIdentifier("onChange"),
+      factory.createJsxExpression(
+        undefined,
+        factory.createPropertyAccessExpression(
+          factory.createIdentifier("formik"),
+          factory.createIdentifier("handleChange")
+        )
+      )
+    );
+  }
+
+  private createGridItemElement(children: readonly ts.JsxChild[]): ts.JsxElement {
+    return factory.createJsxElement(
+      factory.createJsxOpeningElement(
+        factory.createIdentifier("Grid"),
+        undefined,
+        factory.createJsxAttributes([
+          factory.createJsxAttribute(
+            factory.createIdentifier("item"),
+            undefined
+          ),
+          factory.createJsxAttribute(
+            factory.createIdentifier("md"),
+            factory.createJsxExpression(
+              undefined,
+              factory.createNumericLiteral("6")
+            )
+          ),
+          factory.createJsxAttribute(
+            factory.createIdentifier("xs"),
+            factory.createJsxExpression(
+              undefined,
+              factory.createNumericLiteral("12")
+            )
+          ),
+        ])
+      ),
+      children,
+      factory.createJsxClosingElement(factory.createIdentifier("Grid"))
+    );
   }
 }

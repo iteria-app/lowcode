@@ -1,7 +1,8 @@
 
+import { IntrospectionQuery } from "@iteria-app/graphql-lowcode/esm/generate"
 import { Project, SourceFile } from "ts-morph"
 import ts from "typescript"
-import { Property } from "../generation/entity"
+import { createEntityFromIntrospection, Entity, Property } from "../generation/entity"
 
 export function createAst(
     code:string,
@@ -43,6 +44,24 @@ export function createAst(
     }))
 
     return property ?? []
+}
+
+export function getEntityPropertyIntrospection(introspection: IntrospectionQuery,  propertyName: string, typeName = "Customer"): Property | undefined {
+  const entity: Entity | undefined = createEntityFromIntrospection(introspection, typeName)
+
+  let property: Property | undefined = undefined
+
+  if(entity){
+    let propertiesWithName = entity.properties.filter(((prop: { getName: () => string })=> { 
+      return prop.getName().toLowerCase() === propertyName 
+    }))
+
+    if(propertiesWithName){
+      property = propertiesWithName[0]
+    }
+  }
+
+  return property
 }
 
   export function parseGraphqlTypes(sourceCode: string) {
