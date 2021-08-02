@@ -173,20 +173,14 @@ export default class MuiDataTableGenerator implements TableGenerator
                           ast:SourceFile,
                           columnIndex?: number): ts.SourceFile{
 
-        // let test = this.createNewDataGridColumn(property)
+      const newColumnsDefinition = this.getNewColumnsDeclaration(columnDeclarationParent, 
+                                                                property, 
+                                                                columnIndex)
 
-        let newColumnsDefinition = this.getNewColumnsDeclaration(columnDeclarationParent, 
-                                                                 property, 
-                                                                 columnIndex)
-
-        // const newColumnsDefinition = this.setNewColumns(
-        //   columnDeclarationParent, test, columnIndex
-        // )
-
-        return replaceElementsToAST(ast, 
-                                    columnDeclarationParent.pos, 
-                                    factory.createArrayLiteralExpression(newColumnsDefinition))
-        }
+      return replaceElementsToAST(ast, 
+        columnDeclarationParent.pos, 
+        factory.createArrayLiteralExpression(newColumnsDefinition))
+    }
 
     private getNewColumnsDeclaration(columnDeclarationParent: ts.ArrayLiteralExpression, 
       property: Property,
@@ -195,7 +189,7 @@ export default class MuiDataTableGenerator implements TableGenerator
         let oldElements = columnDeclarationParent.elements
         
         let newColumnDefinition = this.createNewDataGridColumn(property) as ts.ObjectLiteralExpression // this.createColumnDefinition(property, this.getUsedFormatter(columnDeclarationParent))
-        console.log(newColumnDefinition)
+
         if(columnIndex && columnIndex > 0 && columnIndex < oldElements.length + 1){
           newElements = [...oldElements.slice(0, columnIndex-1), 
                          newColumnDefinition, 
@@ -205,24 +199,6 @@ export default class MuiDataTableGenerator implements TableGenerator
         }
 
         return newElements
-    }
-
-    private setNewColumns(columns: ts.ArrayLiteralExpression, 
-      child: ts.JsxChild,
-      columnIndex?: number  
-    ) {
-      let newElements = []
-      let oldElements = columns.elements
-
-      if (columnIndex && columnIndex > 0 && columnIndex < oldElements.length + 1) {
-        newElements = [...oldElements.slice(0, columnIndex - 1), 
-          child,
-          ...oldElements.slice(columnIndex - 1)
-        ]
-      } else {
-        newElements = [...oldElements, child]
-      }
-      return newElements
     }
 
     private getUsedFormatter(columnsDefinition:  ts.ArrayLiteralExpression): Formatter {
@@ -345,7 +321,7 @@ export default class MuiDataTableGenerator implements TableGenerator
       let propertiesColumnDefinitions = Array<ts.ObjectLiteralExpression>()
 
       getProperties(this._entity!).forEach(property => {
-        propertiesColumnDefinitions.push(this.createColumnDefinition(property, this._context.formatter??Formatter.None))
+        propertiesColumnDefinitions.push(this.createNewDataGridColumn(property) as ts.ObjectLiteralExpression) // this.createColumnDefinition(property, this._context.formatter??Formatter.None)
       });
 
       return factory.createVariableDeclarationList(
@@ -362,127 +338,62 @@ export default class MuiDataTableGenerator implements TableGenerator
       )
     }
 
-    private createColumnDefinition(property: Property, formatter: Formatter): ts.ObjectLiteralExpression {
-      let propertyName = property.getName()
-      let propType: PropertyType = PropertyType.string
-      let muiColumnType = 'string'
+    // private getHeaderRender(property: Property): ts.ArrowFunction {
+    //   let declaration = this._helper.addImportDeclaration('GridColParams', muiDataGrid)
 
-      // this.addNewDataGridColumn(
-      //   undefined,
-      //   undefined,
-      //   property,
-      //   undefined,
-      // )
+    //   this._imports.push(declaration)
 
-
-      //TODO: datetime is not working for numbers, find out why
-      // switch(propType) {
-      //   case PropertyType.currency:
-      //   case PropertyType.numeric:
-      //     muiColumnType = 'number'
-      //     break
-      //   case PropertyType.date:
-      //   case PropertyType.datetime:
-      //     muiColumnType = 'date'
-      //     break
-      // }
-
-      let properties : ts.ObjectLiteralElementLike[] = 
-      [ 
-        factory.createPropertyAssignment(
-        factory.createIdentifier("field"),
-        factory.createStringLiteral(propertyName)
-        ),
-        factory.createPropertyAssignment(
-          factory.createIdentifier("flex"),
-          factory.createNumericLiteral(1)
-          ),
-        factory.createPropertyAssignment(
-          factory.createIdentifier("type"),
-          factory.createStringLiteral(muiColumnType)
-        )
-      ];
-
-      if(formatter === Formatter.ReactIntl){
-        properties.push(factory.createPropertyAssignment(
-          factory.createIdentifier("valueFormatter"),
-          this.getValueFormatter(property)
-        ))
-
-        properties.push(factory.createPropertyAssignment(
-          factory.createIdentifier("renderHeader"),
-          this.getHeaderRender(property)
-        ))
-      }else{
-        properties.push(factory.createPropertyAssignment(
-          factory.createIdentifier("headerName"),
-          factory.createStringLiteral(property.getName())
-        ))
-      }
-
-      let expression = factory.createObjectLiteralExpression(
-        properties,
-        false
-      )
-
-      return expression;
-    }
-
-    private getHeaderRender(property: Property): ts.ArrowFunction {
-      let declaration = this._helper.addImportDeclaration('GridColParams', muiDataGrid)
-
-      this._imports.push(declaration)
-
-      let localizedProperty = this._intlFormatter.localizePropertyNameUsingTag(property, this._entity)
+    //   let localizedProperty = this._intlFormatter.localizePropertyNameUsingTag(property, this._entity)
       
-      return factory.createArrowFunction(
-        undefined,
-        undefined,
-        [factory.createParameterDeclaration(
-          undefined,
-          undefined,
-          undefined,
-          factory.createIdentifier("params"),
-          undefined,
-          factory.createTypeReferenceNode(
-            factory.createIdentifier("GridColParams"),
-            undefined
-          ),
-          undefined
-        )],
-        undefined,
-        factory.createToken(ts.SyntaxKind.EqualsGreaterThanToken),
-        factory.createParenthesizedExpression(localizedProperty)
-      )
-    }
+    //   return factory.createArrowFunction(
+    //     undefined,
+    //     undefined,
+    //     [factory.createParameterDeclaration(
+    //       undefined,
+    //       undefined,
+    //       undefined,
+    //       factory.createIdentifier("params"),
+    //       undefined,
+    //       factory.createTypeReferenceNode(
+    //         factory.createIdentifier("GridColParams"),
+    //         undefined
+    //       ),
+    //       undefined
+    //     )],
+    //     undefined,
+    //     factory.createToken(ts.SyntaxKind.EqualsGreaterThanToken),
+    //     factory.createParenthesizedExpression(localizedProperty)
+    //   )
+    // }
 
-    private getValueFormatter(prop: Property): ts.ArrowFunction {
-      return factory.createArrowFunction(
-        undefined,
-        undefined,
-        [factory.createParameterDeclaration(
-          undefined,
-          undefined,
-          undefined,
-          factory.createObjectBindingPattern([factory.createBindingElement(
-            undefined,
-            undefined,
-            factory.createIdentifier("value"),
-            undefined
-          )]),
-          undefined,
-          undefined,
-          undefined
-        )],
-        undefined,
-        factory.createToken(ts.SyntaxKind.EqualsGreaterThanToken),
-        this._intlFormatter.formatPropertyUsingImperative(prop, factory.createIdentifier("value"), factory.createIdentifier("value"))
-      )
-    }
+    // private getValueFormatter(prop: Property): ts.ArrowFunction {
+    //   return factory.createArrowFunction(
+    //     undefined,
+    //     undefined,
+    //     [factory.createParameterDeclaration(
+    //       undefined,
+    //       undefined,
+    //       undefined,
+    //       factory.createObjectBindingPattern([factory.createBindingElement(
+    //         undefined,
+    //         undefined,
+    //         factory.createIdentifier("value"),
+    //         undefined
+    //       )]),
+    //       undefined,
+    //       undefined,
+    //       undefined
+    //     )],
+    //     undefined,
+    //     factory.createToken(ts.SyntaxKind.EqualsGreaterThanToken),
+    //     this._intlFormatter.formatPropertyUsingImperative(prop, factory.createIdentifier("value"), factory.createIdentifier("value"))
+    //   )
+    // }
 
     private createNewDataGridColumn(
       property: Property
     ): ts.ObjectLiteralExpression | undefined {
+
       const template = this.createTemplateForColumn(property)
       if (template) {
         const tree = createAst(template)
@@ -492,8 +403,7 @@ export default class MuiDataTableGenerator implements TableGenerator
           })
           if (columnElement) {
             this.clearNodePosition(columnElement)
-            const obj = this.createLiteralGridColumn(columnElement)
-            return obj
+            return this.createLiteralGridColumn(columnElement)
           }
         }
       }
@@ -504,9 +414,27 @@ export default class MuiDataTableGenerator implements TableGenerator
     private createTemplateForColumn(property: Property) {
       const name = property.getName()
       const type = property.getType() as any
+      // let columnsIdentifier = factory.createIdentifier("columns")
+      // console.log(this.createTemplateForDataGrid(this.createColumns(columnsIdentifier),this._helper.getInputParameterIdentifier(this._entity!)))
 
-      let template = `{ field: "${name}" flex: ${1} type: "${type._compilerType.intrinsicName}" valueFormatter: ({ value }) => value renderHeader: ${this.renderHeaderTemplate(property)}}`
-
+      let template = ``
+      switch(type.getText()) {
+        case("string"):
+        case("number"):
+        case("boolean"):
+          template = `{ field: "${name}" flex: ${1} type: "${type.getText()}" valueFormatter: ({ value }) => value renderHeader: ${this.renderHeaderTemplate(property)}}`
+          break
+        case("date"):
+        case("any"):
+          template = `{ field: "${name}" flex: ${1} type: "${type.getText()}" valueFormatter: ({ value }) => intl.formatDate(value) renderHeader: ${this.renderHeaderTemplate(property)}}`
+          break
+        case("dateTime"):
+          template = `{ field: "${name}" flex: ${1} type: "${type.getText()}" valueFormatter: ({ value }) => intl.formatDate(value) + ", " + intl.formatTime(value) renderHeader: ${this.renderHeaderTemplate(property)}}`
+          break
+        default:
+          template = ''
+      }
+      
       return template
     }
 
@@ -520,14 +448,36 @@ export default class MuiDataTableGenerator implements TableGenerator
 
 
     private createLiteralGridColumn(element: any) {
-      console.log(element.statements)
+      let el : any = []
+      for (let i in element.statements) {
+        if (element.statements[i].kind !== undefined) {
+          el.push(
+            factory.createPropertyAssignment(
+              element.statements[i].label.escapedText,
+              element.statements[i].statement.expression
+            )
+          )
+        }
+      }
+
       return factory.createObjectLiteralExpression(
-        element.statements,
+        el,
         false
       )
     }
 
     private renderHeaderTemplate(property: Property) {
+      let declaration = this._helper.addImportDeclaration('GridColParams', muiDataGrid)
+      this._imports.push(declaration)
       return `(params : GridColsParams) => (<FormattedMessage id="${this._entity?.getName()}" defaultMessage="${property.getName()}"/>)`
+    }
+
+    private createTemplateForDataGrid(columns: ts.VariableDeclarationList, rows: ts.Identifier) {
+      let declaration = this._helper.addImportDeclaration('DataGrid', muiDataGrid)
+      this._imports.push(declaration)
+
+      let template = `<DataGrid columns={${columns}} rows={${rows}}/>`
+      console.log(template)
+      return template
     }
 }

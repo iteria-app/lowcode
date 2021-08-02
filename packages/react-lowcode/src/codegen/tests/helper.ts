@@ -39,7 +39,7 @@ export function createAst(
     const testEntity = sourceFileEntity(myClassFile, typeName)
     
     let property = testEntity?.properties.filter(((prop: { getName: () => string })=> { 
-      return prop.getName().toLowerCase() === name 
+      return prop.getName().toLowerCase() === name.toLowerCase()
     }))
 
     return property ?? []
