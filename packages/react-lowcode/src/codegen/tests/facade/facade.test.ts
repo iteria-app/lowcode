@@ -1,12 +1,12 @@
-import { sourceFileEntity, getEntityProperty, parseGraphqlTypes } from "../helper";
+import { sourceFileEntity, getEntityProperty, parseGraphqlTypes, getEntityPropertyIntrospection } from "../helper";
 import { graphqlGenTs1 } from "../typeAlias.example";
 import { deleteColumn, insertColumn, insertColumnToBasicTableGrommet, insertColumnToBasicTableMui, insertColumnToDataTableGrommet, insertFormWidget } from "../../facade/facadeApi";
 import { CodegenRw } from "../../io/codegenRw";
 import { SourceLineCol } from "../../../ast";
 import { FacadeInsertOptions } from "../../facade/interfaces";
 import { TestListHelper } from "../list/list-helper";
-import { Formatter } from "../../definition/context-types";
-import { TestFacadeHelper } from "./facade-helper";
+import { is2 } from "../introspection-example"
+import { Property } from "../../generation/entity";
 
 describe("codegen facade tests", () => {
   describe(".add column", () => {
@@ -178,12 +178,15 @@ describe("codegen facade tests", () => {
       
         test(".add column (UiFramework.MaterialUI) (TableType.DataTable) (Formatter.ReactIntl) (defined position)", async () => {
           const tablePosition: SourceLineCol = {
-            lineNumber: 15,
-            columnNumber: 73,
+            lineNumber: 10,
+            columnNumber: 61,
             fileName: 'src/codegen/tests/facade/files/mui/data-table/react-intl/add-column.txt'
           };
+
+          const property: Property | undefined = getEntityPropertyIntrospection(is2.data.__schema, 'testdate')
+
           const options: FacadeInsertOptions = {
-            entityField: getEntityProperty(graphqlGenTs1, 'testdate')[0],
+            entityField: property!,
             index: 1
           };
       
@@ -229,7 +232,7 @@ describe("codegen facade tests", () => {
       };
 
       const result = await insertFormWidget(formPosition, options, new CodegenRw());
-      const a = TestFacadeHelper.getFormikInitialValues(result);
+      //const a = TestFacadeHelper.getFormikInitialValues(result);
 
       console.log(result);
     });

@@ -1,8 +1,9 @@
 import ts, { ArrayLiteralExpression, factory, Node } from "typescript"
 import { addElementsToAST, createAst, findByCondition, replaceElementsToAST } from "../../../../ast"
 import { printSourceCode } from "../../../ast/ast"
-import { createImportDeclaration, createNamedImportDeclaration, existsImportWithNamespace } from "../../../ast/imports"
+import { createImportDeclaration, existsImportWithNamespace } from "../../../ast/imports"
 import { createJsxSelfclosingElement } from "../../../ast/jsxElements"
+import path from 'path'
 
 export function generateNewRoute(routeDefinitionSource: string, 
                                  componentRouteUri:string, 
@@ -25,7 +26,10 @@ function addComponentRoute(ast:ts.SourceFile,
                            componentName:string,
                            componentPath: string): ts.SourceFile{
 
-    let alteredSource =  addImport(ast, componentName, componentPath)
+    let importNamespace = componentPath
+    importNamespace = componentPath.replace(path.extname(importNamespace), '')
+
+    let alteredSource =  addImport(ast, componentName, importNamespace)
 
     const definition = findByCondition<Node>(ast, (node: Node) => {
         return (ts.isPropertyAssignment(node) && node.name.getText() == 'children')

@@ -27,3 +27,11 @@ export function createUseQueryExpression(hookName: string, variables?: string[])
     )]
   )
 }
+
+export const isUseQueryHook = (node: ts.Node, name: string): boolean | undefined => {
+  if(ts.isCallExpression(node)) {
+    if(node.expression.getFullText().indexOf(name) > 0) {
+      return true
+    }
+  }
+}
