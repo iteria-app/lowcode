@@ -507,10 +507,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
           factory.createIdentifier("type"),
           factory.createStringLiteral("input")
         ),
-        factory.createJsxAttribute(
-          factory.createIdentifier("label"),
-          factory.createStringLiteral(name)
-        ),
+        this.getLabelValueAttribute(name),
         this.getTextValueAttribute(name, InputType.text),
         factory.createJsxAttribute(
           factory.createIdentifier("onChange"),
@@ -742,6 +739,16 @@ export default class MuiDetailGenerator implements DetailGenerator {
     }
   }
 
+  private getLabelValueAttribute(
+    name: string
+  ): ts.JsxAttribute {
+    if (this._context.formatter === Formatter.ReactIntl) {
+        return this.createLabelValueFormattedAttribute(name);
+    } else {
+        return this.createLabelValueAttribute(name);
+    }
+  }
+
   private createCardElement(elements: ts.JsxChild[]): ts.JsxElement {
     return factory.createJsxElement(
       factory.createJsxOpeningElement(
@@ -859,6 +866,44 @@ export default class MuiDetailGenerator implements DetailGenerator {
         )
       )
     );
+  }
+  private createLabelValueFormattedAttribute(name: string) : ts.JsxAttribute{
+    return factory.createJsxAttribute(
+      factory.createIdentifier("label"),
+      factory.createJsxExpression(
+        undefined,
+        factory.createCallExpression(
+          factory.createPropertyAccessExpression(
+            factory.createIdentifier("intl"),
+            factory.createIdentifier("formatMessage")
+          ),
+          undefined,
+          [
+            factory.createObjectLiteralExpression(
+              [
+                factory.createPropertyAssignment( 
+                  factory.createIdentifier("'" + "id"),
+                  factory.createPropertyAccessExpression(
+                    factory.createPropertyAccessExpression(
+                      factory.createIdentifier("formik"),
+                      factory.createIdentifier("values")
+                    ),
+                    factory.createIdentifier(name + "'")
+                  )
+                ),
+              ],
+              false
+            ),
+          ]
+        )
+      )
+    );
+  }
+  private createLabelValueAttribute(name: string): ts.JsxAttribute{
+    return factory.createJsxAttribute(
+      factory.createIdentifier("label"),
+      factory.createStringLiteral(name)
+      )
   }
   private createFormikWrapper(formik: ts.JsxElement) {
     return factory.createJsxElement(
