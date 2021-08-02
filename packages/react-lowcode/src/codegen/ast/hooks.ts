@@ -1,15 +1,14 @@
 import { Hook } from "../../ast/hooks"
-import { createImportDeclaration } from "./imports"
+import { createNamedImportDeclaration } from "./imports"
 import ts, { factory } from "typescript"
 
 export function defineHook(defaultInstanceName: string, hookName: string, packageName: string): Hook {
-  let importDeclaration = createImportDeclaration(hookName, packageName)
-
-  return {
-    hookName: hookName,
-    defaultInstanceName,
-    importDeclaration
-  }
+    let importDeclaration = createNamedImportDeclaration(hookName, packageName)
+    return {
+      hookName: hookName,
+      defaultInstanceName,
+      importDeclaration
+    }
 }
 
 export function createUseQueryExpression(hookName: string, variables?: string[]): ts.CallExpression {

@@ -2,78 +2,162 @@ import { AppGenerator } from './generation/generators/app-generator'
 import { UiFramework, TableType, Formatter } from './definition/context-types'
 import { CodeDir, CodeRW } from '../io'
 import ts, { factory } from "typescript"
-import { Property } from './generation/entity/index'
+import { Entity, createEntityFromIntrospection } from './generation/entity/index'
 import { CodegenOptions } from './interfaces'
 import TemplateResolver from './generation/generators/template/template-resolver'
-import { IntrospectionQuery, getNestedOfType, generateGraphqlFile, getEntity, getQueryNames } from '@iteria-app/graphql-lowcode/src/generate'
+import { IntrospectionQuery, generateGraphqlFile } from '@iteria-app/graphql-lowcode/esm/generate'
+import { getListComponentName, getListPageComponentName, getPluralizedEntityName } from './generation/entity/helper'
+import { generateMenuItem, generateRoute } from './facade/facadeApi'
 
 // generates CRUD React pages (master-detail, eg. orders list, order detail form) from typescript
-export function generatePages(introspection: IntrospectionQuery, io: CodeRW & CodeDir, options?: CodegenOptions) {
-  const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
+export function generatePages(introspection: IntrospectionQuery, 
+                              io: CodeRW & CodeDir, 
+                              options?: CodegenOptions) {
 
-  options?.names.map(name => {
-    //generates graphql queries for each entity name in props
-    const graphqlQueries = generateGraphqlFile(introspection, name)
-    if (graphqlQueries != '') io.writeFile(`./src/views/${name}/${name}.graphql`, graphqlQueries)
+    options?.names.map((typeName) => {
+        const entity: Entity | undefined = createEntityFromIntrospection(introspection, typeName)
 
-    const entityType = getEntity(introspection.types, name)
+        if (entity) {
+            const componentStorageRoot = options?.componentStoragePath ?? 'src/components'
+            const routeDefinitionFilePath = options?.routeDefinitionFilePath ?? 'src/routes.tsx'
+            const menuDefinitionFilePath = options?.menuDefinitionFilePath ?? 'src/layouts/DashboardLayout/NavBar/index.tsx'
+            const entityListComponentPageName = getListPageComponentName(entity)
+            const listComponentName = getListComponentName(entity)
+            const listComponentFilePath = `${componentStorageRoot}/${listComponentName}.tsx`
+            const listPageComponentFilePath = `${componentStorageRoot}/${entityListComponentPageName}.tsx`
+            const moduleName = getPluralizedEntityName(entity.getName())
+            const moduleRouteUri = `codegen-${moduleName}`
 
-    if (entityType && entityType.fields) {
-      const entityName = entityType.name
+            //generate graphql queries
+            const graphqlQueries = generateGraphqlFile(introspection, typeName)
 
-      let props: Property[] = []
-      entityType.fields.forEach(field => {
-        const propName = field.name
-        const propType = getNestedOfType(field).name ?? ''
+            if (graphqlQueries != '') 
+                io.writeFile(`${componentStorageRoot}/${typeName}.graphql`, graphqlQueries)
 
-        props = [...props, { getName: () => propName, getType: () => propType }]
-      })
+            //generate component for list
+            generateListComponent(io, 
+                                  listComponentFilePath,
+                                  entity, 
+                                  options)
 
-      const entity = {
-        getName: () => entityName,
-        properties: props
-      }
+            //generate page for list component
+            generateListPage(io, 
+                             entity, 
+                             typeName, 
+                             options.pageListTemplate, 
+                             listPageComponentFilePath);
 
-      let context = { uiFramework: UiFramework.MaterialUI, formatter: Formatter.None, index: { tableType: TableType.BasicTable, height: "400px" } };
+            //generate route for generated list page
+            addNewListRoute(io, 
+                            routeDefinitionFilePath, 
+                            moduleRouteUri, 
+                            entityListComponentPageName, 
+                            listPageComponentFilePath)
 
-      const generator = new AppGenerator(context, entity)
-      const page = generator.generateListComponent(/* TODO entity / type name should be input - not in context */)
+            //generate new menu item for generated list page
+            addNewMenuItem(io,
+                           menuDefinitionFilePath, 
+                           moduleName, 
+                           '/app/' + moduleRouteUri)
+        }
+    })
+}
 
-      const filePath = `src/components/${name}.tsx`
-      const sourceFile = ts.createSourceFile(
+function generateListComponent(io: CodeRW, 
+                               filePath: string,
+                               entity: Entity, 
+                               options?:CodegenOptions) {
+    let context = {
+        uiFramework: options?.uiFramework ?? UiFramework.MaterialUI, 
+        formatter: Formatter.None, 
+        index: {
+            tableType: options?.tableType ?? TableType.BasicTable, 
+            height: "400px"
+        }
+    }
+
+    console.log(`GENERATOR: selected table type: ${context.index.tableType}`)
+        
+    const generator = new AppGenerator(context, entity)
+    const page = generator.generateListComponent(/* TODO entity / type name should be input - not in context */)
+    
+    const sourceFile = ts.createSourceFile(
         filePath,
         '',
         ts.ScriptTarget.ESNext,
         true,
         ts.ScriptKind.TSX
-      )
+    )
 
-      const pageSourceCode = printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page!.imports, page!.functionDeclaration]), sourceFile)
+    const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
 
-      console.log(`table for ${name} was generated: ${pageSourceCode}`)
-      io.writeFile(filePath, pageSourceCode)
+    const pageSourceCode = printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page!.imports, page!.functionDeclaration]), sourceFile)
+    
+    io.writeFile(filePath, pageSourceCode)
+}
 
-      //generate list wrapper
-      const templateResolver = new TemplateResolver(entity, introspection);
-      const listWrapper = templateResolver.generateListPage(options.pageListTemplate);
+function generateListPage(io: CodeRW, 
+                          entity: Entity, 
+                          typeName:string,
+                          pageListTemplateSource: string,
+                          listPageFilePath: string) {
+    const templateResolver = new TemplateResolver(entity);
+    const listPage = templateResolver.generateListPage(pageListTemplateSource);
 
-      if (listWrapper) {
-        const listWrapperFilePath = `src/components/${name}Page.tsx`
-        const sourceFileWrapperSourceFile = ts.createSourceFile(
-          listWrapperFilePath,
-          listWrapper,
-          ts.ScriptTarget.ESNext,
-          true,
-          ts.ScriptKind.TSX
+    if(listPage) {
+        const listPageSourceFile = ts.createSourceFile(
+            listPageFilePath,
+            listPage,
+            ts.ScriptTarget.ESNext,
+            true,
+            ts.ScriptKind.TSX
         )
+    
+        const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
 
-        // TODO:PC: Need print here? or only: io.writeFile(listWrapperFilePath, listWrapper)
-        const wrapperPageSourceCode = printer.printFile(sourceFileWrapperSourceFile);
+        const generatedSourceCode = printer.printFile(listPageSourceFile);
 
-        console.log(`page for ${name} table was generated: ${wrapperPageSourceCode}`)
-
-        io.writeFile(listWrapperFilePath, wrapperPageSourceCode)
-      }
+        io.writeFile(listPageFilePath, generatedSourceCode)
     }
-  })
+}
+
+function addNewListRoute(io:CodeRW,
+                         routeDefinitionFilePath: string,
+                         moduleRouteUri: string, 
+                         componentName: string,
+                         componentFilePath: string){
+    generateRoute(
+        { 
+            routeFilePath: routeDefinitionFilePath, 
+            componentName: componentName, 
+            componentFilePath: componentFilePath, 
+            componentRouteUri: moduleRouteUri
+        }, 
+        io).then(generatedSource => {
+            if(generatedSource){
+                io.writeFile(routeDefinitionFilePath, generatedSource)
+            }
+        }
+    )
+}
+
+function addNewMenuItem(io:CodeRW, 
+                        menuDefinitionFilePath: string,
+                        itemTitle: string, 
+                        itemUri: string, 
+                        icon?: string)
+{
+    generateMenuItem(
+        {
+            menuDefinitionFilePath: menuDefinitionFilePath,
+            itemTitle: itemTitle,
+            itemUri: itemUri,
+            itemIcon: icon
+        }, 
+        io)
+    .then(generatedSource => {
+        if(generatedSource){
+            io.writeFile(menuDefinitionFilePath, generatedSource)
+        }
+    })
 }

@@ -5,13 +5,14 @@ import {
 import { DetailComponentDefinitionBase } from "../../../definition/detail-definition-core";
 import { Formatter } from "../../../definition/context-types";
 import { Entity, getProperties, Property } from "../../entity";
-import { createImportDeclaration, createNameSpaceImport, uniqueImports } from "../../../ast/imports";
+import { createNamedImportDeclaration, createNameSpaceImport, uniqueImports } from "../../../ast/imports";
 import { GeneratorHelper } from "../helper";
 import ReactIntlFormatter from "../../react-components/react-intl/intl-formatter";
 import { GrommetDetailComponents } from "../../../definition/grommet/detail";
 import { DetailGenerator } from "../detail/detail-generator-factory";
 import { getPropertyType, PropertyType } from "../../graphql/typeAlias";
 import GenerationContext from "../../context/context";
+import { getEntityName } from "../../entity/helper";
 
 export default class GrommetDetailGenerator
   implements DetailGenerator {
@@ -20,12 +21,14 @@ export default class GrommetDetailGenerator
   private _context: GenerationContext
   private _entity: Entity
   private _intlFormatter: ReactIntlFormatter
+  private _dataPropertyName: string;
 
   constructor(generationContext: GenerationContext, entity: Entity) {
     this._helper = new GeneratorHelper(generationContext, this._imports)
     this._context = generationContext
     this._entity = entity
     this._intlFormatter = new ReactIntlFormatter(generationContext, this._imports)
+    this._dataPropertyName = getEntityName(this._entity)
   }
   getDetailDefinition(): DetailComponentDefinitionBase {
     return GrommetDetailComponents;
@@ -46,21 +49,21 @@ export default class GrommetDetailGenerator
       createNameSpaceImport("React", "react")
     );
     uniqueFileImports.push(
-      createImportDeclaration(
+      createNamedImportDeclaration(
         "TextInput",
         "grommet"
       )
     );
     uniqueFileImports.push(
-      createImportDeclaration("useFormik", "formik")
+      createNamedImportDeclaration("useFormik", "formik")
     );
 
     uniqueFileImports.push(
-      createImportDeclaration("useIntl", "react-intl")
+      createNamedImportDeclaration("useIntl", "react-intl")
     );
 
     uniqueFileImports.push(
-      createImportDeclaration("Customer", "./Customer")
+      createNamedImportDeclaration(this._entity.getName(), "./" + this._entity.getName())
     );
 
     return { functionDeclaration: functionalComponent, imports: uniqueFileImports };
@@ -127,7 +130,7 @@ export default class GrommetDetailGenerator
       factory.createJsxAttributes([
         factory.createJsxAttribute(
           factory.createIdentifier("id"),
-          factory.createStringLiteral(name)
+          factory.createStringLiteral(this._dataPropertyName + "." + name)
         ),
         factory.createJsxAttribute(
           factory.createIdentifier("type"),
@@ -149,13 +152,13 @@ export default class GrommetDetailGenerator
               undefined,
               [factory.createObjectLiteralExpression(
                 [factory.createPropertyAssignment(
-                  factory.createIdentifier("id"),
+                  factory.createIdentifier("'" + "id"),
                   factory.createPropertyAccessExpression(
                     factory.createPropertyAccessExpression(
                       factory.createIdentifier("formik"),
                       factory.createIdentifier("values")
                     ),
-                    factory.createIdentifier(text)
+                    factory.createIdentifier(text + "'")
                   )
                 )],
                 false
@@ -317,13 +320,13 @@ export default class GrommetDetailGenerator
       case PropertyType.string:
         assignment = factory.createPropertyAssignment(
           factory.createIdentifier(propertyName),
-          factory.createIdentifier("customer." + propertyName)
+          factory.createIdentifier(this._dataPropertyName + "." + propertyName)
         );
         break;
       case PropertyType.datetime:
         assignment = factory.createPropertyAssignment(
           factory.createIdentifier(propertyName),
-          factory.createIdentifier("customer." + propertyName)
+          factory.createIdentifier(this._dataPropertyName + "." + propertyName)
         );
         break;
     }
@@ -348,7 +351,7 @@ export default class GrommetDetailGenerator
             ),
             [
               factory.createTypeReferenceNode(
-                factory.createIdentifier("Customer"),
+                factory.createIdentifier(this._entity.getName()),
                 undefined
               ),
             ]
@@ -361,7 +364,7 @@ export default class GrommetDetailGenerator
                 undefined,
                 undefined,
                 undefined,
-                factory.createIdentifier("(customer)"),
+                factory.createIdentifier("(" + this._dataPropertyName + ")"),
                 undefined,
                 undefined,
                 undefined

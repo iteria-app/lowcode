@@ -1,4 +1,4 @@
-import ts from "typescript";
+import ts, { factory, JsxChild } from "typescript";
 
 export const isImportDeclarationWithName = (node: ts.Node, name: string): boolean | undefined => {
   if (ts.isImportDeclaration(node)) {
@@ -17,6 +17,31 @@ export const isImportDeclarationWithName = (node: ts.Node, name: string): boolea
   }
 }
 
+export const isFunctionDeclarationWithName = (node: ts.Node, name: string): boolean | undefined => {
+  if (ts.isFunctionDeclaration(node)) {
+      if (node.name?.escapedText === name) {
+          return true;
+      }
+  }
+}
+
+export const isJsxAttributeWithName = (node: ts.Node, name: string): boolean | undefined => {
+  if(ts.isJsxAttribute(node)) {
+      return node.name.escapedText === name;
+  }
+}
+
+export const isJsxChild = (node: ts.Node): boolean => {
+  return ts.isJsxText(node) || ts.isJsxExpression(node) || ts.isJsxElement(node) || ts.isJsxSelfClosingElement(node) || ts.isJsxFragment(node);
+}
+
+export const createStringJsxAttribute = (name: string, value: string) => {
+  return factory.createJsxAttribute(
+      factory.createIdentifier(name),
+      factory.createStringLiteral(value)
+    );
+}
+
 export const isOpeningOrSelfClosingElementWithName = (node: ts.Node, name: string): boolean | undefined => {
     if (ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) {
         if (ts.isIdentifier(node.tagName)) {
@@ -25,4 +50,11 @@ export const isOpeningOrSelfClosingElementWithName = (node: ts.Node, name: strin
             }
         }
     }
+}
+export const clearNodePosition = (node: ts.Node): void => {
+    ts.setTextRange(node, { pos: -1, end: -1 });
+
+    node.forEachChild((child: ts.Node) => {
+        clearNodePosition(child);
+    });
 }
