@@ -1090,7 +1090,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
     const propName = property.getName();
     const propType: PropertyType = PropertyType.string; // getPropertyType(property);
 
-    if(template !== '') {
+    if(template === '') {
       template = this.getDefaultInputTemplateByPropertyType(propType);
     }
 
@@ -1153,12 +1153,12 @@ export default class MuiDetailGenerator implements DetailGenerator {
           
             return (
               <TextField
+                  fullWidth
                   id="id"
                   type="input"
                   label={T('label')} 
                   value={value} 
                   onChange={handleChange}
-                  fullWidth 
               />
             );
           };        
