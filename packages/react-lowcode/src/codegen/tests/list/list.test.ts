@@ -31,172 +31,189 @@ class testDemoWriter implements CodeRW, CodeDir {
 
 describe("table generation", () => {
   
-  test (".test table generation from index", ()=>{
+//   test (".test table generation from index", ()=>{
 
-    var testWriter = new testDemoWriter()
+//     var testWriter = new testDemoWriter()
 
-    const io = new CodegenRw()
-    const template = fs.readFileSync(path.resolve('src/codegen/tests/list/files/page-list-template.txt'), 'utf-8')
+//     const io = new CodegenRw()
+//     const template = fs.readFileSync(path.resolve('src/codegen/tests/list/files/page-list-template.txt'), 'utf-8')
     
-    var options = {names:['Customer'], pageListTemplate: template}
-    // @ts-ignore
-    generatePages(graphqlGenTs1, testWriter, options)
+//     var options = {names:['Customer'], pageListTemplate: template}
+//     // @ts-ignore
+//     generatePages(graphqlGenTs1, testWriter, options)
 
-    console.log('generated:' + testWriter.getSourceString())
-  });
+//     console.log('generated:' + testWriter.getSourceString())
+//   });
 
-  test(".mui table generation without formatting", () => {
-      const sourceFile = createAst('')
-      const myClassFile = parseGraphqlTypes(graphqlGenTs1)
-      const testEntity = sourceFileEntity(myClassFile)
+//   test(".mui table generation without formatting", () => {
+//       const sourceFile = createAst('')
+//       const myClassFile = parseGraphqlTypes(graphqlGenTs1)
+//       const testEntity = sourceFileEntity(myClassFile)
 
-      let generationContext = {uiFramework: UiFramework.MaterialUI, formatter: Formatter.None, index: {tableType: TableType.BasicTable, height: "400px"}};
-      let generator = new AppGenerator(generationContext, testEntity!);
+//       let generationContext = {uiFramework: UiFramework.MaterialUI, formatter: Formatter.None, index: {tableType: TableType.BasicTable, height: "400px"}};
+//       let generator = new AppGenerator(generationContext, testEntity!);
 
-      const page = generator.generateListComponent()
+//       const page = generator.generateListComponent()
       
-      /*ts.transform(sourceFile, [
-          (context) => (node) => {
-            return ts.visitNode(node, n => {
-              return node
-            })
-          }
-        ])*/
-      // TODO https://github.com/vvakame/typescript-formatter/blob/master/lib/formatter.ts
-      const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
+//       /*ts.transform(sourceFile, [
+//           (context) => (node) => {
+//             return ts.visitNode(node, n => {
+//               return node
+//             })
+//           }
+//         ])*/
+//       // TODO https://github.com/vvakame/typescript-formatter/blob/master/lib/formatter.ts
+//       const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
 
-      console.log('generated:', printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page!.imports, page!.functionDeclaration]), sourceFile))
-  });
+//       console.log('generated:', printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page!.imports, page!.functionDeclaration]), sourceFile))
+//   });
 
-  test(".mui table generation with formatting", () => {
+//   test(".mui table generation with formatting", () => {
+//     const sourceFile = createAst('')
+//     const myClassFile = parseGraphqlTypes(graphqlGenTs1)
+//     const testEntity = sourceFileEntity(myClassFile)
+
+//     let generationContext = {uiFramework: UiFramework.MaterialUI, formatter: Formatter.ReactIntl, index: {tableType: TableType.BasicTable, height: "400px"}};
+//     let generator = new AppGenerator(generationContext, testEntity!!);
+
+//     const page = generator.generateListComponent()
+
+//     /*ts.transform(sourceFile, [
+//         (context) => (node) => {
+//           return ts.visitNode(node, n => {
+//             return node
+//           })
+//         }
+//       ])*/
+//     // TODO https://github.com/vvakame/typescript-formatter/blob/master/lib/formatter.ts
+//     const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
+
+//     console.log('generated:', printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page!.imports, page!.functionDeclaration]), sourceFile))
+// });
+
+// test(".grommet table generation without formatting", () => {
+//   const sourceFile = createAst('')
+//   const myClassFile = parseGraphqlTypes(graphqlGenTs1)
+//   const testEntity = sourceFileEntity(myClassFile)
+
+//   let generationContext = {uiFramework: UiFramework.Grommet, formatter: Formatter.None, index: {tableType: TableType.BasicTable, height: "400px"}};
+//   let generator = new AppGenerator(generationContext, testEntity!!);
+
+//   const page = generator.generateListComponent()
+  
+//   /*ts.transform(sourceFile, [
+//       (context) => (node) => {
+//         return ts.visitNode(node, n => {
+//           return node
+//         })
+//       }
+//     ])*/
+//   // TODO https://github.com/vvakame/typescript-formatter/blob/master/lib/formatter.ts
+//   const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
+
+//   console.log('generated:', printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page!.imports, page!.functionDeclaration]), sourceFile))
+//   });
+
+//   test(".grommet table generation with formatting", () => {
+//   const sourceFile = createAst('')
+//   const myClassFile = parseGraphqlTypes(graphqlGenTs1)
+//   const testEntity = sourceFileEntity(myClassFile)
+
+//   let generationContext = {uiFramework: UiFramework.Grommet, formatter: Formatter.ReactIntl, index: {tableType: TableType.BasicTable, height: "400px"}};
+//   let generator = new AppGenerator(generationContext, testEntity!!);
+
+//   const page = generator.generateListComponent()
+
+//   /*ts.transform(sourceFile, [
+//       (context) => (node) => {
+//         return ts.visitNode(node, n => {
+//           return node
+//         })
+//       }
+//     ])*/
+//   // TODO https://github.com/vvakame/typescript-formatter/blob/master/lib/formatter.ts
+//   const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
+
+//   console.log('generated:', printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page!.imports, page!.functionDeclaration]), sourceFile))
+//   });
+
+//   test(".mui data table generation without formatting", () => {
+//       const sourceFile = createAst('')
+//       const myClassFile = parseGraphqlTypes(graphqlGenTs1)
+//       const testEntity = sourceFileEntity(myClassFile)
+
+//       let generationContext = {uiFramework: UiFramework.MaterialUI, formatter: Formatter.None, index: {tableType: TableType.DataTable, height: "400px"}};
+//       let generator = new AppGenerator(generationContext, testEntity!!);
+
+//       const page = generator.generateListComponent()
+      
+//       const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
+
+//       console.log('generated:', printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page!.imports, page!.functionDeclaration]), sourceFile))
+//   });
+
+//   test(".mui data table generation with formatting", () => {
+//       const sourceFile = createAst('')
+//       const myClassFile = parseGraphqlTypes(graphqlGenTs1)
+//       const testEntity = sourceFileEntity(myClassFile)
+
+//       let generationContext = {uiFramework: UiFramework.MaterialUI, formatter: Formatter.ReactIntl, index: {tableType: TableType.DataTable, height: "400px"}};
+//       let generator = new AppGenerator(generationContext, testEntity!!);
+
+//       const page = generator.generateListComponent()
+      
+//       const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
+
+//       console.log('generated:', printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page!.imports, page!.functionDeclaration]), sourceFile))
+//   });
+
+//   test(".grommet data table generation without formatting", () => {
+//       const sourceFile = createAst('')
+//       const myClassFile = parseGraphqlTypes(graphqlGenTs1)
+//       const testEntity = sourceFileEntity(myClassFile)
+
+//       let generationContext = {uiFramework: UiFramework.Grommet, formatter: Formatter.None, index: {tableType: TableType.DataTable, height: "400px"}};
+//       let generator = new AppGenerator(generationContext, testEntity!!);
+
+//       const page = generator.generateListComponent()
+      
+//       const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
+
+//       console.log('generated:', printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page!.imports, page!.functionDeclaration]), sourceFile))
+//   });
+
+//   test(".grommet data table generation with formatting", () => {
+//       const sourceFile = createAst('')
+//       const myClassFile = parseGraphqlTypes(graphqlGenTs1)
+//       const testEntity = sourceFileEntity(myClassFile)
+
+//       let generationContext = {uiFramework: UiFramework.Grommet, formatter: Formatter.ReactIntl, index: {tableType: TableType.DataTable, height: "400px"}};
+//       let generator = new AppGenerator(generationContext, testEntity!!);
+
+//       const page = generator.generateListComponent()
+    
+//       const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
+//       let generatedCode = printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page!.imports, page!.functionDeclaration]), sourceFile)
+    
+//       console.log('generated:', generatedCode)
+//   });
+
+  test(".generate table from template", () => {
     const sourceFile = createAst('')
     const myClassFile = parseGraphqlTypes(graphqlGenTs1)
     const testEntity = sourceFileEntity(myClassFile)
-
-    let generationContext = {uiFramework: UiFramework.MaterialUI, formatter: Formatter.ReactIntl, index: {tableType: TableType.BasicTable, height: "400px"}};
+    
+    let generationContext = {uiFramework: UiFramework.MaterialUI, formatter: Formatter.ReactIntl, index: {tableType: TableType.DataTable, height: "400px"}};
     let generator = new AppGenerator(generationContext, testEntity!!);
 
     const page = generator.generateListComponent()
 
-    /*ts.transform(sourceFile, [
-        (context) => (node) => {
-          return ts.visitNode(node, n => {
-            return node
-          })
-        }
-      ])*/
-    // TODO https://github.com/vvakame/typescript-formatter/blob/master/lib/formatter.ts
     const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
+    let generatedCode = printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page!.imports, page!.functionDeclaration]), sourceFile)
 
-    console.log('generated:', printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page!.imports, page!.functionDeclaration]), sourceFile))
-});
+    console.log("generated: ", generatedCode)
 
-test(".grommet table generation without formatting", () => {
-  const sourceFile = createAst('')
-  const myClassFile = parseGraphqlTypes(graphqlGenTs1)
-  const testEntity = sourceFileEntity(myClassFile)
-
-  let generationContext = {uiFramework: UiFramework.Grommet, formatter: Formatter.None, index: {tableType: TableType.BasicTable, height: "400px"}};
-  let generator = new AppGenerator(generationContext, testEntity!!);
-
-  const page = generator.generateListComponent()
-  
-  /*ts.transform(sourceFile, [
-      (context) => (node) => {
-        return ts.visitNode(node, n => {
-          return node
-        })
-      }
-    ])*/
-  // TODO https://github.com/vvakame/typescript-formatter/blob/master/lib/formatter.ts
-  const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
-
-  console.log('generated:', printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page!.imports, page!.functionDeclaration]), sourceFile))
-  });
-
-  test(".grommet table generation with formatting", () => {
-  const sourceFile = createAst('')
-  const myClassFile = parseGraphqlTypes(graphqlGenTs1)
-  const testEntity = sourceFileEntity(myClassFile)
-
-  let generationContext = {uiFramework: UiFramework.Grommet, formatter: Formatter.ReactIntl, index: {tableType: TableType.BasicTable, height: "400px"}};
-  let generator = new AppGenerator(generationContext, testEntity!!);
-
-  const page = generator.generateListComponent()
-
-  /*ts.transform(sourceFile, [
-      (context) => (node) => {
-        return ts.visitNode(node, n => {
-          return node
-        })
-      }
-    ])*/
-  // TODO https://github.com/vvakame/typescript-formatter/blob/master/lib/formatter.ts
-  const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
-
-  console.log('generated:', printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page!.imports, page!.functionDeclaration]), sourceFile))
-  });
-
-  test(".mui data table generation without formatting", () => {
-      const sourceFile = createAst('')
-      const myClassFile = parseGraphqlTypes(graphqlGenTs1)
-      const testEntity = sourceFileEntity(myClassFile)
-
-      let generationContext = {uiFramework: UiFramework.MaterialUI, formatter: Formatter.None, index: {tableType: TableType.DataTable, height: "400px"}};
-      let generator = new AppGenerator(generationContext, testEntity!!);
-
-      const page = generator.generateListComponent()
-      
-      const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
-
-      console.log('generated:', printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page!.imports, page!.functionDeclaration]), sourceFile))
-  });
-
-  test(".mui data table generation with formatting", () => {
-      const sourceFile = createAst('')
-      const myClassFile = parseGraphqlTypes(graphqlGenTs1)
-      const testEntity = sourceFileEntity(myClassFile)
-
-      let generationContext = {uiFramework: UiFramework.MaterialUI, formatter: Formatter.ReactIntl, index: {tableType: TableType.DataTable, height: "400px"}};
-      let generator = new AppGenerator(generationContext, testEntity!!);
-
-      const page = generator.generateListComponent()
-      
-      const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
-
-      console.log('generated:', printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page!.imports, page!.functionDeclaration]), sourceFile))
-  });
-
-  test(".grommet data table generation without formatting", () => {
-      const sourceFile = createAst('')
-      const myClassFile = parseGraphqlTypes(graphqlGenTs1)
-      const testEntity = sourceFileEntity(myClassFile)
-
-      let generationContext = {uiFramework: UiFramework.Grommet, formatter: Formatter.None, index: {tableType: TableType.DataTable, height: "400px"}};
-      let generator = new AppGenerator(generationContext, testEntity!!);
-
-      const page = generator.generateListComponent()
-      
-      const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
-
-      console.log('generated:', printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page!.imports, page!.functionDeclaration]), sourceFile))
-  });
-
-  test(".grommet data table generation with formatting", () => {
-      const sourceFile = createAst('')
-      const myClassFile = parseGraphqlTypes(graphqlGenTs1)
-      const testEntity = sourceFileEntity(myClassFile)
-
-      let generationContext = {uiFramework: UiFramework.Grommet, formatter: Formatter.ReactIntl, index: {tableType: TableType.DataTable, height: "400px"}};
-      let generator = new AppGenerator(generationContext, testEntity!!);
-
-      const page = generator.generateListComponent()
-    
-      const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
-      let generatedCode = printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page!.imports, page!.functionDeclaration]), sourceFile)
-    
-      console.log('generated:', generatedCode)
-  });
+  })
 })
 
 

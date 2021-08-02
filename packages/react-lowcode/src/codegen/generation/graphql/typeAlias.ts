@@ -10,8 +10,8 @@ export enum PropertyType {
   navigation
 }
 
-export function getPropertyType(prop: Property) {
-  switch(prop.getType().toLowerCase()) {
+export function getPropertyType(prop: any) {
+  switch(prop.getType().getText().toLowerCase()) {
     case 'date': return PropertyType.date
     case 'timestamptz': return PropertyType.datetime
     case 'timez': return PropertyType.time

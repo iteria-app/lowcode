@@ -2,6 +2,7 @@ import { defineComponent } from '../../generation/react-components/react-compone
 
 export const muiCore = '@material-ui/core'
 export const muiDataGrid = '@material-ui/data-grid'
+export const intl = 'react-intl'
 
 export const MuiTableComponents = {
     table: defineComponent('Table', muiCore),
@@ -15,4 +16,8 @@ export const MuiTableComponents = {
 export const MuiDtTableComponents = {
     table: defineComponent('DataGrid', muiDataGrid),
     gridColParams: defineComponent('GridColParams', muiDataGrid)
+}
+
+export const FormattedComponents = {
+    message: defineComponent('FormattedMessage', intl)
 }
