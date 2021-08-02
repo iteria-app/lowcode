@@ -35,7 +35,7 @@ export async function insertColumn(
 
   let generator = new MuiDataTableGenerator(
     generationContext,
-    undefined,
+    options.entity,
     widgetContext
   );
   

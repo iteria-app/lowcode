@@ -172,15 +172,21 @@ export default class MuiDataTableGenerator implements TableGenerator
                           property: Property, 
                           ast:SourceFile,
                           columnIndex?: number): ts.SourceFile{
-      
+
+        // let test = this.createNewDataGridColumn(property)
+
         let newColumnsDefinition = this.getNewColumnsDeclaration(columnDeclarationParent, 
                                                                  property, 
                                                                  columnIndex)
-       
+
+        // const newColumnsDefinition = this.setNewColumns(
+        //   columnDeclarationParent, test, columnIndex
+        // )
+
         return replaceElementsToAST(ast, 
                                     columnDeclarationParent.pos, 
                                     factory.createArrayLiteralExpression(newColumnsDefinition))
-    }
+        }
 
     private getNewColumnsDeclaration(columnDeclarationParent: ts.ArrayLiteralExpression, 
       property: Property,
@@ -188,8 +194,8 @@ export default class MuiDataTableGenerator implements TableGenerator
         let newElements: ts.Expression[] = []
         let oldElements = columnDeclarationParent.elements
         
-        let newColumnDefinition = this.createColumnDefinition(property, this.getUsedFormatter(columnDeclarationParent))
-        
+        let newColumnDefinition = this.createNewDataGridColumn(property) as ts.ObjectLiteralExpression // this.createColumnDefinition(property, this.getUsedFormatter(columnDeclarationParent))
+        console.log(newColumnDefinition)
         if(columnIndex && columnIndex > 0 && columnIndex < oldElements.length + 1){
           newElements = [...oldElements.slice(0, columnIndex-1), 
                          newColumnDefinition, 
@@ -199,6 +205,24 @@ export default class MuiDataTableGenerator implements TableGenerator
         }
 
         return newElements
+    }
+
+    private setNewColumns(columns: ts.ArrayLiteralExpression, 
+      child: ts.JsxChild,
+      columnIndex?: number  
+    ) {
+      let newElements = []
+      let oldElements = columns.elements
+
+      if (columnIndex && columnIndex > 0 && columnIndex < oldElements.length + 1) {
+        newElements = [...oldElements.slice(0, columnIndex - 1), 
+          child,
+          ...oldElements.slice(columnIndex - 1)
+        ]
+      } else {
+        newElements = [...oldElements, child]
+      }
+      return newElements
     }
 
     private getUsedFormatter(columnsDefinition:  ts.ArrayLiteralExpression): Formatter {
@@ -340,20 +364,28 @@ export default class MuiDataTableGenerator implements TableGenerator
 
     private createColumnDefinition(property: Property, formatter: Formatter): ts.ObjectLiteralExpression {
       let propertyName = property.getName()
-      let propType: PropertyType = getPropertyType(property)
+      let propType: PropertyType = PropertyType.string
       let muiColumnType = 'string'
 
+      // this.addNewDataGridColumn(
+      //   undefined,
+      //   undefined,
+      //   property,
+      //   undefined,
+      // )
+
+
       //TODO: datetime is not working for numbers, find out why
-      switch(propType) {
-        case PropertyType.currency:
-        case PropertyType.numeric:
-          muiColumnType = 'number'
-          break
-        case PropertyType.date:
-        case PropertyType.datetime:
-          muiColumnType = 'date'
-          break
-      }
+      // switch(propType) {
+      //   case PropertyType.currency:
+      //   case PropertyType.numeric:
+      //     muiColumnType = 'number'
+      //     break
+      //   case PropertyType.date:
+      //   case PropertyType.datetime:
+      //     muiColumnType = 'date'
+      //     break
+      // }
 
       let properties : ts.ObjectLiteralElementLike[] = 
       [ 
@@ -388,7 +420,7 @@ export default class MuiDataTableGenerator implements TableGenerator
         ))
       }
 
-      let expression =  factory.createObjectLiteralExpression(
+      let expression = factory.createObjectLiteralExpression(
         properties,
         false
       )
@@ -446,5 +478,56 @@ export default class MuiDataTableGenerator implements TableGenerator
         factory.createToken(ts.SyntaxKind.EqualsGreaterThanToken),
         this._intlFormatter.formatPropertyUsingImperative(prop, factory.createIdentifier("value"), factory.createIdentifier("value"))
       )
+    }
+
+    private createNewDataGridColumn(
+      property: Property
+    ): ts.ObjectLiteralExpression | undefined {
+      const template = this.createTemplateForColumn(property)
+      if (template) {
+        const tree = createAst(template)
+        if (tree) {
+          const columnElement = findByCondition<ts.JsxChild>(tree, (node: ts.Node) => {
+            return  ts.isJsxText(node) || ts.isJsxExpression(node) || ts.isJsxElement(node) || ts.isJsxSelfClosingElement(node) || ts.isJsxFragment(node) || ts.isBlock(node);
+          })
+          if (columnElement) {
+            this.clearNodePosition(columnElement)
+            const obj = this.createLiteralGridColumn(columnElement)
+            return obj
+          }
+        }
+      }
+      return undefined
+    }
+
+
+    private createTemplateForColumn(property: Property) {
+      const name = property.getName()
+      const type = property.getType() as any
+
+      let template = `{ field: "${name}" flex: ${1} type: "${type._compilerType.intrinsicName}" valueFormatter: ({ value }) => value renderHeader: ${this.renderHeaderTemplate(property)}}`
+
+      return template
+    }
+
+    private clearNodePosition = (node: ts.Node): void => {
+      ts.setTextRange(node, { pos: -1, end: -1 });
+  
+      node.forEachChild((child: ts.Node) => {
+          this.clearNodePosition(child);
+      });
+    }
+
+
+    private createLiteralGridColumn(element: any) {
+      console.log(element.statements)
+      return factory.createObjectLiteralExpression(
+        element.statements,
+        false
+      )
+    }
+
+    private renderHeaderTemplate(property: Property) {
+      return `(params : GridColsParams) => (<FormattedMessage id="${this._entity?.getName()}" defaultMessage="${property.getName()}"/>)`
     }
 }
