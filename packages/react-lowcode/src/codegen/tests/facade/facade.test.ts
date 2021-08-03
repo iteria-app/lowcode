@@ -7,6 +7,7 @@ import { FacadeInsertOptions } from "../../facade/interfaces";
 import { TestListHelper } from "../list/list-helper";
 import { is2 } from "../introspection-example"
 import { Property } from "../../generation/entity";
+import { TestFacadeHelper } from "./facade-helper";
 
 describe("codegen facade tests", () => {
   describe(".add column", () => {
@@ -221,8 +222,8 @@ describe("codegen facade tests", () => {
       const testEntity = sourceFileEntity(myClassFile);
 
       const formPosition: SourceLineCol = {
-        lineNumber: 50,
-        columnNumber: 19, 
+        lineNumber: 33,
+        columnNumber: 15, 
         fileName: 'src/codegen/tests/detail/detail-test-file.txt'
       };
 
@@ -232,8 +233,21 @@ describe("codegen facade tests", () => {
       };
 
       const result = await insertFormWidget(formPosition, options, new CodegenRw());
-      //const a = TestFacadeHelper.getFormikInitialValues(result);
 
+      // TODO:PC: create test on this test function
+      const formikInitialValues = TestFacadeHelper.getFormikInitialValues(result);
+
+      expect(formikInitialValues).toStrictEqual([
+        { name: 'avatarUrl', value: 'customer.avatarUrl'},
+        { name: 'createdAt', value: 'customer.createdAt'},
+        { name: 'email', value: 'customer.email'},
+        { name: 'name', value: 'customer.name'},
+        { name: 'phone', value: 'customer.phone'},
+        { name: 'updatedAt', value: 'customer.updatedAt'},
+        { name: 'test2', value: 'customer.test2'}
+      ]);
+
+      // TODO:PC check if in grid is correct addedinput
       console.log(result);
     });
 
