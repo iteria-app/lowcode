@@ -34,11 +34,11 @@ export default class TemplateResolver {
 
                 //find 'useGeneratedQuery' import and replace it with use'queryName's
                 const { listQueryName } = this._introspection ? getQueryNames(this._introspection, this._entity.getName()) : { listQueryName : undefined }
-                const hookName = queryHookName(listQueryName ?? '')
+                const hookName = 'useAllCustomersQuery' //queryHookName(listQueryName ?? '')//TODO:replace this with realn query name
 
                 const transformUseQueryImport = (node: ts.Node, importName: string, queryName: string) => {
                   if(isImportDeclarationWithName(node, importName)) {
-                    return createImportDeclaration(queryName, './generated/graphql');
+                    return createNamedImportDeclaration(queryName, 'src/generated/graphql');
                   }
                 }
 
@@ -55,7 +55,7 @@ export default class TemplateResolver {
 
                 const transformImportDeclaration = (node: ts.Node, importName: string, tableComponentName: string) => {
                     if(isImportDeclarationWithName(node, importName)) {
-                        return createNamedImportDeclaration(tableComponentName, './' + tableComponentName);
+                        return createImportDeclaration(tableComponentName, './' + tableComponentName);
                     }
                 }
 
