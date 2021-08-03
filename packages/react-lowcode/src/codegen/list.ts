@@ -18,10 +18,10 @@ export function isSelectedDataTable(sourceCode:string, tablePosition: SourceLine
 export async function addColumn(typesSourceCode: string, 
     io: CodeRW, 
     sourceCode:SourceLineCol, 
-    options: InsertOptions, 
-    code?: string): Promise<string | undefined>{
+    options: InsertOptions): Promise<string | undefined>{
         
     const property: Property = getEntityProperty(typesSourceCode, options.property, options.entityName)[0]
+    const code = await io.readFile(sourceCode.fileName)
     let generatedSource = undefined
     let isGrommet = false
     if (code)
@@ -61,9 +61,9 @@ export async function addColumn(typesSourceCode: string,
 
 export async function deleteColumn(io: CodeRW, 
     sourceCode:SourceLineCol, 
-    options: DeleteOptions, 
-    code?: string): Promise<string | undefined> {
+    options: DeleteOptions): Promise<string | undefined> {
     let isGrommet = false
+    const code = await io.readFile(sourceCode.fileName)
     if(code) 
         isGrommet = isGrommetRepository(code)
 

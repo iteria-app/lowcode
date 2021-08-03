@@ -62,9 +62,8 @@ describe(".api tests", () => {
         test(".add column (MUI DataTable)", async () => {
             const filePath = 'src/codegen/tests/list/files/is-datatable-test-file.txt';
             const source : SourceLineCol = {lineNumber: 12, columnNumber:17, fileName:filePath};
-            const file = await fs.readFileSync(filePath)
-            if (!file) throw new Error("File not found")
-            const result = await addColumn(graphqlGenTs1, new CodegenRw(), source, {property: 'testdate', entityName: 'Customer'}, file.toString());
+            
+            const result = await addColumn(graphqlGenTs1, new CodegenRw(), source, {property: 'testdate', entityName: 'Customer'});
     
             expect(result).not.toBe(undefined);
     
