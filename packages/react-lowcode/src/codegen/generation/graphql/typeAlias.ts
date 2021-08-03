@@ -11,7 +11,7 @@ export enum PropertyType {
 }
 
 export function getPropertyType(prop: any) {
-  switch(prop.getType().getText().toLowerCase()) {
+  switch(prop.getType().toLowerCase()) {
     case 'date': return PropertyType.date
     case 'timestamptz': return PropertyType.datetime
     case 'timez': return PropertyType.time

@@ -1,5 +1,5 @@
 import ts, { factory } from "typescript"
-import { graphqlGenTs1 } from "../typeAlias.example"
+import { is2 } from "../typeAlias.example"
 import { Formatter, TableType, UiFramework } from '../../definition/context-types'
 import { AppGenerator } from '../../generation/generators/app-generator'
 import { CodeDir, CodeRW } from "../../../io"
@@ -31,19 +31,19 @@ class testDemoWriter implements CodeRW, CodeDir {
 
 describe("table generation", () => {
   
-//   test (".test table generation from index", ()=>{
+  test (".test table generation from index", ()=>{
 
-//     var testWriter = new testDemoWriter()
+    var testWriter = new testDemoWriter()
 
-//     const io = new CodegenRw()
-//     const template = fs.readFileSync(path.resolve('src/codegen/tests/list/files/page-list-template.txt'), 'utf-8')
+    const io = new CodegenRw()
+    const template = fs.readFileSync(path.resolve('src/codegen/tests/list/files/page-list-template.txt'), 'utf-8')
     
-//     var options = {names:['Customer'], pageListTemplate: template}
-//     // @ts-ignore
-//     generatePages(graphqlGenTs1, testWriter, options)
+    var options = {names:['Customer'], pageListTemplate: template}
 
-//     console.log('generated:' + testWriter.getSourceString())
-//   });
+    generatePages(is2.data.__schema, testWriter, options)
+
+    console.log('generated:' + testWriter.getSourceString())
+  });
 
 //   test(".mui table generation without formatting", () => {
 //       const sourceFile = createAst('')
@@ -198,22 +198,22 @@ describe("table generation", () => {
 //       console.log('generated:', generatedCode)
 //   });
 
-  test(".generate table from template", () => {
-    const sourceFile = createAst('')
-    const myClassFile = parseGraphqlTypes(graphqlGenTs1)
-    const testEntity = sourceFileEntity(myClassFile)
+  // test(".generate table from template", () => {
+  //   const sourceFile = createAst('')
+  //   const myClassFile = parseGraphqlTypes(graphqlGenTs1)
+  //   const testEntity = sourceFileEntity(myClassFile)
     
-    let generationContext = {uiFramework: UiFramework.MaterialUI, formatter: Formatter.ReactIntl, index: {tableType: TableType.DataTable, height: "400px"}};
-    let generator = new AppGenerator(generationContext, testEntity!!);
+  //   let generationContext = {uiFramework: UiFramework.MaterialUI, formatter: Formatter.ReactIntl, index: {tableType: TableType.DataTable, height: "400px"}};
+  //   let generator = new AppGenerator(generationContext, testEntity!!);
 
-    const page = generator.generateListComponent()
+  //   const page = generator.generateListComponent()
 
-    const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
-    let generatedCode = printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page!.imports, page!.functionDeclaration]), sourceFile)
+  //   const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
+  //   let generatedCode = printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page!.imports, page!.functionDeclaration]), sourceFile)
 
-    console.log("generated: ", generatedCode)
+  //   console.log("generated: ", generatedCode)
 
-  })
+  // })
 })
 
 

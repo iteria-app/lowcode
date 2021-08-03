@@ -5,7 +5,7 @@ import ts, { factory } from "typescript"
 import { Property } from './generation/entity/index'
 import { CodegenOptions } from './interfaces'
 import TemplateResolver from './generation/generators/template/template-resolver'
-import { IntrospectionQuery, getNestedOfType, generateGraphqlFile, getEntity } from '@iteria-app/graphql-lowcode/esm/generate'
+import { IntrospectionQuery, getNestedOfType, generateGraphqlFile, getEntity } from "../../../graphql-lowcode/src/generate"
 
 // generates CRUD React pages (master-detail, eg. orders list, order detail form) from typescript
 export function generatePages(introspection: IntrospectionQuery, io: CodeRW & CodeDir, options?: CodegenOptions) {
@@ -34,7 +34,7 @@ export function generatePages(introspection: IntrospectionQuery, io: CodeRW & Co
         properties: props
       }
 
-      let context = { uiFramework: UiFramework.MaterialUI, formatter: Formatter.None, index: { tableType: TableType.BasicTable, height: "400px" } };
+      let context = { uiFramework: UiFramework.MaterialUI, formatter: Formatter.ReactIntl, index: { tableType: TableType.DataTable, height: "400px" } };
 
       const generator = new AppGenerator(context, entity)
       const page = generator.generateListComponent(/* TODO entity / type name should be input - not in context */)

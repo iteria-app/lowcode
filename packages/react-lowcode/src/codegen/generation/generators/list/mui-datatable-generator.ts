@@ -323,24 +323,23 @@ export default class MuiDataTableGenerator implements TableGenerator
 
     private createTemplateForColumn(property: Property) {
       const name = property.getName()
-      const type = property.getType() as any
+      const type = property.getType().toLowerCase()
 
       let template = ``
-      switch(type.getText()) {
+      switch(type) {
         case("string"):
         case("number"):
         case("boolean"):
-          template = `{ field: "${name}" flex: ${1} type: "${type.getText()}" valueFormatter: ({ value }) => value renderHeader: ${this.renderHeaderTemplate(property)}}`
+          template = `{ field: "${name}" flex: ${1} type: "${type}" valueFormatter: ({ value }) => value renderHeader: ${this.renderHeaderTemplate(property)}}`
           break
         case("date"):
-        case("any"):
-          template = `{ field: "${name}" flex: ${1} type: "${type.getText()}" valueFormatter: ({ value }) => intl.formatDate(value) renderHeader: ${this.renderHeaderTemplate(property)}}`
+          template = `{ field: "${name}" flex: ${1} type: "${type}" valueFormatter: ({ value }) => intl.formatDate(value) renderHeader: ${this.renderHeaderTemplate(property)}}`
           break
         case("dateTime"):
-          template = `{ field: "${name}" flex: ${1} type: "${type.getText()}" valueFormatter: ({ value }) => intl.formatDate(value) + ", " + intl.formatTime(value) renderHeader: ${this.renderHeaderTemplate(property)}}`
+          template = `{ field: "${name}" flex: ${1} type: "${type}" valueFormatter: ({ value }) => intl.formatDate(value) + ", " + intl.formatTime(value) renderHeader: ${this.renderHeaderTemplate(property)}}`
           break
         default:
-          template = ''
+          template = `{ field: "${name}" flex: ${1} type: "${type}" valueFormatter: ({ value }) => value renderHeader: ${this.renderHeaderTemplate(property)}}`
       }
       
       return template
@@ -386,7 +385,7 @@ export default class MuiDataTableGenerator implements TableGenerator
       let declaration = this._helper.addImportDeclaration('DataGrid', muiDataGrid)
       this._imports.push(declaration)
 
-      let template = `<DataGrid columns={${columns}} rows={${rows}}/>`
+      let template = `<DataGrid columns={${columns}} rows={${rows}} pageSize={5} rowsPerPageOptions={[2, 3, 4, 5, 6, 20]} />`
       return template
     }
 
