@@ -19,6 +19,7 @@ export async function generatePages(introspection: IntrospectionQuery,
 
         if (entity) {
             const componentStorageRoot = options?.componentStoragePath ?? 'src/components'
+            const generatedFolderPath = options?.generatedFolderPath ?? 'src/generated'
             const routeDefinitionFilePath = options?.routeDefinitionFilePath ?? 'src/routes.tsx'
             const menuDefinitionFilePath = options?.menuDefinitionFilePath ?? 'src/layouts/DashboardLayout/NavBar/index.tsx'
             const entityListComponentPageName = getListPageComponentName(entity)
@@ -42,10 +43,12 @@ export async function generatePages(introspection: IntrospectionQuery,
 
             //generate page for list component
             await generateListPage(io, 
-                             entity, 
-                             typeName, 
-                             options.pageListTemplate, 
-                             listPageComponentFilePath);
+                                   entity, 
+                                   typeName, 
+                                   options.pageListTemplate, 
+                                   listPageComponentFilePath,
+                                   introspection,
+                                   generatedFolderPath);
 
             //generate route for generated list page
             await addNewListRoute(io, 
@@ -100,9 +103,11 @@ async function generateListPage(io: CodeRW,
                           entity: Entity, 
                           typeName:string,
                           pageListTemplateSource: string,
-                          listPageFilePath: string) {
-    const templateResolver = new TemplateResolver(entity);
-    const listPage = templateResolver.generateListPage(pageListTemplateSource);
+                          listPageFilePath: string,
+                          introspection: IntrospectionQuery,
+                          generatedFolderPath: string) {
+    const templateResolver = new TemplateResolver(entity, introspection);
+    const listPage = templateResolver.generateListPage(pageListTemplateSource, generatedFolderPath);
 
     if(listPage) {
         const listPageSourceFile = ts.createSourceFile(

@@ -14,12 +14,12 @@ export default class TemplateResolver {
     private _entity?: Entity
     private _introspection?: IntrospectionQuery
 
-    constructor(entity?: Entity, introspection?: IntrospectionQuery) {
+    constructor(entity: Entity, introspection: IntrospectionQuery) {
         this._entity = entity;
         this._introspection = introspection;
     }
 
-    generateListPage(template: string): string | undefined {
+    generateListPage(template: string, generatedFolderPath: string): string | undefined {
         let result: string | undefined;
 
         if (this._entity) {
@@ -34,11 +34,11 @@ export default class TemplateResolver {
 
                 //find 'useGeneratedQuery' import and replace it with use'queryName's
                 const { listQueryName } = this._introspection ? getQueryNames(this._introspection, this._entity.getName()) : { listQueryName : undefined }
-                const hookName = 'useAllCustomersQuery' //queryHookName(listQueryName ?? '')//TODO:replace this with realn query name
+                const hookName = queryHookName(listQueryName ?? '')
 
                 const transformUseQueryImport = (node: ts.Node, importName: string, queryName: string) => {
                   if(isImportDeclarationWithName(node, importName)) {
-                    return createNamedImportDeclaration(queryName, 'src/generated/graphql');
+                    return createNamedImportDeclaration(queryName, `${generatedFolderPath}/graphql`);
                   }
                 }
 
