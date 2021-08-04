@@ -1,4 +1,4 @@
-import { SourceLineCol } from "../ast"
+import { SourceLineCol } from "."
 import { cloneElementInAst } from "../clone"
 import { encodeEmptyLines, printFormattedSourceFile } from "./format"
 
