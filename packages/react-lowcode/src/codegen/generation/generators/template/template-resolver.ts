@@ -8,8 +8,7 @@ import { isUseQueryHook } from '../../../ast/hooks';
 import { createAst } from "../../code-generation/createSourceFile";
 import { Entity } from "../../entity";
 import { EntityHelper } from "../../entity/helper";
-import { IntrospectionQuery, getQueryNames, queryHookName } from '../../../../../../graphql-lowcode/src/generate'
-
+import { IntrospectionQuery, getQueryNames, queryHookName } from "@iteria-app/graphql-lowcode/esm/generate"
 export default class TemplateResolver {
     private _entity?: Entity
     private _introspection?: IntrospectionQuery

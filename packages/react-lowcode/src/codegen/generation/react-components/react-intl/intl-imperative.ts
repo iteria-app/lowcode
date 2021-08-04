@@ -42,6 +42,20 @@ export default class ReactIntlImperative {
         return createVariableStatement(hook.defaultInstanceName, callExpression, ts.NodeFlags.Const)
     }
 
+    getNavigateHook(): ts.VariableStatement {
+        var hook = defineHook("navigate", "useNavigate", "react-router-dom");
+
+        this._imports.push(hook.importDeclaration);
+
+        let callExpression = factory.createCallExpression(
+            factory.createIdentifier(hook.hookName),
+            undefined,
+            []
+          )
+
+        return createVariableStatement(hook.defaultInstanceName, callExpression, ts.NodeFlags.Let)
+    }
+
     formatDate(value: ts.Expression): ts.CallExpression {
         return this.formatValue([value], IntlFormatingImperativeMethods.formatDate)
     }

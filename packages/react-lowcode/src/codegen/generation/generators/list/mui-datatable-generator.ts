@@ -249,6 +249,7 @@ export default class MuiDataTableGenerator implements TableGenerator
 
       if(this._context.formatter === Formatter.ReactIntl){
         statements.push(this._intlFormatter.getImperativeHook())
+        statements.push(this._intlFormatter.getNavigateHook())
       }
 
       let columnsIdentifier = factory.createIdentifier("columns")
@@ -330,16 +331,21 @@ export default class MuiDataTableGenerator implements TableGenerator
         case("string"):
         case("number"):
         case("boolean"):
+        case("int"):
+        case("jsonb"):
+        case("uuid"):
           template = `{ field: "${name}" flex: ${1} type: "${type}" valueFormatter: ({ value }) => value renderHeader: ${this.renderHeaderTemplate(property)}}`
           break
         case("date"):
           template = `{ field: "${name}" flex: ${1} type: "${type}" valueFormatter: ({ value }) => intl.formatDate(value) renderHeader: ${this.renderHeaderTemplate(property)}}`
           break
         case("dateTime"):
+        case("timestamptz"):
           template = `{ field: "${name}" flex: ${1} type: "${type}" valueFormatter: ({ value }) => intl.formatDate(value) + ", " + intl.formatTime(value) renderHeader: ${this.renderHeaderTemplate(property)}}`
           break
         default:
-          template = `{ field: "${name}" flex: ${1} type: "${type}" valueFormatter: ({ value }) => value renderHeader: ${this.renderHeaderTemplate(property)}}`
+          template = ''
+          break
       }
       
       return template
@@ -385,7 +391,8 @@ export default class MuiDataTableGenerator implements TableGenerator
       let declaration = this._helper.addImportDeclaration('DataGrid', muiDataGrid)
       this._imports.push(declaration)
 
-      let template = `<DataGrid columns={${columns}} rows={${rows}} pageSize={5} rowsPerPageOptions={[2, 3, 4, 5, 6, 20]} />`
+      let template = `<DataGrid onRowClick={() => navigate('/app/generated-customer-detail', { replace: true })} columns={${columns}} rows={${rows}} pageSize={5} rowsPerPageOptions={[2, 3, 4, 5, 6, 20]} />`
+
       return template
     }
 

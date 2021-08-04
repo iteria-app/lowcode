@@ -26,6 +26,10 @@ export default class ReactIntlFormatter {
       return this._intlImperative.getImperativeHook();
     }
 
+    getNavigateHook(): ts.VariableStatement {
+      return this._intlImperative.getNavigateHook()
+    }
+
     formatPropertyUsingImperative(property: Property, expression: ts.Expression, fallbackExpression: ts.Expression): ts.Expression {
       //TODO null chaining in case of: type.isNullable(), type.isUndefined(), type.isUnionOrIntersection(),
   
