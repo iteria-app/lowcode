@@ -31,18 +31,13 @@ export default class InterfaceGenerator implements DetailGenerator {
   }
 
   getInterfaceFields(): ts.TypeElement[] {
-    let inputs: ts.TypeElement[] = [];
-    getProperties(this._entity).forEach((property) => {
-      let propertyInput = this.getPropertySignature(property);
-
-      if (propertyInput) {
-        inputs.push(propertyInput);
-      }
+    const inputs: ts.TypeElement[] = getProperties(this._entity).map(property =>{
+        return this.getPropertySignature(property);
     });
 
     return inputs;
-
   }
+
   getPropertySignature(property: Property):  ts.TypeElement {
     return factory.createPropertySignature(
       undefined,

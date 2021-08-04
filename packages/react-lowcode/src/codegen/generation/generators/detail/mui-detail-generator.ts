@@ -485,7 +485,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
           factory.createIdentifier("type"),
           factory.createStringLiteral("input")
         ),
-        this.getLabelValueAttribute(name),
+        this.createLabelAttribute(name),
         this.getTextValueAttribute(name, InputType.text),
         factory.createJsxAttribute(
           factory.createIdentifier("onChange"),
@@ -717,7 +717,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
     }
   }
 
-  private getLabelValueAttribute(
+  private createLabelAttribute(
     name: string
   ): ts.JsxAttribute {
     if (this._context.formatter === Formatter.ReactIntl) {
