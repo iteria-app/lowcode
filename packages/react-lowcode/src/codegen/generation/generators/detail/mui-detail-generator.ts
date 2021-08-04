@@ -307,27 +307,6 @@ export default class MuiDetailGenerator implements DetailGenerator {
     }
 
     return ast;
-
-    // Old way, TODO: remove!!
-    // let newField = this.createTextFieldElement(
-    //   property.getName(),
-    //   property.getType(),
-    //   InputType.text
-    // );
-
-    // let newElements: ts.JsxElement[];
-
-    // if(index && index < gridElements.length + 1){
-    //   newElements = [...gridElements.slice(0, index - 1), newField, ...gridElements.slice(index - 1)]
-    // }else{
-    //   newElements = [...gridElements, newField]
-    // }
-
-    // return replaceElementsToAST(
-    //   ast,
-    //   gridContainer.pos,
-    //   this.createGridContainer(newElements)
-    // );
   }
 
   private addNewField(
@@ -392,7 +371,6 @@ export default class MuiDetailGenerator implements DetailGenerator {
   generateDetailComponent(): PageComponent | undefined {
     if(this._entity)
     {
-
       var statements = this.createStatements();
 
       var functionalComponent = this.createConstFunction(
@@ -507,10 +485,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
           factory.createIdentifier("type"),
           factory.createStringLiteral("input")
         ),
-        factory.createJsxAttribute(
-          factory.createIdentifier("label"),
-          factory.createStringLiteral(name)
-        ),
+        this.createLabelAttribute(name),
         this.getTextValueAttribute(name, InputType.text),
         factory.createJsxAttribute(
           factory.createIdentifier("onChange"),
@@ -742,6 +717,16 @@ export default class MuiDetailGenerator implements DetailGenerator {
     }
   }
 
+  private createLabelAttribute(
+    name: string
+  ): ts.JsxAttribute {
+    if (this._context.formatter === Formatter.ReactIntl) {
+        return this.createLabelValueFormattedAttribute(name);
+    } else {
+        return this.createLabelValueAttribute(name);
+    }
+  }
+
   private createCardElement(elements: ts.JsxChild[]): ts.JsxElement {
     return factory.createJsxElement(
       factory.createJsxOpeningElement(
@@ -859,6 +844,44 @@ export default class MuiDetailGenerator implements DetailGenerator {
         )
       )
     );
+  }
+  private createLabelValueFormattedAttribute(name: string) : ts.JsxAttribute{
+    return factory.createJsxAttribute(
+      factory.createIdentifier("label"),
+      factory.createJsxExpression(
+        undefined,
+        factory.createCallExpression(
+          factory.createPropertyAccessExpression(
+            factory.createIdentifier("intl"),
+            factory.createIdentifier("formatMessage")
+          ),
+          undefined,
+          [
+            factory.createObjectLiteralExpression(
+              [
+                factory.createPropertyAssignment( 
+                  factory.createIdentifier("'" + "id"),
+                  factory.createPropertyAccessExpression(
+                    factory.createPropertyAccessExpression(
+                      factory.createIdentifier("formik"),
+                      factory.createIdentifier("values")
+                    ),
+                    factory.createIdentifier(name + "'")
+                  )
+                ),
+              ],
+              false
+            ),
+          ]
+        )
+      )
+    );
+  }
+  private createLabelValueAttribute(name: string): ts.JsxAttribute{
+    return factory.createJsxAttribute(
+      factory.createIdentifier("label"),
+      factory.createStringLiteral(name)
+      )
   }
   private createFormikWrapper(formik: ts.JsxElement) {
     return factory.createJsxElement(
@@ -1112,20 +1135,8 @@ export default class MuiDetailGenerator implements DetailGenerator {
     const propName = property.getName();
     const propType: PropertyType = PropertyType.string; // getPropertyType(property);
 
-    switch (propType) {
-      case PropertyType.string: {
-        template = `
-          <TextField 
-              id={id}
-              type="input"
-              label={T('label')} 
-              value={value} 
-              onChange={handleChange}
-              fullWidth 
-          />
-        `;
-        break;
-      }
+    if(template === '') {
+      template = this.getDefaultInputTemplateByPropertyType(propType);
     }
 
     if(template) {
@@ -1167,6 +1178,38 @@ export default class MuiDetailGenerator implements DetailGenerator {
         const transformationResult = ts.transform(ast, [transformer(transformInputTemplate)]);
         return printSourceCode(transformationResult.transformed[0]);
       }
+    }
+  };
+
+  private getDefaultInputTemplateByPropertyType = (propType: PropertyType): string => {
+    switch (propType) {
+      case PropertyType.string: {
+        return `
+          import React from 'react';
+          import { useIntl } from 'react-intl';
+          import { TextField } from '@material-ui/core';
+          
+          export const StringInputTemplate = ({ value, handleChange, error }) => {
+            const intl = useIntl();
+          
+            const T = (name: string): string => {
+              return intl.formatMessage({ id: name });
+            };
+          
+            return (
+              <TextField
+                  fullWidth
+                  id="id"
+                  type="input"
+                  label={T('label')} 
+                  value={value} 
+                  onChange={handleChange}
+              />
+            );
+          };        
+        `;
+      }
+      default: return '';
     }
   };
 

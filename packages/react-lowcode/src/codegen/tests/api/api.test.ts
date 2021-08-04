@@ -1,7 +1,6 @@
 import fs from 'fs'
 import path from 'path'
 import { SyntaxKind } from 'typescript';
-import { generatePages } from '../..';
 import { findByCondition, SourceLineCol } from '../../../ast';
 import { addFormInput, getFormWidgetProperties, isSelectedFormWidget, setFormWidgetProperties } from '../../detail';
 import MuiDetailGenerator from '../../generation/generators/detail/mui-detail-generator';
@@ -12,6 +11,7 @@ import { TestListHelper } from '../list/list-helper';
 import { graphqlGenTs1 } from '../typeAlias.example';
 import { is2 } from '../introspection-example';
 import ts from 'typescript'
+import { generatePages } from '../../app'
 import { TableType } from '../../definition/context-types';
 
 describe(".api tests", () => {

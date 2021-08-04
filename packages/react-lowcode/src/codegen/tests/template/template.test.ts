@@ -1,14 +1,14 @@
-import { generateCode } from "ts-factory-code-generator-generator";
-import { getListPageComponentName } from "../../generation/entity/helper";
-import TemplateResolver from "../../generation/generators/template/template-resolver";
-import { parseGraphqlTypes, sourceFileEntity } from "../helper";
-import { graphqlGenTs1 } from "../typeAlias.example";
+import { generateCode } from "ts-factory-code-generator-generator"
+import { getListPageComponentName } from "../../generation/entity/helper"
+import TemplateResolver from "../../generation/generators/template/template-resolver"
+import { is2 } from "../introspection-example"
+import { createEntityFromIntrospection, Entity } from "../../generation/entity"
 
 describe("TemplateResolver", () => {
+    //todo:add expect also if gprahhql related stuff were generated correctly
     test("Generate page for list component", () => {
-        const myClassFile = parseGraphqlTypes(graphqlGenTs1)
-        const testEntity = sourceFileEntity(myClassFile)
-        const templateResolver = new TemplateResolver(testEntity);
+        const entity: Entity | undefined = createEntityFromIntrospection(is2.data.__schema, "Customer")
+        const templateResolver = new TemplateResolver(entity!, is2.data.__schema);
 
         const template = `
 import { useGeneratedQuery } from '../generated'
@@ -33,12 +33,12 @@ function App() {
 export default App;
               `;
 
-        const generatedCode = templateResolver.generateListPage(template);
+        const generatedCode = templateResolver.generateListPage(template, 'src/generated');
         console.log(`generated list page: ${generateCode}`)
 
         expect(generatedCode).toContain('import { CustomerList } from "./CustomerList";');
         expect(generatedCode).toContain('<CustomerList customers={data?.customers}/>');
-        expect(generatedCode).toContain(`function ${getListPageComponentName(testEntity!)}`);
+        expect(generatedCode).toContain(`function ${getListPageComponentName(entity!)}`);
         
         expect(generatedCode).not.toContain("import ListPlaceholder from './ListPlaceholder'");
         expect(generatedCode).not.toContain("<ListPlaceholder customers={data?.customers} />");

@@ -19,8 +19,7 @@ export var FormikComponent: React.FC<Customer> = customer => {
       email: customer.email,
       name: customer.name,
       phone: customer.phone,
-      updatedAt: customer.updatedAt,
-      test2: customer.test2
+      updatedAt: customer.updatedAt
     },
     onSubmit: values => {}
   });
