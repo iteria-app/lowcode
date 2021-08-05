@@ -103,11 +103,15 @@ export default class GrommetDataTableGenerator implements TableGenerator
         let newColumnDefinition = this.createColumnDefinition(property, this.getUsedFormatter(columnDeclarationParent))
         
         if(columnIndex && columnIndex > 0 && columnIndex < oldElements.length + 1){
-        newElements = [...oldElements.slice(0, columnIndex-1), 
+        newElements = [...oldElements.slice(0, columnIndex - 1), 
                         newColumnDefinition, 
-                        ...oldElements.slice(columnIndex-1)]
-        }else{
-        newElements = [...oldElements, newColumnDefinition]
+                        ...oldElements.slice(columnIndex - 1)]
+        }
+        else if (columnIndex === 0) {
+          newElements = [newColumnDefinition, ...oldElements]
+        }
+        else{
+          newElements = [...oldElements, newColumnDefinition]
         }
 
         return newElements

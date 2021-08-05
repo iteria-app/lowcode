@@ -43,7 +43,6 @@ export async function addColumn(typesSourceCode: string,
             let ent : any = {};
             ent.properties = [property]
             ent.getName = entity?.getName
-            options.index = (options.index as number) + 1
             generatedSource = await insertColumnToDataTableGrommet(
                 sourceCode,
                 {
@@ -62,16 +61,7 @@ export async function addColumn(typesSourceCode: string,
 export async function deleteColumn(io: CodeRW, 
     sourceCode:SourceLineCol, 
     options: DeleteOptions): Promise<string | undefined> {
-    let isGrommet = false
-    const code = await io.readFile(sourceCode.fileName)
-    if(code) 
-        isGrommet = isGrommetRepository(code)
-
-    if (isGrommet) 
-        options.index = options.index + 1
-
-    let generatedSource = await fDeleteColumn(sourceCode, options, io);
-
+    const generatedSource = await fDeleteColumn(sourceCode, options, io);
     return generatedSource
 }
 
