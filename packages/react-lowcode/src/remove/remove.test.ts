@@ -1,5 +1,5 @@
-import { ts } from "@ts-morph/common"
 import { removeElementInAst } from "./remove"
+import ts from 'typescript'
 
 const sourceCode = `import React from 'react';
 import clsx from 'clsx';
