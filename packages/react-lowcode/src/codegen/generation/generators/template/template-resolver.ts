@@ -14,12 +14,12 @@ export default class TemplateResolver {
     private _entity?: Entity
     private _introspection?: IntrospectionQuery
 
-    constructor(entity?: Entity, introspection?: IntrospectionQuery) {
+    constructor(entity: Entity, introspection: IntrospectionQuery) {
         this._entity = entity;
         this._introspection = introspection;
     }
 
-    generateListPage(template: string): string | undefined {
+    generateListPage(template: string, generatedFolderPath: string): string | undefined {
         let result: string | undefined;
 
         if (this._entity) {
@@ -38,7 +38,7 @@ export default class TemplateResolver {
 
                 const transformUseQueryImport = (node: ts.Node, importName: string, queryName: string) => {
                   if(isImportDeclarationWithName(node, importName)) {
-                    return createImportDeclaration(queryName, './generated/graphql');
+                    return createNamedImportDeclaration(queryName, `${generatedFolderPath}/graphql`);
                   }
                 }
 
@@ -55,7 +55,7 @@ export default class TemplateResolver {
 
                 const transformImportDeclaration = (node: ts.Node, importName: string, tableComponentName: string) => {
                     if(isImportDeclarationWithName(node, importName)) {
-                        return createNamedImportDeclaration(tableComponentName, './' + tableComponentName);
+                        return createImportDeclaration(tableComponentName, './' + tableComponentName);
                     }
                 }
 

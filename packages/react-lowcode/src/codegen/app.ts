@@ -10,15 +10,16 @@ import { getListComponentName, getListPageComponentName, getPluralizedEntityName
 import { generateMenuItem, generateRoute } from './facade/facadeApi'
 
 // generates CRUD React pages (master-detail, eg. orders list, order detail form) from typescript
-export function generatePages(introspection: IntrospectionQuery, 
+export async function generatePages(introspection: IntrospectionQuery, 
                               io: CodeRW & CodeDir, 
                               options?: CodegenOptions) {
 
-    options?.names.map((typeName) => {
+    options?.names.map(async (typeName) => {
         const entity: Entity | undefined = createEntityFromIntrospection(introspection, typeName)
 
         if (entity) {
             const componentStorageRoot = options?.componentStoragePath ?? 'src/components'
+            const generatedFolderPath = options?.generatedFolderPath ?? 'src/generated'
             const routeDefinitionFilePath = options?.routeDefinitionFilePath ?? 'src/routes.tsx'
             const menuDefinitionFilePath = options?.menuDefinitionFilePath ?? 'src/layouts/DashboardLayout/NavBar/index.tsx'
             const entityListComponentPageName = getListPageComponentName(entity)
@@ -35,27 +36,29 @@ export function generatePages(introspection: IntrospectionQuery,
                 io.writeFile(`${componentStorageRoot}/${typeName}.graphql`, graphqlQueries)
 
             //generate component for list
-            generateListComponent(io, 
+            await generateListComponent(io, 
                                   listComponentFilePath,
                                   entity, 
                                   options)
 
             //generate page for list component
-            generateListPage(io, 
-                             entity, 
-                             typeName, 
-                             options.pageListTemplate, 
-                             listPageComponentFilePath);
+            await generateListPage(io, 
+                                   entity, 
+                                   typeName, 
+                                   options.pageListTemplate, 
+                                   listPageComponentFilePath,
+                                   introspection,
+                                   generatedFolderPath);
 
             //generate route for generated list page
-            addNewListRoute(io, 
+            await addNewListRoute(io, 
                             routeDefinitionFilePath, 
                             moduleRouteUri, 
                             entityListComponentPageName, 
                             listPageComponentFilePath)
 
             //generate new menu item for generated list page
-            addNewMenuItem(io,
+            await addNewMenuItem(io,
                            menuDefinitionFilePath, 
                            moduleName, 
                            '/app/' + moduleRouteUri)
@@ -63,7 +66,7 @@ export function generatePages(introspection: IntrospectionQuery,
     })
 }
 
-function generateListComponent(io: CodeRW, 
+async function generateListComponent(io: CodeRW, 
                                filePath: string,
                                entity: Entity, 
                                options?:CodegenOptions) {
@@ -93,16 +96,18 @@ function generateListComponent(io: CodeRW,
 
     const pageSourceCode = printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page!.imports, page!.functionDeclaration]), sourceFile)
     
-    io.writeFile(filePath, pageSourceCode)
+    await io.writeFile(filePath, pageSourceCode)
 }
 
-function generateListPage(io: CodeRW, 
+async function generateListPage(io: CodeRW, 
                           entity: Entity, 
                           typeName:string,
                           pageListTemplateSource: string,
-                          listPageFilePath: string) {
-    const templateResolver = new TemplateResolver(entity);
-    const listPage = templateResolver.generateListPage(pageListTemplateSource);
+                          listPageFilePath: string,
+                          introspection: IntrospectionQuery,
+                          generatedFolderPath: string) {
+    const templateResolver = new TemplateResolver(entity, introspection);
+    const listPage = templateResolver.generateListPage(pageListTemplateSource, generatedFolderPath);
 
     if(listPage) {
         const listPageSourceFile = ts.createSourceFile(
@@ -117,11 +122,11 @@ function generateListPage(io: CodeRW,
 
         const generatedSourceCode = printer.printFile(listPageSourceFile);
 
-        io.writeFile(listPageFilePath, generatedSourceCode)
+        await io.writeFile(listPageFilePath, generatedSourceCode)
     }
 }
 
-function addNewListRoute(io:CodeRW,
+async function addNewListRoute(io:CodeRW,
                          routeDefinitionFilePath: string,
                          moduleRouteUri: string, 
                          componentName: string,
@@ -133,15 +138,15 @@ function addNewListRoute(io:CodeRW,
             componentFilePath: componentFilePath, 
             componentRouteUri: moduleRouteUri
         }, 
-        io).then(generatedSource => {
+        io).then(async generatedSource => {
             if(generatedSource){
-                io.writeFile(routeDefinitionFilePath, generatedSource)
+                await io.writeFile(routeDefinitionFilePath, generatedSource)
             }
         }
     )
 }
 
-function addNewMenuItem(io:CodeRW, 
+async function addNewMenuItem(io:CodeRW, 
                         menuDefinitionFilePath: string,
                         itemTitle: string, 
                         itemUri: string, 
@@ -155,9 +160,9 @@ function addNewMenuItem(io:CodeRW,
             itemIcon: icon
         }, 
         io)
-    .then(generatedSource => {
+    .then(async generatedSource => {
         if(generatedSource){
-            io.writeFile(menuDefinitionFilePath, generatedSource)
+            await io.writeFile(menuDefinitionFilePath, generatedSource)
         }
     })
 }

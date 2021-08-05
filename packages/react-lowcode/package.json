@@ -1,7 +1,14 @@
 {
   "name": "@iteria-app/react-lowcode",
-  "version": "0.6.6",
+  "version": "0.6.9",
   "description": "Automate React Apps.",
+  "license": "AGPL-3.0-or-later",
+  "module": "esm/index.js",
+  "exports": {
+    ".": {
+      "import": "./esm/index.js"
+    }
+  },
   "scripts": {
     "build": "npx tsc",
     "watch": "npx tsc --watch",
@@ -38,7 +45,7 @@
   "author": "iteria",
   "license": "AGPL-3.0-or-later",
   "dependencies": {
-    "@iteria-app/graphql-lowcode": "^0.1.2",
+    "@iteria-app/graphql-lowcode": "^0.1.3",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
     "@testing-library/user-event": "^12.1.10",
