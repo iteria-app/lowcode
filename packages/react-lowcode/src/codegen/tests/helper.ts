@@ -46,7 +46,7 @@ export function createAst(
     return property ?? []
 }
 
-export function getEntityPropertyIntrospection(introspection: IntrospectionQuery,  propertyName: string, typeName = "Customer"): Property | undefined {
+export function getEntityPropertyIntrospection(introspection: IntrospectionQuery,  propertyName: string, typeName = "customer"): Property | undefined {
   const entity: Entity | undefined = createEntityFromIntrospection(introspection, typeName)
 
   let property: Property | undefined = undefined
