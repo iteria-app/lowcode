@@ -89,7 +89,7 @@ function getEntityFields(entityName: string, types: TypesObject[]): Field[] {
  */
 
 export function getNestedOfType(field: Field | Argument): Type {
-  let actualType = field.type
+  let actualType = field.type ?? field.ofType
 
   while (actualType.ofType) actualType = actualType.ofType
 
