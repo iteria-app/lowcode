@@ -12,58 +12,58 @@ import { generateMenuItem, generateRoute } from './facade/facadeApi'
 // generates CRUD React pages (master-detail, eg. orders list, order detail form) from typescript
 export async function generatePages(introspection: IntrospectionQuery, 
                               io: CodeRW & CodeDir, 
-                              options?: CodegenOptions) {
+                              options: CodegenOptions) {
 
-    options?.names.map(async (typeName) => {
-        const entity: Entity | undefined = createEntityFromIntrospection(introspection, typeName)
+        await Promise.all(options.names.map(async (typeName) => {
+            const entity: Entity | undefined = createEntityFromIntrospection(introspection, typeName)
 
-        if (entity) {
-            const componentStorageRoot = options?.componentStoragePath ?? 'src/components'
-            const generatedFolderPath = options?.generatedFolderPath ?? 'src/generated'
-            const routeDefinitionFilePath = options?.routeDefinitionFilePath ?? 'src/routes.tsx'
-            const menuDefinitionFilePath = options?.menuDefinitionFilePath ?? 'src/layouts/DashboardLayout/NavBar/index.tsx'
-            const entityListComponentPageName = getListPageComponentName(entity)
-            const listComponentName = getListComponentName(entity)
-            const listComponentFilePath = `${componentStorageRoot}/${listComponentName}.tsx`
-            const listPageComponentFilePath = `${componentStorageRoot}/${entityListComponentPageName}.tsx`
-            const moduleName = getPluralizedEntityName(entity.getName())
-            const moduleRouteUri = `codegen-${moduleName}`
+            if (entity) {
+                const componentStorageRoot = options?.componentStoragePath ?? 'src/components'
+                const generatedFolderPath = options?.generatedFolderPath ?? 'src/generated'
+                const routeDefinitionFilePath = options?.routeDefinitionFilePath ?? 'src/routes.tsx'
+                const menuDefinitionFilePath = options?.menuDefinitionFilePath ?? 'src/layouts/DashboardLayout/NavBar/index.tsx'
+                const entityListComponentPageName = getListPageComponentName(entity)
+                const listComponentName = getListComponentName(entity)
+                const listComponentFilePath = `${componentStorageRoot}/${listComponentName}.tsx`
+                const listPageComponentFilePath = `${componentStorageRoot}/${entityListComponentPageName}.tsx`
+                const moduleName = getPluralizedEntityName(entity.getName())
+                const moduleRouteUri = `codegen-${moduleName}`
 
-            //generate graphql queries
-            const graphqlQueries = generateGraphqlFile(introspection, typeName)
+                //generate graphql queries
+                const graphqlQueries = generateGraphqlFile(introspection, typeName)
 
-            if (graphqlQueries != '') 
-                io.writeFile(`${componentStorageRoot}/${typeName}.graphql`, graphqlQueries)
+                if (graphqlQueries != '') 
+                    await io.writeFile(`${componentStorageRoot}/${typeName}.graphql`, graphqlQueries)
 
-            //generate component for list
-            await generateListComponent(io, 
-                                  listComponentFilePath,
-                                  entity, 
-                                  options)
+                //generate component for list
+                await generateListComponent(io, 
+                                    listComponentFilePath,
+                                    entity, 
+                                    options)
 
-            //generate page for list component
-            await generateListPage(io, 
-                                   entity, 
-                                   typeName, 
-                                   options.pageListTemplate, 
-                                   listPageComponentFilePath,
-                                   introspection,
-                                   generatedFolderPath);
+                //generate page for list component
+                await generateListPage(io, 
+                                    entity, 
+                                    typeName, 
+                                    options.pageListTemplate, 
+                                    listPageComponentFilePath,
+                                    introspection,
+                                    generatedFolderPath);
 
-            //generate route for generated list page
-            await addNewListRoute(io, 
-                            routeDefinitionFilePath, 
-                            moduleRouteUri, 
-                            entityListComponentPageName, 
-                            listPageComponentFilePath)
+                //generate route for generated list page
+                await addNewListRoute(io, 
+                                routeDefinitionFilePath, 
+                                moduleRouteUri, 
+                                entityListComponentPageName, 
+                                listPageComponentFilePath)
 
-            //generate new menu item for generated list page
-            await addNewMenuItem(io,
-                           menuDefinitionFilePath, 
-                           moduleName, 
-                           '/app/' + moduleRouteUri)
-        }
-    })
+                //generate new menu item for generated list page
+                await addNewMenuItem(io,
+                            menuDefinitionFilePath, 
+                            moduleName, 
+                            '/app/' + moduleRouteUri)
+            }
+    }))
 }
 
 async function generateListComponent(io: CodeRW, 
@@ -79,8 +79,6 @@ async function generateListComponent(io: CodeRW,
         }
     }
 
-    console.log(`GENERATOR: selected table type: ${context.index.tableType}`)
-        
     const generator = new AppGenerator(context, entity)
     const page = generator.generateListComponent(/* TODO entity / type name should be input - not in context */)
     
@@ -131,19 +129,19 @@ async function addNewListRoute(io:CodeRW,
                          moduleRouteUri: string, 
                          componentName: string,
                          componentFilePath: string){
-    generateRoute(
-        { 
-            routeFilePath: routeDefinitionFilePath, 
-            componentName: componentName, 
-            componentFilePath: componentFilePath, 
-            componentRouteUri: moduleRouteUri
-        }, 
-        io).then(async generatedSource => {
-            if(generatedSource){
-                await io.writeFile(routeDefinitionFilePath, generatedSource)
-            }
-        }
-    )
+
+    const generatedSource  = await generateRoute(
+    { 
+        routeFilePath: routeDefinitionFilePath, 
+        componentName: componentName, 
+        componentFilePath: componentFilePath, 
+        componentRouteUri: moduleRouteUri
+    }, 
+    io)
+    
+    if(generatedSource){
+        await io.writeFile(routeDefinitionFilePath, generatedSource)
+    }
 }
 
 async function addNewMenuItem(io:CodeRW, 
@@ -152,17 +150,16 @@ async function addNewMenuItem(io:CodeRW,
                         itemUri: string, 
                         icon?: string)
 {
-    generateMenuItem(
-        {
-            menuDefinitionFilePath: menuDefinitionFilePath,
-            itemTitle: itemTitle,
-            itemUri: itemUri,
-            itemIcon: icon
-        }, 
-        io)
-    .then(async generatedSource => {
-        if(generatedSource){
-            await io.writeFile(menuDefinitionFilePath, generatedSource)
-        }
-    })
+    const generatedSource  = await generateMenuItem(
+    {
+        menuDefinitionFilePath: menuDefinitionFilePath,
+        itemTitle: itemTitle,
+        itemUri: itemUri,
+        itemIcon: icon
+    }, 
+    io)
+    
+    if(generatedSource){
+        await io.writeFile(menuDefinitionFilePath, generatedSource)
+    }
 }
