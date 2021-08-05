@@ -65,8 +65,8 @@ export class BasicTableGenerator implements TableGenerator
                                     const addHeaderColumn = this.propertyHead(property, this._entity!);
                                     const addBodyColumn = this.propertyCell(property, this._entity!, prefixIterator);                                    
                                     if (columnIndex && columnIndex > 0 && columnIndex < headColumns.length + 1) {
-                                        headColumns = [...headColumns.slice(0, columnIndex), ...[addHeaderColumn], ...headColumns.slice(columnIndex)];
-                                        bodyColumns = [...bodyColumns.slice(0, columnIndex), ...[addBodyColumn], ...bodyColumns.slice(columnIndex)];
+                                        headColumns = [...headColumns.slice(0, columnIndex - 1), ...[addHeaderColumn], ...headColumns.slice(columnIndex - 1)];
+                                        bodyColumns = [...bodyColumns.slice(0, columnIndex - 1), ...[addBodyColumn], ...bodyColumns.slice(columnIndex - 1)];
                                     } else if (columnIndex !== undefined && columnIndex == 0) {
                                         headColumns = [...[addHeaderColumn], ...headColumns]
                                         bodyColumns = [...[addBodyColumn], ...bodyColumns]
