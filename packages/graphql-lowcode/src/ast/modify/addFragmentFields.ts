@@ -1,5 +1,5 @@
 import { FragmentDefinitionNode, SelectionNode, FieldNode, parse, visit } from 'graphql'
-import { Field } from '../generate'
+import { Field } from '../../generate'
 
 interface fieldOffset {
   offset: number,

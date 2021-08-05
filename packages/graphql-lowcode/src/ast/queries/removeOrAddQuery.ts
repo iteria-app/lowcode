@@ -16,10 +16,10 @@ export function removeOrAddQuery(file: string, queryName: string, queryCache: { 
         if (node.name?.value === queryName && node.loc) {
           //deletes fragment
           const fragmentName = getFragmentSpreadName(file, queryName)
-          const { fileWithoutFragment, removedFragment } = removeFragment(file, fragmentName)
+          const { originalFileContent, removedFragment } = removeFragment(file, fragmentName)
 
           //deletes query
-          const { fileWithoutQuery, removedQuery } = removeQuery(fileWithoutFragment, queryName)
+          const { fileWithoutQuery, removedQuery } = removeQuery(originalFileContent, queryName)
           queryCache = [...queryCache, { name: queryName, query: removedQuery, fragment: removedFragment }]
 
           if(remainingQueries === 1) file = placeholder_query

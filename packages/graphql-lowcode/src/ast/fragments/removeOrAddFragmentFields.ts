@@ -1,5 +1,5 @@
 import { BREAK, FragmentDefinitionNode, SelectionNode, FieldNode, parse, visit } from 'graphql'
-import { addFragmentField } from '../../modify'
+import { addFragmentField } from '../modify'
 
 export function removeOrAddFragmentField(file: string, fragmentName: string, fieldName: string, parents: string[], childrenField?: boolean) {
   try {
@@ -113,11 +113,11 @@ export function countWhitespacesAndNewLinesToRight(file: string, pos: number) {
   return { rightSpaces: spaces, rightNewLines: newLines }
 }
 
-export function removeFragment(file: string, fragmentName: string): { fileWithoutFragment: string, removedFragment: string } {
+export function removeFragment(file: string, fragmentName: string): { originalFileContent: string, removedFragment: string } {
   const ast = parse(file)
 
   let removedFragment = ''
-  let fileWithoutFragment: string = ''
+  let originalFileContent: string = ''
 
   visit(ast, {
     FragmentDefinition(node: FragmentDefinitionNode) {
@@ -127,13 +127,13 @@ export function removeFragment(file: string, fragmentName: string): { fileWithou
         const { leftSpaces, leftNewLines } = countWhitespacesAndNewLinesToLeft(file, node.loc.start)
         const { rightSpaces, rightNewLines } = countWhitespacesAndNewLinesToRight(file, node.loc.end)
 
-        fileWithoutFragment = file.substr(0, node.loc?.start - (leftSpaces + leftNewLines)) + file.substr(node.loc?.end + (rightSpaces + rightNewLines), file.length - 1)
+        originalFileContent = file.substr(0, node.loc?.start - (leftSpaces + leftNewLines)) + file.substr(node.loc?.end + (rightSpaces + rightNewLines), file.length - 1)
         BREAK
       }
     }
   })
 
-  return { fileWithoutFragment, removedFragment }
+  return { originalFileContent, removedFragment }
 }
 
 export function addFragment(file: string, fragment: string) {
