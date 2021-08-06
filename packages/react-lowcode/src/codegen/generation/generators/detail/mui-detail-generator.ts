@@ -29,7 +29,7 @@ import {
   printSourceCode,
 } from "../../../ast/ast";
 import { findWidgetParentNode, getWidgetProperties } from "../../../ast/widgetDeclaration";
-import { WidgetProperties } from "../../../interfaces";
+import { WidgetProperties, WidgetProperty } from "../../../interfaces";
 import { clearNodePosition, createStringJsxAttribute, isJsxAttributeWithName } from "../../../ast/node";
 import { getEntityName } from "../../entity/helper";
 
@@ -53,7 +53,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
       generationContext,
       this._imports
     );
-    this._dataPropertyName = getEntityName(this._entity)
+    this._dataPropertyName = this._entity !== undefined ? getEntityName(this._entity) : ""
   }
 
   async getFormWidgetProperties(position: SourceLineCol): Promise<WidgetProperties> {
@@ -116,56 +116,20 @@ export default class MuiDetailGenerator implements DetailGenerator {
                 if (inputProp) {
                   if (prop.initializer) {
                     const initializer = prop.initializer
+                    // STRING_LITERALS
                     if (inputProp.type === "STRING_LITERAL") {
-                      const text = ts.isStringLiteral(initializer) ? initializer.text : initializer.getText()
-                      if(inputProp.value !== text) {
-                        newProp = factory.updateJsxAttribute(prop, prop.name, factory.createStringLiteral(inputProp.value));
-                        astChanged = true;
+                      const stringLiteral = this.createAttributeForStringLiterals(initializer, inputProp)
+                      if (stringLiteral) {
+                        newProp = factory.updateJsxAttribute(prop, prop.name, stringLiteral)
+                        astChanged = true
                       }
-                    } else if (inputProp.type === "EXPRESSION") {
-                      const text = ts.isJsxExpression(initializer) ? initializer.expression?.getText() : initializer.text 
-                      if (inputProp.value !== text || !ts.isJsxExpression(initializer)) {
-                        const newAst = createAst(inputProp.value)
-                        const statement = newAst?.statements[0] as any
-                        if (statement) {
-                          const expression = statement.expression
-                          if (expression) {
-                            // numbers 
-                            if (expression.kind === SyntaxKind.NumericLiteral) {
-                              const value = factory.createJsxExpression(
-                                undefined,
-                                factory.createNumericLiteral(inputProp.value)
-                              )
-  
-                              newProp = factory.updateJsxAttribute(prop, prop.name, value)
-                              astChanged = true
-                            }
-                            // boolean 
-                            else if (expression.kind === SyntaxKind.TrueKeyword || expression.kind === SyntaxKind.FalseKeyword) {
-                              const value = factory.createJsxExpression(
-                                undefined,
-                                inputProp.value.toLowerCase() === "true" ? factory.createTrue() : factory.createFalse()
-                              )
-  
-                              newProp = factory.updateJsxAttribute(prop, prop.name, value)
-                              astChanged = true
-                            }
-                            // other expressions  
-                            else if (expression.kind === SyntaxKind.CallExpression || expression.kind === SyntaxKind.PropertyAccessExpression) {
-                              if (expression.arguments && expression.arguments[0].properties) {
-                                expression.arguments[0] = this.createObjectLiteral(expression.arguments[0].properties[0])
-                              }
-  
-                              const value = factory.createJsxExpression(
-                                undefined,
-                                expression
-                              )
-  
-                              newProp = factory.updateJsxAttribute(prop, prop.name, value)
-                              astChanged = true
-                            }
-                          }
-                        }
+                    }
+                    // EXPRESSIONS 
+                    else if (inputProp.type === "EXPRESSION") {
+                      const expression = this.createAttributeForExpressions(initializer, inputProp)
+                      if (expression) {
+                        newProp = factory.updateJsxAttribute(prop,prop.name, expression)
+                        astChanged = true
                       }
                     }
                   } else {
@@ -188,7 +152,6 @@ export default class MuiDetailGenerator implements DetailGenerator {
         }
       }
     }
-
     return result;
   }
 
@@ -200,6 +163,66 @@ export default class MuiDetailGenerator implements DetailGenerator {
       )],
       false
     )
+  }
+
+  createAttributeForStringLiterals(initializer : ts.JsxExpression | ts.StringLiteral, inputProp: WidgetProperty) {
+    const text = ts.isStringLiteral(initializer) ? initializer.text : initializer.getText()
+    if(inputProp.value !== text) {
+      return factory.createStringLiteral(inputProp.value)
+    }
+  }
+
+  createAttributeForExpressions(initializer : ts.JsxExpression | ts.StringLiteral, inputProp: WidgetProperty) {
+    const text = ts.isJsxExpression(initializer) ? initializer.expression?.getText() : initializer.text
+    if (inputProp.value !== text || !ts.isJsxExpression(initializer)) {
+      const newAst = createAst(inputProp.value)
+      const statement = newAst?.statements[0] as any
+      if (statement) {
+        const expression = statement?.expression
+        const value = this.createAttributeForNumbers(expression, inputProp) || 
+                      this.createAttributeForBooleans(expression, inputProp) ||  
+                      this.createAttributeForOtherExpression(expression)
+        return value;
+      }
+    }
+  }
+
+  createAttributeForNumbers(expression: any, inputProp: WidgetProperty) {
+    if (expression?.kind === SyntaxKind.NumericLiteral) {
+      const value = factory.createJsxExpression(
+        undefined,
+        factory.createNumericLiteral(inputProp.value)
+      )
+
+      return value
+    }
+  }
+
+  createAttributeForBooleans(expression: any, inputProp: WidgetProperty) {
+    if (expression?.kind === SyntaxKind.TrueKeyword || expression?.kind === SyntaxKind.FalseKeyword) {
+      console.log("here")
+      const value = factory.createJsxExpression(
+        undefined,
+        inputProp.value.toLowerCase() === "true" ? factory.createTrue() : factory.createFalse()
+      )
+
+      return value
+    }
+  }
+
+  createAttributeForOtherExpression(expression: any) {
+    if (expression?.kind === SyntaxKind.CallExpression || expression?.kind === SyntaxKind.PropertyAccessExpression) {
+      if (expression.arguments && expression.arguments[0].properties) {
+        expression.arguments[0] = this.createObjectLiteral(expression.arguments[0].properties[0])
+      }
+
+      const value = factory.createJsxExpression(
+        undefined,
+        expression
+      )
+
+      return value
+    }
   }
 
   async insertFormWidget(position: SourceLineCol, property: Property, index?:number): Promise<string> {
