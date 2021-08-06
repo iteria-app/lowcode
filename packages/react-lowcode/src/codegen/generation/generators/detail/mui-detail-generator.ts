@@ -200,7 +200,6 @@ export default class MuiDetailGenerator implements DetailGenerator {
 
   createAttributeForBooleans(expression: any, inputProp: WidgetProperty) {
     if (expression?.kind === SyntaxKind.TrueKeyword || expression?.kind === SyntaxKind.FalseKeyword) {
-      console.log("here")
       const value = factory.createJsxExpression(
         undefined,
         inputProp.value.toLowerCase() === "true" ? factory.createTrue() : factory.createFalse()
