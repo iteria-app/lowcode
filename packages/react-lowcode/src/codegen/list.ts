@@ -15,9 +15,9 @@ export function isSelectedDataTable(sourceCode:string, tablePosition: SourceLine
 }
 
 export async function addColumn(typesSourceCode: string, 
-    io: CodeRW, 
-    sourceCode:SourceLineCol, 
-    options: InsertOptions): Promise<string | undefined>{
+                      io: CodeRW, 
+                      sourceCode:SourceLineCol, 
+                      options: InsertOptions): Promise<string | undefined>{
         
     const property: Property = getEntityProperty(typesSourceCode, options.property, options.entityName)[0]
     let generatedSource = undefined

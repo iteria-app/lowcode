@@ -14,8 +14,7 @@ describe("codegen facade tests", () => {
     describe("UiFramework.MaterialUI", () => {
       describe("TableType.BasicTable", () => {
         test("with (Formatter.None) (undefined position)", async() => {
-          const myClassFile = parseGraphqlTypes(graphqlGenTs1);
-          const testEntity = sourceFileEntity(myClassFile);
+          const testEntity: Entity | undefined = createEntityFromIntrospection(is2.data.__schema, 'customer');
           const entityName = testEntity?.getName().toLowerCase();
       
           const tablePosition: SourceLineCol = {
@@ -57,8 +56,7 @@ describe("codegen facade tests", () => {
         });   
       
         test("with (Formatter.None) (defined position)", async() => {
-          const myClassFile = parseGraphqlTypes(graphqlGenTs1);
-          const testEntity = sourceFileEntity(myClassFile);
+          const testEntity: Entity | undefined = createEntityFromIntrospection(is2.data.__schema, 'customer');
           const entityName = testEntity?.getName().toLowerCase();
       
           const tablePosition: SourceLineCol = {
@@ -101,8 +99,7 @@ describe("codegen facade tests", () => {
         });   
       
         test("with (Formatter.ReactIntl) (undefined position)", async() => {
-          const myClassFile = parseGraphqlTypes(graphqlGenTs1);
-          const testEntity = sourceFileEntity(myClassFile);
+          const testEntity: Entity | undefined = createEntityFromIntrospection(is2.data.__schema, 'customer');
           const entityName = testEntity?.getName().toLowerCase();
 
           const tablePosition: SourceLineCol = {

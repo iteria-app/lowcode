@@ -1,9 +1,8 @@
 // TODO https://github.com/vvakame/typescript-formatter/blob/master/lib/formatter.ts
 import ts, { factory } from "typescript"
-import { graphqlGenTs1 } from "../typeAlias.example"
 import { UiFramework, TableType, Formatter } from '../../definition/context-types'
 import { AppGenerator } from '../../generation/generators/app-generator'
-import { sourceFileEntity, createAst, parseGraphqlTypes } from "../helper"
+import { createAst } from "../helper"
 import { createEntityFromIntrospection, Entity } from "../../generation/entity"
 import { is2 } from "../introspection-example"
 
@@ -24,11 +23,11 @@ import { is2 } from "../introspection-example"
 
   test(".grommet formik generation", () => {
     const sourceFile = createAst('')
-    const myClassFile = parseGraphqlTypes(graphqlGenTs1)
-    const testEntity = sourceFileEntity(myClassFile)
+    const entityName = 'customer';      
+    const entity: Entity | undefined = createEntityFromIntrospection(is2.data.__schema, entityName);
 
-    let generationContext = {useFormatter:false, uiFramework: UiFramework.Grommet, tableType: TableType.BasicTable, entity: testEntity!!};
-    let generator = new AppGenerator(generationContext , testEntity!!);
+    let generationContext = {useFormatter:false, uiFramework: UiFramework.Grommet, tableType: TableType.BasicTable, entity: entity!!};
+    let generator = new AppGenerator(generationContext , entity!!);
 
     const page = generator.generateDetailPage()
     
@@ -39,11 +38,11 @@ import { is2 } from "../introspection-example"
 
 test("interface generation", () => {
   const sourceFile = createAst('')
-  const myClassFile = parseGraphqlTypes(graphqlGenTs1)
-  const testEntity = sourceFileEntity(myClassFile)
+  const entityName = 'customer';      
+  const entity: Entity | undefined = createEntityFromIntrospection(is2.data.__schema, entityName);
 
-    let generationContext = {useFormatter:false, uiFramework: UiFramework.MaterialUI, tableType: TableType.BasicTable, entity: testEntity!!};
-    let generator = new AppGenerator(generationContext , testEntity!!);
+    let generationContext = {useFormatter:false, uiFramework: UiFramework.MaterialUI, tableType: TableType.BasicTable, entity: entity!!};
+    let generator = new AppGenerator(generationContext , entity!!);
 
     const page = generator.generateInterface();
     
