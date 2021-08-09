@@ -706,15 +706,11 @@ export default class MuiDetailGenerator implements DetailGenerator {
     name: string,
     type: InputType
   ): ts.JsxAttribute {
-    if (this._context.formatter === Formatter.ReactIntl) {
       if (type === InputType.date) {
         return this.createDateValueFormattedAttribute(name);
       } else {
-        return this.createTextValueFormattedAttribute(name);
-      }
-    } else {
-      return this.createTextValueAttribute(name);
-    }
+        return this.createTextValueAttribute(name);
+    } 
   }
 
   private createLabelAttribute(
@@ -798,38 +794,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
       )
     );
   }
-  private createTextValueFormattedAttribute(name: string): ts.JsxAttribute {
-    return factory.createJsxAttribute(
-      factory.createIdentifier("value"),
-      factory.createJsxExpression(
-        undefined,
-        factory.createCallExpression(
-          factory.createPropertyAccessExpression(
-            factory.createIdentifier("intl"),
-            factory.createIdentifier("formatMessage")
-          ),
-          undefined,
-          [
-            factory.createObjectLiteralExpression(
-              [
-                factory.createPropertyAssignment(
-                  factory.createIdentifier("'" + "id"),
-                  factory.createPropertyAccessExpression(
-                    factory.createPropertyAccessExpression(
-                      factory.createIdentifier("formik"),
-                      factory.createIdentifier("values")
-                    ),
-                    factory.createIdentifier(name + "'")
-                  )
-                ),
-              ],
-              false
-            ),
-          ]
-        )
-      )
-    );
-  }
+
   private createTextValueAttribute(name: string): ts.JsxAttribute {
     return factory.createJsxAttribute(
       factory.createIdentifier("value"),
@@ -860,13 +825,10 @@ export default class MuiDetailGenerator implements DetailGenerator {
             factory.createObjectLiteralExpression(
               [
                 factory.createPropertyAssignment( 
-                  factory.createIdentifier("'" + "id"),
+                  factory.createIdentifier("id"),
                   factory.createPropertyAccessExpression(
-                    factory.createPropertyAccessExpression(
-                      factory.createIdentifier("formik"),
-                      factory.createIdentifier("values")
-                    ),
-                    factory.createIdentifier(name + "'")
+                      factory.createIdentifier("'" + this._dataPropertyName),
+                      factory.createIdentifier(name + "'")
                   )
                 ),
               ],
