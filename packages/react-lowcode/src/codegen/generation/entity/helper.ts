@@ -25,7 +25,3 @@ export function getPluralizedEntityName(entityName: string) : string {
     return Pluralize.plural(camalizeString(entityName))
 }
 
-export function getCapitalizeFirstLetter(entityName: string): string {
-        let first = entityName.substr(0,1).toUpperCase();
-        return first + entityName.substr(1); 
-}

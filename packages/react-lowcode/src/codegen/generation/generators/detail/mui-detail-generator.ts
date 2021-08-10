@@ -31,7 +31,8 @@ import {
 import { findWidgetParentNode, getWidgetProperties } from "../../../ast/widgetDeclaration";
 import { WidgetProperties } from "../../../interfaces";
 import { clearNodePosition, createStringJsxAttribute, isJsxAttributeWithName } from "../../../ast/node";
-import { getCapitalizeFirstLetter, getEntityName } from "../../entity/helper";
+import { getEntityName } from "../../entity/helper";
+import { pascalCase } from "pascal-case";
 
 export default class MuiDetailGenerator implements DetailGenerator {
   private _imports: ts.ImportDeclaration[] = [];
@@ -389,7 +390,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
         )
       );
       uniqueFileImports.push(createNamedImportDeclaration("useFormik", "formik"));
-      uniqueFileImports.push(createNamedImportDeclaration(getCapitalizeFirstLetter(this._entity.getName()), "./" + this._entity.getName()));
+      uniqueFileImports.push(createNamedImportDeclaration(pascalCase(this._entity.getName()), "./" + this._entity.getName()));
 
       return {
         functionDeclaration: functionalComponent,
@@ -1014,7 +1015,7 @@ export default class MuiDetailGenerator implements DetailGenerator {
             ),
             [
               factory.createTypeReferenceNode(
-                factory.createIdentifier(getCapitalizeFirstLetter(this._entity.getName())),
+                factory.createIdentifier(pascalCase(this._entity.getName())),
                 undefined
               ),
             ]
