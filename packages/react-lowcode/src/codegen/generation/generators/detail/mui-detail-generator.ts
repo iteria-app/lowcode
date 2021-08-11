@@ -32,7 +32,7 @@ import { WidgetProperties } from "../../../interfaces";
 import { clearNodePosition, createStringJsxAttribute, isJsxAttributeWithName } from "../../../ast/node";
 import { getDetailComponentName, getEntityInterfaceName, getEntityName } from "../../entity/helper";
 import { ComponentGenerator } from "../../interfaces/generation-interfaces";
-
+import { pascalCase } from "pascal-case";
 
 export default class MuiDetailGenerator implements ComponentGenerator {
   private _imports: ts.ImportDeclaration[] = [];
@@ -1017,7 +1017,7 @@ export default class MuiDetailGenerator implements ComponentGenerator {
             ),
             [
               factory.createTypeReferenceNode(
-                factory.createIdentifier(this?._entity?.getName()!),
+                factory.createIdentifier(pascalCase(this._entity.getName())),
                 undefined
               ),
             ]

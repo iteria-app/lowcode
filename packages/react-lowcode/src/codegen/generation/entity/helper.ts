@@ -44,3 +44,4 @@ export function getBaseModuleUri(entity: Entity): string {
 export function getDetailModuleUri(entity: Entity): string {
     return `${getBaseModuleUri(entity)}-detail`
 }
+
