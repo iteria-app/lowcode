@@ -709,7 +709,7 @@ export default class MuiDetailGenerator implements ComponentGenerator {
     name: string,
     type: InputType
   ): ts.JsxAttribute {
-      if (type === InputType.date) {
+      if (type === InputType.date && this._context.formatter === Formatter.ReactIntl) {
         return this.createDateValueFormattedAttribute(name);
       } else {
         return this.createTextValueAttribute(name);
