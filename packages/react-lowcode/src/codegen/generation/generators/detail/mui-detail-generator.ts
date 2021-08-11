@@ -1,6 +1,5 @@
-import ts, { factory, JsxAttributeLike, Node, ObjectLiteralExpression, SourceFile, SyntaxKind, transform } from "typescript";
+import ts, { factory, JsxAttributeLike, Node, ObjectLiteralExpression, SourceFile, SyntaxKind } from "typescript";
 import { PageComponent } from "../../react-components/react-component-helper";
-import { DetailGenerator } from "./detail-generator-factory";
 import { DetailComponentDefinitionBase } from "../../../definition/detail-definition-core";
 import GenerationContext from "../../context/context";
 import { Formatter } from "../../../definition/context-types";
@@ -31,9 +30,11 @@ import {
 import { findWidgetParentNode, getWidgetProperties } from "../../../ast/widgetDeclaration";
 import { WidgetProperties } from "../../../interfaces";
 import { clearNodePosition, createStringJsxAttribute, isJsxAttributeWithName } from "../../../ast/node";
-import { getEntityName } from "../../entity/helper";
+import { getDetailComponentName, getEntityInterfaceName, getEntityName } from "../../entity/helper";
+import { ComponentGenerator } from "../../interfaces/generation-interfaces";
 
-export default class MuiDetailGenerator implements DetailGenerator {
+
+export default class MuiDetailGenerator implements ComponentGenerator {
   private _imports: ts.ImportDeclaration[] = [];
   private _context: GenerationContext;
   private _entity: Entity;
@@ -368,13 +369,13 @@ export default class MuiDetailGenerator implements DetailGenerator {
     return MuiDetailComponents;
   }
 
-  generateDetailComponent(): PageComponent | undefined {
+  generateComponent(): PageComponent | undefined {
     if(this._entity)
     {
       var statements = this.createStatements();
 
       var functionalComponent = this.createConstFunction(
-        "GeneratedFormikComponent",
+        getDetailComponentName(this._entity),
         statements
       );
 
@@ -389,7 +390,9 @@ export default class MuiDetailGenerator implements DetailGenerator {
         )
       );
       uniqueFileImports.push(createNamedImportDeclaration("useFormik", "formik"));
-      uniqueFileImports.push(createNamedImportDeclaration(this._entity.getName(), "./" + this._entity.getName()));
+
+      const interfaceName = getEntityInterfaceName(this._entity)
+      uniqueFileImports.push(createNamedImportDeclaration(interfaceName, "./" + interfaceName));
 
       return {
         functionDeclaration: functionalComponent,

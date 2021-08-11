@@ -3,34 +3,37 @@ import ts, {
 } from "typescript";
 import { Entity, getProperties, Property } from "../../entity";
 import { PageComponent } from "../../react-components/react-component-helper";
-import { DetailGenerator } from "./detail-generator-factory";
+import { ComponentGenerator } from "../../interfaces/generation-interfaces";
+import { getEntityInterfaceName } from "../../entity/helper";
 
-export default class InterfaceGenerator implements DetailGenerator {
+export default class InterfaceGenerator implements ComponentGenerator {
   private _imports: ts.ImportDeclaration[] = [];
   private _entity: Entity;
 
   constructor(entity: Entity) {
     this._entity = entity;
   }
-  generateDetailComponent(): PageComponent | undefined {
+
+  generateComponent(): PageComponent | undefined {
     var functionalComponent = this.generateInterface();
     return {
       functionDeclaration: functionalComponent,
       imports: this._imports,
     };
   }
-  generateInterface(): ts.InterfaceDeclaration {
+
+  private generateInterface(): ts.InterfaceDeclaration {
     return factory.createInterfaceDeclaration(
       undefined,
       [factory.createModifier(ts.SyntaxKind.ExportKeyword)],
-      factory.createIdentifier(this._entity.getName()),
+      factory.createIdentifier(getEntityInterfaceName(this._entity)),
       undefined,
       undefined,
       this.getInterfaceFields()
     );
   }
 
-  getInterfaceFields(): ts.TypeElement[] {
+  private getInterfaceFields(): ts.TypeElement[] {
     const inputs: ts.TypeElement[] = getProperties(this._entity).map(property =>{
         return this.getPropertySignature(property);
     });
@@ -38,7 +41,7 @@ export default class InterfaceGenerator implements DetailGenerator {
     return inputs;
   }
 
-  getPropertySignature(property: Property):  ts.TypeElement {
+  private getPropertySignature(property: Property):  ts.TypeElement {
     return factory.createPropertySignature(
       undefined,
       factory.createIdentifier(property.getName()),
