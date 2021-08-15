@@ -10,5 +10,4 @@ export const getJsxIdentifierLength = (code: string, source: SourceLineCol) => {
   const node = astFindStart(code, pos!)
   if (!node) throw new Error("Unable to find node in AST")
   return node.end - node.pos
-
 }
