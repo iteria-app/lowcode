@@ -21,8 +21,8 @@ export default class DetailPageTemplateResolver {
             const detailPageName = getDetailPageComponentName(this._entity)
             const detailComponentName = getDetailComponentName(this._entity)
             const entityIdenfier = getPluralizedEntityName(this._entity)
-
             const hookNamePlaceholder = '#query_name#'
+
             const detailPageNamePlaceholder = '#detail_component_page#'
             const detailComponentNamePlaceholder = '#detail_component#'
             const entityIdentifierPlaceholder = '#entity_identifier#'

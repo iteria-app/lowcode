@@ -33,11 +33,10 @@ import { getDetailComponentName, getEntityInterfaceName, getEntityName } from ".
 import { ComponentGenerator } from "../../interfaces/generation-interfaces";
 import { pascalCase } from "pascal-case";
 import { InputsMetadata, inputsMetadata } from "../../../definition/material-ui/inputsMetadata";
+import { createFormikHook, tryCreateInitialValueForProperty } from "../../react-components/formik";
 
 export default class MuiDetailGenerator implements ComponentGenerator {
 
-
-  private _imports: ts.ImportDeclaration[] = [];
   private _context: GenerationContext;
   private _entity: Entity;
   private _widgetContext: WidgetContext | undefined;
@@ -47,14 +46,14 @@ export default class MuiDetailGenerator implements ComponentGenerator {
   constructor(
     generationContext: GenerationContext,
     entity: Entity,
-    widgetContext?: WidgetContext
+    widgetContext?: WidgetContext //todo: remove nullable from widgetContext
   ) {
     this._context = generationContext;
     this._entity = entity;
     this._widgetContext = widgetContext;
     this._intlFormatter = new ReactIntlFormatter(
       generationContext,
-      this._imports
+      this._widgetContext?.getPageImports()??[]
     );
     this._dataPropertyName = getEntityName(this._entity)
   }
@@ -280,7 +279,10 @@ export default class MuiDetailGenerator implements ComponentGenerator {
 
     const inputStatements = this.getInputStatementsForProperty(getPropertyType(property), this._entity.getName(), property.getName());
 
-    if(inputStatements) {        
+    if(inputStatements) {       
+      this._widgetContext?.addImportArray(inputStatements.importDeclarations)
+      this._widgetContext?.addStatementIfNotExistArray(inputStatements.variableStatements)
+
       const gridItemElement = this.createGridItemElement([inputStatements.inputElement]);
 
       let newElements: ts.JsxElement[];
@@ -345,7 +347,7 @@ export default class MuiDetailGenerator implements ComponentGenerator {
     property: Property,
     ast: SourceFile
   ): ts.SourceFile {
-    let newField = this.tryCreateInitialValueForProperty(property);
+    let newField = tryCreateInitialValueForProperty(property, this._dataPropertyName);
     let newElements: ts.PropertyAssignment[] = [
       ...propertyAssignmentArray,
       newField,
@@ -391,39 +393,36 @@ export default class MuiDetailGenerator implements ComponentGenerator {
   generateComponent(): PageComponent | undefined {
     if(this._entity)
     {
-      var statements = this.createStatements();
+      this.createStatements();
 
       var functionalComponent = this.createConstFunction(
-        getDetailComponentName(this._entity),
-        statements
+         getDetailComponentName(this._entity)
       );
 
-      this._imports = [...this._imports, ...this._intlFormatter.getImports()];
+      this._widgetContext?.addImportArray(this._intlFormatter.getImports())
 
-      var uniqueFileImports = uniqueImports(this._imports);
-      uniqueFileImports.push(createNameSpaceImport("React", "react"));
-      uniqueFileImports.push(
+      this._widgetContext?.addImport(createNameSpaceImport("React", "react"));
+      this._widgetContext?.addImport(
         createNamedImportDeclaration(
           "TextField, Avatar, Card, CardHeader, CardContent, Grid",
           "@material-ui/core"
         )
       );
-      uniqueFileImports.push(createNamedImportDeclaration("useFormik", "formik"));
+      this._widgetContext?.addImport(createNamedImportDeclaration("useFormik", "formik"));
 
       const interfaceName = getEntityInterfaceName(this._entity)
-      uniqueFileImports.push(createNamedImportDeclaration(interfaceName, "./" + interfaceName));
+      this._widgetContext?.addImport(createNamedImportDeclaration(interfaceName, "./" + interfaceName));
 
       return {
         functionDeclaration: functionalComponent,
-        imports: uniqueFileImports,
+        imports: this._widgetContext?.getPageImports() ?? [],
       };
     } else return undefined
   }
 
-  private createStatements(): ts.Statement[] {
-    let statements = new Array<ts.Statement>();
+  private createStatements() {
     if (this._context.formatter === Formatter.ReactIntl) {
-      statements.push(this._intlFormatter.getImperativeHook());
+      this._widgetContext?.addStatementIfNotExist(this._intlFormatter.getImperativeHook())
     }
 
     let fields = this.createInputsForEntity();
@@ -431,13 +430,16 @@ export default class MuiDetailGenerator implements ComponentGenerator {
     var formElement = this.createFormElement(card);
 
     let wrapper = this.createFormikWrapper(formElement);
-    statements.push(
+
+    this._widgetContext?.addStatementIfNotExist(
       factory.createReturnStatement(
         factory.createParenthesizedExpression(wrapper)
       )
     );
 
-    return statements;
+    this._widgetContext?.addStatementIfNotExist(
+      createFormikHook(this._entity, this._dataPropertyName)
+    )
   }
 
   private createInputsForEntity(): ts.JsxChild[] {
@@ -555,130 +557,9 @@ export default class MuiDetailGenerator implements ComponentGenerator {
       factory.createJsxClosingElement(factory.createIdentifier("div"))
     );
   }
-  private creteInitialValuesForEntity() {
-    let inputs: ts.PropertyAssignment[] = [];
 
-    getProperties(this._entity).forEach((property) => {
-      let propertyInput = this.tryCreateInitialValueForProperty(property);
-
-      if (propertyInput) {
-        inputs.push(propertyInput);
-      }
-    });
-
-    return inputs;
-  }
-  private tryCreateInitialValueForProperty(
-    property: Property
-  ): ts.PropertyAssignment | undefined {
-    let propType: PropertyType = getPropertyType(property);
-    let propertyName = property.getName();
-
-    let assignment: ts.PropertyAssignment | undefined;
-
-    switch (propType) {
-      case PropertyType.string:
-        assignment = factory.createPropertyAssignment(
-          factory.createIdentifier(propertyName),
-          factory.createIdentifier(this._dataPropertyName + "." + propertyName)
-        );
-        break;
-      case PropertyType.datetime:
-        assignment = factory.createPropertyAssignment(
-          factory.createIdentifier(propertyName),
-          factory.createIdentifier(this._dataPropertyName + "." + propertyName)
-        );
-        break;
-    }
-
-    return assignment;
-  }
-  private getIntlVariable(): ts.VariableStatement | ts.EmptyStatement {
-    if (this._context.formatter === Formatter.ReactIntl) {
-      return this.createUseIntlVariable();
-    } else {
-      return factory.createEmptyStatement();
-    }
-  }
-  private createUseIntlVariable(): ts.VariableStatement {
-    return factory.createVariableStatement(
-      undefined,
-      factory.createVariableDeclarationList(
-        [
-          factory.createVariableDeclaration(
-            factory.createIdentifier("intl"),
-            undefined,
-            undefined,
-            factory.createCallExpression(
-              factory.createIdentifier("useIntl"),
-              undefined,
-              []
-            )
-          ),
-        ],
-        ts.NodeFlags.Const
-      )
-    );
-  }
-  private createFormikVariale(): ts.VariableStatement {
-    return factory.createVariableStatement(
-      undefined,
-      factory.createVariableDeclarationList(
-        [
-          factory.createVariableDeclaration(
-            factory.createIdentifier("formik"),
-            undefined,
-            undefined,
-            factory.createCallExpression(
-              factory.createIdentifier("useFormik"),
-              undefined,
-              [
-                factory.createObjectLiteralExpression(
-                  [
-                    factory.createPropertyAssignment(
-                      factory.createIdentifier("initialValues"),
-                      factory.createObjectLiteralExpression(
-                        this.creteInitialValuesForEntity(),
-                        false
-                      )
-                    ),
-                    factory.createPropertyAssignment(
-                      factory.createIdentifier("onSubmit"),
-                      factory.createArrowFunction(
-                        undefined,
-                        undefined,
-                        [
-                          factory.createParameterDeclaration(
-                            undefined,
-                            undefined,
-                            undefined,
-                            factory.createIdentifier("values"),
-                            undefined,
-                            undefined,
-                            undefined
-                          ),
-                        ],
-                        undefined,
-                        factory.createToken(
-                          ts.SyntaxKind.EqualsGreaterThanToken
-                        ),
-                        factory.createBlock([], false)
-                      )
-                    ),
-                  ],
-                  true
-                ),
-              ]
-            )
-          ),
-        ],
-        ts.NodeFlags.Const
-      )
-    );
-  }
   private createConstFunction(
-    componentName: string,
-    body: ts.Statement[]
+    componentName: string
   ): ts.VariableStatement {
     return factory.createVariableStatement(
       [factory.createModifier(ts.SyntaxKind.ExportKeyword)],
@@ -714,11 +595,7 @@ export default class MuiDetailGenerator implements ComponentGenerator {
             ],
             undefined,
             factory.createToken(ts.SyntaxKind.EqualsGreaterThanToken),
-            factory.createBlock([
-              this.getIntlVariable(),
-              this.createFormikVariale(),
-              factory.createBlock(body, true),
-            ])
+            factory.createBlock(this._widgetContext?.getStatements()??[], true)
           )
         ),
       ])
