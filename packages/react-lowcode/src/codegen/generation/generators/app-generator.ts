@@ -3,6 +3,7 @@ import GenerationContext from '../context/context'
 import { TableGenerator, TableGeneratorFactory } from './list/table-generator-factory'
 import { DetailGenerator, DetailGeneratorFactory } from './detail/detail-generator-factory'
 import { Entity } from '../entity';
+import InterfaceGenerator from './detail/interface-generator';
 
 export class AppGenerator {
     _context: GenerationContext;
@@ -45,5 +46,10 @@ export class AppGenerator {
     private getDetailGenerator(): DetailGenerator {
         let generatorFactory = new DetailGeneratorFactory(this._context, this._entity);
         return generatorFactory.getDetailGenerator();
+    }
+
+     generateInterface() {
+        let generator = new InterfaceGenerator(this._entity);
+        return generator.generateDetailComponent();
     }
 }

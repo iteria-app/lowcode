@@ -15,6 +15,7 @@ import { createAst, findByCondition, removeElementFromAst, replaceElementsToAST,
 import { findVariableDeclarations } from "../../../ast/ast"
 import { findWidgetParentNode } from "../../../ast/widgetDeclaration"
 import { ColumnSourcePositionResult } from "../../../interfaces"
+import { getListComponentName } from "../../entity/helper"
 
 export default class MuiDataTableGenerator implements TableGenerator 
 {
@@ -228,7 +229,7 @@ export default class MuiDataTableGenerator implements TableGenerator
     generateTableComponent(): PageComponent | undefined {
       if(this._entity){
         var statements = this.createStatements();
-        var functionalComponent = createFunctionalComponent(this._helper.getComponentName(this._entity), 
+        var functionalComponent = createFunctionalComponent(getListComponentName(this._entity), 
                                                             [this._helper.createInputParameter(this._entity)], 
                                                             statements);
 
