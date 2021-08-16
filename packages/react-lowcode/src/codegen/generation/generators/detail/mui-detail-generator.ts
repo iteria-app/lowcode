@@ -36,7 +36,7 @@ import { InputsMetadata, inputsMetadata } from "../../../definition/material-ui/
 import { createFormikHook, tryCreateInitialValueForProperty } from "../../react-components/formik";
 
 export default class MuiDetailGenerator implements ComponentGenerator {
-
+  private _imports: ts.ImportDeclaration[] = [];
   private _context: GenerationContext;
   private _entity: Entity;
   private _widgetContext: WidgetContext | undefined;
@@ -53,7 +53,7 @@ export default class MuiDetailGenerator implements ComponentGenerator {
     this._widgetContext = widgetContext;
     this._intlFormatter = new ReactIntlFormatter(
       generationContext,
-      this._widgetContext?.getPageImports()??[]
+      this._imports
     );
     this._dataPropertyName = getEntityName(this._entity)
   }
@@ -393,36 +393,40 @@ export default class MuiDetailGenerator implements ComponentGenerator {
   generateComponent(): PageComponent | undefined {
     if(this._entity)
     {
-      this.createStatements();
+      var statements = this.createStatements();
 
       var functionalComponent = this.createConstFunction(
-         getDetailComponentName(this._entity)
+         getDetailComponentName(this._entity),
+         statements
       );
 
-      this._widgetContext?.addImportArray(this._intlFormatter.getImports())
+      this._imports = [...this._imports, ...this._intlFormatter.getImports()];
 
-      this._widgetContext?.addImport(createNameSpaceImport("React", "react"));
-      this._widgetContext?.addImport(
+      var uniqueFileImports = uniqueImports(this._imports);
+      uniqueFileImports.push(createNameSpaceImport("React", "react"));
+
+      uniqueFileImports.push(
         createNamedImportDeclaration(
           "TextField, Avatar, Card, CardHeader, CardContent, Grid",
           "@material-ui/core"
         )
       );
-      this._widgetContext?.addImport(createNamedImportDeclaration("useFormik", "formik"));
+      uniqueFileImports.push(createNamedImportDeclaration("useFormik", "formik"));
 
       const interfaceName = getEntityInterfaceName(this._entity)
-      this._widgetContext?.addImport(createNamedImportDeclaration(interfaceName, "./" + interfaceName));
+      uniqueFileImports.push(createNamedImportDeclaration(interfaceName, "./" + interfaceName));
 
       return {
         functionDeclaration: functionalComponent,
-        imports: this._widgetContext?.getPageImports() ?? [],
+        imports: uniqueFileImports,
       };
     } else return undefined
   }
 
-  private createStatements() {
+  private createStatements(): ts.Statement[]  {
+    let statements = new Array<ts.Statement>();
     if (this._context.formatter === Formatter.ReactIntl) {
-      this._widgetContext?.addStatementIfNotExist(this._intlFormatter.getImperativeHook())
+      statements.push(this._intlFormatter.getImperativeHook());
     }
 
     let fields = this.createInputsForEntity();
@@ -431,15 +435,13 @@ export default class MuiDetailGenerator implements ComponentGenerator {
 
     let wrapper = this.createFormikWrapper(formElement);
 
-    this._widgetContext?.addStatementIfNotExist(
+    statements.push(
       factory.createReturnStatement(
         factory.createParenthesizedExpression(wrapper)
       )
     );
 
-    this._widgetContext?.addStatementIfNotExist(
-      createFormikHook(this._entity, this._dataPropertyName)
-    )
+    return statements;
   }
 
   private createInputsForEntity(): ts.JsxChild[] {
@@ -559,7 +561,8 @@ export default class MuiDetailGenerator implements ComponentGenerator {
   }
 
   private createConstFunction(
-    componentName: string
+    componentName: string,
+    body: ts.Statement[]
   ): ts.VariableStatement {
     return factory.createVariableStatement(
       [factory.createModifier(ts.SyntaxKind.ExportKeyword)],
@@ -595,7 +598,10 @@ export default class MuiDetailGenerator implements ComponentGenerator {
             ],
             undefined,
             factory.createToken(ts.SyntaxKind.EqualsGreaterThanToken),
-            factory.createBlock(this._widgetContext?.getStatements()??[], true)
+            factory.createBlock([
+              createFormikHook(this._entity, this._dataPropertyName),
+              factory.createBlock(body, true),
+            ])
           )
         ),
       ])

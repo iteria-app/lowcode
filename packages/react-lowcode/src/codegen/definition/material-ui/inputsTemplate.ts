@@ -12,12 +12,12 @@ import { useIntl } from 'react-intl';
 import { TextField, Avatar } from '@material-ui/core';
 
 export const StringInputTemplate = ({ entityName, propertyName, formik }) => {
-  const intl = useIntl();\
+  const intl = useIntl();
 
   return (
     <TextField
       fullWidth
-      type=\"input\"
+      type="input"
       label={intl.formatMessage({ id: ${identifierPlaceholder} })}
       value={formik.values[${propertyNamePlaceholder}]}
       onChange={formik.handleChange}
@@ -26,12 +26,12 @@ export const StringInputTemplate = ({ entityName, propertyName, formik }) => {
 };
 
 export const DateTimeInputTemplate = ({ entityName, propertyName, formik }) => {
-  const intl = useIntl();\
+  const intl = useIntl();
 
   return (
     <TextField
         fullWidth
-        type=\"datetime\"
+        type="datetime"
         label={intl.formatMessage({ id: ${identifierPlaceholder} })}
         value={intl.formatDate(formik.values[${propertyNamePlaceholder}])} 
         onChange={formik.handleChange}
