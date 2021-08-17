@@ -1,6 +1,6 @@
 import ts, { SyntaxKind } from "typescript"
-import { astFindSource,SourceLineCol} from "../../ast"
-import { WidgetProperty } from "../interfaces"
+import { astFindSource,createAst,SourceLineCol} from "../../ast"
+import { WidgetProperty, WidgetPropertyValue } from "../interfaces"
 
 export function findWidgetParentNode(sourceCode:string, position: SourceLineCol): ts.Node  | null | undefined{
     let astCode = astFindSource(sourceCode, position)
@@ -69,11 +69,12 @@ export function getWidgetProperties(node: ts.Node): WidgetProperty[] {
         result = node.attributes.properties.map(prop => {
             if (ts.isJsxAttribute(prop)) {
                 const value = getAttributeValue(prop);
-
+                const type = getAttributeType(prop) ?? WidgetPropertyValue.EXPRESSION
                 if (value) {
                     return {
                         name: prop.name.escapedText.toString(),
-                        value
+                        value,
+                        type
                     };
                 }
             }
@@ -137,11 +138,22 @@ function getAttributeValue(attribute: ts.JsxAttribute): string | undefined {
     if (attribute.initializer) {
         return getStringTypeAttributeValue(attribute.initializer)
             || getNumberTypeAttributeValue(attribute.initializer)
-            || getBooleanTypeAttributeValue(attribute.initializer);
+            || getBooleanTypeAttributeValue(attribute.initializer)
+            || getExpressionTypeAttributeValue(attribute.initializer);
     }
 
     return 'true';
 }
+
+function getAttributeType(attribute: ts.JsxAttribute): string | undefined {
+    if (attribute.initializer) {
+        if (ts.isStringLiteral(attribute.initializer))
+            return WidgetPropertyValue.STRING_LITERAL
+        else 
+            return WidgetPropertyValue.EXPRESSION
+    }
+}
+
 
 function getStringTypeAttributeValue(initializer: ts.StringLiteral | ts.JsxExpression): string | undefined {
     return ts.isStringLiteral(initializer) ? initializer.text : undefined;
@@ -159,3 +171,10 @@ function getBooleanTypeAttributeValue(initializer: ts.StringLiteral | ts.JsxExpr
         return initializer.expression.getText();
     }
 }
+
+
+function getExpressionTypeAttributeValue(initializer: ts.StringLiteral | ts.JsxExpression) : string | undefined {
+    if (ts.isJsxExpression(initializer) && initializer.expression) {
+        return initializer.expression.getText()
+    }
+} 

@@ -27,7 +27,7 @@ import {
   printSourceCode,
 } from "../../../ast/ast";
 import { findWidgetParentNode, getWidgetProperties } from "../../../ast/widgetDeclaration";
-import { WidgetProperties } from "../../../interfaces";
+import { WidgetProperties, WidgetProperty } from "../../../interfaces";
 import { extractInputStatementsFromTemplate } from "../../../ast/node";
 import { getDetailComponentName, getEntityInterfaceName, getEntityName } from "../../entity/helper";
 import { ComponentGenerator } from "../../interfaces/generation-interfaces";
@@ -55,7 +55,7 @@ export default class MuiDetailGenerator implements ComponentGenerator {
       generationContext,
       this._imports
     );
-    this._dataPropertyName = getEntityName(this._entity)
+    this._dataPropertyName = this._entity !== undefined ? getEntityName(this._entity) : ""
   }
 
   async getFormWidgetProperties(position: SourceLineCol): Promise<WidgetProperties> {
@@ -115,44 +115,28 @@ export default class MuiDetailGenerator implements ComponentGenerator {
               if (ts.isJsxAttribute(prop)) {
                 const propName = prop.name.escapedText.toString();
                 const inputProp = widgetProperties.properties.find(l => l.name === propName);
-
                 if (inputProp) {
                   if (prop.initializer) {
-                    if (ts.isStringLiteral(prop.initializer)) {
-                      if(inputProp.value !== prop.initializer.text) {
-                        newProp = factory.updateJsxAttribute(prop, prop.name, factory.createStringLiteral(inputProp.value));
-                        astChanged = true;
+                    const initializer = prop.initializer
+                    // STRING_LITERALS
+                    if (inputProp.type === "STRING_LITERAL") {
+                      const stringLiteral = this.createAttributeForStringLiterals(initializer, inputProp)
+                      if (stringLiteral) {
+                        newProp = factory.updateJsxAttribute(prop, prop.name, stringLiteral)
+                        astChanged = true
                       }
-                    } else if (ts.isJsxExpression(prop.initializer)) {
-                      if (prop.initializer.expression) {
-                        if (prop.initializer.expression.kind === SyntaxKind.TrueKeyword || prop.initializer.expression.kind === SyntaxKind.FalseKeyword) {
-                          if(inputProp.value !== prop.initializer.expression.getText()) {
-                            const booleanValue = factory.createJsxExpression(
-                              undefined,
-                              inputProp.value.toLowerCase() === 'true' ? factory.createTrue() : factory.createFalse()
-                            )
-  
-                            newProp = factory.updateJsxAttribute(prop, prop.name, booleanValue);
-                            astChanged = true;
-                          }
-                        }
-
-                        if (ts.isNumericLiteral(prop.initializer.expression)) {
-                          if (inputProp.value !== prop.initializer.expression.getText()) {
-                            const numericValue = factory.createJsxExpression(
-                              undefined,
-                              factory.createNumericLiteral(inputProp.value)
-                            );
-
-                            newProp = factory.updateJsxAttribute(prop, prop.name, numericValue);
-                            astChanged = true;
-                          }
-                        }
+                    }
+                    // EXPRESSIONS 
+                    else if (inputProp.type === "EXPRESSION") {
+                      const expression = this.createAttributeForExpressions(initializer, inputProp)
+                      if (expression) {
+                        newProp = factory.updateJsxAttribute(prop,prop.name, expression)
+                        astChanged = true
                       }
                     }
                   } else {
                     if(inputProp.value.toLowerCase() == 'false') {
-                      newProp = undefined;
+                      newProp = factory.updateJsxAttribute(prop, prop.name, factory.createJsxExpression(undefined, factory.createFalse()));
                       astChanged = true;
                     }
                   }
@@ -170,8 +154,76 @@ export default class MuiDetailGenerator implements ComponentGenerator {
         }
       }
     }
-
     return result;
+  }
+
+  createObjectLiteral(property : any) {
+    return factory.createObjectLiteralExpression(
+      [factory.createPropertyAssignment(
+        factory.createIdentifier(property.name.escapedText),
+        property.initializer.text === undefined ? factory.createIdentifier(property.initializer.getText()) : factory.createStringLiteral(property.initializer.text, true)
+      )],
+      false
+    )
+  }
+
+  createAttributeForStringLiterals(initializer : ts.JsxExpression | ts.StringLiteral, inputProp: WidgetProperty) {
+    const text = ts.isStringLiteral(initializer) ? initializer.text : initializer.getText()
+    if(inputProp.value !== text) {
+      return factory.createStringLiteral(inputProp.value)
+    }
+  }
+
+  createAttributeForExpressions(initializer : ts.JsxExpression | ts.StringLiteral, inputProp: WidgetProperty) {
+    const text = ts.isJsxExpression(initializer) ? initializer.expression?.getText() : initializer.text
+    if (inputProp.value !== text || !ts.isJsxExpression(initializer)) {
+      const newAst = createAst(inputProp.value)
+      const statement = newAst?.statements[0] as any
+      if (statement) {
+        const expression = statement?.expression
+        const value = this.createAttributeForNumbers(expression, inputProp) || 
+                      this.createAttributeForBooleans(expression, inputProp) ||  
+                      this.createAttributeForOtherExpression(expression)
+        return value;
+      }
+    }
+  }
+
+  createAttributeForNumbers(expression: any, inputProp: WidgetProperty) {
+    if (expression?.kind === SyntaxKind.NumericLiteral) {
+      const value = factory.createJsxExpression(
+        undefined,
+        factory.createNumericLiteral(inputProp.value)
+      )
+
+      return value
+    }
+  }
+
+  createAttributeForBooleans(expression: any, inputProp: WidgetProperty) {
+    if (expression?.kind === SyntaxKind.TrueKeyword || expression?.kind === SyntaxKind.FalseKeyword) {
+      const value = factory.createJsxExpression(
+        undefined,
+        inputProp.value.toLowerCase() === "true" ? factory.createTrue() : factory.createFalse()
+      )
+
+      return value
+    }
+  }
+
+  createAttributeForOtherExpression(expression: any) {
+    if (expression?.kind === SyntaxKind.CallExpression || expression?.kind === SyntaxKind.PropertyAccessExpression) {
+      if (expression.arguments && expression.arguments[0].properties) {
+        expression.arguments[0] = this.createObjectLiteral(expression.arguments[0].properties[0])
+      }
+
+      const value = factory.createJsxExpression(
+        undefined,
+        expression
+      )
+
+      return value
+    }
   }
 
   async insertFormWidget(position: SourceLineCol, property: Property, index?:number): Promise<string> {
