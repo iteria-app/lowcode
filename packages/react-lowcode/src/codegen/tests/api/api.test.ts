@@ -63,6 +63,7 @@ describe(".api tests", () => {
         test(".add column (MUI DataTable)", async () => {
             const filePath = 'src/codegen/tests/list/files/is-datatable-test-file.txt';
             const source : SourceLineCol = {lineNumber: 12, columnNumber:17, fileName:filePath};
+            
             const result = await addColumn(graphqlGenTs1, new CodegenRw(), source, {property: 'testdate', entityName: 'Customer'});
     
             expect(result).not.toBe(undefined);
@@ -314,6 +315,7 @@ describe(".api tests", () => {
 
             const io = new CodegenRw()
             const template = fs.readFileSync(path.resolve('src/codegen/tests/list/files/page-list-template.txt'), 'utf-8')
+            const detailTemplate = ''
             const routeDefinitionFilePath = 'src/codegen/tests/api/files/route-definition.txt'
             const menuDefinitionFilePath = 'src/codegen/tests/api/files/menu-definition.txt'
             const componentStorageRoot = 'src/codegen/tests/api/files/output'
@@ -321,6 +323,7 @@ describe(".api tests", () => {
             var options = {
                            names:['customer'], 
                            pageListTemplate: template, 
+                           detailPageTemplate: detailTemplate,
                            componentStoragePath:componentStorageRoot, 
                            menuDefinitionFilePath: menuDefinitionFilePath, 
                            routeDefinitionFilePath:routeDefinitionFilePath,

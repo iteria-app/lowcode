@@ -1,15 +1,15 @@
 import ts, { factory } from "typescript"
-import { graphqlGenTs1 } from "../typeAlias.example"
 import { Formatter, TableType, UiFramework } from '../../definition/context-types'
 import { AppGenerator } from '../../generation/generators/app-generator'
-import { sourceFileEntity, createAst, parseGraphqlTypes } from "../helper"
+import { createAst } from "../helper"
+import { createEntityFromIntrospection, Entity } from "../../generation/entity"
+import { is2 } from "../introspection-example"
 
 describe("table generation", () => {
   
   test(".mui table generation without formatting", () => {
       const sourceFile = createAst('')
-      const myClassFile = parseGraphqlTypes(graphqlGenTs1)
-      const testEntity = sourceFileEntity(myClassFile)
+      const testEntity: Entity | undefined = createEntityFromIntrospection(is2.data.__schema, 'customer');
 
       let generationContext = {uiFramework: UiFramework.MaterialUI, formatter: Formatter.None, index: {tableType: TableType.BasicTable, height: "400px"}};
       let generator = new AppGenerator(generationContext, testEntity!);
@@ -31,8 +31,7 @@ describe("table generation", () => {
 
   test(".mui table generation with formatting", () => {
     const sourceFile = createAst('')
-    const myClassFile = parseGraphqlTypes(graphqlGenTs1)
-    const testEntity = sourceFileEntity(myClassFile)
+    const testEntity: Entity | undefined = createEntityFromIntrospection(is2.data.__schema, 'customer');
 
     let generationContext = {uiFramework: UiFramework.MaterialUI, formatter: Formatter.ReactIntl, index: {tableType: TableType.BasicTable, height: "400px"}};
     let generator = new AppGenerator(generationContext, testEntity!!);
@@ -54,8 +53,7 @@ describe("table generation", () => {
 
 test(".grommet table generation without formatting", () => {
   const sourceFile = createAst('')
-  const myClassFile = parseGraphqlTypes(graphqlGenTs1)
-  const testEntity = sourceFileEntity(myClassFile)
+  const testEntity: Entity | undefined = createEntityFromIntrospection(is2.data.__schema, 'customer');
 
   let generationContext = {uiFramework: UiFramework.Grommet, formatter: Formatter.None, index: {tableType: TableType.BasicTable, height: "400px"}};
   let generator = new AppGenerator(generationContext, testEntity!!);
@@ -77,8 +75,7 @@ test(".grommet table generation without formatting", () => {
 
   test(".grommet table generation with formatting", () => {
   const sourceFile = createAst('')
-  const myClassFile = parseGraphqlTypes(graphqlGenTs1)
-  const testEntity = sourceFileEntity(myClassFile)
+  const testEntity: Entity | undefined = createEntityFromIntrospection(is2.data.__schema, 'customer');
 
   let generationContext = {uiFramework: UiFramework.Grommet, formatter: Formatter.ReactIntl, index: {tableType: TableType.BasicTable, height: "400px"}};
   let generator = new AppGenerator(generationContext, testEntity!!);
@@ -100,8 +97,7 @@ test(".grommet table generation without formatting", () => {
 
   test(".mui data table generation without formatting", () => {
       const sourceFile = createAst('')
-      const myClassFile = parseGraphqlTypes(graphqlGenTs1)
-      const testEntity = sourceFileEntity(myClassFile)
+      const testEntity: Entity | undefined = createEntityFromIntrospection(is2.data.__schema, 'customer');
 
       let generationContext = {uiFramework: UiFramework.MaterialUI, formatter: Formatter.None, index: {tableType: TableType.DataTable, height: "400px"}};
       let generator = new AppGenerator(generationContext, testEntity!!);
@@ -115,8 +111,7 @@ test(".grommet table generation without formatting", () => {
 
   test(".mui data table generation with formatting", () => {
       const sourceFile = createAst('')
-      const myClassFile = parseGraphqlTypes(graphqlGenTs1)
-      const testEntity = sourceFileEntity(myClassFile)
+      const testEntity: Entity | undefined = createEntityFromIntrospection(is2.data.__schema, 'customer');
 
       let generationContext = {uiFramework: UiFramework.MaterialUI, formatter: Formatter.ReactIntl, index: {tableType: TableType.DataTable, height: "400px"}};
       let generator = new AppGenerator(generationContext, testEntity!!);
@@ -130,8 +125,7 @@ test(".grommet table generation without formatting", () => {
 
   test(".grommet data table generation without formatting", () => {
       const sourceFile = createAst('')
-      const myClassFile = parseGraphqlTypes(graphqlGenTs1)
-      const testEntity = sourceFileEntity(myClassFile)
+      const testEntity: Entity | undefined = createEntityFromIntrospection(is2.data.__schema, 'customer');
 
       let generationContext = {uiFramework: UiFramework.Grommet, formatter: Formatter.None, index: {tableType: TableType.DataTable, height: "400px"}};
       let generator = new AppGenerator(generationContext, testEntity!!);
@@ -145,8 +139,7 @@ test(".grommet table generation without formatting", () => {
 
   test(".grommet data table generation with formatting", () => {
       const sourceFile = createAst('')
-      const myClassFile = parseGraphqlTypes(graphqlGenTs1)
-      const testEntity = sourceFileEntity(myClassFile)
+      const testEntity: Entity | undefined = createEntityFromIntrospection(is2.data.__schema, 'customer');
 
       let generationContext = {uiFramework: UiFramework.Grommet, formatter: Formatter.ReactIntl, index: {tableType: TableType.DataTable, height: "400px"}};
       let generator = new AppGenerator(generationContext, testEntity!!);

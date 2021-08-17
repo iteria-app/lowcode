@@ -6,7 +6,7 @@ import { SourceLineCol } from "../../../ast";
 import { FacadeInsertOptions } from "../../facade/interfaces";
 import { TestListHelper } from "../list/list-helper";
 import { is2 } from "../introspection-example"
-import { Property } from "../../generation/entity";
+import { createEntityFromIntrospection, Entity, Property } from "../../generation/entity";
 import { TestFacadeHelper } from "./facade-helper";
 
 describe("codegen facade tests", () => {
@@ -14,8 +14,7 @@ describe("codegen facade tests", () => {
     describe("UiFramework.MaterialUI", () => {
       describe("TableType.BasicTable", () => {
         test("with (Formatter.None) (undefined position)", async() => {
-          const myClassFile = parseGraphqlTypes(graphqlGenTs1);
-          const testEntity = sourceFileEntity(myClassFile);
+          const testEntity: Entity | undefined = createEntityFromIntrospection(is2.data.__schema, 'customer');
           const entityName = testEntity?.getName().toLowerCase();
       
           const tablePosition: SourceLineCol = {
@@ -57,8 +56,7 @@ describe("codegen facade tests", () => {
         });   
       
         test("with (Formatter.None) (defined position)", async() => {
-          const myClassFile = parseGraphqlTypes(graphqlGenTs1);
-          const testEntity = sourceFileEntity(myClassFile);
+          const testEntity: Entity | undefined = createEntityFromIntrospection(is2.data.__schema, 'customer');
           const entityName = testEntity?.getName().toLowerCase();
       
           const tablePosition: SourceLineCol = {
@@ -101,8 +99,7 @@ describe("codegen facade tests", () => {
         });   
       
         test("with (Formatter.ReactIntl) (undefined position)", async() => {
-          const myClassFile = parseGraphqlTypes(graphqlGenTs1);
-          const testEntity = sourceFileEntity(myClassFile);
+          const testEntity: Entity | undefined = createEntityFromIntrospection(is2.data.__schema, 'customer');
           const entityName = testEntity?.getName().toLowerCase();
 
           const tablePosition: SourceLineCol = {
@@ -218,8 +215,11 @@ describe("codegen facade tests", () => {
     });
 
     test(".add widget to existing detail page", async () => {
-      const myClassFile = parseGraphqlTypes(graphqlGenTs1);
-      const testEntity = sourceFileEntity(myClassFile);
+      const entityName = 'customer';
+      const entityPropertyName = 'test2';
+      
+      const entity: Entity | undefined = createEntityFromIntrospection(is2.data.__schema, entityName);
+      const property: Property | undefined = getEntityPropertyIntrospection(is2.data.__schema, entityPropertyName, entityName);
 
       const formPosition: SourceLineCol = {
         lineNumber: 33,
@@ -228,8 +228,8 @@ describe("codegen facade tests", () => {
       };
 
       const options: FacadeInsertOptions = {
-        entity: testEntity!!, 
-        entityField: getEntityProperty(graphqlGenTs1,'test2')[0]
+        entity: entity, 
+        entityField: property!
       };
 
       const result = await insertFormWidget(formPosition, options, new CodegenRw());

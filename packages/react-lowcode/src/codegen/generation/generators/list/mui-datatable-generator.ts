@@ -7,7 +7,7 @@ import GenerationContext from "../../context/context"
 import { MuiDtTableComponents, muiDataGrid } from '../../../definition/material-ui/table'
 import { TableComponentDefinitionBase } from '../../../definition/table-definition-core'
 import { Formatter } from "../../../definition/context-types"
-import { createNameSpaceImport, uniqueImports } from "../../../ast/imports"
+import { createNamedImportDeclaration, createNameSpaceImport, uniqueImports } from "../../../ast/imports"
 import { GeneratorHelper } from "../helper"
 import ReactIntlFormatter from "../../react-components/react-intl/intl-formatter"
 import { WidgetContext } from "../../context/widget-context"
@@ -15,7 +15,9 @@ import { createAst, findByCondition, removeElementFromAst, replaceElementsToAST,
 import { findVariableDeclarations } from "../../../ast/ast"
 import { findWidgetParentNode } from "../../../ast/widgetDeclaration"
 import { ColumnSourcePositionResult } from "../../../interfaces"
-import { getListComponentName } from "../../entity/helper"
+import { getDetailModuleUri, getListComponentName } from "../../entity/helper"
+import { defineHook } from "../../../ast/hooks"
+import { createVariableStatement } from "../../../ast/variables"
 
 export default class MuiDataTableGenerator implements TableGenerator 
 {
@@ -226,7 +228,7 @@ export default class MuiDataTableGenerator implements TableGenerator
        return undefined
     }
     
-    generateTableComponent(): PageComponent | undefined {
+    generateComponent(): PageComponent | undefined {
       if(this._entity){
         var statements = this.createStatements();
         var functionalComponent = createFunctionalComponent(getListComponentName(this._entity), 
@@ -256,16 +258,61 @@ export default class MuiDataTableGenerator implements TableGenerator
       let columnsIdentifier = factory.createIdentifier("columns")
       let columnsDeclaration = this.createColumns(columnsIdentifier)
 
+      let onclickAttribute = this.getOnClick(statements)
+
       var columnsAttribute = createJsxAttribute("columns", "columns")
       statements.push(factory.createVariableStatement(undefined, columnsDeclaration))
 
       var rowsAttribute = createJsxAttribute("rows", this._helper.getInputParameterIdentifier(this._entity!))
 
-      let returnStatement = this.createReturnStatement([columnsAttribute, rowsAttribute])
+      let returnStatement = this.createReturnStatement([onclickAttribute, columnsAttribute, rowsAttribute])
 
       statements.push(returnStatement)
 
       return statements;
+    }
+
+    private getOnClick(statements: ts.Statement[]): ts.JsxAttribute {
+      var hook = defineHook("navigate", "useNavigate", "react-router-dom");
+      
+      this._imports=[...this._imports, hook.importDeclaration]
+
+      let callExpression = factory.createCallExpression(
+        factory.createIdentifier(hook.hookName),
+        undefined,
+        []
+      )
+
+      statements.push(createVariableStatement(hook.defaultInstanceName, callExpression, ts.NodeFlags.Const))
+
+      return factory.createJsxAttribute(
+        factory.createIdentifier("onRowClick"),
+        factory.createJsxExpression(
+          undefined,
+          factory.createArrowFunction(
+            undefined,
+            undefined,
+            [],
+            undefined,
+            factory.createToken(ts.SyntaxKind.EqualsGreaterThanToken),
+            factory.createCallExpression(
+              factory.createIdentifier("navigate"),
+              undefined,
+              [
+                factory.createStringLiteral(`/app/${getDetailModuleUri(this._entity!)}`),
+                factory.createObjectLiteralExpression(
+                  [factory.createPropertyAssignment(
+                    factory.createIdentifier("replace"),
+                    factory.createTrue()
+                  )],
+                  false
+                )
+              ]
+            )
+          )
+        )
+      )
+      
     }
 
     private createReturnStatement(parameters: ts.JsxAttributeLike[]):ts.ReturnStatement {
