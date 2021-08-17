@@ -35,18 +35,18 @@ export function createAst(
     }
   }
 
-  export function getEntityProperty(typesSourceCode: string,  name: string, typeName = "Customer"): Property[] {
+  export function getEntityProperty(typesSourceCode: string,  name: string, typeName = "Utilization"): Property[] {
     const myClassFile = parseGraphqlTypes(typesSourceCode)
     const testEntity = sourceFileEntity(myClassFile, typeName)
-    
-    let property = testEntity?.properties.filter(((prop: { getName: () => string })=> { 
-      return prop.getName().toLowerCase() === name 
+
+    let property = testEntity?.properties.filter(((prop: { getName: () => string })=> {
+      return prop.getName().toLowerCase() === name.toLowerCase()
     }))
 
     return property ?? []
 }
 
-export function getEntityPropertyIntrospection(introspection: IntrospectionQuery,  propertyName: string, typeName = "Customer"): Property | undefined {
+export function getEntityPropertyIntrospection(introspection: IntrospectionQuery,  propertyName: string, typeName = "customer"): Property | undefined {
   const entity: Entity | undefined = createEntityFromIntrospection(introspection, typeName)
 
   let property: Property | undefined = undefined

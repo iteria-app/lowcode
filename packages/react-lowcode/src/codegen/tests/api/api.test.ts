@@ -4,6 +4,7 @@ import { SyntaxKind } from 'typescript';
 import { findByCondition, SourceLineCol } from '../../../ast';
 import { addFormInput, getFormWidgetProperties, isSelectedFormWidget, setFormWidgetProperties } from '../../detail';
 import MuiDetailGenerator from '../../generation/generators/detail/mui-detail-generator';
+import { WidgetPropertyValue } from '../../interfaces';
 import { CodegenRw } from '../../io/codegenRw';
 import { addColumn, deleteColumn, getColumnSourcePosition, isSelectedDataTable } from '../../list';
 import { createAst } from '../helper';
@@ -62,6 +63,7 @@ describe(".api tests", () => {
         test(".add column (MUI DataTable)", async () => {
             const filePath = 'src/codegen/tests/list/files/is-datatable-test-file.txt';
             const source : SourceLineCol = {lineNumber: 12, columnNumber:17, fileName:filePath};
+            
             const result = await addColumn(graphqlGenTs1, new CodegenRw(), source, {property: 'testdate', entityName: 'Customer'});
     
             expect(result).not.toBe(undefined);
@@ -139,115 +141,134 @@ describe(".api tests", () => {
     
         test(".get Widget Fields (MUI TextField)", async () => {
             const filePath = 'src/codegen/tests/detail/detail-test-file.txt';
-            const source: SourceLineCol = { lineNumber: 80, columnNumber: 19, fileName: filePath };
+            const source: SourceLineCol = { lineNumber: 70, columnNumber: 19, fileName: filePath };
             const result = await getFormWidgetProperties(new CodegenRw(), source);
     
             expect(result.properties).toStrictEqual(
                 [
                     {
                         name: "fullWidth",
-                        value: "true"
-                    },
-                    {
-                        name: "required",
-                        value: "true"
-                    },
-                    {
-                        name: "disabled",
-                        value: "false"
-                    },
-                    {
-                        name: "rows",
-                        value: "10"
+                        value: "true",
+                        type: WidgetPropertyValue.EXPRESSION
                     },
                     {
                         name: "id",
-                        value: "updatedAt"
+                        value: "phone",
+                        type: WidgetPropertyValue.STRING_LITERAL
                     },
                     {
                         name: "type",
-                        value: "date"
+                        value: "input",
+                        type: WidgetPropertyValue.STRING_LITERAL
                     },
                     {
                         name: "label",
-                        value: "updatedAt"
+                        value: "phone",
+                        type: WidgetPropertyValue.STRING_LITERAL
+                    },
+                    {
+                        name: "value",
+                        value: "intl.formatMessage({ id: formik.values.phone })",
+                        type: WidgetPropertyValue.EXPRESSION
+                    },
+                    {
+                        name: "onChange",
+                        value: "formik.handleChange",
+                        type: WidgetPropertyValue.EXPRESSION
                     }
                 ]
             );
         }); 
         
         test(".set Widget Fields (MUI TextField)", async () => {
-            const properties =             [
+            const properties = [
                 {
                     name: "fullWidth",
-                    value: "false"
-                },
-                {
-                    name: "required",
-                    value: "false"
-                },
-                {
-                    name: "disabled",
-                    value: "true"
-                },
-                {
-                    name: "rows",
-                    value: "5"
+                    value: "true",
+                    type: WidgetPropertyValue.EXPRESSION
                 },
                 {
                     name: "id",
-                    value: "updatedAtTime"
+                    value: "phoneNumber",
+                    type: WidgetPropertyValue.STRING_LITERAL
                 },
                 {
                     name: "type",
-                    value: "time"
+                    value: "input",
+                    type: WidgetPropertyValue.STRING_LITERAL
                 },
                 {
                     name: "label",
-                    value: "updatedAtTime"
+                    value: "intl.formatMessage({ id: 'formik.values.message' })",
+                    type: WidgetPropertyValue.EXPRESSION
+                },
+                {
+                    name: "rows",
+                    value: "20",
+                    type: WidgetPropertyValue.EXPRESSION
+                },
+                {
+                    name: "value",
+                    value: "intl.formatMessage({ id: formik.values.phone })",
+                    type: WidgetPropertyValue.EXPRESSION
+                },
+                {
+                    name: "onChange",
+                    value: "formik.handleChange",
+                    type: WidgetPropertyValue.EXPRESSION
                 }
             ];
     
             const expectedProperties = [
                 {
-                    name: "required",
-                    value: "false"
-                },
-                {
-                    name: "disabled",
-                    value: "true"
-                },
-                {
-                    name: "rows",
-                    value: "5"
+                    name: "fullWidth",
+                    value: "true",
+                    type: WidgetPropertyValue.EXPRESSION
                 },
                 {
                     name: "id",
-                    value: "updatedAtTime"
+                    value: "phoneNumber",
+                    type: WidgetPropertyValue.STRING_LITERAL
                 },
                 {
                     name: "type",
-                    value: "time"
+                    value: "input",
+                    type: WidgetPropertyValue.STRING_LITERAL
                 },
                 {
                     name: "label",
-                    value: "updatedAtTime"
+                    value: "intl.formatMessage({ id: 'formik.values.message' })",
+                    type: WidgetPropertyValue.EXPRESSION
+                },
+                {
+                    name: "rows",
+                    value: "20",
+                    type: WidgetPropertyValue.EXPRESSION
+                },
+                {
+                    name: "value",
+                    value: "intl.formatMessage({ id: formik.values.phone })",
+                    type: WidgetPropertyValue.EXPRESSION
+                },
+                {
+                    name: "onChange",
+                    value: "formik.handleChange",
+                    type: WidgetPropertyValue.EXPRESSION
                 }
             ];
     
             const filePath = 'src/codegen/tests/detail/detail-test-file.txt';
-            const source: SourceLineCol = { lineNumber: 80, columnNumber: 19, fileName: filePath };
+            const source: SourceLineCol = { lineNumber: 70, columnNumber: 19, fileName: filePath };
             const result = await setFormWidgetProperties(new CodegenRw(), source, { properties: properties });
-    
             expect(result).not.toBe(undefined);
-    
+
             if(result) {
                 const resultAst = createAst(result);
                 var updatedAtNode = findByCondition<ts.Node>(resultAst, (node: ts.Node) => {
                     if (ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) {
                         const idProperty = node.attributes.properties.find(p => p.kind === SyntaxKind.JsxAttribute && p.name.text === 'id');
                         if(idProperty && ts.isJsxAttribute(idProperty) && idProperty.initializer && ts.isStringLiteral(idProperty.initializer)) {
-                            return idProperty.initializer.text === 'updatedAtTime';
+                            return idProperty.initializer.text === 'phoneNumber';
                         }
                     }
                     return false;
@@ -268,15 +289,18 @@ describe(".api tests", () => {
             const properties =             [
                 {
                     name: "disabled",
-                    value: "false"
+                    value: "false",
+                    type: WidgetPropertyValue.EXPRESSION
                 },
                 {
                     name: "rows",
-                    value: "10"
+                    value: "10",
+                    type: WidgetPropertyValue.EXPRESSION
                 },
                 {
                     name: "id",
-                    value: "updatedAt"
+                    value: "updatedAt",
+                    type: WidgetPropertyValue.STRING_LITERAL
                 }
             ];
     
@@ -291,6 +315,7 @@ describe(".api tests", () => {
 
             const io = new CodegenRw()
             const template = fs.readFileSync(path.resolve('src/codegen/tests/list/files/page-list-template.txt'), 'utf-8')
+            const detailTemplate = ''
             const routeDefinitionFilePath = 'src/codegen/tests/api/files/route-definition.txt'
             const menuDefinitionFilePath = 'src/codegen/tests/api/files/menu-definition.txt'
             const componentStorageRoot = 'src/codegen/tests/api/files/output'
@@ -298,6 +323,7 @@ describe(".api tests", () => {
             var options = {
                            names:['customer'], 
                            pageListTemplate: template, 
+                           detailPageTemplate: detailTemplate,
                            componentStoragePath:componentStorageRoot, 
                            menuDefinitionFilePath: menuDefinitionFilePath, 
                            routeDefinitionFilePath:routeDefinitionFilePath,

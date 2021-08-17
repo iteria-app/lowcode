@@ -34,15 +34,12 @@ export class BasicTableGenerator implements TableGenerator
     async insertColumn(position: SourceLineCol,
         property: Property,
         columnIndex?: number): Promise<string> {
-
         let alteredSource = ''
         if (this._widgetContext) {
             let sourceCode = await this._widgetContext.getSourceCodeString(position);
             let ast = createAst(sourceCode);
-
             if (ast) {
                 let widgetParentNode = findWidgetParentNode(sourceCode, position);
-
                 if (widgetParentNode) {
                     const tableDefinition = this.getTableDefinition();
 
@@ -54,10 +51,10 @@ export class BasicTableGenerator implements TableGenerator
                         if (tableHead && tableBody) {
                             const tableHeadRow = this.findElementByName(tableHead, tableDefinition.row.tagName.text);
                             const tableBodyRow = this.findElementByName(tableBody, tableDefinition.row.tagName.text);
-
+                            // to be able insert into iteration with right iterator
+                            const prefixIterator = (tableBodyRow?.parent as any)?.parameters[0]?.getText()
                             if (tableHeadRow && tableBodyRow) {
                                 this._context.formatter = this.findUsedFormatter(ast);
-
                                 let headColumns: ts.JsxElement[] = [];
                                 let bodyColumns: ts.JsxElement[] = [];
 
@@ -66,11 +63,13 @@ export class BasicTableGenerator implements TableGenerator
 
                                 if (!this.tableBodyColumnExists(bodyColumns, property)) {
                                     const addHeaderColumn = this.propertyHead(property, this._entity!);
-                                    const addBodyColumn = this.propertyCell(property, this._entity!);
-
+                                    const addBodyColumn = this.propertyCell(property, this._entity!, prefixIterator);                                    
                                     if (columnIndex && columnIndex > 0 && columnIndex < headColumns.length + 1) {
                                         headColumns = [...headColumns.slice(0, columnIndex - 1), ...[addHeaderColumn], ...headColumns.slice(columnIndex - 1)];
                                         bodyColumns = [...bodyColumns.slice(0, columnIndex - 1), ...[addBodyColumn], ...bodyColumns.slice(columnIndex - 1)];
+                                    } else if (columnIndex !== undefined && columnIndex == 0) {
+                                        headColumns = [...[addHeaderColumn], ...headColumns]
+                                        bodyColumns = [...[addBodyColumn], ...bodyColumns]
                                     } else {
                                         headColumns.push(addHeaderColumn);
                                         bodyColumns.push(addBodyColumn);
@@ -96,7 +95,7 @@ export class BasicTableGenerator implements TableGenerator
         return alteredSource;
     }
 
-    generateTableComponent(): PageComponent | undefined {
+    generateComponent(): PageComponent | undefined {
       if(this._entity){
         var statements = this. createStatements()
         var functionalComponent = createFunctionalComponent(this._helper.getComponentName(this._entity!), [this._helper.createInputParameter(this._entity!)], statements)
@@ -143,7 +142,7 @@ export class BasicTableGenerator implements TableGenerator
 
     private createBodyRow(): ts.JsxElement {
       const rowComponent = this._helper.prepareComponent(this.getTableDefinition().row, this._imports)
-
+      
       let bodyRow = createJsxElement(rowComponent.tagName, [],getProperties(this._entity!)
                        ?.map(prop => this.propertyCell(prop, this._entity!)))
 
@@ -170,7 +169,7 @@ export class BasicTableGenerator implements TableGenerator
         )
     }
     
-    private propertyCell(prop: Property, entity: Entity) {
+    private propertyCell(prop: Property, entity: Entity, prefixIterator?: string ) {
         let child: ts.JsxChild;
 
         if(this._context.formatter === Formatter.ReactIntl) {
@@ -179,8 +178,8 @@ export class BasicTableGenerator implements TableGenerator
             child = factory.createJsxExpression(
                 undefined,
                 factory.createPropertyAccessExpression(
-                  this.getRowIdentifier(),
-                  factory.createIdentifier(prop.getName())
+                    prefixIterator !== undefined ? factory.createIdentifier(prefixIterator ?? entity.getName().toLowerCase()) : this.getRowIdentifier(),
+                    factory.createIdentifier(prop.getName())
                 )
               )
         }

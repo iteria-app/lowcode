@@ -9,13 +9,13 @@ import { createNamedImportDeclaration, createNameSpaceImport, uniqueImports } fr
 import { GeneratorHelper } from "../helper";
 import ReactIntlFormatter from "../../react-components/react-intl/intl-formatter";
 import { GrommetDetailComponents } from "../../../definition/grommet/detail";
-import { DetailGenerator } from "../detail/detail-generator-factory";
 import { getPropertyType, PropertyType } from "../../graphql/typeAlias";
 import GenerationContext from "../../context/context";
 import { getEntityName } from "../../entity/helper";
+import { ComponentGenerator } from "../../interfaces/generation-interfaces";
 
 export default class GrommetDetailGenerator
-  implements DetailGenerator {
+  implements ComponentGenerator {
   private readonly _helper: GeneratorHelper
   private _imports: ts.ImportDeclaration[] = []
   private _context: GenerationContext
@@ -34,7 +34,7 @@ export default class GrommetDetailGenerator
     return GrommetDetailComponents;
   }
 
-  generateDetailComponent(): PageComponent {
+  generateComponent(): PageComponent {
     var statements = this.createStatements();
 
     var functionalComponent = this.createConstFunction(
