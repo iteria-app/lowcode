@@ -21,6 +21,8 @@ export interface CodegenOptions {
     routeDefinitionFilePath?: string
     //default is /src/layouts/DashboardLayout/NavBar/index.tsx
     menuDefinitionFilePath?: string
+    //template for generating detail page
+    detailPageTemplate: string
 }
 
 export interface InsertOptions {

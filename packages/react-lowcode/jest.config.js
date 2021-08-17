@@ -1,8 +1,12 @@
 module.exports = {
-  "transform": {
-    "^.+\\.tsx?$": "ts-jest"
+  "globals": {
+    "extensionsToTreatAsEsm": ['.ts', '.js'],
+    'ts-jest': {
+        useESM: true
+    }
   },
+  "preset": 'ts-jest/presets/js-with-ts-esm',
   "transformIgnorePatterns": [
-    "node_modules/(@iteria-app)"
+    'node_modules/(?!(@iteria-app)/)' 
   ]
 };

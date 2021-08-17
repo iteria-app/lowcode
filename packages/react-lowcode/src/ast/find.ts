@@ -102,7 +102,7 @@ export const getAstAndNodeFromSource = (
   return { node, ast }
 }
 
-export const findByCondition = <T>(node: Node | SourceFile, condition: (node: Node) => boolean): T | undefined => {
+export const findByCondition = <T>(node: Node | SourceFile, condition: (node: Node) => boolean | undefined): T | undefined => {
   if(condition(node)) {
       return node as unknown as T;
   };
@@ -112,7 +112,7 @@ export const findByCondition = <T>(node: Node | SourceFile, condition: (node: No
   });
 }
 
-export const findAllByCondition = <T>(node: Node | SourceFile, output: T[], condition: (node: Node) => boolean): void => {
+export const findAllByCondition = <T>(node: Node | SourceFile, output: T[], condition: (node: Node) => boolean | undefined): void => {
   if(condition(node)) {
     output.push(node as unknown as T);
   };

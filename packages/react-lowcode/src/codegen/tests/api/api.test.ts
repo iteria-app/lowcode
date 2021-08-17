@@ -291,6 +291,7 @@ describe(".api tests", () => {
 
             const io = new CodegenRw()
             const template = fs.readFileSync(path.resolve('src/codegen/tests/list/files/page-list-template.txt'), 'utf-8')
+            const detailTemplate = ''
             const routeDefinitionFilePath = 'src/codegen/tests/api/files/route-definition.txt'
             const menuDefinitionFilePath = 'src/codegen/tests/api/files/menu-definition.txt'
             const componentStorageRoot = 'src/codegen/tests/api/files/output'
@@ -298,6 +299,7 @@ describe(".api tests", () => {
             var options = {
                            names:['customer'], 
                            pageListTemplate: template, 
+                           detailPageTemplate: detailTemplate,
                            componentStoragePath:componentStorageRoot, 
                            menuDefinitionFilePath: menuDefinitionFilePath, 
                            routeDefinitionFilePath:routeDefinitionFilePath,

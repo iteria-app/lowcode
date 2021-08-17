@@ -1,13 +1,9 @@
 import { UiFramework } from '../../../definition/context-types';
-import { PageComponent } from '../../react-components/react-component-helper'
 import GenerationContext from '../../context/context'
 import GrommetDetailGenerator from './grommet-detail-generator'
 import MuiDataDetailGenerator from './mui-detail-generator'
 import { Entity } from '../../entity';
-
-export interface DetailGenerator{
-    generateDetailComponent(): PageComponent | undefined;
-}
+import { ComponentGenerator } from '../../interfaces/generation-interfaces';
 
 export class DetailGeneratorFactory{
     private _context: GenerationContext;
@@ -18,8 +14,8 @@ export class DetailGeneratorFactory{
         this._entity = entity;
     }
 
-    getDetailGenerator(): DetailGenerator{
-        let generator: DetailGenerator = new MuiDataDetailGenerator(this._context, this._entity);
+    getDetailGenerator(): ComponentGenerator{
+        let generator: ComponentGenerator = new MuiDataDetailGenerator(this._context, this._entity);
 
         switch(this._context.uiFramework){
              case UiFramework.Grommet:

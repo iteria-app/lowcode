@@ -122,7 +122,7 @@ export default class GrommetDataTableGenerator implements TableGenerator
         return GrommetDtTableComponents;
     }
     
-    generateTableComponent(): PageComponent | undefined {
+    generateComponent(): PageComponent | undefined {
       if(this._entity){
         var statements = this.createStatements();
         var functionalComponent = createFunctionalComponent(this._helper.getComponentName(this._entity!), [this._helper.createInputParameter(this._entity)], statements);
