@@ -1,12 +1,13 @@
-import { SourceLineCol } from "../ast"
+import { createAst, SourceLineCol } from "../ast"
 import { CodeRW } from "../io"
 import { isDataTableWidget } from "./ast/widgetDeclaration"
 import { ColumnSourcePositionOptions, ColumnSourcePositionResult, DeleteOptions, InsertOptions } from "./interfaces"
-import { getEntityProperty } from "./tests/helper"
+import { getEntityProperty, parseGraphqlTypes, sourceFileEntity } from "./tests/helper"
 import { 
     insertColumn, 
     deleteColumn as fDeleteColumn, 
     getColumnSourcePosition as fGetColumnSourcePosition,
+    insertColumnToDataTableGrommet
 } from './facade/facadeApi'
 import { Property } from "./generation/entity"
 
@@ -20,12 +21,38 @@ export async function addColumn(typesSourceCode: string,
                       options: InsertOptions): Promise<string | undefined>{
         
     const property: Property = getEntityProperty(typesSourceCode, options.property, options.entityName)[0]
+    const code = await io.readFile(sourceCode.fileName)
     let generatedSource = undefined
+    let isGrommet = false
+    if (code)
+        isGrommet = isGrommetRepository(code)
 
     if(property){
-        generatedSource = await insertColumn(sourceCode, 
-        {entityField: property, index: options.index}, 
-        io)
+        if (!isGrommet) {
+            generatedSource = await insertColumn(
+                sourceCode, 
+                {
+                    entityField: property, index: options.index
+                }, 
+                io
+            )
+        } else {
+            const myClassFile = parseGraphqlTypes(typesSourceCode)
+            const entity = sourceFileEntity(myClassFile, options.entityName)
+    
+            let ent : any = {};
+            ent.properties = [property]
+            ent.getName = entity?.getName
+            generatedSource = await insertColumnToDataTableGrommet(
+                sourceCode,
+                {
+                    entityField: property,
+                    index: options.index,
+                    entity: ent
+                },
+                io
+            )
+        }    
     }
 
     return generatedSource
@@ -34,10 +61,8 @@ export async function addColumn(typesSourceCode: string,
 export async function deleteColumn(io: CodeRW, 
     sourceCode:SourceLineCol, 
     options: DeleteOptions): Promise<string | undefined> {
-
-let generatedSource = await fDeleteColumn(sourceCode, options, io);
-
-return generatedSource
+    const generatedSource = await fDeleteColumn(sourceCode, options, io);
+    return generatedSource
 }
 
 export async function getColumnSourcePosition(io: CodeRW, 
@@ -45,4 +70,19 @@ export async function getColumnSourcePosition(io: CodeRW,
     options: ColumnSourcePositionOptions): Promise<ColumnSourcePositionResult | undefined> {
 
 return await fGetColumnSourcePosition(sourceCode, options, io);
+}
+
+const isGrommetRepository = (code: string) => {
+    const ast = createAst(code) as any
+    const imports = ast.imports
+    if (imports) {
+        for(let item in imports) {
+            const el = imports[item]
+            if (el.text == "grommet") {
+                return true
+            }
+        }
+        return false
+    }
+    return false
 }

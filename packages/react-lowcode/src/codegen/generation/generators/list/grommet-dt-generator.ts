@@ -36,17 +36,14 @@ export default class GrommetDataTableGenerator implements TableGenerator
         if(this._widgetContext){
           let sourceCode = await this._widgetContext.getSourceCodeString(position)
           let ast = createAst(sourceCode)
-  
           if(ast){
             let widgetParentNode = findWidgetParentNode(sourceCode, position)
-  
+
             if(widgetParentNode)
             {
               let columnsDeclarationNode = this.findColumnsDeclaration(widgetParentNode)
-  
               if(columnsDeclarationNode){
-                let columnDeclarationArray = columnsDeclarationNode.getChildAt(2) as ts.ArrayLiteralExpression
-  
+                let columnDeclarationArray = columnsDeclarationNode.getChildAt(2) as ts.ArrayLiteralExpression  
                 if(columnDeclarationArray){
                   ast = this.addNewColumn(columnDeclarationArray, 
                                           property, 
@@ -85,12 +82,10 @@ export default class GrommetDataTableGenerator implements TableGenerator
     private findColumnsDeclaration(widgetParent: ts.Node): ts.VariableDeclaration | undefined{
         let array: ts.VariableDeclaration[] = []
         findVariableDeclarations(widgetParent, array)
-  
          if(array.length > 0){
            let columnDeclaration = array.filter((def: ts.VariableDeclaration) => {
              return def.getChildAt(0).getFullText().trim() === 'columns'
            });
-          
            if(columnDeclaration && columnDeclaration.length > 0){
              return columnDeclaration[0] as ts.VariableDeclaration
            }
@@ -108,11 +103,15 @@ export default class GrommetDataTableGenerator implements TableGenerator
         let newColumnDefinition = this.createColumnDefinition(property, this.getUsedFormatter(columnDeclarationParent))
         
         if(columnIndex && columnIndex > 0 && columnIndex < oldElements.length + 1){
-        newElements = [...oldElements.slice(0, columnIndex-1), 
+        newElements = [...oldElements.slice(0, columnIndex - 1), 
                         newColumnDefinition, 
-                        ...oldElements.slice(columnIndex-1)]
-        }else{
-        newElements = [...oldElements, newColumnDefinition]
+                        ...oldElements.slice(columnIndex - 1)]
+        }
+        else if (columnIndex === 0) {
+          newElements = [newColumnDefinition, ...oldElements]
+        }
+        else{
+          newElements = [...oldElements, newColumnDefinition]
         }
 
         return newElements
