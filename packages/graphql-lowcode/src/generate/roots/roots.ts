@@ -42,7 +42,11 @@ export function getQueryNames(introspection: IntrospectionQuery, entityName: str
   const rootNames = getRootNames(introspection)
   const [queryRoot, mutationRoot, subscriptionRoot] = getRoots(introspection.types, rootNames)
 
-  const listTypeQuery = queryRoot?.fields.find(field => isListType(field)) ?? queryRoot?.fields[0] //TODO zmenit
+  //looks for list type query that includes entityName else picks first listTypeQuery
+  const listTypeQuery = queryRoot?.fields.filter(field => 
+    isListType(field)).find(field => 
+      field.name.toLowerCase().indexOf(entityName) >= 0) ?? queryRoot?.fields[0]
+
   const detailTypeQuery = queryRoot?.fields.find(field => isObjectType(field, entityName) ?? queryRoot?.fields[0])
 
   //TODO update, insert etc...
