@@ -48,8 +48,11 @@ function findQueryOffsetsForFields(graphqlQuery: string, entity: string, propert
         const startIndex = firstFragmentField?.loc?.start ?? actualNodePos?.start
         const endIndex = lastFragmentField?.loc?.end ?? actualNodePos?.end
 
+        let selections = node.selectionSet?.selections
+        if(parents) selections = actualNodeSelections
+
         //if fragment does not contain the new property, calculate relative offset to original qiery and indent size for every fragment
-        if (endIndex && node.selectionSet?.selections && !fragmentContainsField(node.selectionSet?.selections, property)) {
+        if (endIndex && node.selectionSet?.selections && !fragmentContainsField(selections, property)) {
           queryOffsetForFields = [...queryOffsetForFields, {
             offset: endIndex,
             indentSize: getFieldIndentation(graphqlQuery, startIndex)

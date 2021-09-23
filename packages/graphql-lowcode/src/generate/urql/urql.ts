@@ -3,3 +3,13 @@ export function queryHookName(queryName: string) {
 
   return hookName
 }
+
+const capitalize = (string: string) => {
+  return string[0].toUpperCase() + string.slice(1)
+}
+
+export function upperLetterInWord(queryName: string) {
+  let arr = queryName.split('_')
+  arr = arr.map((item) => capitalize(item))
+  return arr.join("_")
+}

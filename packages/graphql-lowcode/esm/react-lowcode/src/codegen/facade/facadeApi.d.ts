@@ -1,0 +1,15 @@
+import { SourceLineCol } from "../../ast";
+import { CodeRW } from "../../io";
+import { FacadeDeleteOptions, FacadeInsertOptions, MenuItemOptions, RouteOptions } from "./interfaces";
+import { ColumnSourcePositionResult, WidgetProperties } from "../interfaces";
+export declare function insertColumn(tablePosition: SourceLineCol, options: FacadeInsertOptions, io: CodeRW): Promise<string>;
+export declare function deleteColumn(tablePosition: SourceLineCol, options: FacadeDeleteOptions, io: CodeRW): Promise<string>;
+export declare function insertColumnToDataTableGrommet(tablePosition: SourceLineCol, options: FacadeInsertOptions, io: CodeRW): Promise<string>;
+export declare function insertColumnToBasicTableMui(tablePosition: SourceLineCol, options: FacadeInsertOptions, io: CodeRW): Promise<string>;
+export declare function insertColumnToBasicTableGrommet(tablePosition: SourceLineCol, options: FacadeInsertOptions, io: CodeRW): Promise<string>;
+export declare function insertFormWidget(formPosition: SourceLineCol, options: FacadeInsertOptions, io: CodeRW): Promise<string>;
+export declare function getColumnSourcePosition(tablePosition: SourceLineCol, options: FacadeDeleteOptions, io: CodeRW): Promise<ColumnSourcePositionResult | undefined>;
+export declare function getFormWidgetProperties(position: SourceLineCol, io: CodeRW): Promise<WidgetProperties>;
+export declare function setFormWidgetProperties(position: SourceLineCol, io: CodeRW, properties: WidgetProperties): Promise<string | undefined>;
+export declare function generateRoute(options: RouteOptions, io: CodeRW): Promise<string | undefined>;
+export declare function generateMenuItem(options: MenuItemOptions, io: CodeRW): Promise<string>;

@@ -10,7 +10,7 @@ import { IntrospectionQuery, Field, TypesObject, Root } from './types'
  * @returns 
  */
 
-export function generateGraphqlFile(introspection: IntrospectionQuery, names: string[]): { queries: string, entityName: string }[] {
+export function generateGraphqlFile(introspection: IntrospectionQuery, names: string[]): { queries: string, entityName: string, properties: { name: string, type: string | null }[] }[] {
   const rootNames = getRootNames(introspection)
 
   const roots = getRoots(introspection.types, rootNames)
@@ -25,8 +25,13 @@ export function generateGraphqlFile(introspection: IntrospectionQuery, names: st
       modifiedRoot?.fields.forEach(field => usedQueryNames = [...usedQueryNames, field.name]))
 
     const modifiedIntrospection = replaceRootFields(modifiedRoots, introspection)
+    const entityFields = getEntity(modifiedIntrospection.types, name)?.fields?.filter(field => getNestedOfType(field).kind === 'SCALAR')
+    
+    const queryFragmentFields = entityFields?.map(field => {
+      return { name: field.name, type: getNestedOfType(field).name }
+    })
 
-    return { queries: generateGraphqlQueries(modifiedIntrospection, name), entityName: name }
+    return { queries: generateGraphqlQueries(modifiedIntrospection, name), entityName: name, properties: queryFragmentFields ?? [] }
   })
 
   return generatedQueries
@@ -37,9 +42,9 @@ function replaceRootFields(roots: (Root | undefined)[], introspection: Introspec
   const modifiedIntrospection: IntrospectionQuery = JSON.parse(JSON.stringify(introspection))
 
   roots.forEach(root => {
-    if(root) {
+    if (root) {
       const modifiedType = modifiedIntrospection.types.find(type => type.name === root.name)
-      if(modifiedType) modifiedType.fields = [...root.fields]
+      if (modifiedType) modifiedType.fields = [...root.fields]
     }
   })
 

@@ -1,0 +1,12 @@
+import ts from "typescript";
+import { Entity } from ".";
+export declare function getEntityName(entity: Entity): string;
+export declare function getListComponentName(entity: Entity): string;
+export declare function getDetailComponentName(entity: Entity): string;
+export declare function getDetailPageComponentName(entity: Entity): string;
+export declare function getListPageComponentName(entity: Entity): string;
+export declare function getInputParameterIdentifier(entity: Entity): ts.Identifier;
+export declare function getPluralizedEntityName(entity: Entity): string;
+export declare function getEntityInterfaceName(entity: Entity): string;
+export declare function getBaseModuleUri(entity: Entity): string;
+export declare function getDetailModuleUri(entity: Entity): string;
