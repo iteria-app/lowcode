@@ -6,7 +6,6 @@ import { Entity, createEntityFromIntrospection } from './generation/entity/index
 import { CodegenOptions } from './interfaces'
 import TemplateResolver from './generation/generators/template/template-resolver'
 import { IntrospectionQuery, generateGraphqlFile } from '@iteria-app/graphql-lowcode/esm/generate'
-
 import { getBaseModuleUri, getDetailComponentName, getDetailModuleUri, getDetailPageComponentName, getEntityInterfaceName, getListComponentName, getListPageComponentName, getPluralizedEntityName } from './generation/entity/helper'
 import { generateMenuItem, generateRoute } from './facade/facadeApi'
 import GenerationContext from './generation/context/context'
@@ -17,22 +16,9 @@ export async function generatePages(introspection: IntrospectionQuery,
   io: CodeRW & CodeDir,
   options: CodegenOptions) {
 
-  const entities: (Entity | undefined)[] = options.names.map(name => createEntityFromIntrospection(introspection, name))
+  await Promise.all(options.names.map(async (typeName) => {
+    const entity: Entity | undefined = createEntityFromIntrospection(introspection, typeName)
 
-  const componentStorageRoot = options?.componentStoragePath ?? 'src/components'
-  const generatedFolderPath = options?.generatedFolderPath ?? 'src/generated'
-  const routeDefinitionFilePath = options?.routeDefinitionFilePath ?? 'src/routes.tsx'
-  const menuDefinitionFilePath = options?.menuDefinitionFilePath ?? 'src/layouts/DashboardLayout/NavBar/index.tsx'
-
-  //generate graphql queries
-  const graphqlQueries = generateGraphqlFile(introspection, options.names)
-
-  //writes each query into graphql file
-  await Promise.all(graphqlQueries.map(async entity => {
-    if(entity.queries != '') await io.writeFile(`${componentStorageRoot}/${entity.entityName}.graphql`, entity.queries)
-  }))
-
-  await Promise.all(entities.map(async entity => {
     if (entity) {
       let context = {
         uiFramework: options?.uiFramework ?? UiFramework.MaterialUI,
@@ -42,6 +28,11 @@ export async function generatePages(introspection: IntrospectionQuery,
           height: "400px"
         }
       }
+
+      const componentStorageRoot = options?.componentStoragePath ?? 'src/components'
+      const generatedFolderPath = options?.generatedFolderPath ?? 'src/generated'
+      const routeDefinitionFilePath = options?.routeDefinitionFilePath ?? 'src/routes.tsx'
+      const menuDefinitionFilePath = options?.menuDefinitionFilePath ?? 'src/layouts/DashboardLayout/NavBar/index.tsx'
 
       const entityListComponentPageName = getListPageComponentName(entity)
       const listComponentName = getListComponentName(entity)
@@ -57,6 +48,12 @@ export async function generatePages(introspection: IntrospectionQuery,
       const moduleName = getEntityInterfaceName(entity)
       const listRouteUri = getBaseModuleUri(entity)
       const detailRouteUri = getDetailModuleUri(entity)
+
+      //generate graphql queries
+      const graphqlQueries = generateGraphqlFile(introspection, typeName)
+
+      if (graphqlQueries != '')
+        await io.writeFile(`${componentStorageRoot}/${typeName}.graphql`, graphqlQueries)
 
       //generate component for list
       await generateListComponent(io,
@@ -160,6 +157,7 @@ async function generateListComponent(io: CodeRW,
   const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
 
   const pageSourceCode = printer.printList(ts.ListFormat.MultiLine, factory.createNodeArray([...page!.imports, page!.functionDeclaration]), sourceFile)
+
   await io.writeFile(filePath, pageSourceCode)
 }
 
@@ -230,7 +228,6 @@ async function generateListPage(io: CodeRW,
     const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
 
     const generatedSourceCode = printer.printFile(listPageSourceFile);
-    console.log(generatedSourceCode);
 
     await io.writeFile(listPageFilePath, generatedSourceCode)
   }
