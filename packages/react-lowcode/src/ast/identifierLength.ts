@@ -1,9 +1,4 @@
-import {
-  SourceLineCol,
-  startOfJsxIdentifier,
-  astFindStart,
-} from "../ast/find"
-import { SourceFile } from "ts-morph"
+import { SourceLineCol, startOfJsxIdentifier, astFindStart } from "../ast/find"
 
 export const getJsxIdentifierLength = (code: string, source: SourceLineCol) => {
   const pos = startOfJsxIdentifier(code, source)
