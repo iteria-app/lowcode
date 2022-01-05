@@ -1,39 +1,58 @@
-import { FieldNode, parse, visit } from 'graphql'
+import { FragmentDefinitionNode, SelectionNode, FieldNode, parse, visit } from 'graphql'
+import { Field } from '../../generate'
 
 interface fieldOffset {
   offset: number,
   indentSize: number
 }
 
-export function addFragmentField(graphqlQuery: string, options: { entity: string, property: string }) {
+export function addFragmentField(graphqlQuery: string, options: { entity: string, property: string }, parents: string[], childrenField?: boolean) {
   //if fragment does not contain fragment keyword -> returns unchanged query
   if (!graphqlQuery.indexOf('fragment')) return graphqlQuery
 
   //if query is inline add spaces after newProperty, else add new line
   const format = graphqlQuery.indexOf('\n') >= 0 ? '\n' : ''
 
-  const queryOffsetsForFields = findQueryOffsetsForFields(graphqlQuery, options.entity, options.property)
+  const queryOffsetsForFields = findQueryOffsetsForFields(graphqlQuery, options.entity, options.property, parents)
+
+  if(childrenField) options.property = `${options.property} {\n    __typename\n  }` //TODO change
 
   const finalQuery = patchQueryFields(graphqlQuery, queryOffsetsForFields, options.property, format)
 
   return finalQuery
 }
 
-function findQueryOffsetsForFields(graphqlQuery: string, entity: string, property: string) {
+function findQueryOffsetsForFields(graphqlQuery: string, entity: string, property: string, parents: string[]) {
   const ast = parse(graphqlQuery)
 
   let queryOffsetForFields: fieldOffset[] = []
 
   visit(ast, {
-    Field(node: FieldNode ) {
+    FragmentDefinition(node: FragmentDefinitionNode) {
       if (node.name.value === entity) {
-        const firstFragmentField = node.selectionSet?.selections[0]
-        const lastFragmentField = node.selectionSet?.selections[node.selectionSet.selections.length - 1]
-        const startIndex = firstFragmentField?.loc?.start
-        const endIndex = lastFragmentField?.loc?.end
+        let actualNodeSelections = node.selectionSet.selections
+        let actualNodePos = node.loc
+
+        for(const actualParent of parents) {
+          const foundNode = actualNodeSelections.filter((selection: SelectionNode): selection is FieldNode => true).find(selection => selection.name.value === actualParent)
+
+          if(foundNode && foundNode.selectionSet) {
+            actualNodeSelections = foundNode.selectionSet.selections
+            actualNodePos = foundNode.loc
+          }
+          else actualNodeSelections = []
+        }
+
+        const firstFragmentField = actualNodeSelections[0]
+        const lastFragmentField = actualNodeSelections[actualNodeSelections.length - 1]
+        const startIndex = firstFragmentField?.loc?.start ?? actualNodePos?.start
+        const endIndex = lastFragmentField?.loc?.end ?? actualNodePos?.end
+
+        let selections = node.selectionSet?.selections
+        if(parents) selections = actualNodeSelections
 
         //if fragment does not contain the new property, calculate relative offset to original qiery and indent size for every fragment
-        if (endIndex && node.selectionSet?.selections && !fragmentContainsField(node.selectionSet?.selections, property)) {
+        if (endIndex && node.selectionSet?.selections && !fragmentContainsField(selections, property)) {
           queryOffsetForFields = [...queryOffsetForFields, {
             offset: endIndex,
             indentSize: getFieldIndentation(graphqlQuery, startIndex)

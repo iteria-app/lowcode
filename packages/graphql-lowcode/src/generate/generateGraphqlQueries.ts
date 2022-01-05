@@ -40,7 +40,7 @@ export function generateGraphqlQueries(introspection: IntrospectionQuery, name: 
  * @returns Array of `EntityQuery`
  */
 
-function getEntities(roots: (Root | undefined)[], types: TypesObject[], filterOnlyFields?: string): EntityQuery[] {
+export function getEntities(roots: (Root | undefined)[], types: TypesObject[], filterOnlyFields?: string): EntityQuery[] {
   const entities = roots.map(root => {
     let rootEntities: EntityQuery[] = []
 
@@ -89,7 +89,7 @@ function getEntityFields(entityName: string, types: TypesObject[]): Field[] {
  */
 
 export function getNestedOfType(field: Field | Argument): Type {
-  let actualType = field.type
+  let actualType = field.type ?? field.ofType
 
   while (actualType.ofType) actualType = actualType.ofType
 

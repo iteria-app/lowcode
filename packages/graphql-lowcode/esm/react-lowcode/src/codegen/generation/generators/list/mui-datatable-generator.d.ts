@@ -1,0 +1,37 @@
+import ts from "typescript";
+import { PageComponent } from '../../react-components/react-component-helper';
+import { Entity, Property } from '../../entity/index';
+import { TableGenerator } from './table-generator-factory';
+import GenerationContext from "../../context/context";
+import { TableComponentDefinitionBase } from '../../../definition/table-definition-core';
+import { WidgetContext } from "../../context/widget-context";
+import { SourceLineCol } from "../../../../ast";
+import { ColumnSourcePositionResult } from "../../../interfaces";
+export default class MuiDataTableGenerator implements TableGenerator {
+    private readonly _helper;
+    private _imports;
+    private _context;
+    private _entity?;
+    private _intlFormatter;
+    private _widgetContext;
+    constructor(generationContext: GenerationContext, entity?: Entity, widgetContext?: WidgetContext);
+    insertColumn(tablePosition: SourceLineCol, property: Property, columnIndex?: number): Promise<string>;
+    deleteColumn(tablePosition: SourceLineCol, columnIndex: number): Promise<string>;
+    getColumnSourcePosition(tablePosition: SourceLineCol, columnIndex: number): Promise<ColumnSourcePositionResult | undefined>;
+    getColumnsDeclaration(sourceCode: string, tablePosition: SourceLineCol): ts.ArrayLiteralExpression | undefined;
+    private printSourceCode;
+    private addNewColumn;
+    private getNewColumnsDeclaration;
+    private getUsedFormatter;
+    private findColumnsDeclaration;
+    generateComponent(): PageComponent | undefined;
+    getTableDefinition(): TableComponentDefinitionBase;
+    private createStatements;
+    private getOnClick;
+    private createReturnStatement;
+    private createTableWrapper;
+    private createColumns;
+    private createColumnDefinition;
+    private getHeaderRender;
+    private getValueFormatter;
+}

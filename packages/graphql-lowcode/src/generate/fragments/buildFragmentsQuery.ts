@@ -24,7 +24,9 @@ export function buildFragmentsQuery(entities: EntityQuery[], types: TypesObject[
 
         fragmentFields = [...fragmentFields, returningString]
       }
-      if (getNestedOfType(field).kind === 'SCALAR') fragmentFields = [...fragmentFields, field.name]
+      else {
+        if (getNestedOfType(field).kind === 'SCALAR') fragmentFields = [...fragmentFields, field.name]
+      }
     })
 
     const newFragmentString = `fragment ${entity.queryName}_${entity.entityName} on ${entity.entityName} {\n  ${fragmentFields.join('\n  ')}\n}`

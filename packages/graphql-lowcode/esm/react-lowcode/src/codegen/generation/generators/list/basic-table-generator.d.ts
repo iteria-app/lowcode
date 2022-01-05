@@ -1,0 +1,35 @@
+import ts from "typescript";
+import { PageComponent } from '../../react-components/react-component-helper';
+import { Entity, Property } from '../../entity/index';
+import { TableGenerator } from './table-generator-factory';
+import { TableComponentDefinition } from '../../../definition/table-definition-core';
+import GenerationContext from "../../context/context";
+import { SourceLineCol } from "../../../../ast";
+import { WidgetContext } from "../../context/widget-context";
+export declare class BasicTableGenerator implements TableGenerator {
+    private readonly _helper;
+    private _imports;
+    private _context;
+    private _entity?;
+    private _intlFormatter;
+    private _widgetContext;
+    constructor(generationContext: GenerationContext, entity?: Entity, widgetContext?: WidgetContext);
+    insertColumn(position: SourceLineCol, property: Property, columnIndex?: number): Promise<string>;
+    generateComponent(): PageComponent | undefined;
+    private createStatements;
+    private createHeader;
+    private createBodyRow;
+    getTableDefinition(): TableComponentDefinition;
+    private propertyHead;
+    private propertyCell;
+    private formatCellWithTag;
+    private mapArrayToTableRows;
+    protected getRowIdentifier(): ts.Identifier;
+    private printSourceCode;
+    private findElementByName;
+    private findElementsByName;
+    private findUsedFormatter;
+    private find;
+    private findTableBodyColumnIds;
+    private tableBodyColumnExists;
+}

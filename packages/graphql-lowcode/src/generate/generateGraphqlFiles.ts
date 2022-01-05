@@ -10,28 +10,45 @@ import { IntrospectionQuery, Field, TypesObject, Root } from './types'
  * @returns 
  */
 
-export function generateGraphqlFile(introspection: IntrospectionQuery, name: string): string {
+export function generateGraphqlFile(introspection: IntrospectionQuery, names: string[]): { queries: string, entityName: string, properties: { name: string, type: string | null }[] }[] {
   const rootNames = getRootNames(introspection)
 
   const roots = getRoots(introspection.types, rootNames)
-  const modifiedRoots = filterRootQueries(roots, introspection.types, name)
-  const modifiedIntrospection = replaceRootFields(modifiedRoots, introspection)
 
-  const generatedQueries = generateGraphqlQueries(modifiedIntrospection, name)
+  let usedQueryNames: string[] = []
+
+  const generatedQueries = names.map(name => {
+    const modifiedRoots = filterRootQueries(roots, introspection.types, name, usedQueryNames)
+
+    //adds each modifiedRoot field name to userQueryNames to prevent duplicity
+    modifiedRoots.forEach(modifiedRoot =>
+      modifiedRoot?.fields.forEach(field => usedQueryNames = [...usedQueryNames, field.name]))
+
+    const modifiedIntrospection = replaceRootFields(modifiedRoots, introspection)
+    const entityFields = getEntity(modifiedIntrospection.types, name)?.fields?.filter(field => getNestedOfType(field).kind === 'SCALAR')
+    
+    const queryFragmentFields = entityFields?.map(field => {
+      return { name: field.name, type: getNestedOfType(field).name }
+    })
+
+    return { queries: generateGraphqlQueries(modifiedIntrospection, name), entityName: name, properties: queryFragmentFields ?? [] }
+  })
 
   return generatedQueries
 }
 
 function replaceRootFields(roots: (Root | undefined)[], introspection: IntrospectionQuery): IntrospectionQuery {
-  for (const root of roots) {
-    if (root) {
-      for (const type of introspection.types) {
-        if (type.name === root.name) type.fields = root.fields
-      }
-    }
-  }
+  //cloning a object, because we only want his values
+  const modifiedIntrospection: IntrospectionQuery = JSON.parse(JSON.stringify(introspection))
 
-  return introspection
+  roots.forEach(root => {
+    if (root) {
+      const modifiedType = modifiedIntrospection.types.find(type => type.name === root.name)
+      if (modifiedType) modifiedType.fields = [...root.fields]
+    }
+  })
+
+  return modifiedIntrospection
 }
 
 /**
@@ -42,16 +59,15 @@ function replaceRootFields(roots: (Root | undefined)[], introspection: Introspec
  * @returns Filtered roots
  */
 
-function filterRootQueries(roots: (Root | undefined)[], types: TypesObject[], entityName: string): (Root | undefined)[] {
-  let modifiedRoots: (Root | undefined)[] = []
-
-  for (const root of roots) {
+function filterRootQueries(roots: (Root | undefined)[], types: TypesObject[], entityName: string, usedQueryNames: string[]): (Root | undefined)[] {
+  const modifiedRoots = roots.map(root => {
     if (root) {
-      root.fields = root.fields.filter(field => isReturningEntity(field, types, entityName))
+      const modifiedRoot = { ...root }
+      modifiedRoot.fields = modifiedRoot.fields.filter(field => isReturningEntity(field, types, entityName) && !usedQueryNames.includes(field.name))
+      return modifiedRoot
     }
-
-    modifiedRoots = [...modifiedRoots, root]
-  }
+    return root
+  })
 
   return modifiedRoots
 }

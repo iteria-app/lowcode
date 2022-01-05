@@ -42,9 +42,15 @@ export function getQueryNames(introspection: IntrospectionQuery, entityName: str
   const rootNames = getRootNames(introspection)
   const [queryRoot, mutationRoot, subscriptionRoot] = getRoots(introspection.types, rootNames)
 
-  const listTypeQuery = queryRoot?.fields.find(field => isListType(field)) ?? queryRoot?.fields[0] //TODO zmenit
-  const detailTypeQuery = queryRoot?.fields.find(field => isObjectType(field, entityName) ?? queryRoot?.fields[0])
+  //looks for list type query that includes entityName else picks first listTypeQuery
+  const listTypeQuery = queryRoot?.fields.filter(field => 
+    isListType(field)).find(field => 
+      field.name.toLowerCase().indexOf(entityName) >= 0) ?? queryRoot?.fields[0]
 
+  //const detailTypeQuery = queryRoot?.fields.find(field => isObjectType(field, entityName) ?? queryRoot?.fields[0])
+  const detailTypeQuery = queryRoot?.fields.filter(field => 
+    isObjectType(field, entityName)).find(field => 
+      field.name.toLowerCase().indexOf(entityName) >= 0 ?? queryRoot?.fields[0])
   //TODO update, insert etc...
 
   return {
@@ -62,10 +68,8 @@ function isListType(typeField: Field | Type) {
 }
 
 function isObjectType(typeField: Field | Type, entityName: string) {
-  for(typeField = typeField.type; typeField.ofType; typeField = typeField.ofType) {
+  for(typeField = typeField.type;; typeField = typeField.ofType) {
+    if(!typeField || typeField.kind === 'LIST') return false
     if (typeField.kind === 'OBJECT' && typeField.name === entityName) return true
-    if (typeField.kind !== 'NON_NULL') return false
   }
-
-  return false
 }
